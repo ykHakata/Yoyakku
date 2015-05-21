@@ -30,7 +30,6 @@ our @EXPORT_OK = qw{
     $WEB_RESERVE_3
     $SELECT_ADMIN_ID
     $SELECT_GENERAL_ID
-    $WEB_RESERVE
 };
 
 Readonly our $SPACE             => q{ };
