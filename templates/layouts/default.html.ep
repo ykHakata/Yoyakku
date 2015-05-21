@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <head><title><%= title %></title></head>
-  <body><%= content %></body>
+  <head>
+    <title><%= title %></title>
+    %= stylesheet '/css/import.css'
+  </head>
+  <body class="<%= $class %>"><%= content %></body>
 </html>

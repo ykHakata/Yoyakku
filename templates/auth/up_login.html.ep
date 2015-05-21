@@ -1,0 +1,27 @@
+% layout 'default';
+% title 'yoyakkuログイン';
+
+<div id="pop_wrapper">
+  <div id="pop_section">
+    <div id="login_select">
+      <div class="L_B_botton">
+        <p><a href="index">×</a></p>
+      </div>
+      <div class="L_B_head">
+        <h2>ログインを選択してください。</h2>
+      </div>
+      <div class="L_B_section">
+        <p class="part2">
+          <a href="up_login_general">一般ユーザーログイン</a>
+          <br />
+          <br />
+          <br />
+          <a href="up_login_admin">
+            <span id="l_box_login_admin">店舗管理者ログイン</span>
+          </a>
+          <br />
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

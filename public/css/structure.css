@@ -1,0 +1,60 @@
+@charset "utf-8";
+
+/* =======================================
+
+    Structure CSS
+
+========================================== */
+
+html, body {
+    background: #F2F2F2 url(../../images/base/structure_bg_01.png) repeat-x;
+    color: #000000;
+}
+
+
+body {
+    padding: 20px;
+}
+
+#wrapper {
+    margin: 0 auto;
+    width: 1200px;
+    border: 0px solid #676767;
+    background: #FFFFFF ;
+
+}
+
+#header,
+#header_all,
+ul#globalnavi,
+#mainVisual {
+    background: #ffffcc;
+}
+
+#index_contents {
+    margin: 0 20px 0 20px;
+    width: 1158px;
+    border: 1px solid #676767;
+}
+
+
+#contents {
+    float: right;
+    display: inline;
+    margin: 0 20px 0 0px;
+    width: 810px;
+    border: 0px solid #676767;
+}
+
+#navigation {
+    float: left;
+    display: inline;
+    width: 330px;
+    margin: 0 0 0 20px;
+    border: 0px solid black;
+}
+#footer {
+    clear: both;
+    background: #ffcc66;
+}
+

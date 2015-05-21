@@ -13,6 +13,9 @@ sub startup {
 
   # Normal route to controller
   $r->get('/')->to('example#welcome');
+
+    # ログインフォーム入り口
+    $r->get('/up_login')->to( controller => 'auth', action => 'up_login' );
 }
 
 1;
