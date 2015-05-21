@@ -5,6 +5,10 @@ use Mojo::Base 'Mojolicious::Controller';
 sub welcome {
   my $self = shift;
 
+    my $class = '';
+
+    $self->stash( class => $class );
+
   # Render template "example/welcome.html.ep" with message
   $self->render(msg => 'Welcome to the Mojolicious real-time web framework!');
 }

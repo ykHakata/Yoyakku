@@ -21,6 +21,8 @@ Yoyakku アプリケーションのクラス階層
 
 =item * Yoyakku::Controller::Example
 
+=item * L<Yoyakku::Controller::Auth>
+
 =item * L<Yoyakku::Model::Master>
 
 =back
