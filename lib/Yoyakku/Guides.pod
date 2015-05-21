@@ -1,0 +1,28 @@
+
+=encoding utf8
+
+=head1 NAME
+
+Yoyakku::Guides - Yoyakku guide to the galaxy
+
+音楽スタジオ予約 WEB アプリケーションの案内
+
+=head1 REFERENCE
+
+This is the class hierarchy of the L<Yoyakku> distribution.
+
+Yoyakku アプリケーションのクラス階層
+
+=over 2
+
+=item * Yoyakku
+
+=over 2
+
+=item * Yoyakku::Controller::Example
+
+=item * L<Yoyakku::Model::Master>
+
+=back
+
+=back
