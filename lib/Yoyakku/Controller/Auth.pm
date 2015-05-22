@@ -367,6 +367,35 @@ This documentation referes to Yoyakku::Controller::Auth version 0.0.1
 
 ログインフォーム入口画面の描写
 
+=head2 up_login_admin
+
+    リクエスト
+    URL: http:// ... /up_login_admin
+    METHOD: GET
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_login_admin
+
+    リクエスト
+    URL: http:// ... /up_login_admin
+    METHOD: POST
+    PARAMETERS:
+        login: (指定の ASCII 文字)
+        password: (指定の ASCII 文字)
+
+    レスポンス (ログイン成功、profile 設定が終了している)
+    URL: http:// ... /index
+
+    レスポンス (ログイン成功、profile 設定が終了していない)
+    URL: http:// ... /profile
+
+    レスポンス (ログイン失敗)
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_login_admin
+
+店舗管理者用ログイン
+
 =head2 root_login
 
     リクエスト
