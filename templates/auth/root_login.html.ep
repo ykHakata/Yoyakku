@@ -1,0 +1,37 @@
+% layout 'default';
+% title 'yoyakkuスーパーユーザーログイン';
+
+<div id="pop_wrapper">
+  <div id="pop_section">
+    <div id="bottom">
+      <p>
+        <a href="up_login">×</a>
+      </p>
+    </div>
+    <div id="head">
+      <h2>yoyakkuスーパーユーザーログイン</h2>
+    </div>
+    <div id="section">
+    <form method="post" action="">
+    <table>
+      <tr>
+        <td>
+          <div class="vali"> <%= $login %><!-- バリデーションエラー login を挿入 --> </div>
+          ID<input type="text" name="login" value="" class="ex1">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="vali"> <%= $password %><!-- バリデーションエラー password を挿入 --> </div>
+          password<input type="password" name="password" value="" class="ex1">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <input type="submit" value="ログイン" class="login">
+        </td>
+      </tr>
+    </table>
+    </form>
+  </div>
+</div>

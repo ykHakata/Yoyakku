@@ -1,5 +1,50 @@
 # carton snapshot format: version 1.0
 DISTRIBUTIONS
+  B-Hooks-EndOfScope-0.15
+    pathname: E/ET/ETHER/B-Hooks-EndOfScope-0.15.tar.gz
+    provides:
+      B::Hooks::EndOfScope 0.15
+      B::Hooks::EndOfScope::PP 0.15
+      B::Hooks::EndOfScope::XS 0.15
+    requirements:
+      ExtUtils::CBuilder 0.26
+      ExtUtils::MakeMaker 0
+      Module::Implementation 0.05
+      Sub::Exporter::Progressive 0.001006
+      Variable::Magic 0.48
+      perl 5.008001
+      strict 0
+      warnings 0
+  CGI-4.15
+    pathname: L/LE/LEEJO/CGI-4.15.tar.gz
+    provides:
+      CGI 4.15
+      CGI::Carp 4.15
+      CGI::Cookie 4.15
+      CGI::File::Temp 4.15
+      CGI::HTML::Functions undef
+      CGI::Pretty 4.15
+      CGI::Push 4.15
+      CGI::Util 4.15
+      Fh 4.15
+      MultipartBuffer 4.15
+    requirements:
+      Carp 0
+      Config 0
+      Encode 0
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      File::Spec 0.82
+      File::Temp 0
+      HTML::Entities 3.69
+      base 0
+      if 0
+      overload 0
+      parent 0.225
+      perl 5.008001
+      strict 0
+      utf8 0
+      warnings 0
   CPAN-Meta-2.150001
     pathname: D/DA/DAGOLDEN/CPAN-Meta-2.150001.tar.gz
     provides:
@@ -23,6 +68,206 @@ DISTRIBUTIONS
       strict 0
       version 0.88
       warnings 0
+  Class-Accessor-Lite-0.08
+    pathname: K/KA/KAZUHO/Class-Accessor-Lite-0.08.tar.gz
+    provides:
+      Class::Accessor::Lite 0.08
+    requirements:
+      ExtUtils::MakeMaker 6.36
+  Class-Load-0.22
+    pathname: E/ET/ETHER/Class-Load-0.22.tar.gz
+    provides:
+      Class::Load 0.22
+      Class::Load::PP 0.22
+    requirements:
+      Carp 0
+      Data::OptList 0
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      Module::Build::Tiny 0.037
+      Module::Implementation 0.04
+      Module::Runtime 0.012
+      Package::Stash 0.14
+      Scalar::Util 0
+      Try::Tiny 0
+      base 0
+      namespace::clean 0
+      perl 5.006
+      strict 0
+      warnings 0
+  Data-OptList-0.109
+    pathname: R/RJ/RJBS/Data-OptList-0.109.tar.gz
+    provides:
+      Data::OptList 0.109
+    requirements:
+      ExtUtils::MakeMaker 6.30
+      List::Util 0
+      Params::Util 0
+      Sub::Install 0.921
+      strict 0
+      warnings 0
+  Dist-CheckConflicts-0.11
+    pathname: D/DO/DOY/Dist-CheckConflicts-0.11.tar.gz
+    provides:
+      Dist::CheckConflicts 0.11
+    requirements:
+      Carp 0
+      Exporter 0
+      ExtUtils::MakeMaker 6.30
+      Module::Runtime 0.009
+      base 0
+      strict 0
+      warnings 0
+  Email-Valid-1.196
+    pathname: R/RJ/RJBS/Email-Valid-1.196.tar.gz
+    provides:
+      Email::Valid 1.196
+    requirements:
+      ExtUtils::MakeMaker 0
+      Mail::Address 0
+      Scalar::Util 0
+      Test::More 0
+      perl 5.006
+  Email-Valid-Loose-0.05
+    pathname: M/MI/MIYAGAWA/Email-Valid-Loose-0.05.tar.gz
+    provides:
+      Email::Valid::Loose 0.05
+    requirements:
+      Email::Valid 0.17
+      ExtUtils::MakeMaker 0
+      Test::More 0.32
+  ExtUtils-Config-0.008
+    pathname: L/LE/LEONT/ExtUtils-Config-0.008.tar.gz
+    provides:
+      ExtUtils::Config 0.008
+    requirements:
+      Data::Dumper 0
+      ExtUtils::MakeMaker 6.30
+      strict 0
+      warnings 0
+  ExtUtils-Helpers-0.022
+    pathname: L/LE/LEONT/ExtUtils-Helpers-0.022.tar.gz
+    provides:
+      ExtUtils::Helpers 0.022
+      ExtUtils::Helpers::Unix 0.022
+      ExtUtils::Helpers::VMS 0.022
+      ExtUtils::Helpers::Windows 0.022
+    requirements:
+      Carp 0
+      Exporter 5.57
+      ExtUtils::MakeMaker 6.30
+      File::Basename 0
+      File::Copy 0
+      File::Spec::Functions 0
+      Module::Load 0
+      Text::ParseWords 3.24
+      strict 0
+      warnings 0
+  ExtUtils-InstallPaths-0.011
+    pathname: L/LE/LEONT/ExtUtils-InstallPaths-0.011.tar.gz
+    provides:
+      ExtUtils::InstallPaths 0.011
+    requirements:
+      Carp 0
+      ExtUtils::Config 0.002
+      ExtUtils::MakeMaker 0
+      File::Spec 0
+      perl 5.006
+      strict 0
+      warnings 0
+  FormValidator-Lite-0.38
+    pathname: T/TO/TOKUHIROM/FormValidator-Lite-0.38.tar.gz
+    provides:
+      FormValidator::Lite 0.38
+      FormValidator::Lite::Constraint undef
+      FormValidator::Lite::Constraint::Date undef
+      FormValidator::Lite::Constraint::Default undef
+      FormValidator::Lite::Constraint::Email undef
+      FormValidator::Lite::Constraint::File undef
+      FormValidator::Lite::Constraint::Japanese undef
+      FormValidator::Lite::Constraint::Number undef
+      FormValidator::Lite::Constraint::Time undef
+      FormValidator::Lite::Constraint::URL undef
+      FormValidator::Lite::Hash undef
+      FormValidator::Lite::Messages::en undef
+      FormValidator::Lite::Messages::ja undef
+      FormValidator::Lite::Upload undef
+      FormValidator::Lite::Upload::CGI undef
+      FormValidator::Lite::Upload::HTTPEngine undef
+      FormValidator::Lite::Upload::PlackRequest undef
+    requirements:
+      CGI >= 3.31, != 4.05, != 4.06, != 4.07, != 4.08
+      Class::Accessor::Lite 0.05
+      Class::Load 0.11
+      Email::Valid 0
+      Email::Valid::Loose 0
+      Filter::Util::Call 0
+      Module::Build 0.38
+      Scalar::Util 1.19
+      perl 5.008001
+  HTML-FillInForm-2.21
+    pathname: M/MA/MARKSTOS/HTML-FillInForm-2.21.tar.gz
+    provides:
+      HTML::FillInForm 2.21
+    requirements:
+      ExtUtils::MakeMaker 0
+      HTML::Parser 3.26
+      HTML::TokeParser 3.26
+      warnings 0
+  HTML-Parser-3.71
+    pathname: G/GA/GAAS/HTML-Parser-3.71.tar.gz
+    provides:
+      HTML::Entities 3.69
+      HTML::Filter 3.57
+      HTML::HeadParser 3.71
+      HTML::LinkExtor 3.69
+      HTML::Parser 3.71
+      HTML::PullParser 3.57
+      HTML::TokeParser 3.69
+    requirements:
+      ExtUtils::MakeMaker 0
+      HTML::Tagset 3
+      XSLoader 0
+      perl 5.008
+  HTML-Tagset-3.20
+    pathname: P/PE/PETDANCE/HTML-Tagset-3.20.tar.gz
+    provides:
+      HTML::Tagset 3.20
+    requirements:
+      ExtUtils::MakeMaker 0
+  MailTools-2.14
+    pathname: M/MA/MARKOV/MailTools-2.14.tar.gz
+    provides:
+      Mail undef
+      Mail::Address 2.14
+      Mail::Cap 2.14
+      Mail::Field 2.14
+      Mail::Field::AddrList 2.14
+      Mail::Field::Date 2.14
+      Mail::Field::Generic 2.14
+      Mail::Filter 2.14
+      Mail::Header 2.14
+      Mail::Internet 2.14
+      Mail::Mailer 2.14
+      Mail::Mailer::qmail 2.14
+      Mail::Mailer::rfc822 2.14
+      Mail::Mailer::sendmail 2.14
+      Mail::Mailer::smtp 2.14
+      Mail::Mailer::smtp::pipe 2.14
+      Mail::Mailer::smtps 2.14
+      Mail::Mailer::smtps::pipe 2.14
+      Mail::Mailer::testfile 2.14
+      Mail::Mailer::testfile::pipe 2.14
+      Mail::Send 2.14
+      Mail::Util 2.14
+    requirements:
+      Date::Format 0
+      Date::Parse 0
+      ExtUtils::MakeMaker 0
+      IO::Handle 0
+      Net::Domain 1.05
+      Net::SMTP 1.03
+      Test::More 0
   Module-Build-0.4212
     pathname: L/LE/LEONT/Module-Build-0.4212.tar.gz
     provides:
@@ -73,6 +318,52 @@ DISTRIBUTIONS
       Text::ParseWords 0
       perl 5.008000
       version 0.87
+  Module-Build-Tiny-0.039
+    pathname: L/LE/LEONT/Module-Build-Tiny-0.039.tar.gz
+    provides:
+      Module::Build::Tiny 0.039
+    requirements:
+      CPAN::Meta 0
+      DynaLoader 0
+      Exporter 5.57
+      ExtUtils::CBuilder 0
+      ExtUtils::Config 0.003
+      ExtUtils::Helpers 0.020
+      ExtUtils::Install 0
+      ExtUtils::InstallPaths 0.002
+      ExtUtils::ParseXS 0
+      File::Basename 0
+      File::Find 0
+      File::Path 0
+      File::Spec::Functions 0
+      Getopt::Long 2.36
+      JSON::PP 2
+      Pod::Man 0
+      TAP::Harness::Env 0
+      perl 5.006
+      strict 0
+      warnings 0
+  Module-Implementation-0.09
+    pathname: D/DR/DROLSKY/Module-Implementation-0.09.tar.gz
+    provides:
+      Module::Implementation 0.09
+    requirements:
+      Carp 0
+      ExtUtils::MakeMaker 0
+      Module::Runtime 0.012
+      Try::Tiny 0
+      strict 0
+      warnings 0
+  Module-Runtime-0.014
+    pathname: Z/ZE/ZEFRAM/Module-Runtime-0.014.tar.gz
+    provides:
+      Module::Runtime 0.014
+    requirements:
+      Module::Build 0
+      Test::More 0
+      perl 5.006
+      strict 0
+      warnings 0
   Mojolicious-6.11
     pathname: S/SR/SRI/Mojolicious-6.11.tar.gz
     provides:
@@ -189,6 +480,47 @@ DISTRIBUTIONS
       Pod::Simple 3.09
       Time::Local 1.2
       perl 5.010001
+  Package-Stash-0.37
+    pathname: D/DO/DOY/Package-Stash-0.37.tar.gz
+    provides:
+      Package::Stash 0.37
+      Package::Stash::PP 0.37
+    requirements:
+      B 0
+      Carp 0
+      Config 0
+      Dist::CheckConflicts 0.02
+      ExtUtils::MakeMaker 0
+      File::Spec 0
+      Getopt::Long 0
+      Module::Implementation 0.06
+      Package::Stash::XS 0.26
+      Scalar::Util 0
+      Symbol 0
+      Text::ParseWords 0
+      constant 0
+      strict 0
+      warnings 0
+  Package-Stash-XS-0.28
+    pathname: D/DO/DOY/Package-Stash-XS-0.28.tar.gz
+    provides:
+      Package::Stash::XS 0.28
+    requirements:
+      ExtUtils::MakeMaker 6.30
+      XSLoader 0
+      strict 0
+      warnings 0
+  Params-Util-1.07
+    pathname: A/AD/ADAMK/Params-Util-1.07.tar.gz
+    provides:
+      Params::Util 1.07
+    requirements:
+      ExtUtils::CBuilder 0.27
+      ExtUtils::MakeMaker 6.52
+      File::Spec 0.80
+      Scalar::Util 1.18
+      Test::More 0.42
+      perl 5.00503
   Readonly-2.00
     pathname: S/SA/SANKO/Readonly-2.00.tar.gz
     provides:
@@ -209,3 +541,103 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       Readonly 1.02
+  Sub-Exporter-Progressive-0.001011
+    pathname: F/FR/FREW/Sub-Exporter-Progressive-0.001011.tar.gz
+    provides:
+      Sub::Exporter::Progressive 0.001011
+    requirements:
+      ExtUtils::MakeMaker 0
+      Test::More 0.88
+  Sub-Install-0.928
+    pathname: R/RJ/RJBS/Sub-Install-0.928.tar.gz
+    provides:
+      Sub::Install 0.928
+    requirements:
+      B 0
+      Carp 0
+      ExtUtils::MakeMaker 6.30
+      Scalar::Util 0
+      strict 0
+      warnings 0
+  TimeDate-2.30
+    pathname: G/GB/GBARR/TimeDate-2.30.tar.gz
+    provides:
+      Date::Format 2.24
+      Date::Format::Generic 2.24
+      Date::Language 1.10
+      Date::Language::Afar 0.99
+      Date::Language::Amharic 1.00
+      Date::Language::Austrian 1.01
+      Date::Language::Brazilian 1.01
+      Date::Language::Bulgarian 1.01
+      Date::Language::Chinese 1.00
+      Date::Language::Chinese_GB 1.01
+      Date::Language::Czech 1.01
+      Date::Language::Danish 1.01
+      Date::Language::Dutch 1.02
+      Date::Language::English 1.01
+      Date::Language::Finnish 1.01
+      Date::Language::French 1.04
+      Date::Language::Gedeo 0.99
+      Date::Language::German 1.02
+      Date::Language::Greek 1.00
+      Date::Language::Hungarian 1.01
+      Date::Language::Icelandic 1.01
+      Date::Language::Italian 1.01
+      Date::Language::Norwegian 1.01
+      Date::Language::Oromo 0.99
+      Date::Language::Romanian 1.01
+      Date::Language::Russian 1.01
+      Date::Language::Russian_cp1251 1.01
+      Date::Language::Russian_koi8r 1.01
+      Date::Language::Sidama 0.99
+      Date::Language::Somali 0.99
+      Date::Language::Spanish 1.00
+      Date::Language::Swedish 1.01
+      Date::Language::Tigrinya 1.00
+      Date::Language::TigrinyaEritrean 1.00
+      Date::Language::TigrinyaEthiopian 1.00
+      Date::Language::Turkish 1.0
+      Date::Parse 2.30
+      Time::Zone 2.24
+    requirements:
+      ExtUtils::MakeMaker 0
+  Try-Tiny-0.22
+    pathname: D/DO/DOY/Try-Tiny-0.22.tar.gz
+    provides:
+      Try::Tiny 0.22
+    requirements:
+      Carp 0
+      Exporter 5.57
+      ExtUtils::MakeMaker 6.30
+      constant 0
+      strict 0
+      warnings 0
+  Variable-Magic-0.57
+    pathname: V/VP/VPIT/Variable-Magic-0.57.tar.gz
+    provides:
+      Variable::Magic 0.57
+    requirements:
+      Carp 0
+      Config 0
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      IO::Handle 0
+      IO::Select 0
+      IPC::Open3 0
+      POSIX 0
+      Socket 0
+      Test::More 0
+      XSLoader 0
+      base 0
+      lib 0
+      perl 5.008
+  namespace-clean-0.25
+    pathname: R/RI/RIBASUSHI/namespace-clean-0.25.tar.gz
+    provides:
+      namespace::clean 0.25
+    requirements:
+      B::Hooks::EndOfScope 0.12
+      ExtUtils::CBuilder 0.27
+      Package::Stash 0.23
+      Test::More 0.88

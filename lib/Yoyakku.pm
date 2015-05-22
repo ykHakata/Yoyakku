@@ -16,6 +16,9 @@ sub startup {
 
     # ログインフォーム入り口
     $r->get('/up_login')->to( controller => 'auth', action => 'up_login' );
+
+    # ログインフォーム(スーパーユーザー)
+    $r->route('/root_login')->to( controller => 'auth', action => 'root_login' );
 }
 
 1;
