@@ -11,14 +11,16 @@ sub startup {
   # Router
   my $r = $self->routes;
 
-  # Normal route to controller
-  $r->get('/')->to('example#welcome');
-
     # ログインフォーム入り口
     $r->get('/up_login')->to( controller => 'auth', action => 'up_login' );
 
+    # ログインフォーム(店舗管理者)
+    $r->route('/up_login_admin')
+        ->to( controller => 'auth', action => 'up_login_admin' );
+
     # ログインフォーム(スーパーユーザー)
-    $r->route('/root_login')->to( controller => 'auth', action => 'root_login' );
+    $r->route('/root_login')
+        ->to( controller => 'auth', action => 'root_login' );
 }
 
 1;
