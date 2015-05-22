@@ -25,6 +25,10 @@ sub startup {
     # ログインフォーム(スーパーユーザー)
     $r->route('/root_login')
         ->to( controller => 'auth', action => 'root_login' );
+
+    # ログアウト
+    $r->route('/up_logout')
+        ->to( controller => 'auth', action => 'up_logout' );
 }
 
 1;

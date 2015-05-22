@@ -304,10 +304,35 @@ sub root_login {
     return $self->render( text => $output );
 }
 
+sub up_logout {
+    my $self = shift;
+
+    # テンプレート用bodyのクラス名
+    my $class = 'up_logout';
+
+    $self->stash( class => $class );
+
+    $self->session( expires => 1 );
+
+    return $self->render( template => 'auth/up_logout', format => 'html' )
+};
+
 1;
 
 __END__
 
+# up_logout.html.ep
+# ログアウト画面========================================
+get '/up_logout' => sub {
+my $self = shift;
+# テンプレート用bodyのクラス名
+my $class = "up_logout";
+$self->stash(class => $class);
+
+$self->session(expires => 1);
+
+$self->render('up_logout');
+};
 
 # up_login_general.html.ep
 # ログインフォーム、一般（テスト用）フォーム========================================
@@ -641,6 +666,20 @@ This documentation referes to Yoyakku::Controller::Auth version 0.0.1
     FILE: templates/auth/root_login
 
 スーパーユーザー用ログイン
+
+=head2 up_logout
+
+    リクエスト
+    URL: http:// ... /up_logout
+    METHOD: GET
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_logout
+
+    レスポンス時に session データを消去
+
+ログアウト機能
 
 =head1 DEPENDENCIES (依存モジュール)
 

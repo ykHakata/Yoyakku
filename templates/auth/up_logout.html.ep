@@ -1,0 +1,18 @@
+% layout 'default';
+% title 'ログアウト';
+
+<div id="pop_wrapper">
+  <div id="pop_section">
+    <div id="bottom">
+      <p>
+        <a href="index">×</a>
+      </p>
+    </div>
+    <div id="head">
+      <h2>ログアウトしました。</h2>
+    </div>
+    <div id="section">
+      <p>ありがとうございました。</p>
+    </div>
+  </div>
+</div>
