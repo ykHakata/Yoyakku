@@ -18,7 +18,7 @@ sub root_login {
     my $self = shift;
 
     # テンプレート用bodyのクラス名
-    my $class = "up_login_admin";
+    my $class = "root_login";
 
     $self->stash( class => $class );
 
@@ -48,7 +48,6 @@ sub root_login {
         $self->session( root_id => $self->param('login') ),
         $self->redirect_to('mainte_list')
         if !$validator->has_error();
-        die 'post';
 
     # バリデートエラー処理
     $validator->set_message(

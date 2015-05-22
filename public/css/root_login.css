@@ -1,0 +1,109 @@
+@charset "utf-8";
+
+/* =======================================
+    root_login CSS
+ -----------------------------------------
+    INDEX
+ -----------------------------------------
+========================================== */
+
+/*全体の枠*/
+.root_login #pop_wrapper {
+    margin: 0 auto;
+    width: 1200px;
+    height: 660px;
+    background: #b4b4b4;
+    padding: 60px 0 0 0;
+}
+
+/*表示枠の設定*/
+.root_login #pop_section {
+    margin: 0 auto;
+    border: 1px solid black;
+    width: 600px;
+    height: 600px;
+    background: white;
+    font-size: 123.1%;
+    line-height: 1.374;
+}
+
+/*----------------------
+見出しとコメントの場合*/
+/*×ボタンの設定*/
+.root_login #pop_section #bottom {
+    height: 50px;
+}
+
+.root_login #pop_section #bottom p {
+    text-align: right;
+    padding: 0px 5px 0px 5px;
+    margin: 0 0 0 570px;
+    cursor: pointer;
+}
+
+/*見出しの設定*/
+.root_login #pop_section #head {
+    margin: 0 auto;
+    width: 500px;
+    height: 50px;
+}
+
+/*見出し設定*/
+.root_login h2 {
+    padding: 15px 0 0 10px;
+    font-size: 138.5%;
+    line-height: 1.112;
+    text-align: center;
+}
+
+/*入力フォーム設定*/
+.root_login input {
+    width: 300px;
+    height: 40px;
+    background: #bfbfbf;
+}
+
+.root_login input.login {
+    width: 100px;
+}
+
+.root_login table {
+    margin: 0 auto;
+    margin-top: 150px;
+}
+
+.root_login table tr {
+    height: 70px;
+}
+
+.root_login table td{
+    text-align: right;
+}
+
+/*本文の設定*/
+/*オーバフロウなし*/
+.root_login #pop_section #section {
+    margin: 0 auto;
+    width: 498px;
+    height: 448px;
+    border: 1px solid #555555;
+}
+
+/* 3.link()
+========================================== */
+
+/* 3-1.Default(リンク部初期)
+----------------------------------- */
+.root_login #pop_wrapper a
+{text-decoration: underline; color: #000000;}
+
+/* 3-2.When Mouse Over
+----------------------------------- */
+.root_login #pop_wrapper a:hover
+{text-decoration: underline; color: #ff0000;}
+
+/* バリデーション用スタイル
+========================================== */
+.root_login .vali {
+    color: red;
+}
