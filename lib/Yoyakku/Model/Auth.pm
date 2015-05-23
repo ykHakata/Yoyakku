@@ -6,6 +6,7 @@ use Exporter 'import';
 our @EXPORT_OK = qw{
     check_valid_login
 };
+use Yoyakku::Model qw{$teng};
 
 sub check_valid_login {
     my $self   = shift;
@@ -24,75 +25,47 @@ sub check_valid_login {
         },
     };
 
-    # my $row = $teng->single( $table, +{ login => $params->{login} } );
+    my $row = $teng->single( $table, +{ login => $params->{login} } );
 
-    # # 不合格の場合 (DB検証 メルアド違い)
-    # if ( !$row ) {
-    #     $check_valid->{msg}->{login} = 'メールアドレス違い';
-    #     $check_valid->{error} = 1;
-    # }
-
-    # return $check_valid if $check_valid->{error};
-
-    # # 不合格の場合 (DB検証 パスワード違い)
-    # if ( $row->password ne $params->{password} ) {
-    #     $check_valid->{msg}->{password} = 'パスワードが違います';
-    #     $check_valid->{error} = 1;
-    # }
-
-    # return $check_valid if $check_valid->{error};
-
-    ##########################################################################
-    # DB を実装していないので暫定の処置
-    # 不合格の場合 (メルアド違い)
-    if ( 'yoyakku' ne $params->{login} ) {
+    # 不合格の場合 (DB検証 メルアド違い)
+    if ( !$row ) {
         $check_valid->{msg}->{login} = 'メールアドレス違い';
         $check_valid->{error} = 1;
     }
 
     return $check_valid if $check_valid->{error};
 
-    # 不合格の場合 (パスワード違い)
-    if ( '0520' ne $params->{password} ) {
+    # 不合格の場合 (DB検証 パスワード違い)
+    if ( $row->password ne $params->{password} ) {
         $check_valid->{msg}->{password} = 'パスワードが違います';
         $check_valid->{error} = 1;
     }
 
     return $check_valid if $check_valid->{error};
 
-    $check_valid->{session_id} = '10';
-    ##########################################################################
-
-    # $check_valid->{session_id} = $row->id;
+    $check_valid->{session_id} = $row->id;
 
     # リダイレクト先を選択するための検証(profile テーブル)
-    # my $search_column
-    #     = $table eq 'general' ? 'general_id'
-    #     : $table eq 'admin'   ? 'admin_id'
-    #     :                       '';
+    my $search_column
+        = $table eq 'general' ? 'general_id'
+        : $table eq 'admin'   ? 'admin_id'
+        :                       '';
 
-    # my $profile_row
-    #     = $teng->single( 'profile', +{ $search_column => $row->id } );
+    my $profile_row
+        = $teng->single( 'profile', +{ $search_column => $row->id } );
 
-    # if ( !$profile_row ) {
-    #     $check_valid->{msg}->{login} = '管理者へ連絡ください';
-    #     $check_valid->{error} = 1;
-    # }
+    if ( !$profile_row ) {
+        $check_valid->{msg}->{login} = '管理者へ連絡ください';
+        $check_valid->{error} = 1;
+    }
 
-    # return $check_valid if $check_valid->{error};
+    return $check_valid if $check_valid->{error};
 
     # profile の設定確認
-    # $check_valid->{check_profile} = 'profile';
-    # if ( $profile_row->status ) {
-    #     $check_valid->{check_profile} = 'index';
-    # }
-
-    ##########################################################################
-    # DB を実装していないので暫定の処置
-    # profile の暫定設定値
     $check_valid->{check_profile} = 'profile';
-    # $check_valid->{check_profile} = 'index';
-    ##########################################################################
+    if ( $profile_row->status ) {
+        $check_valid->{check_profile} = 'index';
+    }
 
     return $check_valid;
 }

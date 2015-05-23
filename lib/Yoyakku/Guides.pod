@@ -21,7 +21,7 @@ Yoyakku アプリケーションのクラス階層
 
 =item * L<Yoyakku::Controller::Auth>
 
-=item * Yoyakku::Model
+=item * L<Yoyakku::Model>
 
 =over 2
 
