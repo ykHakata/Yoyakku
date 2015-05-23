@@ -2,9 +2,12 @@ package Yoyakku::Controller::Auth;
 use Mojo::Base 'Mojolicious::Controller';
 use FormValidator::Lite;
 use HTML::FillInForm;
+use Yoyakku::Model::Auth qw{check_valid_login};
 
 sub up_login {
     my $self = shift;
+
+    return $self->redirect_to('/index') if $self->_check_login();
 
     # テンプレート用bodyのクラス名
     my $class = 'up_login';
@@ -16,6 +19,8 @@ sub up_login {
 
 sub up_login_general {
     my $self = shift;
+
+    return $self->redirect_to('/index') if $self->_check_login();
 
     # テンプレート用bodyのクラス名
     my $class = 'up_login_general';
@@ -57,63 +62,17 @@ sub up_login_general {
 
     # 入力された情報をもとにデータベースにアクセス、検証(general テーブル)
     # 入力値が存在する場合だけ問い合わせ
-    my $db_error;
-
+    my $check_routing;
     if ( !$validator->has_error() ) {
-        # my $general_row
-        #     = $teng->single( 'general', +{ login => $params->{login} } );
-
-        # 不合格の場合 (DB検証 メルアド違い)
-        # if ( !$general_row ) {
-        #     $self->stash->{login} = 'メールアドレス違い';
-        #     $db_error = 1;
-        # }
-
-        # 不合格の場合 (DB検証 パスワード違い)
-        # if ( $general_row && $general_row->password ne $params->{password} ) {
-        #     $self->stash->{password} = 'パスワードが違います';
-        #     $db_error = 1;
-        # }
-
-        # my $general_id = $general_row->id;
-
-        # DB を実装していないので暫定の処置 ####
-        # 不合格の場合 (メルアド違い)
-        if ( 'yoyakku' ne $params->{login} ) {
-            $self->stash->{login} = 'メールアドレス違い';
-            $db_error = 1;
-        }
-
-        # 不合格の場合 (パスワード違い)
-        if ( '0520' ne $params->{password} ) {
-            $self->stash->{password} = 'パスワードが違います',;
-            $db_error = 1;
-        }
-
-        my $general_id = '10';
-
-        # リダイレクト先を選択するための検証(profile テーブル)
-        # my $profile_row
-        #     = $teng->single( 'profile', +{ general_id => $general_id } );
-
-        # if ( !$profile_row ) {
-        #     $self->stash->{login} = '管理者へ連絡ください',
-        #     $db_error = 1;
-        # }
-
-        # my $status = $profile_row->status;
-
-        my $status = '1'; # 暫定値
-
-        #セッション書き込み
-        $self->session(session_general_id => $general_id);
-
-        # profile 設定が終了している
-        return $self->redirect_to('index') if $status && !$db_error;
-
-        # profile 設定が終了してない
-        return $self->redirect_to('profile') if !$db_error;
+        $check_routing = $self->_make_msg_with_routing( 'general', $params );
     }
+
+    # profile 設定による切り替え
+    return $self->redirect_to('index')
+        if $check_routing && $check_routing->{redirect_to} eq 'index';
+
+    return $self->redirect_to('profile')
+        if $check_routing && $check_routing->{redirect_to} eq 'profile';
 
     # エラー時の出力
     my $html = $self->render_to_string(
@@ -132,6 +91,8 @@ sub up_login_general {
 
 sub up_login_admin {
     my $self = shift;
+
+    return $self->redirect_to('/index') if $self->_check_login();
 
     # テンプレート用bodyのクラス名
     my $class = "up_login_admin";
@@ -173,62 +134,17 @@ sub up_login_admin {
 
     # 入力された情報をもとにデータベースにアクセス、検証(admin テーブル)
     # 入力値が存在する場合だけ問い合わせ
-    my $db_error;
+    my $check_routing;
     if ( !$validator->has_error() ) {
-        # my $admin_row
-        #     = $teng->single( 'admin', +{ login => $params->{login} } );
-
-        # 不合格の場合 (DB検証 メルアド違い)
-        # if ( !$admin_row ) {
-        #     $self->stash->{login} = 'メールアドレス違い';
-        #     $db_error = 1;
-        # }
-
-        # 不合格の場合 (DB検証 パスワード違い)
-        # if ( $admin_row && $admin_row->password ne $params->{password} ) {
-        #     $self->stash->{password} = 'パスワードが違います';
-        #     $db_error = 1;
-        # }
-
-        # my $admin_id = $admin_row->id;
-
-        # DB を実装していないので暫定の処置 ####
-        # 不合格の場合 (メルアド違い)
-        if ( 'yoyakku' ne $params->{login} ) {
-            $self->stash->{login} = 'メールアドレス違い';
-            $db_error = 1;
-        }
-
-        # 不合格の場合 (パスワード違い)
-        if ( '0520' ne $params->{password} ) {
-            $self->stash->{password} = 'パスワードが違います',;
-            $db_error = 1;
-        }
-
-        my $admin_id = '10';
-
-        # リダイレクト先を選択するための検証(profile テーブル)
-        # my $profile_row
-        #     = $teng->single( 'profile', +{ admin_id => $admin_id } );
-
-        # if ( !$profile_row ) {
-        #     $self->stash->{login} = '管理者へ連絡ください',
-        #     $db_error = 1;
-        # }
-
-        # my $status = $profile_row->status;
-
-        my $status = '1'; # 暫定値
-
-        #セッション書き込み
-        $self->session(session_admin_id => $admin_id);
-
-        # profile 設定が終了している
-        return $self->redirect_to('index') if $status && !$db_error;
-
-        # profile 設定が終了してない
-        return $self->redirect_to('profile') if !$db_error;
+        $check_routing = $self->_make_msg_with_routing( 'admin', $params );
     }
+
+    # profile 設定による切り替え
+    return $self->redirect_to('index')
+        if $check_routing && $check_routing->{redirect_to} eq 'index';
+
+    return $self->redirect_to('profile')
+        if $check_routing && $check_routing->{redirect_to} eq 'profile';
 
     # エラー時の出力
     my $html = $self->render_to_string(
@@ -307,6 +223,8 @@ sub root_login {
 sub up_logout {
     my $self = shift;
 
+    return $self->redirect_to('/index') if $self->_check_logout();
+
     # テンプレート用bodyのクラス名
     my $class = 'up_logout';
 
@@ -317,245 +235,62 @@ sub up_logout {
     return $self->render( template => 'auth/up_logout', format => 'html' )
 };
 
+sub _make_msg_with_routing {
+    my $self   = shift;
+    my $table  = shift;
+    my $params = shift;
+
+    die '_make_msg_with_routing' if !$self || !$table || !$params;
+
+    my $check_valid_login_routing = +{
+        redirect_to => '',
+    };
+
+    my $check_valid = $self->check_valid_login($table, $params);
+
+    # エラーメッセージ作成
+    $self->stash->{login}    = $check_valid->{msg}->{login};
+    $self->stash->{password} = $check_valid->{msg}->{password};
+
+    # エラー時はセッション書き込みせず終了
+    return $check_valid_login_routing if $check_valid->{error};
+
+    # セッション書き込み
+    my $session_name
+        = $table eq 'general' ? 'session_general_id'
+        : $table eq 'admin'   ? 'session_admin_id'
+        :                       'session_id';
+
+    $self->session( $session_name => $check_valid->{session_id} );
+
+    $check_valid_login_routing->{redirect_to} = $check_valid->{check_profile};
+
+    return $check_valid_login_routing;
+}
+
+sub _check_login {
+    my $self = shift;
+
+    return 1
+        if $self->session->{session_general_id}
+        || $self->session->{session_admin_id};
+
+    return;
+}
+
+sub _check_logout {
+    my $self = shift;
+
+    return 1
+        if !$self->session->{session_general_id}
+        && !$self->session->{session_admin_id};
+
+    return;
+}
+
 1;
 
 __END__
-
-# up_logout.html.ep
-# ログアウト画面========================================
-get '/up_logout' => sub {
-my $self = shift;
-# テンプレート用bodyのクラス名
-my $class = "up_logout";
-$self->stash(class => $class);
-
-$self->session(expires => 1);
-
-$self->render('up_logout');
-};
-
-# up_login_general.html.ep
-# ログインフォーム、一般（テスト用）フォーム========================================
-any '/up_login_general' => sub {
-my $self = shift;
-# テンプレート用bodyのクラス名
-my $class = "up_login_admin";
-$self->stash(class => $class);
-
-
-if (uc $self->req->method eq 'POST') {
-    #ログイン押すとpostで入ってくる、バリデード実行
-    my $validator = $self->create_validator;
-    $validator->field('login')->required(1)->length(1,50)->callback(sub {
-        my $login    = shift;
-        my $password = $self->param('password');
-
-        my $judg_login = 0;
-        my $general_ref      = $teng->single('general', +{login => $login});
-
-        my $login_name    ;
-        my $login_password;
-
-        if ($general_ref) {
-            $login_name     = $general_ref->login;
-            $login_password = $general_ref->password;
-            if ($login_name eq $login and $login_password ne $password) {
-                $judg_login = 2 ;
-            }
-        }
-        else {
-            $judg_login = 1 ;
-        }
-
-        return   ($judg_login == 1) ? (0, 'メールアドレス違い'  )
-               : ($judg_login == 2) ? (0, 'パスワードが違います')
-               :                       1
-               ;
-    });
-    $validator->field('password')->required(1)->length(1,50);
-    #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、
-    my $param_hash = $self->req->params->to_hash;
-    $self->stash(param_hash => $param_hash);
-
-    #入力検査合格、の時、値を新規もしくは修正アップロード実行
-    if ( $self->validate($validator,$param_hash) ) {
-        #sql検索
-        my $login     = $self->param('login');
-        my $general_ref = $teng->single('general', +{login => $login});
-        my $general_id    = $general_ref->id;
-        #セッションに書き込み
-        $self->session(session_general_id => $general_id);
-        #リダイレクト先を選択する、profile設定が終わってないときはprofileへ#sqlへ確認
-        my $profile_ref = $teng->single('profile', +{general_id => $general_id});
-        my $status = $profile_ref->status;
-        if ($status) {
-            return $self->redirect_to('index');
-        }
-        else {
-            return $self->redirect_to('profile');
-        }
-        #リターンなのでここでおしまい。
-    }
-    #入力検査合格しなかった場合、もう一度入力フォーム表示Fillinにて
-    my $html = $self->render_partial()->to_string;
-    $html = HTML::FillInForm->fill(\$html, $self->req->params,);
-    return $self->render_text($html, format => 'html');
-    #リターンなのでここでおしまい。
-    #post以外(getの時)list画面から修正で移動してきた時
-}
-
-
-$self->render('up_login_general');
-};
-
-# up_login_admin.html.ep
-# ログインフォーム、管理者入力フォーム========================================
-any '/up_login_admin' => sub {
-my $self = shift;
-# テンプレート用bodyのクラス名
-my $class = "up_login_admin";
-$self->stash(class => $class);
-
-
-if (uc $self->req->method eq 'POST') {
-    #ログイン押すとpostで入ってくる、バリデード実行
-    my $validator = $self->create_validator;
-    $validator->field('login')->required(1)->length(1,50)->callback(sub {
-        my $login    = shift;
-        my $password = $self->param('password');
-
-        my $judg_login = 0;
-        #die "hoge";
-        my $admin_ref      = $teng->single('admin', +{login => $login});
-
-        my $login_name    ;
-        my $login_password;
-
-        if ($admin_ref) {
-            $login_name     = $admin_ref->login;
-            $login_password = $admin_ref->password;
-
-            if ($login_name eq $login and $login_password ne $password) {
-                $judg_login = 2 ;
-            }
-        }
-        else {
-            $judg_login = 1 ;
-        }
-
-        return   ($judg_login == 1) ? (0, 'メールアドレス違い'  )
-               : ($judg_login == 2) ? (0, 'パスワードが違います')
-               :                       1
-               ;
-    });
-
-    $validator->field('password')->required(1)->length(1,50);
-    #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、
-    my $param_hash = $self->req->params->to_hash;
-    $self->stash(param_hash => $param_hash);
-
-    #入力検査合格、の時、値を新規もしくは修正アップロード実行
-    if ( $self->validate($validator,$param_hash) ) {
-        #sql検索
-        my $login     = $self->param('login');
-        my $admin_ref = $teng->single('admin', +{login => $login});
-        my $admin_id  = $admin_ref->id;
-
-
-        #セッションにokと書き込み
-        $self->session(session_admin_id => $admin_id);
-        #リダイレクト先を選択する、profile設定が終わってないときはprofileへ#sqlへ確認
-        my $profile_ref = $teng->single('profile', +{admin_id => $admin_id});
-        my $status = $profile_ref->status;
-        if ($status) {
-            return $self->redirect_to('index');
-        }
-        else {
-            return $self->redirect_to('profile');
-        }
-        #リターンなのでここでおしまい。
-    }
-    #入力検査合格しなかった場合、もう一度入力フォーム表示Fillinにて
-    my $html = $self->render_partial()->to_string;
-    $html = HTML::FillInForm->fill(\$html, $self->req->params,);
-    return $self->render_text($html, format => 'html');
-    #リターンなのでここでおしまい。
-    #post以外(getの時)list画面から修正で移動してきた時
-}
-
-
-$self->render('up_login_admin');
-};
-
-# root_login.html.ep
-# スーバーユーザー用ログイン入り口========================================
-any '/root_login' => sub {
-my $self = shift;
-# テンプレート用bodyのクラス名
-my $class = "up_login_admin";
-$self->stash(class => $class);
-
-if (uc $self->req->method eq 'POST') {
-    #ログイン押すとpostで入ってくる、バリデード実行
-    my $validator = $self->create_validator;
-    $validator->field('login')->required(1)->length(1,10)->callback(sub {
-        my $login    = shift;
-        my $password = $self->param('password');
-
-        my $judg_login = 0;
-        #id検証
-        if ($login eq "yoyakku") {
-            if ($password eq "0520") {
-                $judg_login = 0;
-            }
-            else {
-                $judg_login = 2;
-            }
-        }
-        else {
-            $judg_login = 1;
-        }
-
-        return   ($judg_login == 1) ? (0, 'ID違い'  )
-               : ($judg_login == 2) ? (0, 'password違い')
-               :                       1
-               ;
-    });
-
-    $validator->field('password')->required(1)->length(1,50);
-    #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、
-    my $param_hash = $self->req->params->to_hash;
-    $self->stash(param_hash => $param_hash);
-
-    #入力検査合格、の時、値を新規もしくは修正アップロード実行
-    if ( $self->validate($validator,$param_hash) ) {
-        my $root_id     = $self->param('login');
-        #セッションに書き込み
-        $self->session(root_id => $root_id);
-        return $self->redirect_to('mainte_list');
-        #リターンなのでここでおしまい。
-    }
-    #入力検査合格しなかった場合、もう一度入力フォーム表示Fillinにて
-    my $html = $self->render_partial()->to_string;
-    $html = HTML::FillInForm->fill(\$html, $self->req->params,);
-    return $self->render_text($html, format => 'html');
-    #リターンなのでここでおしまい。
-    #post以外(getの時)list画面から修正で移動してきた時
-}
-
-$self->render('root_login');
-};
-
-# up_login.html.ep
-# ログインフォーム入り口========================================
-get '/up_login' => sub {
-    my $self = shift;
-    # テンプレート用bodyのクラス名
-    my $class = "up_login_admin";
-    $self->stash(class => $class);
-
-    $self->render('up_login');
-};
 
 =encoding utf8
 

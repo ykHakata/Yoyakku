@@ -29,6 +29,9 @@ sub startup {
     # ログアウト
     $r->route('/up_logout')
         ->to( controller => 'auth', action => 'up_logout' );
+
+    # セッション情報設定
+    $self->sessions->cookie_name('yoyakku');
 }
 
 1;
