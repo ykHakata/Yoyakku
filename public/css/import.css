@@ -4,14 +4,14 @@
 ========================================== */
 @import "reset.css";
 @import "structure.css";
-/*@import "base/header.css";*/
-/*@import "base/footer.css";*/
+@import "header.css";
+@import "footer.css";
 /*@import "base/navigation.css";*/
 /*@import "base/textdecorations.css";*/
 
 /* Parts
 ========================================== */
-/*@import "parts/others.css";*/
+/*@import "others.css";*/
 /*@import "parts/table.css";*/
 /*@import "parts/popup.css";*/
 /*@import "popup.css";*/
@@ -20,6 +20,7 @@
 @import "up_login_admin.css";
 @import "up_login_general.css";
 @import "up_logout.css";
+@import "profile.css";
 
 
 /* Individual

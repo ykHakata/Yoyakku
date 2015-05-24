@@ -1,0 +1,152 @@
+% layout 'default';
+% title 'yoyakkuプロフィール設定';
+
+<div id="wrapper">
+<%= include './temp/header_navi_new' %>
+<div id="index_contents">
+<h1 class="input_ads">プロフィールの設定／<%= $login %></h1>
+% if ($switch_header eq 8) {
+
+% }
+% else {
+  <div class="input_ads_n">
+    <button class="input_ads_b" type="button">
+    <a href="profile_comp">確認画面にもどる</a>
+    </button>
+  </div>
+% }
+
+<form action="" method="post">
+<table id="profile_table" >
+<tr class="header">
+  <th colspan="2">
+    ※必須項目の入力が完了すると利用が可能になります
+    <br />
+    初期パスワードは変更する事をおすすめします。
+  </th>
+</tr>
+<tr class="header">
+  <th colspan="2">ログイン情報</th>
+</tr>
+<tr class="">
+  <th scope="row">ログインid</th>
+  <td>
+    <input name="id" type="hidden" />
+    <input name="login" type="text" readonly />
+  </td>
+</tr>
+<tr class="required">
+  <th scope="row">ログイン名※</th>
+  <td>
+    <input name="nick_name" type="text" />(予約の際に表示されます)
+    <div class="vali"><%= $nick_name %></div>
+  </td>
+</tr>
+<tr class="required">
+  <th scope="row">パスワード※</th>
+  <td>
+    <input name="password" type="password" />(英数半角4文字以上)
+    <div class="vali"><%= $password %></div>
+  </td>
+</tr>
+<tr class="required">
+  <th scope="row">パスワード(確認)</th>
+  <td>
+    <input name="password_2" type="password" />
+    <div class="vali"><%= $password_2 %></div>
+  </td>
+</tr>
+<tr class="header">
+  <th colspan="2">個人情報</th>
+</tr>
+<tr class="">
+  <th scope="row">氏名</th>
+  <td>
+    <input name="profile_id" type="hidden" />
+    <input name="full_name" type="text" />
+    <div class="vali"><%= $full_name %></div>
+  </td>
+</tr>
+<tr class="">
+  <th scope="row">氏名(ふりがな)</th>
+    <td>
+    <input name="phonetic_name" type="text" />
+    <div class="vali"><%= $phonetic_name %></div>
+  </td>
+</tr>
+<tr class="required">
+  <th scope="row">電話番号※</th>
+    <td>
+    <input name="tel" type="text" />
+    <div class="vali"><%= $tel %></div>
+  </td>
+</tr>
+<tr class="">
+  <th scope="row">メールアドレス</th>
+    <td>
+    <input name="mail" type="text" />
+    <div class="vali"><%= $mail %></div>
+  </td>
+</tr>
+
+% if ($switch_acting) {
+  <tr class="header">
+    <th colspan="2">お気に入り店舗登録</th>
+  </tr>
+  <tr class="">
+    <th scope="row">店舗登録とは？</th>
+    <td>選択した店舗からあなたのIDを使って予約の代行が可能<br />
+    電話のみでの依頼の時に役に立ちます</td>
+  </tr>
+  <tr class="">
+    <th scope="row">リスト[1]</th>
+    <td>
+    <select name="acting_1">
+    <option value="0">選択しない</option>
+    % for my $storeinfo_ref (@$storeinfos_ref) {
+      <option value="<%= $storeinfo_ref->id %>">
+      <%= $storeinfo_ref->name %>
+      </option>
+    % }
+    </select>
+    <div class="vali"><%= $acting_1 %></div></td>
+  </tr>
+  <tr class="">
+    <th scope="row">リスト[2]</th>
+    <td>
+    <select name="acting_2">
+    <option value="0">選択しない</option>
+    % for my $storeinfo_ref (@$storeinfos_ref) {
+      <option value="<%= $storeinfo_ref->id %>">
+      <%= $storeinfo_ref->name %>
+      </option>
+    % }
+    </select>
+    </td>
+  </tr>
+  <tr class="">
+    <th scope="row">リスト[3]</th>
+    <td>
+      <select name="acting_3">
+      <option value="0">選択しない</option>
+      % for my $storeinfo_ref (@$storeinfos_ref) {
+        <option value="<%= $storeinfo_ref->id %>">
+        <%= $storeinfo_ref->name %>
+        </option>
+      % }
+      </select>
+    </td>
+  </tr>
+% }
+
+<tr class="">
+  <th scope="row"></th>
+  <td>
+    <input type="submit" name="submit" value="登録" id="button_submit">
+  </td>
+</tr>
+</table>
+</form>
+</div>
+<%= include './temp/footer' %>
+<!-- /#wrapper --></div>

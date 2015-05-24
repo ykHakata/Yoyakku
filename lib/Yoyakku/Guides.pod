@@ -19,13 +19,23 @@ Yoyakku アプリケーションのクラス階層
 
 =over 2
 
+=item * Yoyakku::Controller
+
+=over 2
+
 =item * L<Yoyakku::Controller::Auth>
+
+=item * L<Yoyakku::Controller::Profile>
+
+=back
 
 =item * L<Yoyakku::Model>
 
 =over 2
 
 =item * L<Yoyakku::Model::Auth>
+
+=item * L<Yoyakku::Model::Profile>
 
 =item * L<Yoyakku::Model::Master>
 

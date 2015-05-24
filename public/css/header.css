@@ -1,0 +1,374 @@
+@charset "utf-8";
+
+/* =======================================
+
+    Header CSS
+
+ -----------------------------------------
+    INDEX
+ -----------------------------------------
+    1.Site Title(ロゴ使用)
+    2.Description(今回は予定なし)
+    3.Header Navi(枠組み)
+    4.Header Navi(テキスト指定)
+========================================== */
+/*
+#header {
+    position: relative;
+    padding: 0px 0px 0px 20px;
+    zoom: 1;
+}
+*/
+/* !Site Title */
+/* 1.Site Title
+========================================== */
+#header h1#site-title {}
+#header h1#site-title a {}
+/* !Description */
+/* 2.Description
+========================================== */
+#header p#description {}
+
+/* 3.Header Navi(枠組み)
+========================================== */
+    /* 3-1.headerNavi_region(地域ナビ枠組み)
+    ----------------------------------- */
+/*
+    #header ul#headerNavi_region {
+        position: absolute;
+        top: 0px;
+        left: 200px;
+        width: 120px;
+        height: 90px;
+        zoom: 1;
+        background: url(/images/base/header_btn_000.png);
+    }
+*/
+    /* 3-2.headerNavi(グローバルナビ枠組み)
+    ----------------------------------- */
+/*
+    #header ul#headerNavi {
+        position: absolute;
+        top: 0px;
+        left: 320px;
+        width: 860px;
+        height: 90px;
+        zoom: 1;
+        background: url(/images/base/header_btn_0000.png);
+    }
+    #header ul#headerNavi li {
+        float: left;
+        display: inline;
+        width: 86px;
+    }
+*/
+
+    /* 改訂版 ===================================================*/
+    #header_all {
+        position: relative;
+        padding: 0px 0px 0px 20px;
+        zoom: 1;
+    }
+    #header_heading {
+        position: absolute;
+        top: 0px;
+        left: 200px;
+        width: 120px;
+        height: 90px;
+        zoom: 1;
+        background: url(/images/base/header_btn_000.png);
+        }
+    #header_heading li {
+        margin-top: 32px;
+        font-size: medium;
+        text-align: center;
+        padding: 3px 0 3px 0;
+        }
+    #header_navi {
+        position: absolute;
+        top: 0px;
+        left: 320px;
+        width: 860px;
+        height: 90px;
+        zoom: 1;
+        background: url(/images/base/header_btn_0000.png);
+    }
+    #header_navi li {
+        float: left;
+        display: inline;
+        margin-top: 32px;
+        font-size: medium;
+        overflow: hidden;
+        padding: 3px 0 3px 0;
+    }
+    .header_navi_col {
+        width: 71px;
+        text-align: center;
+    }
+    .header_navi_col_delete {
+        width: 0px;
+    }
+    .header_navi_col_in_login {
+        width: 210px;
+        text-align: left;
+    }
+    .header_navi_col_wait_login {
+        width: 71px;
+        text-align: center;
+    }
+    /* 4-2.Default(リンク部初期)
+    ----------------------------------- */
+    #header_all a
+    {text-decoration: none; color: #000000;}
+    /* 4-3.When Mouse Over
+    ----------------------------------- */
+    #header_all a:hover
+    {text-decoration: underline; color: #ff0000;}
+    /* 4-4.When Active Page
+    ----------------------------------- */
+
+
+
+    /*ログイン中*/
+    #header_navi_li11                              a ,
+    /*各月の枠*/
+
+
+    body.index_this_m             #header_navi_li0 a ,
+    body.index_next_m             #header_navi_li1 a ,
+    body.index_next_two_m         #header_navi_li2 a ,
+    body.index_next_three_m       #header_navi_li3 a ,
+    /*履歴の枠*/
+    body.history                  #header_navi_li5 a,
+    /*店舗登録の枠*/
+    body.entry                    #header_navi_li6 a,
+    /*予約の枠*/
+    body.state                    #header_navi_li4 a,
+    body.situation                #header_navi_li4 a,
+    body.store_info               #header_navi_li4 a,
+    /*管理の枠*/
+    body.admin_store_edit         #header_navi_li5 a,
+    body.admin_store_comp         #header_navi_li5 a,
+    body.admin_reserv_edit        #header_navi_li5 a,
+    body.up_admin_r_d_edit        #header_navi_li5 a,
+
+    body.admin_reserv_comp        #header_navi_li5 a,
+    body.admin_pub_edit           #header_navi_li5 a,
+    body.admin_pub_comp           #header_navi_li5 a,
+    body.admin_reserv_list        #header_navi_li5 a,
+    /*プロフィールの枠*/
+    body.profile_comp             #header_navi_li6 a,
+    body.profile                  #header_navi_li6 a,
+/*
+    body.admin_reserv_update      #header_navi_li5 a,
+    body.admin_reserv_input       #header_navi_li5 a,
+    body.admin_reserv_provi       #header_navi_li5 a,
+    body.admin_reserv_update_kari #header_navi_li5 a,
+    body.admin_reserv_conf        #header_navi_li5 a,
+    body.admin_reserv_update_cansel #header_navi_li5 a,
+    body.admin_reserv_stop          #header_navi_li5 a,
+    body.admin_reserv_provi_stop    #header_navi_li5 a,
+    body.admin_reserv_update_stop   #header_navi_li5 a,
+*/
+    /*スーバーユーザー*/
+    body.mainte_list              #header_heading  a ,
+    body.mainte_region_serch      #header_navi_li0 a ,
+    body.mainte_post_serch        #header_navi_li1 a ,
+    body.mainte_storeinfo_serch   #header_navi_li2 a ,
+    body.mainte_storeinfo_new     #header_navi_li2 a ,
+    body.mainte_roominfo_serch    #header_navi_li3 a ,
+    body.mainte_roominfo_new      #header_navi_li3 a ,
+    body.mainte_reserve_serch     #header_navi_li4 a ,
+    body.mainte_reserve_new       #header_navi_li4 a ,
+    body.mainte_ads_serch         #header_navi_li5 a ,
+    body.mainte_ads_new           #header_navi_li5 a ,
+    body.mainte_registrant_serch  #header_navi_li6 a ,
+    body.mainte_registrant_new    #header_navi_li6 a ,
+    body.mainte_general_serch     #header_navi_li7 a ,
+    body.mainte_general_new       #header_navi_li7 a ,
+    body.mainte_profile_serch     #header_navi_li8 a ,
+    body.mainte_profile_new       #header_navi_li8 a ,
+    body.mainte_acting_serch      #header_navi_li9 a ,
+    body.mainte_acting_new        #header_navi_li9 a
+    {text-decoration: none; color: #ff0000;}
+
+    /*===================================================*/
+
+
+
+    /*!一般ログイン時の枠幅変更*/
+/*
+    body.situation_login #header ul#headerNavi .item09,
+    body.history         #header ul#headerNavi .item09,
+    body.history_pick    #header ul#headerNavi .item09
+    {width: 0px;}
+    body.situation_login    #header ul#headerNavi .item10,
+    body.history            #header ul#headerNavi .item10,
+    body.history_pick       #header ul#headerNavi .item10
+    {width: 172px;}
+*/
+    /*!管理者ログイン時の枠幅変更*/
+/*
+    body.index_admin          #header ul#headerNavi .item08,
+    body.index_admin          #header ul#headerNavi .item09,
+    body.admin_store_edit     #header ul#headerNavi .item08,
+    body.admin_store_edit     #header ul#headerNavi .item09,
+    body.admin_store_comp     #header ul#headerNavi .item08,
+    body.admin_store_comp     #header ul#headerNavi .item09,
+    body.admin_reserv_edit    #header ul#headerNavi .item08,
+    body.admin_reserv_edit    #header ul#headerNavi .item09,
+    body.admin_reserv_comp    #header ul#headerNavi .item08,
+    body.admin_reserv_comp    #header ul#headerNavi .item09,
+    body.admin_pub_edit       #header ul#headerNavi .item08,
+    body.admin_pub_edit       #header ul#headerNavi .item09,
+    body.admin_pub_comp       #header ul#headerNavi .item08,
+    body.admin_pub_comp       #header ul#headerNavi .item09,
+    body.admin_reserv_list    #header ul#headerNavi .item08,
+    body.admin_reserv_list    #header ul#headerNavi .item09,
+    body.admin_reserv_update  #header ul#headerNavi .item08,
+    body.admin_reserv_update  #header ul#headerNavi .item09,
+    body.admin_reserv_input   #header ul#headerNavi .item08,
+    body.admin_reserv_input   #header ul#headerNavi .item09,
+    body.admin_reserv_provi   #header ul#headerNavi .item08,
+    body.admin_reserv_provi   #header ul#headerNavi .item09,
+    body.admin_reserv_update_kari   #header ul#headerNavi .item08,
+    body.admin_reserv_update_kari   #header ul#headerNavi .item09,
+    body.admin_reserv_conf   #header ul#headerNavi .item08,
+    body.admin_reserv_conf   #header ul#headerNavi .item09,
+    body.admin_reserv_update_cansel   #header ul#headerNavi .item08,
+    body.admin_reserv_update_cansel   #header ul#headerNavi .item09,
+    body.admin_reserv_stop   #header ul#headerNavi .item08,
+    body.admin_reserv_stop   #header ul#headerNavi .item09,
+    body.admin_reserv_provi_stop   #header ul#headerNavi .item08,
+    body.admin_reserv_provi_stop   #header ul#headerNavi .item09,
+    body.admin_reserv_update_stop   #header ul#headerNavi .item08,
+    body.admin_reserv_update_stop   #header ul#headerNavi .item09
+    {width: 0px;}
+    body.index_admin         #header ul#headerNavi .item10,
+    body.admin_store_edit    #header ul#headerNavi .item10,
+    body.admin_store_comp    #header ul#headerNavi .item10,
+    body.admin_reserv_edit   #header ul#headerNavi .item10,
+    body.admin_reserv_comp   #header ul#headerNavi .item10,
+    body.admin_pub_edit      #header ul#headerNavi .item10,
+    body.admin_pub_comp      #header ul#headerNavi .item10,
+    body.admin_reserv_list   #header ul#headerNavi .item10,
+    body.admin_reserv_update #header ul#headerNavi .item10,
+    body.admin_reserv_input  #header ul#headerNavi .item10,
+    body.admin_reserv_provi  #header ul#headerNavi .item10,
+    body.admin_reserv_update_kari  #header ul#headerNavi .item10,
+    body.admin_reserv_conf  #header ul#headerNavi .item10,
+    body.admin_reserv_update_cansel  #header ul#headerNavi .item10,
+    body.admin_reserv_stop  #header ul#headerNavi .item10,
+    body.admin_reserv_provi_stop  #header ul#headerNavi .item10,
+    body.admin_reserv_update_stop  #header ul#headerNavi .item10
+    {width: 258px;}
+*/
+
+/* 4.Header Navi(テキスト指定)
+========================================== */
+    /* 4-1.headerNavi(共通)
+    ----------------------------------- */
+/*
+    #header li {
+        font-size: 138.5%;
+        line-height: 1.112;
+        text-align: center;
+        border: 0px solid #676767;
+        margin: 35px 0px 0px 0px;
+    }
+*/
+    /*#header ul#header-navi li a {
+    display: block;
+    height: px;
+    background: url() no-repeat;
+    text-indent: -9999px;
+    overflow: hidden;
+    }*/
+
+    /* 4-2.Default(リンク部初期)
+    ----------------------------------- */
+/*
+    #header li a
+    {text-decoration: none; color: #000000;}
+*/
+
+    /* 4-3.When Mouse Over
+    ----------------------------------- */
+/*
+    #header li a:hover
+    {text-decoration: underline; color: #ff0000;}
+*/
+
+    /* 4-4.When Active Page
+    ----------------------------------- */
+    /*各月の枠*/
+/*
+    body.index_this_m          ul#headerNavi .item01 a,
+    body.index_admin           ul#headerNavi .item01 a,
+    body.index_next_m          ul#headerNavi .item02 a,
+    body.index_next_two_m      ul#headerNavi .item03 a,
+    body.index_next_three_m    ul#headerNavi .item04 a,
+*/
+    /*予約の枠*/
+/*
+    body.state                 ul#headerNavi .item05 a,
+    body.province              ul#headerNavi .item05 a,
+    body.shoplist              ul#headerNavi .item05 a,
+    body.store_info            ul#headerNavi .item05 a,
+    body.situation             ul#headerNavi .item05 a,
+    body.situation_login       ul#headerNavi .item05 a,
+*/
+    /*履歴の枠*/
+/*
+    body.history               ul#headerNavi .item06 a,
+    body.history_pick          ul#headerNavi .item06 a,
+*/
+    /*店舗登録の枠*/
+/*     body.entry #header         ul#headerNavi .item08 a, */
+    /*管理の枠*/
+/*
+    body.admin_store_edit      ul#headerNavi .item07 a,
+    body.admin_store_comp      ul#headerNavi .item07 a,
+    body.admin_reserv_edit     ul#headerNavi .item07 a,
+    body.admin_reserv_comp     ul#headerNavi .item07 a,
+    body.admin_pub_edit        ul#headerNavi .item07 a,
+    body.admin_pub_comp        ul#headerNavi .item07 a,
+    body.admin_reserv_list     ul#headerNavi .item07 a,
+    body.admin_reserv_update   ul#headerNavi .item07 a,
+    body.admin_reserv_input    ul#headerNavi .item07 a,
+    body.admin_reserv_provi    ul#headerNavi .item07 a,
+    body.admin_reserv_update_kari    ul#headerNavi .item07 a,
+    body.admin_reserv_conf    ul#headerNavi .item07 a,
+    body.admin_reserv_update_cansel    ul#headerNavi .item07 a,
+    body.admin_reserv_stop    ul#headerNavi .item07 a,
+    body.admin_reserv_provi_stop    ul#headerNavi .item07 a,
+    body.admin_reserv_update_stop    ul#headerNavi .item07 a,
+*/
+    /*ログインの枠*/
+/*
+    body.situation_login       ul#headerNavi .item10 a,
+    body.history               ul#headerNavi .item10 a,
+    body.history_pick          ul#headerNavi .item10 a,
+    body.index_admin           ul#headerNavi .item10 a,
+    body.admin_store_edit      ul#headerNavi .item10 a,
+    body.admin_store_comp      ul#headerNavi .item10 a,
+    body.admin_reserv_edit     ul#headerNavi .item10 a,
+    body.admin_reserv_comp     ul#headerNavi .item10 a,
+    body.admin_pub_edit        ul#headerNavi .item10 a,
+    body.admin_pub_comp        ul#headerNavi .item10 a,
+    body.admin_reserv_list     ul#headerNavi .item10 a,
+    body.admin_reserv_update   ul#headerNavi .item10 a,
+    body.admin_reserv_provi   ul#headerNavi .item10 a,
+    body.admin_reserv_input   ul#headerNavi .item10 a,
+    body.admin_reserv_update_kari   ul#headerNavi .item10 a,
+    body.admin_reserv_conf   ul#headerNavi .item10 a,
+    body.admin_reserv_update_cansel   ul#headerNavi .item10 a,
+    body.admin_reserv_stop   ul#headerNavi .item10 a,
+    body.admin_reserv_provi_stop   ul#headerNavi .item10 a,
+    body.admin_reserv_update_stop   ul#headerNavi .item10 a
+    {text-decoration: none; color: #ff0000;}
+*/
+
+
+
+

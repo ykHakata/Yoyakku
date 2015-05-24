@@ -30,6 +30,10 @@ sub startup {
     $r->route('/up_logout')
         ->to( controller => 'auth', action => 'up_logout' );
 
+    # 個人情報(入力画面)
+    $r->route('/profile')
+        ->to( controller => 'profile', action => 'profile' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 }

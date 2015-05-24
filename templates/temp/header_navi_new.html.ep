@@ -1,0 +1,169 @@
+<div id="header_all">
+<h1 id="siteTitle">
+
+% if ($switch_header eq 8) {
+<a href="#">
+% }
+% else {
+<a href="index">
+% }
+
+<img src="./images/base/header_logo_01.png" width="180" height="90" ait="studio search yoyakku" />
+</a></h1>
+%# ====================
+% my @header_navi_row_name_value1 = (
+    % "region"     ,"post"    ,"store\ninfo",
+    % "room\ninfo" ,"reserve" ,"ads"        ,
+    % "admin"      ,"general" ,"profile" ,
+    % "acting"     ,undef     ,$login      ,
+% );
+
+% my @header_navi_row_name_value2 = (
+    % $now_data->mon    . "月" , $next1m_data->mon . "月" , $next2m_data->mon . "月"  ,
+    % $next3m_data->mon . "月" , "予約"                   , undef                     ,
+    % "登録"               , undef                    , undef                     ,
+    % undef                    , undef                    , "login"                   ,
+% );
+
+% my @header_navi_row_name_value3 = @header_navi_row_name_value2;
+% $header_navi_row_name_value3[5] = "履歴";
+% $header_navi_row_name_value3[6] = "プロフィール";
+% $header_navi_row_name_value3[11] = $login;
+
+% my @header_navi_row_name_value4  = @header_navi_row_name_value3;
+% $header_navi_row_name_value4[5]  = "管理";
+% $header_navi_row_name_value4[6]  = "プロフィール" ;
+% $header_navi_row_name_value4[11] = $login;
+
+% my @header_navi_row_name_value5  = @header_navi_row_name_value2;
+% $header_navi_row_name_value5[0]  = undef;
+% $header_navi_row_name_value5[1]  = undef;
+% $header_navi_row_name_value5[2]  = undef;
+% $header_navi_row_name_value5[3]  = undef;
+
+% my @header_navi_row_name_value6 = @header_navi_row_name_value3;
+% $header_navi_row_name_value6[0]  = undef;
+% $header_navi_row_name_value6[1]  = undef;
+% $header_navi_row_name_value6[2]  = undef;
+% $header_navi_row_name_value6[3]  = undef;
+
+% my @header_navi_row_name_value7 = @header_navi_row_name_value4;
+% $header_navi_row_name_value7[0]  = undef;
+% $header_navi_row_name_value7[1]  = undef;
+% $header_navi_row_name_value7[2]  = undef;
+% $header_navi_row_name_value7[3]  = undef;
+
+% my @header_navi_row_name_value8 = @header_navi_row_name_value7;
+% $header_navi_row_name_value8[4]  = undef;
+% $header_navi_row_name_value8[5]  = undef;
+% $header_navi_row_name_value8[6]  = undef;
+
+
+%# ====================
+% my @header_navi_link_name_value1 = qw{
+    % mainte_region_serch       mainte_post_serch       mainte_storeinfo_serch
+    % mainte_roominfo_serch     mainte_reserve_serch    mainte_ads_serch
+    % mainte_registrant_serch   mainte_general_serch    mainte_profile_serch
+    % mainte_acting_serch       #                       up_logout
+% };
+
+% my @header_navi_link_name_value2 = qw{
+    % index                     index_next_m            index_next_two_m
+    % index_next_three_m        region_state            #
+    % entry                     #                       #
+    % #                         #                       up_login
+% };
+
+% my @header_navi_link_name_value3  = @header_navi_link_name_value2;
+% $header_navi_link_name_value3[5]  = "history"  ;
+% $header_navi_link_name_value3[6]  = "profile_comp"  ;
+% $header_navi_link_name_value3[11] = "up_logout";
+
+% my @header_navi_link_name_value4  = @header_navi_link_name_value3;
+% $header_navi_link_name_value4[5]  = "admin_store_edit"  ;
+% $header_navi_link_name_value4[11] = "up_logout";
+
+% my @header_navi_link_name_value9  = @header_navi_link_name_value4;
+% $header_navi_link_name_value9[5]  = "admin_reserv_list"  ;
+
+
+%# ====================
+% my @header_navi_class_name_value1;
+% for my $i (0..11) {
+    % my $value = ($i <= 8)              ? "header_navi_col"
+    %           : ($i >= 9 and $i <= 10) ? "header_navi_col_delete"
+    %           :                          "header_navi_col_in_login"
+    %           ;
+    % $header_navi_class_name_value1[$i] = $value;
+% }
+% my @header_navi_class_name_value2;
+% for my $i (0..11) {
+    % my $value = ($i <= 10)              ? "header_navi_col"
+    %           :                           "header_navi_col_wait_login"
+    %           ;
+    % $header_navi_class_name_value2[$i] = $value;
+% }
+%# ====================
+% my $header_heading_name = ($switch_header eq 1) ? "list"
+%                         :                         "九州版"
+%                         ;
+
+% my $header_heading_link = ($switch_header eq 1) ? "mainte_list"
+%                         :                         "#"
+%                         ;
+
+% my @header_navi_row_name = ($switch_header eq 1) ? @header_navi_row_name_value1
+%                          : ($switch_header eq 2) ? @header_navi_row_name_value2
+%                          : ($switch_header eq 3) ? @header_navi_row_name_value3
+%                          : ($switch_header eq 4) ? @header_navi_row_name_value4
+%                          : ($switch_header eq 5) ? @header_navi_row_name_value5
+%                          : ($switch_header eq 6) ? @header_navi_row_name_value6
+%                          : ($switch_header eq 7) ? @header_navi_row_name_value7
+%                          : ($switch_header eq 8) ? @header_navi_row_name_value8
+%                          : ($switch_header eq 9) ? @header_navi_row_name_value4
+%                          : ($switch_header eq 10)? @header_navi_row_name_value7
+%                          :                         @header_navi_row_name_value2
+%                          ;
+
+% my @header_navi_link_name = ($switch_header eq 1) ? @header_navi_link_name_value1
+%                           : ($switch_header eq 2) ? @header_navi_link_name_value2
+%                           : ($switch_header eq 3) ? @header_navi_link_name_value3
+%                           : ($switch_header eq 4) ? @header_navi_link_name_value4
+%                           : ($switch_header eq 5) ? @header_navi_link_name_value2
+%                           : ($switch_header eq 6) ? @header_navi_link_name_value3
+%                           : ($switch_header eq 7) ? @header_navi_link_name_value4
+%                           : ($switch_header eq 8) ? @header_navi_link_name_value3
+%                           : ($switch_header eq 9) ? @header_navi_link_name_value9
+%                           : ($switch_header eq 10)? @header_navi_link_name_value9
+%                           :                         @header_navi_link_name_value2
+%                           ;
+
+% my @header_navi_class_name = ($switch_header eq 1) ? @header_navi_class_name_value2
+%                            : ($switch_header eq 2) ? @header_navi_class_name_value2
+%                            : ($switch_header eq 3) ? @header_navi_class_name_value1
+%                            : ($switch_header eq 4) ? @header_navi_class_name_value1
+%                            : ($switch_header eq 5) ? @header_navi_class_name_value2
+%                            : ($switch_header eq 6) ? @header_navi_class_name_value1
+%                            : ($switch_header eq 7) ? @header_navi_class_name_value1
+%                            : ($switch_header eq 8) ? @header_navi_class_name_value1
+%                            : ($switch_header eq 9) ? @header_navi_class_name_value1
+%                            : ($switch_header eq 10)? @header_navi_class_name_value1
+%                            :                         @header_navi_class_name_value2
+%                            ;
+
+%# ====================
+
+<ul id="header_heading">
+<li class=""><a href="<%= $header_heading_link %>"><%= $header_heading_name %></a></li>
+</ul>
+
+<ul id="header_navi">
+% for my $i (0..11) {
+    <li id="header_navi_li<%= $i %>" class="<%= $header_navi_class_name[$i] %>"><a href="<%= $header_navi_link_name[$i] %>"><%= $header_navi_row_name[$i] %></a></li>
+% }
+</ul>
+
+
+<!-- /#header_all --></div>
+
+
