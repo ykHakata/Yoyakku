@@ -2,15 +2,27 @@ package Yoyakku::Model;
 use strict;
 use warnings;
 use utf8;
+use Teng;
 use Teng::Schema::Loader;
 use Exporter 'import';
 our @EXPORT_OK = qw{
     $teng
 };
 
+my $dbh = DBI->connect(
+    'dbi:SQLite:./db/yoyakku.db',
+    '', '',
+    +{  RaiseError        => 1,
+        PrintError        => 0,
+        AutoCommit        => 1,
+        sqlite_unicode    => 1,
+        mysql_enable_utf8 => 1,
+    },
+);
+
 our $teng = Teng::Schema::Loader->load(
-    connect_info => [ 'dbi:SQLite:./db/yoyakku.db', '', '' ],
-    namespace    => 'yoyakku_table',
+    dbh       => $dbh,
+    namespace => 'yoyakku_table',
 );
 
 1;
@@ -47,6 +59,8 @@ This documentation referes to Yoyakku::Model version 0.0.1
 =item * L<warnings>
 
 =item * L<utf8>
+
+=item * L<Teng>
 
 =item * L<Teng::Schema::Loader>
 
