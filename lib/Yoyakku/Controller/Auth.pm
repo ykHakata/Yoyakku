@@ -76,8 +76,8 @@ sub up_login_general {
 
     # エラー時の出力
     my $html = $self->render_to_string(
-        templates => 'auth/up_login_general',
-        format    => 'html',
+        template => 'auth/up_login_general',
+        format   => 'html',
     )->to_string;
 
     my $output = HTML::FillInForm->fill( \$html, $params );
@@ -148,8 +148,8 @@ sub up_login_admin {
 
     # エラー時の出力
     my $html = $self->render_to_string(
-        templates => 'auth/up_login_admin',
-        format    => 'html',
+        template => 'auth/up_login_admin',
+        format   => 'html',
     )->to_string;
 
     my $output = HTML::FillInForm->fill( \$html, $params );
@@ -211,8 +211,8 @@ sub root_login {
     $self->stash->{password} = shift @pass_errors;
 
     my $html = $self->render_to_string(
-        templates => 'auth/root_login',
-        format    => 'html',
+        template => 'auth/root_login',
+        format   => 'html',
     )->to_string;
 
     my $output = HTML::FillInForm->fill( \$html, $params );
