@@ -1,5 +1,6 @@
 package Yoyakku::Controller::Profile;
 use Mojo::Base 'Mojolicious::Controller';
+use HTML::FillInForm;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Profile qw{chang_date_6};
 
@@ -59,6 +60,11 @@ sub _switch_stash {
         login         => $login,            # ログイン名をヘッダーの右
         switch_header => $switch_header,    # ヘッダー切替
         switch_acting => $switch_acting,    # お気に入りリスト表示
+        login_data    => +{                 # 初期値表示のため
+            login       => $table,          # ログイン種別識別
+            login_row   => $row,
+            profile_row => $profile_row,
+        },
     );
 
     return;
@@ -100,38 +106,75 @@ sub profile {
     my $class = 'profile';
     $self->stash( class => $class );
 
-    my $nick_name;
-    my $password;
-    my $password_2;
-    my $full_name;
-    my $phonetic_name;
-    my $tel;
-    my $mail;
-    my $acting_1;
-
-    my $storeinfos_ref = [];
-        # die 'profile';
-
+    # バリデート用
     $self->stash(
-        nick_name      => $nick_name,
-        password       => $password,
-        password_2     => $password_2,
-        full_name      => $full_name,
-        phonetic_name  => $phonetic_name,
-        tel            => $tel,
-        mail           => $mail,
-        acting_1       => $acting_1,
-        storeinfos_ref => $storeinfos_ref,
+        password       => '',
+        password_2     => '',
+        nick_name      => '',
+        full_name      => '',
+        phonetic_name  => '',
+        tel            => '',
+        mail           => '',
+        acting_1       => '',
     );
 
+    # お気に入り店舗のための選択データ取り出し 店舗情報 storeinfo
+    # my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
+    my @storeinfo_rows;
+    $self->stash( storeinfos_ref => \@storeinfo_rows, );
 
+    # プロフィールの入力枠に表示するための値の取得 admin or general
+    # 該当の profile テーブル
+    # ログイン時に _check_login_profile で admin or general , profile は取得
 
-    return $self->render( template => 'profile', format => 'html' )
+    my $login_data = $self->stash->{login_data};
+
+    # my $login_data = +{
+    #     login => 'admin' or 'general',
+    #     login_row => 'admin_row' or 'general_row',
+    #     profile_row => $profile_row,
+    # };
+
+    my $acting_1;
+    my $acting_2;
+    my $acting_3;
+
+    # generel の場合は acting テーブル 代行リスト
+    if ( $login_data->{login} eq 'general' ) {
+        # my @actings
+        #     = $teng->search( 'acting',
+        #     +{ general_id => $login, status => 1, } );
+
+        # $acting_1 = $actings[0]->id;
+        # $acting_2 = $actings[1]->id;
+        # $acting_3 = $actings[2]->id;
+    }
+
+    my $params = +{
+        id             => $login_data->{login_row}->id,
+        login          => $login_data->{login_row}->login,
+        password       => $login_data->{login_row}->password,
+        password_2     => $login_data->{login_row}->password,
+        profile_id     => $login_data->{profile_row}->id,
+        nick_name      => $login_data->{profile_row}->nick_name,
+        full_name      => $login_data->{profile_row}->full_name,
+        phonetic_name  => $login_data->{profile_row}->phonetic_name,
+        tel            => $login_data->{profile_row}->tel,
+        mail           => $login_data->{profile_row}->mail,
+        acting_1       => $acting_1,
+        acting_2       => $acting_2,
+        acting_3       => $acting_3,
+    };
+
+    my $html
+        = $self->render_to_string( template => 'profile', format => 'html', )
+        ->to_string;
+
+    my $output = HTML::FillInForm->fill( \$html, $params );
+
+    return $self->render( text => $output );
 }
 
-# #お気に入り店舗のための選択データ取り出し
-# my @storeinfos = $teng->search_named(q{select * from storeinfo;});
-# $self->stash(storeinfos_ref => \@storeinfos);
 
 # #========
 # #--------
@@ -479,85 +522,6 @@ sub profile {
 #     return $self->render_text($html, format => 'html');
 #     #リターンなのでここでおしまい。
 # }
-# #--------
-# # データの表示,ログイン情報とprofile
-# my $id;
-# my $login;
-# my $password;
-# my $profile_ref;
-# my @actings_ref;
-
-# if ($admin_id) {
-#     my $admin_ref   = $teng->single('admin', +{id => $admin_id});
-#     $id             = $admin_ref->id;
-#     $login          = $admin_ref->login;
-#     $password       = $admin_ref->password;
-#     $profile_ref    = $teng->single('profile', +{admin_id => $admin_id});
-# }
-# elsif ($general_id) {
-#     my $general_ref = $teng->single('general', +{id => $general_id});
-#     $id             = $general_ref->id;
-#     $login          = $general_ref->login;
-#     $password       = $general_ref->password;
-#     $profile_ref    = $teng->single('profile', +{general_id => $general_id});
-#     @actings_ref    = $teng->search('acting',  +{general_id => $general_id , status => 1 });
-# }
-# else {
-#     die "stop!!予期せぬエラー";
-# }
-# #値作成==profile
-# my $profile_id    = $profile_ref->id ;
-# my $nick_name     = $profile_ref->nick_name;
-# my $full_name     = $profile_ref->full_name;
-# my $phonetic_name = $profile_ref->phonetic_name;
-# my $tel           = $profile_ref->tel;
-# my $mail          = $profile_ref->mail;
-# my @acting;
-
-# for my $acting_ref (@actings_ref) {
-#     push (@acting , $acting_ref->storeinfo_id);
-# }
-# my $acting_1_ref    = $teng->single('storeinfo', +{id => $acting[0]});
-# my $acting_2_ref    = $teng->single('storeinfo', +{id => $acting[1]});
-# my $acting_3_ref    = $teng->single('storeinfo', +{id => $acting[2]});
-
-# my $acting_1;
-# my $acting_2;
-# my $acting_3;
-
-# if ($acting_1_ref) {
-#     $acting_1      = $acting_1_ref->id;
-# }
-# if ($acting_2_ref) {
-#     $acting_2      = $acting_2_ref->id;
-# }
-# if ($acting_3_ref) {
-#     $acting_3      = $acting_3_ref->id;
-# }
-
-# #修正用フォーム、Fillinつかって表示 値はsqlより該当idのデータをつかう
-# my $html = $self->render_partial()->to_string;
-# $html = HTML::FillInForm->fill(
-#     \$html,{
-#         id            => $id ,
-#         login         => $login ,
-#         password      => $password ,
-#         password_2    => $password ,
-#         profile_id    => $profile_id ,
-#         nick_name     => $nick_name,
-#         full_name     => $full_name,
-#         phonetic_name => $phonetic_name,
-#         tel           => $tel,
-#         mail          => $mail,
-#         acting_1      => $acting_1,
-#         acting_2      => $acting_2,
-#         acting_3      => $acting_3,
-# });
-# #Fillin画面表示実行returnなのでここでおしまい。
-# return $self->render_text($html, format => 'html');
-
-# #$self->render('profile');
-# };
 
 
 1;
@@ -1130,6 +1094,8 @@ This documentation referes to Yoyakku::Controller::Profile version 0.0.1
 =item * L<Mojo::Base>
 
 =item * L<Mojolicious::Controller>
+
+=item * L<HTML::FillInForm>
 
 =item * L<Yoyakku::Model>
 
