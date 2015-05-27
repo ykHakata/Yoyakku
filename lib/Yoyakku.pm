@@ -36,6 +36,9 @@ sub startup {
 
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
+
+    # ログ情報を STDERR に出力
+    $self->log->path('');
 }
 
 1;

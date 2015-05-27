@@ -4,6 +4,219 @@ use HTML::FillInForm;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Profile qw{chang_date_6};
 
+# ヘッダーナビ、各パラメーター
+sub _switch_header_params {
+    my $self          = shift;
+    my $switch_header = shift;
+    my $login         = shift;
+
+    #日付変更線を６時に変更
+    my $chang_date = chang_date_6();
+
+    # 時刻(日付)取得、現在、1,2,3ヶ月後(ヘッダー用)
+    my $now_data    = $chang_date->{now_date};
+    my $next1m_data = $chang_date->{next1m_date};
+    my $next2m_data = $chang_date->{next2m_date};
+    my $next3m_data = $chang_date->{next3m_date};
+
+    my @header_navi_row_name_value1 = (
+        'region',
+        'post',
+        "store\ninfo",
+        "room\ninfo",
+        'reserve',
+        'ads',
+        'admin',
+        'general',
+        'profile',
+        'acting',
+        undef,
+        $login,
+    );
+
+    my @header_navi_row_name_value2 = (
+        $now_data->mon . '月',
+        $next1m_data->mon . '月',
+        $next2m_data->mon . '月',
+        $next3m_data->mon . '月',
+        '予約',
+        undef,
+        '登録',
+        undef,
+        undef,
+        undef,
+        undef,
+        'login',
+    );
+
+    my @header_navi_row_name_value3 = @header_navi_row_name_value2;
+
+    $header_navi_row_name_value3[5]  = '履歴';
+    $header_navi_row_name_value3[6]  = 'プロフィール';
+    $header_navi_row_name_value3[11] = $login;
+
+    my @header_navi_row_name_value4 = @header_navi_row_name_value3;
+    $header_navi_row_name_value4[5]  = '管理';
+    $header_navi_row_name_value4[6]  = 'プロフィール';
+    $header_navi_row_name_value4[11] = $login;
+
+    my @header_navi_row_name_value5  = @header_navi_row_name_value2;
+    $header_navi_row_name_value5[0]  = undef;
+    $header_navi_row_name_value5[1]  = undef;
+    $header_navi_row_name_value5[2]  = undef;
+    $header_navi_row_name_value5[3]  = undef;
+
+    my @header_navi_row_name_value6 = @header_navi_row_name_value3;
+    $header_navi_row_name_value6[0]  = undef;
+    $header_navi_row_name_value6[1]  = undef;
+    $header_navi_row_name_value6[2]  = undef;
+    $header_navi_row_name_value6[3]  = undef;
+
+    my @header_navi_row_name_value7 = @header_navi_row_name_value4;
+    $header_navi_row_name_value7[0]  = undef;
+    $header_navi_row_name_value7[1]  = undef;
+    $header_navi_row_name_value7[2]  = undef;
+    $header_navi_row_name_value7[3]  = undef;
+
+    my @header_navi_row_name_value8 = @header_navi_row_name_value7;
+    $header_navi_row_name_value8[4]  = undef;
+    $header_navi_row_name_value8[5]  = undef;
+    $header_navi_row_name_value8[6]  = undef;
+
+    #
+
+    my @header_navi_link_name_value1 = qw{
+        mainte_region_serch
+        mainte_post_serch
+        mainte_storeinfo_serch
+        mainte_roominfo_serch
+        mainte_reserve_serch
+        mainte_ads_serch
+        mainte_registrant_serch
+        mainte_general_serch
+        mainte_profile_serch
+        mainte_acting_serch
+        #
+        up_logout
+    };
+
+    my @header_navi_link_name_value2 = qw{
+        index
+        index_next_m
+        index_next_two_m
+        index_next_three_m
+        region_state
+        #
+        entry
+        #
+        #
+        #
+        #
+        up_login
+    };
+
+    my @header_navi_link_name_value3 = @header_navi_link_name_value2;
+    $header_navi_link_name_value3[5]  = 'history';
+    $header_navi_link_name_value3[6]  = 'profile_comp';
+    $header_navi_link_name_value3[11] = 'up_logout';
+
+    my @header_navi_link_name_value4 = @header_navi_link_name_value3;
+    $header_navi_link_name_value4[5]  = 'admin_store_edit';
+    $header_navi_link_name_value4[11] = 'up_logout';
+
+    my @header_navi_link_name_value9 = @header_navi_link_name_value4;
+    $header_navi_link_name_value9[5] = 'admin_reserv_list';
+
+    #
+
+    my @header_navi_class_name_value1;
+
+    for my $i ( 0 .. 11 ) {
+        my $value
+            = ( $i <= 8 ) ? 'header_navi_col'
+            : ( $i >= 9 and $i <= 10 ) ? 'header_navi_col_delete'
+            :                            'header_navi_col_in_login';
+        $header_navi_class_name_value1[$i] = $value;
+    }
+
+    my @header_navi_class_name_value2;
+
+    for my $i ( 0 .. 11 ) {
+        my $value
+            = ( $i <= 10 )
+            ? 'header_navi_col'
+            : 'header_navi_col_wait_login';
+        $header_navi_class_name_value2[$i] = $value;
+    }
+
+    #
+
+    my $site_title_link
+        = ( $switch_header eq 8 )
+        ? '#'
+        : 'index';
+
+    my $header_heading_name
+        = ( $switch_header eq 1 )
+        ? 'list'
+        : '九州版';
+
+    my $header_heading_link
+        = ( $switch_header eq 1 )
+        ? 'mainte_list'
+        : '#';
+
+    my @header_navi_row_name
+        = ( $switch_header eq 1 ) ? @header_navi_row_name_value1
+        : ( $switch_header eq 2 )  ? @header_navi_row_name_value2
+        : ( $switch_header eq 3 )  ? @header_navi_row_name_value3
+        : ( $switch_header eq 4 )  ? @header_navi_row_name_value4
+        : ( $switch_header eq 5 )  ? @header_navi_row_name_value5
+        : ( $switch_header eq 6 )  ? @header_navi_row_name_value6
+        : ( $switch_header eq 7 )  ? @header_navi_row_name_value7
+        : ( $switch_header eq 8 )  ? @header_navi_row_name_value8
+        : ( $switch_header eq 9 )  ? @header_navi_row_name_value4
+        : ( $switch_header eq 10 ) ? @header_navi_row_name_value7
+        :                            @header_navi_row_name_value2;
+
+    my @header_navi_link_name
+        = ( $switch_header eq 1 ) ? @header_navi_link_name_value1
+        : ( $switch_header eq 2 )  ? @header_navi_link_name_value2
+        : ( $switch_header eq 3 )  ? @header_navi_link_name_value3
+        : ( $switch_header eq 4 )  ? @header_navi_link_name_value4
+        : ( $switch_header eq 5 )  ? @header_navi_link_name_value2
+        : ( $switch_header eq 6 )  ? @header_navi_link_name_value3
+        : ( $switch_header eq 7 )  ? @header_navi_link_name_value4
+        : ( $switch_header eq 8 )  ? @header_navi_link_name_value3
+        : ( $switch_header eq 9 )  ? @header_navi_link_name_value9
+        : ( $switch_header eq 10 ) ? @header_navi_link_name_value9
+        :                            @header_navi_link_name_value2;
+
+    my @header_navi_class_name
+        = ( $switch_header eq 1 ) ? @header_navi_class_name_value2
+        : ( $switch_header eq 2 )  ? @header_navi_class_name_value2
+        : ( $switch_header eq 3 )  ? @header_navi_class_name_value1
+        : ( $switch_header eq 4 )  ? @header_navi_class_name_value1
+        : ( $switch_header eq 5 )  ? @header_navi_class_name_value2
+        : ( $switch_header eq 6 )  ? @header_navi_class_name_value1
+        : ( $switch_header eq 7 )  ? @header_navi_class_name_value1
+        : ( $switch_header eq 8 )  ? @header_navi_class_name_value1
+        : ( $switch_header eq 9 )  ? @header_navi_class_name_value1
+        : ( $switch_header eq 10 ) ? @header_navi_class_name_value1
+        :                            @header_navi_class_name_value2;
+
+    my $switch_header_params = +{
+        site_title_link        => $site_title_link,
+        header_heading_name    => $header_heading_name,
+        header_heading_link    => $header_heading_link,
+        header_navi_row_name   => \@header_navi_row_name,
+        header_navi_link_name  => \@header_navi_link_name,
+        header_navi_class_name => \@header_navi_class_name,
+    };
+
+    return $switch_header_params;
+}
+
 # ログイン成功時に作成する初期値
 sub _switch_stash {
     my $self  = shift;
@@ -12,11 +225,6 @@ sub _switch_stash {
 
     # id table ないとき強制終了
     die 'not id table!: ' if !$id || !$table;
-
-    # お気に入りリスト admin 非表示 general 表示
-    my $switch_acting = $table eq 'admin'   ? undef
-                      : $table eq 'general' ? 1
-                      :                      undef;
 
     my $row = $teng->single( $table, +{ id => $id } );
 
@@ -56,15 +264,27 @@ sub _switch_stash {
         }
     }
 
+    my $header_params
+        = $self->_switch_header_params( $switch_header, $login );
+
+    my $header_params_hash_ref = +{
+        site_title_link        => $header_params->{site_title_link},
+        header_heading_link    => $header_params->{header_heading_link},
+        header_heading_name    => $header_params->{header_heading_name},
+        header_navi_class_name => $header_params->{header_navi_class_name},
+        header_navi_link_name  => $header_params->{header_navi_link_name},
+        header_navi_row_name   => $header_params->{header_navi_row_name},
+    };
+
     $self->stash(
-        login         => $login,            # ログイン名をヘッダーの右
-        switch_header => $switch_header,    # ヘッダー切替
-        switch_acting => $switch_acting,    # お気に入りリスト表示
-        login_data    => +{                 # 初期値表示のため
-            login       => $table,          # ログイン種別識別
-            login_row   => $row,
-            profile_row => $profile_row,
+        login_data => +{    # 初期値表示のため
+            login         => $table,            # ログイン種別識別
+            login_row     => $row,              # ログイン者情報
+            profile_row   => $profile_row,      # プロフィール情報
+            login_name    => $login,            # ログイン名
+            switch_header => $switch_header,    # 切替
         },
+        %{$header_params_hash_ref},             # ヘッダー各値
     );
 
     return;
@@ -91,20 +311,25 @@ sub profile {
     # ログイン確認する
     return $self->redirect_to('/index') if $self->_check_login_profile();
 
-    #日付変更線を６時に変更
-    my $chang_date = chang_date_6();
-
-    # 時刻(日付)取得、現在、1,2,3ヶ月後(ヘッダー用)
-    $self->stash(
-        now_data    => $chang_date->{now_date},
-        next1m_data => $chang_date->{next1m_date},
-        next2m_data => $chang_date->{next2m_date},
-        next3m_data => $chang_date->{next3m_date},
-    );
-
     # テンプレート用bodyのクラス名
     my $class = 'profile';
     $self->stash( class => $class );
+
+    # ログイン確認時に取得したデータ取り出し
+    my $login_data = $self->stash->{login_data};
+
+    # お気に入りリスト admin 非表示 general 表示
+    my $switch_acting
+        = $login_data->{login} eq 'admin'   ? undef
+        : $login_data->{login} eq 'general' ? 1
+        :                                     undef;
+
+    # 入力フォーム以外の値
+    $self->stash(
+        login         => $login_data->{login_name},    # プロフィール名
+        switch_header => $login_data->{switch_header}, # 画面移動ボタン
+        switch_acting => $switch_acting,    # お気に入りリスト表示
+    );
 
     # バリデート用
     $self->stash(
@@ -122,12 +347,6 @@ sub profile {
     # my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
     my @storeinfo_rows;
     $self->stash( storeinfos_ref => \@storeinfo_rows, );
-
-    # プロフィールの入力枠に表示するための値の取得 admin or general
-    # 該当の profile テーブル
-    # ログイン時に _check_login_profile で admin or general , profile は取得
-
-    my $login_data = $self->stash->{login_data};
 
     # my $login_data = +{
     #     login => 'admin' or 'general',
@@ -150,6 +369,7 @@ sub profile {
         # $acting_3 = $actings[2]->id;
     }
 
+    # 入力フォームフィルイン用
     my $params = +{
         id             => $login_data->{login_row}->id,
         login          => $login_data->{login_row}->login,
