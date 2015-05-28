@@ -4,99 +4,87 @@ use warnings;
 use utf8;
 use Time::Piece;
 use Time::Seconds;
+use Yoyakku::Model qw{$teng};
+use Yoyakku::Util qw{switch_header_params};
 use Exporter 'import';
 our @EXPORT_OK = qw{
-    chang_date_6
+    switch_stash_profile
 };
 
-# 午前６時を日付変更線にした日付情報
-sub chang_date_6 {
-    my $now_date = localtime;
+# ログイン成功時に作成する初期値
+sub switch_stash_profile {
+    my $id    = shift;
+    my $table = shift;
 
-    # 今の時刻が0時〜6時未満の場合日付を一日前
-    my $hour = $now_date->hour;
+    # id table ないとき強制終了
+    die 'not id table!: ' if !$id || !$table;
 
-    my $chang_date = $now_date;
+    my $row = $teng->single( $table, +{ id => $id } );
 
-    if ( $hour >= 0 && $hour < 6 ) {
-        $chang_date = $now_date - ONE_DAY * 1;
+    # row ないときは強制終了
+    die 'not row!: ' if !$row;
+
+    # ヘッダー表示用の名前
+    my $table_id = $table . '_id';
+
+    my $profile_row
+        = $teng->single( 'profile', +{ $table_id => $id } );
+
+    my $login_name = $profile_row->nick_name;
+
+    if ($table eq 'admin') {
+        $login_name = q{(admin)} . $login_name;
     }
 
-    my $first_day
-        = localtime->strptime( $chang_date->strftime('%Y-%m-01'),
-        '%Y-%m-%d' );
+    # ヘッダーの切替(初期値 8 ステータスなし、承認されてない)
+    my $switch_header = 8;
 
-    my $last_day
-        = localtime->strptime(
-        $chang_date->strftime( '%Y-%m-' . $chang_date->month_last_day ),
-        '%Y-%m-%d' );
+    # ステータスあり(admin 7, general 6)
+    if ( $row->status ) {
 
-    my $next1m_date
-        = localtime->strptime(
-        $chang_date->strftime( '%Y-%m-' . $chang_date->month_last_day ),
-        '%Y-%m-%d' )
-        + 86400;
+        $switch_header = $table eq 'admin'   ? 7
+                       : $table eq 'general' ? 6
+                       :                       8;
 
-    my $next2m_date
-        = localtime->strptime(
-        $next1m_date->strftime( '%Y-%m-' . $next1m_date->month_last_day ),
-        '%Y-%m-%d' )
-        + 86400;
+        if ($table eq 'admin') {
+            my $storeinfo_row
+                = $teng->single( 'storeinfo', +{ admin_id => $id } );
 
-    my $next3m_date
-        = localtime->strptime(
-        $next2m_date->strftime( '%Y-%m-' . $next2m_date->month_last_day ),
-        '%Y-%m-%d' )
-        + 86400;
+            # 店舗ステータスなし(9)
+            if ( $storeinfo_row->status eq 0 ) {
+                $switch_header = 9;
+            }
+        }
+    }
 
-    my $chang_date_ref = {
-        now_date    => $chang_date,
-        next1m_date => $next1m_date,
-        next2m_date => $next2m_date,
-        next3m_date => $next3m_date,
+    my $header_params = switch_header_params( $switch_header, $login_name );
+
+    my $header_params_hash_ref = +{
+        site_title_link        => $header_params->{site_title_link},
+        header_heading_link    => $header_params->{header_heading_link},
+        header_heading_name    => $header_params->{header_heading_name},
+        header_navi_class_name => $header_params->{header_navi_class_name},
+        header_navi_link_name  => $header_params->{header_navi_link_name},
+        header_navi_row_name   => $header_params->{header_navi_row_name},
     };
 
-    return $chang_date_ref;
+    my $stash_profile = +{
+        login_data => +{    # 初期値表示のため
+            login         => $table,            # ログイン種別識別
+            login_row     => $row,              # ログイン者情報
+            profile_row   => $profile_row,      # プロフィール情報
+            login_name    => $login_name,       # ログイン名
+            switch_header => $switch_header,    # 切替
+        },
+        %{$header_params_hash_ref},             # ヘッダー各値
+    };
+
+    return $stash_profile;
 }
 
 1;
 
 __END__
-
-#====================================================
-# 午前６時を日付変更線にした日付情報
-sub chang_date_6 {
-    my ($now_date) = @_;
-
-    # 今の時刻が0時〜6時未満の場合日付を一日前
-    my $hour = $now_date->hour;
-
-    my $chang_date;
-
-    if ($hour >= 0 and $hour < 6) {
-        $chang_date   = $now_date - ONE_DAY * 1;
-    }
-    else {
-        $chang_date   = $now_date;
-    }
-
-    my $first_day   = localtime->strptime($chang_date->strftime( '%Y-%m-01'                             ),'%Y-%m-%d');
-    my $last_day    = localtime->strptime($chang_date->strftime( '%Y-%m-' . $chang_date->month_last_day ),'%Y-%m-%d');
-    my $next1m_date = localtime->strptime($chang_date->strftime( '%Y-%m-' . $chang_date->month_last_day ),'%Y-%m-%d') + 86400;
-    my $next2m_date = localtime->strptime($next1m_date->strftime('%Y-%m-' . $next1m_date->month_last_day),'%Y-%m-%d') + 86400;
-    my $next3m_date = localtime->strptime($next2m_date->strftime('%Y-%m-' . $next2m_date->month_last_day),'%Y-%m-%d') + 86400;
-
-    my $chang_date_ref = {
-        now_date    => $chang_date,
-        next1m_date => $next1m_date,
-        next2m_date => $next2m_date,
-        next3m_date => $next3m_date,
-    };
-
-    return $chang_date_ref;
-}
-#====================================================
-
 
 =encoding utf8
 
@@ -110,12 +98,18 @@ This documentation referes to Yoyakku::Model::Profile version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-    use Yoyakku::Model::Profile qw{chang_date_6};
+profile コントローラーのロジック API
 
-    # 日付変更線を６時に変更 (日付のオブジェクトで変換される)
-    my $chang_date = chang_date_6();
+=head2 switch_stash_profile
 
-プロフィール関連の API を提供
+    use Yoyakku::Model::Profile qw{switch_stash_profile};
+
+    # スタッシュに引き渡す値を作成
+    my $stash_profile = switch_stash_profile( $id, $table, );
+
+    $self->stash($stash_profile);
+
+profile アクションログイン時の初期値作成
 
 =head1 DEPENDENCIES (依存モジュール)
 
@@ -127,11 +121,15 @@ This documentation referes to Yoyakku::Model::Profile version 0.0.1
 
 =item * L<utf8>
 
-=item * L<Exporter>
-
 =item * L<Time::Piece>
 
 =item * L<Time::Seconds>
+
+=item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Util>
+
+=item * L<Exporter>
 
 =back
 

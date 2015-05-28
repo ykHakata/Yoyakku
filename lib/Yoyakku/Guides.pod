@@ -41,6 +41,8 @@ Yoyakku アプリケーションのクラス階層
 
 =back
 
+=item * L<Yoyakku::Util>
+
 =back
 
 =back
