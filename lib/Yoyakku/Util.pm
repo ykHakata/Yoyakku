@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 use Time::Piece;
 use Time::Seconds;
+use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     chang_date_6
@@ -11,52 +12,38 @@ our @EXPORT_OK = qw{
 };
 
 sub chang_date_6 {
-    my $now_date = localtime;
 
-    # 今の時刻が0時〜6時未満の場合日付を一日前
-    my $hour = $now_date->hour;
+    my $now = localtime;
 
-    my $chang_date = $now_date;
-
-    if ( $hour >= 0 && $hour < 6 ) {
-        $chang_date = $now_date - ONE_DAY * 1;
+    # 今が午前0時から午前6時の間ならば、日付を1日戻す
+    if ( $now->hour >= $HOUR_00 && $now->hour < $HOUR_06 ) {
+        $now = $now - ONE_DAY;
     }
 
-    my $first_day
-        = localtime->strptime( $chang_date->strftime('%Y-%m-01'),
-        '%Y-%m-%d' );
+    my $now_last = $now->strftime('%Y-%m-') . $now->month_last_day;
 
-    my $last_day
-        = localtime->strptime(
-        $chang_date->strftime( '%Y-%m-' . $chang_date->month_last_day ),
-        '%Y-%m-%d' );
+    $now_last = localtime->strptime( $now_last, '%Y-%m-%d' );
 
-    my $next1m_date
-        = localtime->strptime(
-        $chang_date->strftime( '%Y-%m-' . $chang_date->month_last_day ),
-        '%Y-%m-%d' )
-        + 86400;
+    my $next1 = $now_last + ONE_DAY;    # １ヶ月後の月頭
 
-    my $next2m_date
-        = localtime->strptime(
-        $next1m_date->strftime( '%Y-%m-' . $next1m_date->month_last_day ),
-        '%Y-%m-%d' )
-        + 86400;
+    my $next1_last = $next1->strftime('%Y-%m-') . $next1->month_last_day;
 
-    my $next3m_date
-        = localtime->strptime(
-        $next2m_date->strftime( '%Y-%m-' . $next2m_date->month_last_day ),
-        '%Y-%m-%d' )
-        + 86400;
+    $next1_last = localtime->strptime( $next1_last, '%Y-%m-%d' );
 
-    my $chang_date_ref = {
-        now_date    => $chang_date,
-        next1m_date => $next1m_date,
-        next2m_date => $next2m_date,
-        next3m_date => $next3m_date,
+    my $next2 = $next1_last + ONE_DAY;    # ２ヶ月後の月頭
+
+    my $next2_last = $next2->strftime('%Y-%m-') . $next2->month_last_day;
+
+    $next2_last = localtime->strptime( $next2_last, '%Y-%m-%d' );
+
+    my $next3 = $next2_last + ONE_DAY;    # ３ヶ月後の月頭
+
+    return +{
+        now_date    => $now,
+        next1m_date => $next1,
+        next2m_date => $next2,
+        next3m_date => $next3,
     };
-
-    return $chang_date_ref;
 }
 
 sub switch_header_params {
