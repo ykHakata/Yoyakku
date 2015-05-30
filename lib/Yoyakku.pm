@@ -34,6 +34,10 @@ sub startup {
     $r->route('/profile')
         ->to( controller => 'profile', action => 'profile' );
 
+    # システム管理者のオープニング画面
+    $r->route('/mainte_list')
+        ->to( controller => 'mainte', action => 'mainte_list' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

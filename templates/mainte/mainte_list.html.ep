@@ -1,0 +1,27 @@
+% layout 'default';
+% title 'yoyakkuデータ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">データベース管理</h1>
+    <p id="list_today"><%= $today->datetime(T => "  ") %></p>
+    <ul id="list_blueprint">
+      <li><a href="mainte_region_serch">地域区分マスタ-[region]</a></li>
+      <li><a href="mainte_post_serch">郵便番号マスタ-[post]</a></li>
+      <li><a href="mainte_storeinfo_serch">店舗情報　　　-[storeinfo]</a></li>
+      <li><a href="mainte_roominfo_serch">部屋情報設定　-[roominfo]</a></li>
+      <li><a href="mainte_reserve_serch">予約履歴　　　-[reserve]</a></li>
+      <li><a href="mainte_ads_serch">広告　　　　　-[ads]</a></li>
+      <li><a href="mainte_registrant_serch">管理ユーザー　-[admin]</a></li>
+      <li><a href="mainte_general_serch">一般ユーザー　-[general]</a></li>
+      <li><a href="mainte_profile_serch">個人情報　　　-[profile]</a></li>
+    </ul>
+    <div id="blueprint">
+      <img src="./images/base/yoyakku_db_3.jpg" width="" height="" ait="studio search yoyakku" />
+    </div>
+  </div>
+  <!-- !ライトボックス -->
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>
