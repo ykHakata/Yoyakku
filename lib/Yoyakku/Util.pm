@@ -4,12 +4,19 @@ use warnings;
 use utf8;
 use Time::Piece;
 use Time::Seconds;
-use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
+use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06 $SPACE};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     chang_date_6
     switch_header_params
+    now_datetime
 };
+
+sub now_datetime {
+    my $now = localtime;
+
+    return $now->datetime( T => $SPACE );
+}
 
 sub chang_date_6 {
 
@@ -275,6 +282,14 @@ This documentation referes to Yoyakku::Util version 0.0.1
 
 Yoyakku アプリケーションのユーティリティー
 
+=head2 now_datetime
+
+    use Yoyakku::Util qw{now_datetime};
+
+    now_datetime(), # 2015-06-01 23:55:30
+
+今の日時を datatime 形式の文字列で取得
+
 =head2 chang_date_6
 
     use Yoyakku::Util qw{chang_date_6};
@@ -320,8 +335,12 @@ Yoyakku アプリケーションのユーティリティー
 
 =item * L<Time::Seconds>
 
+=item * L<Yoyakku::Model::Master>
+
 =back
 
 =head1 SEE ALSO (参照)
 
 L<Yoyakku::Guides>
+
+=cut
