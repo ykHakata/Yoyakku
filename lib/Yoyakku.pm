@@ -40,11 +40,11 @@ sub startup {
 
     # システム管理者(admin)
     $r->route('/mainte_registrant_serch')
-        ->to( controller => 'mainte', action => 'mainte_registrant_serch' );
+        ->to( controller => 'Mainte::Admin', action => 'mainte_registrant_serch' );
 
     # システム管理者(admin) 新規 編集
     $r->route('/mainte_registrant_new')
-        ->to( controller => 'mainte', action => 'mainte_registrant_new' );
+        ->to( controller => 'Mainte::Admin', action => 'mainte_registrant_new' );
 
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
