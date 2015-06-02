@@ -29,6 +29,8 @@ Yoyakku アプリケーションのクラス階層
 
 =item * L<Yoyakku::Controller::Mainte::Admin>
 
+=item * L<Yoyakku::Controller::Mainte::General>
+
 =back
 
 =item * L<Yoyakku::Controller::Auth>
@@ -46,6 +48,8 @@ Yoyakku アプリケーションのクラス階層
 =over 2
 
 =item * L<Yoyakku::Model::Mainte::Admin>
+
+=item * L<Yoyakku::Model::Mainte::General>
 
 =back
 
