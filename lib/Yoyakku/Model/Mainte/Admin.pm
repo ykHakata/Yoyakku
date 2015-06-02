@@ -2,10 +2,8 @@ package Yoyakku::Model::Mainte::Admin;
 use strict;
 use warnings;
 use utf8;
-# use Time::Piece;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{now_datetime};
-
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_admin_id_rows
@@ -152,30 +150,67 @@ sub writing_admin {
 
 1;
 
+__END__
+
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Model::Mainte - システム管理者用 API
+Yoyakku::Model::Mainte::Admin - admin テーブル管理用 API
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Model::Mainte version 0.0.1
+This documentation referes to Yoyakku::Model::Mainte::Admin version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-Mainte コントローラーのロジック API
+Admin コントローラーのロジック API
 
-=head2 switch_stash_mainte_list
+=head2 check_admin_login_name
 
-    use Yoyakku::Model::Mainte qw{switch_stash_mainte_list};
+    use Yoyakku::Model::Mainte::Admin qw{check_admin_login_name};
 
-    # スタッシュに引き渡す値を作成
-    my $stash_mainte = switch_stash_mainte_list( $id, $table, );
+    # login の値、存在確認、存在しない場合は undef を返却
+    my $check_admin_row
+        = $self->check_admin_login_name( $req->param('login') );
 
-    $self->stash($stash_mainte);
+login の値の重複登録をさけるために利用
 
-Mainte アクションログイン時の初期値作成
+=head2 search_admin_id_rows
+
+    use Yoyakku::Model::Mainte::Admin qw{search_admin_id_rows};
+
+    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
+    my $admin_rows = $self->search_admin_id_rows($admin_id);
+
+    # 指定の id に該当するレコードなき場合 admin 全てのレコード返却
+
+admin テーブル一覧作成時に利用
+
+=head2 search_admin_id_row
+
+    use Yoyakku::Model::Mainte::Admin qw{search_admin_id_row};
+
+    # 指定の id に該当するレコードを row オブジェクト単体で返却
+    my $admin_row = $self->search_admin_id_row( $params->{id} );
+
+    # 指定の id に該当するレコードなき場合エラー発生
+
+admin テーブル修正フォーム表示などに利用
+
+=head2 writing_admin
+
+    use Yoyakku::Model::Mainte::Admin qw{writing_admin};
+
+    # admin テーブル新規レコード作成時
+    $self->writing_admin( 'insert', $params );
+    $self->flash( touroku => '登録完了' );
+
+    # admin テーブルレコード修正時
+    $self->writing_admin( 'update', $params );
+    $self->flash( henkou => '修正完了' );
+
+admin テーブル書込み、新規、修正、両方に対応
 
 =head1 DEPENDENCIES (依存モジュール)
 
@@ -187,7 +222,9 @@ Mainte アクションログイン時の初期値作成
 
 =item * L<utf8>
 
-=item * L<Time::Piece>
+=item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Util>
 
 =item * L<Exporter>
 

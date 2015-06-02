@@ -3,12 +3,12 @@ use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Mainte qw{switch_stash_mainte_list};
 use Exporter 'import';
 our @EXPORT_OK = qw{
-    _check_login_mainte
-    _switch_stash
+    check_login_mainte
+    switch_stash
 };
 
 # ログイン成功時に作成する初期値
-sub _switch_stash {
+sub switch_stash {
     my $self  = shift;
     my $id    = shift;
     my $table = shift;
@@ -21,7 +21,7 @@ sub _switch_stash {
 }
 
 # ログインチェック
-sub _check_login_mainte {
+sub check_login_mainte {
     my $self = shift;
 
     my $login_id = $self->session->{root_id};
@@ -29,7 +29,7 @@ sub _check_login_mainte {
     # セッションないときは終了
     return 1 if !$login_id;
 
-    return $self->_switch_stash( $login_id, 'root' ) if $login_id;
+    return $self->switch_stash( $login_id, 'root' ) if $login_id;
 }
 
 # システム管理のオープニング画面
@@ -37,7 +37,7 @@ sub mainte_list {
     my $self = shift;
 
     # ログイン確認する
-    return $self->redirect_to('/index') if $self->_check_login_mainte();
+    return $self->redirect_to('/index') if $self->check_login_mainte();
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_list';

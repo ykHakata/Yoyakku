@@ -2,18 +2,16 @@ package Yoyakku::Controller::Mainte::Admin;
 use Mojo::Base 'Mojolicious::Controller';
 use FormValidator::Lite;
 use HTML::FillInForm;
-use Yoyakku::Model qw{$teng};
-# use Yoyakku::Util qw{now_datetime};
-use Yoyakku::Controller::Mainte qw{_check_login_mainte _switch_stash};
+use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Admin
     qw{search_admin_id_rows search_admin_id_row writing_admin check_admin_login_name};
 
 # 管理ユーザー(admin) registrant_serch.html.ep
 sub mainte_registrant_serch {
     my $self = shift;
-    # die 'mainte_registrant_serch';
+
     # ログイン確認する
-    return $self->redirect_to('/index') if $self->_check_login_mainte();
+    return $self->redirect_to('/index') if $self->check_login_mainte();
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_registrant_serch';
@@ -38,7 +36,7 @@ sub mainte_registrant_new {
     my $self = shift;
 
     # ログイン確認する
-    return $self->redirect_to('/index') if $self->_check_login_mainte();
+    return $self->redirect_to('/index') if $self->check_login_mainte();
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_registrant_new';
@@ -153,25 +151,83 @@ __END__
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Controller::Mainte - システム管理者機能のコントローラー
+Yoyakku::Controller::Mainte::Admin - admin テーブルのコントローラー
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Controller::Mainte version 0.0.1
+This documentation referes to Yoyakku::Controller::Mainte::Admin version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-システム管理者関連機能のリクエストをコントロール
+システム管理者 adimn 関連機能のリクエストをコントロール
 
-=head2 mainte_list
+=head2 mainte_registrant_serch
 
     リクエスト
-    URL: http:// ... /mainte_list
+    URL: http:// ... /mainte_registrant_serch
     METHOD: GET
 
-    他詳細は調査、実装中
+    リクエスト
+    URL: http:// ... /mainte_registrant_serch
+    METHOD: GET
+    PARAMETERS:
+        id: (指定の数字)
 
-システム管理のオープニング画面
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/mainte/mainte_registrant_serch
+
+    GET リクエストに id が指定された場合該当レコード表示
+    該当レコードなき場合は全てのレコード表示
+
+admin テーブル登録情報の確認、検索
+
+=head2 mainte_registrant_new
+
+    リクエスト
+    URL: http:// ... /mainte_registrant_new
+    METHOD: GET
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/mainte/mainte_registrant_new
+
+    admin テーブルに新規にレコード登録画面
+
+    リクエスト
+    URL: http:// ... /mainte_registrant_serch
+    METHOD: GET
+    PARAMETERS:
+        id: (指定の数字)
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/mainte/mainte_registrant_new
+
+    admin テーブル指定のレコードの修正画面
+
+    リクエスト
+    URL: http:// ... /mainte_registrant_new
+    METHOD: POST
+    PARAMETERS: 
+        id: (自動連番)
+        login: (指定の ASCII 文字)
+        password: (指定の ASCII 文字)
+        status: (0: 未承認, 1: 承認済み, 2: 削除)
+        create_on: (作成日 datetime 形式)
+        modify_on: (修正日 datetime 形式)
+
+    レスポンス (バリデートエラー時)
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/mainte_registrant_new
+
+    レスポンス (レコード書込み終了)
+    URL: http:// ... /mainte_registrant_serch
+
+    POST リクエストに id パラメーター存在しない場合、新規
+    id パラメーター存在する場合、指定レコード更新
+
+admin テーブルに新規レコード追加、既存レコード修正
 
 =head1 DEPENDENCIES (依存モジュール)
 
@@ -187,9 +243,7 @@ This documentation referes to Yoyakku::Controller::Mainte version 0.0.1
 
 =item * L<Yoyakku::Model::Mainte>
 
-=item * L<Yoyakku::Model>
-
-=item * L<Yoyakku::Util>
+=item * L<Yoyakku::Model::Mainte::Admin>
 
 =back
 
