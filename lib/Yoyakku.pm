@@ -46,6 +46,14 @@ sub startup {
     $r->route('/mainte_registrant_new')
         ->to( controller => 'Mainte::Admin', action => 'mainte_registrant_new' );
 
+    # システム管理者(general)
+    $r->route('/mainte_general_serch')
+        ->to( controller => 'Mainte::General', action => 'mainte_general_serch' );
+
+    # システム管理者(general) 新規 編集
+    $r->route('/mainte_general_new')
+        ->to( controller => 'Mainte::General', action => 'mainte_general_new' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

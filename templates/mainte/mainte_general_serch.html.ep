@@ -1,0 +1,56 @@
+% layout 'default';
+% title 'yoyakku登録者データ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">一般ユーザー／テーブル[general]</h1>
+    <div class="input_ads_n">
+      <p>
+      <form  method="get" action="">
+        <span class="input_f"><%= flash('touroku') %></span>
+        <span class="input_f"><%= flash('henkou') %></span>
+        ID番号<input class="input_ads_b" type="text" name="id">
+        <input class="input_ads_b" type="submit" value="検索する">
+        <button class="input_ads_b" type="button"><a href="mainte_general_new">新規作成画面</a></button>
+      </form>
+      </p>
+    <!-- /.input_ads_n --></div>
+    <table id="input_ads_t" border="1">
+      <tr>
+        <td>一般ユーザーID</td>
+        <td>ログイン名</td>
+        <td>パスワード</td>
+        <td>ステータス</td>
+        <td>登録日</td>
+        <td>修正日</td>
+      </tr>
+      <tr>
+        <td>id</td>
+        <td>login</td>
+        <td>password</td>
+        <td>status</td>
+        <td>create_on</td>
+        <td>modify_on</td>
+      </tr>
+      % foreach my $row_ref (@$rows_ref) {
+      <tr>
+        <td><%= $row_ref->id %>
+          <form action="mainte_general_new" method="get">
+          <input type="hidden" name="id" value="<%= $row_ref->id %>">
+          <input type="submit" value="修正">
+          </form>
+        </td>
+        <td><%= $row_ref->login %></td>
+        <td><%= $row_ref->password %></td>
+        <td><%= $row_ref->status %></td>
+        <td><%= $row_ref->create_on %></td>
+        <td><%= $row_ref->modify_on %></td>
+      </tr>
+      % }
+    </table>
+  </div>
+  <!-- !ライトボックス -->
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>
