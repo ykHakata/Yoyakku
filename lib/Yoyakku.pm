@@ -54,6 +54,14 @@ sub startup {
     $r->route('/mainte_general_new')
         ->to( controller => 'Mainte::General', action => 'mainte_general_new' );
 
+    # システム管理者(profile)
+    $r->route('/mainte_profile_serch')
+        ->to( controller => 'Mainte::Profile', action => 'mainte_profile_serch' );
+
+    # システム管理者(profile) 新規 編集
+    $r->route('/mainte_profile_new')
+        ->to( controller => 'Mainte::Profile', action => 'mainte_profile_new' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

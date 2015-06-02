@@ -1,0 +1,107 @@
+% layout 'default';
+% title 'yoyakkuデータベース管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">個人情報／テーブル[profile]</h1>
+    <div class="input_ads_n">
+      <a href="mainte_profile_serch">検索画面にもどる</a>
+    </div>
+    <form action="" method="post">
+    <table id="input_ads_t" border="1">
+      <tr>
+        <th>カラム名</th>
+        <th>項目名</th>
+        <th>入力フォーム</th>
+      </tr>
+      <tr>
+        <td>id</td>
+        <td>個人情報ID</td>
+        <td><input type="text" name="id" value="" readonly></td>
+      </tr>
+      <tr>
+        <td>general_id</td>
+        <td>一般ユーザーID <div class="vali"><%= $general_id %></div> </td>
+        <td>
+          <select name="general_id">
+          <option value="not_selected">選択しない</option>
+          % for my $general_ref (@$generals_ref) {
+            <option value="<%= $general_ref->id %>">
+            <%= $general_ref->id %>--->(<%= $general_ref->login %>)
+            </option>
+          % }
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>admin_id</td>
+        <td>管理ユーザーID <div class="vali"><%= $admin_id %></div> </td>
+        <td>
+          <select name="admin_id">
+          <option value="not_selected">選択しない</option>
+          % for my $admin_ref (@$admins_ref) {
+            <option value="<%= $admin_ref->id %>">
+            <%= $admin_ref->id %>--->(<%= $admin_ref->login %>)
+            </option>
+          % }
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>nick_name</td>
+        <td>ニックネーム <div class="vali"><%= $nick_name %></div> </td>
+        <td> <input type="text" name="nick_name" value=""> </td>
+      </tr>
+      <tr>
+        <td>full_name</td>
+        <td>氏名 <div class="vali"><%= $full_name %></div> </td>
+        <td> <input type="text" name="full_name" value=""> </td>
+      </tr>
+      <tr>
+        <td>phonetic_name</td>
+        <td>ふりがな <div class="vali"><%= $phonetic_name %></div> </td>
+        <td> <input type="text" name="phonetic_name" value=""> </td>
+      </tr>
+      <tr>
+        <td>tel</td>
+        <td>電話番号 <div class="vali"><%= $tel %></div> </td>
+        <td><input type="text" name="tel" value=""></td>
+      </tr>
+      <tr>
+        <td>mail</td>
+        <td>メールアドレス <div class="vali"><%= $mail %></div> </td>
+        <td><input type="text" name="mail" value=""></td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>ステータス</td>
+        <td>
+          <select name="status">
+            <option value="0" >0　未承認</option>
+            <option value="1" >1　承認済み</option>
+            <option value="2" >2　削除</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>create_on</td>
+        <td>登録日</td>
+        <td><input type="text" name="create_on" value="" readonly></td>
+      </tr>
+      <tr>
+        <td>modify_on</td>
+        <td>修正日</td>
+        <td><input type="text" name="modify_on" value="" readonly></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td> <input type="submit" value="登録する"> </td>
+      </tr>
+    </table>
+    </form>
+  </div>
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>

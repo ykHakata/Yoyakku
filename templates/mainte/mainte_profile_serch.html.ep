@@ -1,0 +1,73 @@
+% layout 'default';
+% title 'yoyakku登録者データ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">個人情報／テーブル[profile]</h1>
+    <div class="input_ads_n">
+      <p>
+      <form  method="get" action="">
+        <span class="input_f"><%= flash('touroku') %></span>
+        <span class="input_f"><%= flash('henkou') %></span>
+        ID番号<input class="input_ads_b" type="text" name="profile_id">
+        <input class="input_ads_b" type="submit" value="検索する">
+      </form>
+      </p>
+      <div class="input_ads_b">
+        <a href="mainte_profile_new">新規作成画面</a>
+      </div>
+    </div>
+    <table id="input_ads_t" border="1">
+      <tr>
+        <td>個人情報ID</td>
+        <td>一般ユーザーID</td>
+        <td>管理ユーザーID</td>
+        <td>ニックネーム</td>
+        <td>氏名</td>
+        <td>ふりがな</td>
+        <td>電話番号</td>
+        <td>メールアドレス</td>
+        <td>ステータス</td>
+        <td>登録日</td>
+        <td>修正日</td>
+      </tr>
+      <tr>
+        <td>id</td>
+        <td>general_id</td>
+        <td>admin_id</td>
+        <td>nick_name</td>
+        <td>full_name</td>
+        <td>phonetic_name</td>
+        <td>tel</td>
+        <td>mail</td>
+        <td>status</td>
+        <td>create_on</td>
+        <td>modify_on</td>
+      </tr>
+      % for my $profile_row (@{$profile_rows}) {
+      <tr>
+        <td><%= $profile_row->id %>
+          <form action="mainte_profile_new" method="get">
+          <input type="hidden" name="id" value="<%= $profile_row->id %>">
+          <input type="submit" value="修正">
+          </form>
+        </td>
+        <td><%= $profile_row->general_id %></td>
+        <td><%= $profile_row->admin_id %></td>
+        <td><%= $profile_row->nick_name %></td>
+        <td><%= $profile_row->full_name %></td>
+        <td><%= $profile_row->phonetic_name %></td>
+        <td><%= $profile_row->tel %></td>
+        <td><%= $profile_row->mail %></td>
+        <td><%= $profile_row->status %></td>
+        <td><%= $profile_row->create_on %></td>
+        <td><%= $profile_row->modify_on %></td>
+      </tr>
+      % }
+    </table>
+  </div>
+  <!-- !ライトボックス -->
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>
