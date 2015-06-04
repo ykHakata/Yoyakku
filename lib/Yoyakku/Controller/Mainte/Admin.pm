@@ -209,7 +209,7 @@ admin テーブル登録情報の確認、検索
     リクエスト
     URL: http:// ... /mainte_registrant_new
     METHOD: POST
-    PARAMETERS: 
+    PARAMETERS:
         id: (自動連番)
         login: (指定の ASCII 文字)
         password: (指定の ASCII 文字)
@@ -231,7 +231,7 @@ admin テーブルに新規レコード追加、既存レコード修正
 
 =head1 DEPENDENCIES (依存モジュール)
 
-=over 2
+=over
 
 =item * L<Mojo::Base>
 
@@ -249,6 +249,6 @@ admin テーブルに新規レコード追加、既存レコード修正
 
 =head1 SEE ALSO (参照)
 
-L<Yoyakku::Guides>
+L<Guides>
 
 =cut

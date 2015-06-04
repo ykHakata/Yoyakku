@@ -605,3 +605,43 @@ if (uc $self->req->method eq 'POST') {#post判定する
     return $self->render_text($html, format => 'html');
 }
 };
+
+__END__
+
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+Yoyakku::Controller::Mainte::Profile - Profile テーブルのコントローラー
+
+=head1 VERSION (改定番号)
+
+This documentation referes to Yoyakku::Controller::Mainte::Profile version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+システム管理者 Profile 関連機能のリクエストをコントロール
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojo::Base>
+
+=item * L<Mojolicious::Controller>
+
+=item * L<FormValidator::Lite>
+
+=item * L<HTML::FillInForm>
+
+=item * L<Yoyakku::Model::Mainte>
+
+=item * L<Yoyakku::Model::Mainte::Profile>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Yoyakku::Guides>
+
+=cut

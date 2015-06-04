@@ -214,7 +214,7 @@ admin テーブル書込み、新規、修正、両方に対応
 
 =head1 DEPENDENCIES (依存モジュール)
 
-=over 2
+=over
 
 =item * L<strict>
 
@@ -232,6 +232,6 @@ admin テーブル書込み、新規、修正、両方に対応
 
 =head1 SEE ALSO (参照)
 
-L<Yoyakku::Guides>
+L<Guides>
 
 =cut

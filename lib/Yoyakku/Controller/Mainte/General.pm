@@ -234,7 +234,7 @@ general テーブルに新規レコード追加、既存レコード修正
 
 =head1 DEPENDENCIES (依存モジュール)
 
-=over 2
+=over
 
 =item * L<Mojo::Base>
 
@@ -252,6 +252,6 @@ general テーブルに新規レコード追加、既存レコード修正
 
 =head1 SEE ALSO (参照)
 
-L<Yoyakku::Guides>
+L<Guides>
 
 =cut

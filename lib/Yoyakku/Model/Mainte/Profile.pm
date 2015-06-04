@@ -113,65 +113,19 @@ __END__
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Model::Mainte::General - general テーブル管理用 API
+Yoyakku::Model::Mainte::Profile - Profile テーブル管理用 API
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Model::Mainte::General version 0.0.1
+This documentation referes to Yoyakku::Model::Mainte::Profile version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-General コントローラーのロジック API
-
-=head2 check_general_login_name
-
-    use Yoyakku::Model::Mainte::General qw{check_general_login_name};
-
-    # login の値、存在確認、存在しない場合は undef を返却
-    my $check_general_row
-        = $self->check_general_login_name( $req->param('login') );
-
-login の値の重複登録をさけるために利用
-
-=head2 search_general_id_rows
-
-    use Yoyakku::Model::Mainte::General qw{search_general_id_rows};
-
-    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $general_rows = $self->search_general_id_rows($general_id);
-
-    # 指定の id に該当するレコードなき場合 general 全てのレコード返却
-
-general テーブル一覧作成時に利用
-
-=head2 search_general_id_row
-
-    use Yoyakku::Model::Mainte::General qw{search_general_id_row};
-
-    # 指定の id に該当するレコードを row オブジェクト単体で返却
-    my $general_row = $self->search_general_id_row( $params->{id} );
-
-    # 指定の id に該当するレコードなき場合エラー発生
-
-general テーブル修正フォーム表示などに利用
-
-=head2 writing_general
-
-    use Yoyakku::Model::Mainte::General qw{writing_general};
-
-    # general テーブル新規レコード作成時
-    $self->writing_general( 'insert', $params );
-    $self->flash( touroku => '登録完了' );
-
-    # general テーブルレコード修正時
-    $self->writing_general( 'update', $params );
-    $self->flash( henkou => '修正完了' );
-
-general テーブル書込み、新規、修正、両方に対応
+Profile コントローラーのロジック API
 
 =head1 DEPENDENCIES (依存モジュール)
 
-=over 2
+=over
 
 =item * L<strict>
 
@@ -189,6 +143,6 @@ general テーブル書込み、新規、修正、両方に対応
 
 =head1 SEE ALSO (参照)
 
-L<Yoyakku::Guides>
+L<Guides>
 
 =cut

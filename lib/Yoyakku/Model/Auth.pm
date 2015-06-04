@@ -110,7 +110,7 @@ This documentation referes to Yoyakku::Model::Auth version 0.0.1
 
 =head1 DEPENDENCIES (依存モジュール)
 
-=over 2
+=over
 
 =item * L<strict>
 
@@ -124,4 +124,6 @@ This documentation referes to Yoyakku::Model::Auth version 0.0.1
 
 =head1 SEE ALSO (参照)
 
-L<Yoyakku::Guides>
+L<Guides>
+
+=cut

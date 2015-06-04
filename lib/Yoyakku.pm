@@ -70,3 +70,50 @@ sub startup {
 }
 
 1;
+
+__END__
+
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+Yoyakku - Yoyakku アプリケーション
+
+=head1 VERSION (改定番号)
+
+This documentation referes to Yoyakku version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+Yoyakku アプリケーション
+
+=head2 startup
+
+    #!/usr/bin/env perl
+
+    use strict;
+    use warnings;
+
+    use lib 'lib';
+
+    # Start command line interface for application
+    require Mojolicious::Commands;
+    Mojolicious::Commands->start_app('Yoyakku');
+
+Yoyakku アプリケーションスタート設定
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojo::Base>
+
+=item * L<Mojolicious>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut

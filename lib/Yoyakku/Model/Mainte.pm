@@ -76,7 +76,7 @@ Mainte アクションログイン時の初期値作成
 
 =head1 DEPENDENCIES (依存モジュール)
 
-=over 2
+=over
 
 =item * L<strict>
 
@@ -92,6 +92,6 @@ Mainte アクションログイン時の初期値作成
 
 =head1 SEE ALSO (参照)
 
-L<Yoyakku::Guides>
+L<Guides>
 
 =cut

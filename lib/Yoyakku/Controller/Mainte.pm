@@ -84,7 +84,7 @@ This documentation referes to Yoyakku::Controller::Mainte version 0.0.1
 
 =head1 DEPENDENCIES (依存モジュール)
 
-=over 2
+=over
 
 =item * L<Mojo::Base>
 
@@ -98,6 +98,6 @@ This documentation referes to Yoyakku::Controller::Mainte version 0.0.1
 
 =head1 SEE ALSO (参照)
 
-L<Yoyakku::Guides>
+L<Guides>
 
 =cut

@@ -321,7 +321,7 @@ Yoyakku アプリケーションのユーティリティー
 
 =head1 DEPENDENCIES (依存モジュール)
 
-=over 2
+=over
 
 =item * L<strict>
 
@@ -341,6 +341,6 @@ Yoyakku アプリケーションのユーティリティー
 
 =head1 SEE ALSO (参照)
 
-L<Yoyakku::Guides>
+L<Guides>
 
 =cut

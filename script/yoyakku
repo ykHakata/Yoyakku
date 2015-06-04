@@ -8,3 +8,51 @@ use lib 'lib';
 # Start command line interface for application
 require Mojolicious::Commands;
 Mojolicious::Commands->start_app('Yoyakku');
+
+__END__
+
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+yoyakku - yoyakku アプリケーションスクリプト
+
+=head1 VERSION (改定番号)
+
+This documentation referes to yoyakku version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+Yoyakku アプリケーション
+
+=head2 yoyakku
+
+    # yoyakku web アプリケーションスタート (開発環境)
+
+    carton exec -- morbo script/yoyakku
+
+    # carton を使いインストールしているので carton exec 使用
+
+    # yoyakku テストコード実行 (全体)
+
+    carton exec -- script/yoyakku test
+
+    # yoyakku テストコード実行 (個別)
+
+    carton exec -- script/yoyakku test t/basic.t
+
+Yoyakku アプリケーションスタート各実行コマンド
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojolicious::Commands>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut

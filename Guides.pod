@@ -65,6 +65,8 @@ yoyakku アプリケーション全体のディレクトリ構成
 
 =item L<Yoyakku::Controller::Mainte::General>
 
+=item L<Yoyakku::Controller::Mainte::Profile>
+
 =back
 
 =item L<Yoyakku::Controller::Auth>
@@ -83,15 +85,17 @@ yoyakku アプリケーション全体のディレクトリ構成
 
 =over 4
 
-=item L<Yoyakku::Model::Mainte>
-
 =item L<Yoyakku::Model::Mainte::Admin>
 
 =item L<Yoyakku::Model::Mainte::General>
 
+=item L<Yoyakku::Model::Mainte::Profile>
+
 =back
 
 =item L<Yoyakku::Model::Auth>
+
+=item L<Yoyakku::Model::Mainte>
 
 =item L<Yoyakku::Model::Master>
 
@@ -128,6 +132,14 @@ yoyakku アプリケーション全体のディレクトリ構成
     script      # スクリプトディレクトリ
     +- yoyakku  # アプリケーションスクリプト
 
+    # 起動するファイル、起動のコマンドなどはファイルドキュメント参照
+
+=over
+
+=item L<script::yoyakku>
+
+=back
+
 スクリプトディレクトリ構成
 
 =head2 DIRECTORY SQL
@@ -139,7 +151,8 @@ SQLファイルディレクトリ構成
 
 =head2 DIRECTORY T
 
-    |- t    # テストコードディレクトリ
+    t           # テストコードディレクトリ
+    +- basic.t  # 基本テスト
 
 テストコードディレクトリ構成
 
