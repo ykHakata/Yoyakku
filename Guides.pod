@@ -37,6 +37,52 @@ yoyakku アプリケーション全体のディレクトリ構成
 
 データベースファイルディレクトリ構成
 
+    DATABASE yoyakku
+
+    TABLES
+
+    region:     地域区分マスタ
+    storeinfo:  店舗情報
+    roominfo:   部屋情報設定
+    reserve:    予約履歴
+    ads:        広告
+    admin:      管理ユーザー
+    general:    一般ユーザー
+    profile:    個人情報
+    acting:     代行リスト
+    mailbox:    メール配信用データ
+    post:       郵便番号マスタ
+
+    + - - - - - - - +
+    |   storeinfo   |
+    + - + - + - + - +
+    |   |   |   |   |
+    |   |   |   |   + roominfo
+    |   |   |   |       |
+    |   |   |   |       + reserve
+    |   |   |   |           |   |
+    |   |   |   |           |   + - - - - - - - +
+    |   |   |   |           |                   |
+    |   |   |   |           + general           |
+    |   |   |   |               |   |           |
+    |   |   |   |   + - - - - - +   + profile   |
+    |   |   |   |   |                   |       |
+    |   |   |   + acting                |       |
+    |   |   |                           |       |
+    |   |   |   + - - - - - - - - - - - +       |
+    |   |   |   |                               |
+    |   |   |   |   + - - - - - - - - - - - - - +
+    |   |   |   |   |
+    |   |   + admin +
+    |   |
+    |   + ads
+    |       |
+    |   + - +
+    |   |
+    + region
+
+yoyakku アプリケーションのデータベース構成
+
 =head2 DIRECTORY LIB
 
     lib               # ライブラリディレクトリ
