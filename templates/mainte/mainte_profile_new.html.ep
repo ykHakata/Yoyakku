@@ -7,7 +7,7 @@
     <div class="input_ads_n">
       <a href="mainte_profile_serch">検索画面にもどる</a>
     </div>
-    <form action="" method="post">
+    <form action="mainte_profile_new" method="post">
     <table id="input_ads_t" border="1">
       <tr>
         <th>カラム名</th>
@@ -24,10 +24,10 @@
         <td>一般ユーザーID <div class="vali"><%= $general_id %></div> </td>
         <td>
           <select name="general_id">
-          <option value="not_selected">選択しない</option>
-          % for my $general_ref (@$generals_ref) {
-            <option value="<%= $general_ref->id %>">
-            <%= $general_ref->id %>--->(<%= $general_ref->login %>)
+          <option value="">選択しない</option>
+          % for my $general_row (@{$general_rows}) {
+            <option value="<%= $general_row->id %>">
+            <%= $general_row->id %>--->(<%= $general_row->login %>)
             </option>
           % }
           </select>
@@ -38,10 +38,10 @@
         <td>管理ユーザーID <div class="vali"><%= $admin_id %></div> </td>
         <td>
           <select name="admin_id">
-          <option value="not_selected">選択しない</option>
-          % for my $admin_ref (@$admins_ref) {
-            <option value="<%= $admin_ref->id %>">
-            <%= $admin_ref->id %>--->(<%= $admin_ref->login %>)
+          <option value="">選択しない</option>
+          % for my $admin_row (@{$admin_rows}) {
+            <option value="<%= $admin_row->id %>">
+            <%= $admin_row->id %>--->(<%= $admin_row->login %>)
             </option>
           % }
           </select>
