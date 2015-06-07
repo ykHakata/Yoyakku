@@ -206,3 +206,19 @@ CREATE TABLE post(                          -- 郵便番号マスタ
     create_on       TEXT,                   -- 登録日
     modify_on       TEXT                    -- 修正日
 );
+
+
+CREATE TABLE reserve(                                   -- 予約履歴
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 予約ID
+    roominfo_id     INTEGER,                            -- 部屋情報ID
+    getstarted_on   TEXT,                               -- 利用開始日時
+    enduse_on       TEXT,                               -- 利用終了日時
+    useform         TEXT,                               -- 利用形態名
+    message         TEXT,                               -- 伝言板
+    general_id      INTEGER,                            -- 一般ユーザーID
+    admin_id        INTEGER,                            -- 管理ユーザーID
+    tel             TEXT,                               -- 電話番号
+    status          INTEGER,                            -- ステータス
+    create_on       TEXT,                               -- 登録日
+    modify_on       TEXT                                -- 修正日
+);

@@ -1,0 +1,76 @@
+% layout 'default';
+% title 'yoyakku登録者データ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+  <h1 class="input_ads">予約履歴／テーブル[reserve]</h1>
+  <div class="input_ads_n">
+    <p>
+    <form  method="get" action="">
+      <span class="input_f"><%= flash('touroku') %></span>
+      <span class="input_f"><%= flash('henkou') %></span>
+      ID番号<input class="input_ads_b" type="text" name="reserve_id">
+      <input class="input_ads_b" type="submit" value="検索する">
+    </form>
+    </p>
+    <div class="input_ads_b">
+      <a href="mainte_reserve_new">新規作成画面</a>
+    </div>
+  </div>
+  <table id="input_ads_t" border="1">
+    <tr>
+      <td>予約ID</td>
+      <td>部屋情報ID</td>
+      <td>利用開始日時</td>
+      <td>利用終了日時</td>
+      <td>利用形態名</td>
+      <td>伝言板</td>
+      <td>一般ユーザーID</td>
+      <td>管理ユーザーID</td>
+      <td>電話番号</td>
+      <td>ステータス</td>
+      <td>登録日</td>
+      <td>修正日</td>
+    </tr>
+    <tr>
+      <td>id</td>
+      <td>roominfo_id</td>
+      <td>getstarted_on</td>
+      <td>enduse_on</td>
+      <td>useform</td>
+      <td>message</td>
+      <td>general_id</td>
+      <td>admin_id</td>
+      <td>tel</td>
+      <td>status</td>
+      <td>create_on</td>
+      <td>modify_on</td>
+    </tr>
+    % for my $reserve_row (@{$reserve_rows}) {
+    <tr>
+      <td><%= $reserve_row->id %>
+        <form action="mainte_reserve_new" method="get">
+          <input type="hidden" name="id" value="<%= $reserve_row->id %>">
+          <input type="submit" value="修正">
+        </form>
+      </td>
+      <td><%= $reserve_row->roominfo_id %></td>
+      <td><%= $reserve_row->getstarted_on %></td>
+      <td><%= $reserve_row->enduse_on %></td>
+      <td><%= $reserve_row->useform %></td>
+      <td><%= $reserve_row->message %></td>
+      <td><%= $reserve_row->general_id %></td>
+      <td><%= $reserve_row->admin_id %></td>
+      <td><%= $reserve_row->tel %></td>
+      <td><%= $reserve_row->status %></td>
+      <td><%= $reserve_row->create_on %></td>
+      <td><%= $reserve_row->modify_on %></td>
+    </tr>
+    % }
+  </table>
+  </div>
+  <!-- !ライトボックス -->
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>
