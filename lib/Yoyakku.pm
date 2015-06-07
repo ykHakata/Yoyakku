@@ -62,6 +62,14 @@ sub startup {
     $r->route('/mainte_profile_new')
         ->to( controller => 'Mainte::Profile', action => 'mainte_profile_new' );
 
+    # システム管理者(storeinfo)
+    $r->route('/mainte_storeinfo_serch')
+        ->to( controller => 'Mainte::Storeinfo', action => 'mainte_storeinfo_serch' );
+
+    # システム管理者(storeinfo) 新規 編集
+    $r->route('/mainte_storeinfo_new')
+        ->to( controller => 'Mainte::Storeinfo', action => 'mainte_storeinfo_new' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

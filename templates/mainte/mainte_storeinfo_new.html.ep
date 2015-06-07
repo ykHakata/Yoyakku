@@ -1,0 +1,126 @@
+% layout 'default';
+% title 'yoyakkuデータベース管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">店舗情報／テーブル[storeinfo]</h1>
+    <div class="input_ads_n">
+      <a href="mainte_storeinfo_serch">検索画面にもどる</a>
+    </div>
+    <form action="mainte_storeinfo_new" method="post">
+    <table id="input_ads_t" border="1">
+      <tr>
+        <th>カラム名</th>
+        <th>項目名</th>
+        <th>入力フォーム</th>
+      </tr>
+      <tr>
+        <td>id</td>
+        <td>店舗ID</td>
+        <td><input type="text" name="id" value="" readonly></td>
+      </tr>
+      <tr>
+        <td>region_id</td>
+        <td>地域区分ID</td>
+        <td><input type="text" name="region_id" value="" readonly></td>
+      </tr>
+      <tr>
+        <td>admin_id</td>
+        <td>管理ユーザーID</td>
+        <td><input type="text" name="admin_id" value="" readonly></td>
+      </tr>
+      <tr>
+        <td>name</td>
+        <td>店舗名<div class="vali"><%= $name %></div></td>
+        <td><input type="text" name="name" value=""></td>
+      </tr>
+      <tr>
+        <td>icon</td>
+        <td>店舗アイコン</td>
+        <td><input type="file" name="icon" value=""></td>
+      </tr>
+      <tr>
+        <td>post</td>
+        <td>住所郵便<div class="vali"><%= $post %></div></td>
+        <td>
+          <input type="text" name="post" value=""><br />
+          -(ハイフン)なし、半角数字６桁入力<br />
+          <input type="submit" name="kensaku" value="検索する">
+        </td>
+      </tr>
+      <tr>
+        <td>state</td>
+        <td>住所都道府県<div class="vali"><%= $state %></div></td>
+        <td><input type="text" name="state" value=""></td>
+      </tr>
+      <tr>
+        <td>cities</td>
+        <td>住所市町村<div class="vali"><%= $cities %></div></td>
+        <td><input type="text" name="cities" value=""></td>
+      </tr>
+      <tr>
+        <td>addressbelow</td>
+        <td>住所以下<div class="vali"><%= $addressbelow %></div></td>
+        <td><input type="text" name="addressbelow" value=""></td>
+      </tr>
+      <tr>
+        <td>tel</td>
+        <td>電話番号<div class="vali"><%= $tel %></div></td>
+        <td><input type="text" name="tel" value=""></td>
+      </tr>
+      <tr>
+        <td>mail</td>
+        <td>メールアドレス<div class="vali"><%= $mail %></div></td>
+        <td><input type="text" name="mail" value=""></td>
+      </tr>
+      <tr>
+        <td>remarks</td>
+        <td>店舗備考欄<div class="vali"><%= $remarks %></div></td>
+        <td><input type="text" name="remarks" value=""></td>
+      </tr>
+      <tr>
+        <td>url</td>
+        <td>店舗リンク先<div class="vali"><%= $url %></div></td>
+        <td>
+          <input type="text" name="url" value=""><br />
+          httpから初めてください<br />
+        </td>
+      </tr>
+      <tr>
+        <td>locationinfor</td>
+        <td>地図位置情報<div class="vali"><%= $locationinfor %></div></td>
+        <td><input type="text" name="locationinfor" value=""></td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>ステータス<div class="vali"><%= $status %></div></td>
+        <td>
+          <select name="status">
+            <option value="0">0 web公開</option>
+            <option value="1">1 web非公開</option>
+            <option value="2">2 削除</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>create_on</td>
+        <td>登録日</td>
+        <td><input type="text" name="create_on" value="" readonly></td>
+      </tr>
+      <tr>
+        <td>modify_on</td>
+        <td>修正日</td>
+        <td><input type="text" name="modify_on" value="" readonly></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td><input type="submit" value="登録する"></td>
+      </tr>
+    </table>
+    </form>
+  </div>
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>

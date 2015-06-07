@@ -113,6 +113,8 @@ yoyakku アプリケーションのデータベース構成
 
 =item L<Yoyakku::Controller::Mainte::Profile>
 
+=item L<Yoyakku::Controller::Mainte::Storeinfo>
+
 =back
 
 =item L<Yoyakku::Controller::Auth>
@@ -136,6 +138,8 @@ yoyakku アプリケーションのデータベース構成
 =item L<Yoyakku::Model::Mainte::General>
 
 =item L<Yoyakku::Model::Mainte::Profile>
+
+=item L<Yoyakku::Model::Mainte::Storeinfo>
 
 =back
 

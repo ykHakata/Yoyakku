@@ -139,6 +139,8 @@ VALUES
 ('','2','まつかた松方','松方正義','まつかた まさよし','098-000-0997','foo@gmail.com','1','2015-05-23','2015-05-23'),
 ('','3','おおくま大隈','大隈重信','おおくま しげのぶ','098-000-0997','foo@gmail.com','1','2015-05-23','2015-05-23');
 
+DROP TABLE storeinfo;
+
 CREATE TABLE storeinfo (                                    -- 店舗情報
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,  -- 店舗ID
     region_id           INTEGER,                            -- 地域区分ID
@@ -158,6 +160,8 @@ CREATE TABLE storeinfo (                                    -- 店舗情報
     create_on           TEXT,                               -- 登録日
     modify_on           TEXT                                -- 修正日
 );
+
+DROP TABLE roominfo;
 
 CREATE TABLE roominfo(                                      -- 部屋情報設定
     id                   INTEGER PRIMARY KEY AUTOINCREMENT, -- 部屋情報ID
@@ -179,4 +183,26 @@ CREATE TABLE roominfo(                                      -- 部屋情報設�
     status               INTEGER,                           -- ステータス
     create_on            TEXT,                              -- 登録日
     modify_on            TEXT                               -- 修正日
+);
+
+DROP TABLE post;
+
+CREATE TABLE post(                          -- 郵便番号マスタ
+    post_id         INTEGER  PRIMARY KEY,   -- 郵便番号
+    region_id       INTEGER,                -- 地域区分ID
+    post_id_old     INTEGER,                -- (旧)郵便番号
+    state_re        TEXT,                   -- 都道府県名(よみ)
+    cities_re       TEXT,                   -- 市区町村名(よみ)
+    town_re         TEXT,                   -- 町域名(よみ)
+    state           TEXT,                   -- 都道府県名
+    cities          TEXT,                   -- 市区町村名
+    town            TEXT,                   -- 町域名
+    more_info1      INTEGER,                -- 一町域が二以上の郵便番号で表される場合の表示
+    more_info2      INTEGER,                -- 小字毎に番地が起番されている町域の表示
+    more_info3      INTEGER,                -- 丁目を有する町域の場合の表示
+    more_info4      INTEGER,                -- 一つの郵便番号で二以上の町域を表す場合の表示
+    more_info5      INTEGER,                -- 更新の表示
+    more_info6      INTEGER,                -- 変更理由
+    create_on       TEXT,                   -- 登録日
+    modify_on       TEXT                    -- 修正日
 );

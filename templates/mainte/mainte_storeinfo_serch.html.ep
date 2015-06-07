@@ -1,0 +1,98 @@
+% layout 'default';
+% title 'yoyakku登録者データ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+  <h1 class="input_ads">店舗情報／テーブル[storeinfo]</h1>
+  <div class="input_ads_n">
+    <p>
+    <form  method="get" action="mainte_storeinfo_serch">
+      <span class="input_f"><%= flash('touroku') %></span>
+      <span class="input_f"><%= flash('henkou') %></span>
+      ID番号<input class="input_ads_b" type="text" name="storeinfo_id">
+      <input class="input_ads_b" type="submit" value="検索する">
+    </form>
+    </p>
+  </div>
+  <table id="input_ads_t" border="1">
+    <tr>
+      <td>店舗ID</td>
+      <td>地域区分ID</td>
+      <td>管理ユーザーID</td>
+      <td>店舗名</td>
+      <td>店舗アイコン</td>
+      <td>住所郵便</td>
+      <td>住所都道府県</td>
+      <td>住所市町村</td>
+      <td>住所以下</td>
+      <td>電話番号</td>
+      <td>メールアドレス</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td colspan="2">店舗備考欄</td>
+      <td colspan="2">店舗リンク先</td>
+      <td colspan="3">地図位置情報</td>
+      <td>ステータス</td>
+      <td>登録日</td>
+      <td>修正日</td>
+    </tr>
+    <tr>
+      <td>id</td>
+      <td>region_id</td>
+      <td>admin_id</td>
+      <td>name</td>
+      <td>icon</td>
+      <td>post</td>
+      <td>state</td>
+      <td>cities</td>
+      <td>addressbelow</td>
+      <td>tel</td>
+      <td>mail</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td colspan="2">remarks</td>
+      <td colspan="2">url</td>
+      <td colspan="3">locationinfor</td>
+      <td>status</td>
+      <td>create_on</td>
+      <td>modify_on</td>
+    </tr>
+    % for my $storeinfo_row (@{$storeinfo_rows}) {
+    <tr>
+      <td><%= $storeinfo_row->id %>
+      <form action="mainte_storeinfo_new" method="get">
+        <input type="hidden" name="id" value="<%= $storeinfo_row->id %>">
+        <input type="submit" value="修正">
+      </form>
+      </td>
+      <td><%= $storeinfo_row->region_id %></td>
+      <td><%= $storeinfo_row->admin_id %></td>
+      <td><%= $storeinfo_row->name %></td>
+      <td><%= $storeinfo_row->icon %></td>
+      <td><%= $storeinfo_row->post %></td>
+      <td><%= $storeinfo_row->state %></td>
+      <td><%= $storeinfo_row->cities %></td>
+      <td><%= $storeinfo_row->addressbelow %></td>
+      <td><%= $storeinfo_row->tel %></td>
+      <td><%= $storeinfo_row->mail %></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td colspan="2"><%= $storeinfo_row->remarks %></td>
+      <td colspan="2"><%= $storeinfo_row->url %></td>
+      <td colspan="3"><%= $storeinfo_row->locationinfor %></td>
+      <td><%= $storeinfo_row->status %></td>
+      <td><%= $storeinfo_row->create_on %></td>
+      <td><%= $storeinfo_row->modify_on %></td>
+    </tr>
+    <tr id="line"><td colspan="11"></td></tr>
+    % }
+  </table>
+  </div>
+  <!-- !ライトボックス -->
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>
