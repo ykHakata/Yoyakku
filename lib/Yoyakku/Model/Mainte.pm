@@ -4,10 +4,75 @@ use warnings;
 use utf8;
 use Time::Piece;
 use Yoyakku::Util qw{switch_header_params};
+use Yoyakku::Model qw{$teng};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     switch_stash_mainte_list
+    search_id_single_or_all_rows
+    get_single_row_search_id
+    writing_db
 };
+
+# データベースへの書き込み
+sub writing_db {
+    my $table     = shift;
+    my $type      = shift;
+    my $params    = shift;
+    my $update_id = shift;
+
+    my $insert_row;
+
+    if ( $type eq 'insert' ) {
+
+        $insert_row = $teng->insert( $table, $params, );
+
+    }
+    elsif ( $type eq 'update' ) {
+
+        $insert_row = $teng->single( $table, +{ id => $update_id }, );
+
+        $insert_row->update($params);
+    }
+
+    die 'not $insert_row' if !$insert_row;
+
+    return;
+}
+
+# レコード更新の為の情報取得
+sub get_single_row_search_id {
+    my $table     = shift;
+    my $search_id = shift;
+
+    my $row = $teng->single( $table, +{ id => $search_id, }, );
+
+    die 'not row!!' if !$row;
+
+    return $row;
+}
+
+# テーブル一覧表示の為の検索
+sub search_id_single_or_all_rows {
+    my $table     = shift;
+    my $search_id = shift;
+
+    my @rows;
+
+    if ( defined $search_id ) {
+        @rows = $teng->search( $table, +{ id => $search_id, }, );
+        if ( !scalar @rows ) {
+
+            # id 検索しないときはテーブルの全てを出力
+            @rows = $teng->search( $table, +{}, );
+        }
+    }
+    else {
+        # id 検索しないときはテーブルの全てを出力
+        @rows = $teng->search( $table, +{}, );
+    }
+
+    return \@rows;
+}
 
 # ログイン成功時に作成する初期値
 sub switch_stash_mainte_list {

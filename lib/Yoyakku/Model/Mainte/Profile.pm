@@ -3,6 +3,11 @@ use strict;
 use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
+use Yoyakku::Model::Mainte qw{
+    search_id_single_or_all_rows
+    get_single_row_search_id
+    writing_db
+};
 use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
@@ -70,35 +75,14 @@ sub search_profile_id_rows {
     my $self       = shift;
     my $profile_id = shift;
 
-    my @profile_rows;
-
-    if ( defined $profile_id ) {
-        @profile_rows = $teng->search( 'profile', +{ id => $profile_id, }, );
-        if ( !scalar @profile_rows ) {
-
-            # id 検索しないときはテーブルの全てを出力
-            @profile_rows = $teng->search( 'profile', +{}, );
-        }
-    }
-    else {
-        # id 検索しないときはテーブルの全てを出力
-        @profile_rows = $teng->search( 'profile', +{}, );
-    }
-
-    return \@profile_rows;
+    return search_id_single_or_all_rows( 'profile', $profile_id );
 }
 
 sub search_profile_id_row {
     my $self       = shift;
     my $profile_id = shift;
 
-    die 'not $profile_id!!' if !$profile_id;
-
-    my $profile_row = $teng->single( 'profile', +{ id => $profile_id, }, );
-
-    die 'not $profile_row!!' if !$profile_row;
-
-    return $profile_row;
+    return get_single_row_search_id( 'profile', $profile_id );
 }
 
 sub writing_profile {
@@ -106,7 +90,7 @@ sub writing_profile {
     my $type   = shift;
     my $params = shift;
 
-    my $create_data_profile = +{
+    my $create_data = +{
         general_id    => $params->{general_id} || undef,
         admin_id      => $params->{admin_id} || undef,
         nick_name     => $params->{nick_name},
@@ -119,26 +103,8 @@ sub writing_profile {
         modify_on     => now_datetime(),
     };
 
-    my $insert_profile_row;
-
-    if ($type eq 'insert') {
-
-        $insert_profile_row = $teng->insert( 'profile', $create_data_profile, );
-
-    }
-    elsif ($type eq 'update') {
-
-        $insert_profile_row
-            = $teng->single( 'profile', +{ id => $params->{id} }, );
-
-        $insert_profile_row->update($create_data_profile);
-    }
-
-    die 'not $insert_profile_row' if !$insert_profile_row;
-
-    return;
+    return writing_db( 'profile', $type, $create_data, $params->{id} );
 }
-
 
 1;
 
@@ -246,6 +212,8 @@ profile テーブル書込み、新規、修正、両方に対応
 =item * L<utf8>
 
 =item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
 

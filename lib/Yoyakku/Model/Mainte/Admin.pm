@@ -3,6 +3,10 @@ use strict;
 use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
+use Yoyakku::Model::Mainte qw{
+    search_id_single_or_all_rows
+    get_single_row_search_id
+};
 use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
@@ -25,35 +29,14 @@ sub search_admin_id_rows {
     my $self     = shift;
     my $admin_id = shift;
 
-    my @admin_rows;
-
-    if ( defined $admin_id ) {
-        @admin_rows = $teng->search( 'admin', +{ id => $admin_id, }, );
-        if ( !scalar @admin_rows ) {
-
-            # id 検索しないときはテーブルの全てを出力
-            @admin_rows = $teng->search( 'admin', +{}, );
-        }
-    }
-    else {
-        # id 検索しないときはテーブルの全てを出力
-        @admin_rows = $teng->search( 'admin', +{}, );
-    }
-
-    return \@admin_rows;
+    return search_id_single_or_all_rows( 'admin', $admin_id );
 }
 
 sub search_admin_id_row {
     my $self     = shift;
     my $admin_id = shift;
 
-    die 'not $admin_id!!' if !$admin_id;
-
-    my $admin_row = $teng->single( 'admin', +{ id => $admin_id, }, );
-
-    die 'not $admin_row!!' if !$admin_row;
-
-    return $admin_row;
+    return get_single_row_search_id( 'admin', $admin_id );
 }
 
 sub writing_admin {
@@ -223,6 +206,8 @@ admin テーブル書込み、新規、修正、両方に対応
 =item * L<utf8>
 
 =item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
 

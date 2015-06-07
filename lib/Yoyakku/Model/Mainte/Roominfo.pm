@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
+use Yoyakku::Model::Mainte qw{get_single_row_search_id writing_db};
 use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
@@ -68,13 +69,7 @@ sub search_roominfo_id_row {
     my $self        = shift;
     my $roominfo_id = shift;
 
-    die 'not $roominfo_id!!' if !$roominfo_id;
-
-    my $roominfo_row = $teng->single( 'roominfo', +{ id => $roominfo_id, }, );
-
-    die 'not $roominfo_row!!' if !$roominfo_row;
-
-    return $roominfo_row;
+    return get_single_row_search_id( 'roominfo', $roominfo_id );
 }
 
 sub writing_roominfo {
@@ -98,7 +93,7 @@ sub writing_roominfo {
         $params->{endingtime_on} .= ":00";
     }
 
-    my $create_data_roominfo = +{
+    my $create_data = +{
         storeinfo_id      => $params->{storeinfo_id} || undef,
         name              => $params->{name},
         starttime_on      => $params->{starttime_on},
@@ -119,19 +114,10 @@ sub writing_roominfo {
         modify_on         => now_datetime(),
     };
 
-    my $insert_roominfo_row;
+    # update 以外は禁止
+    die 'update only' if !$type || ( $type && $type ne 'update' );
 
-    if ( $type eq 'update' ) {
-
-        $insert_roominfo_row
-            = $teng->single( 'roominfo', +{ id => $params->{id} }, );
-
-        $insert_roominfo_row->update($create_data_roominfo);
-    }
-
-    die 'not $insert_roominfo_row' if !$insert_roominfo_row;
-
-    return;
+    return writing_db( 'roominfo', $type, $create_data, $params->{id} );
 }
 
 1;
@@ -243,6 +229,8 @@ rentalunit, 貸出単位の指定バリデート
 =item * L<utf8>
 
 =item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
 

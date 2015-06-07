@@ -3,6 +3,11 @@ use strict;
 use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
+use Yoyakku::Model::Mainte qw{
+    search_id_single_or_all_rows
+    get_single_row_search_id
+    writing_db
+};
 use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
@@ -41,37 +46,14 @@ sub search_storeinfo_id_rows {
     my $self         = shift;
     my $storeinfo_id = shift;
 
-    my @storeinfo_rows;
-
-    if ( defined $storeinfo_id ) {
-        @storeinfo_rows
-            = $teng->search( 'storeinfo', +{ id => $storeinfo_id, }, );
-        if ( !scalar @storeinfo_rows ) {
-
-            # id 検索しないときはテーブルの全てを出力
-            @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
-        }
-    }
-    else {
-        # id 検索しないときはテーブルの全てを出力
-        @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
-    }
-
-    return \@storeinfo_rows;
+    return search_id_single_or_all_rows( 'storeinfo', $storeinfo_id );
 }
 
 sub search_storeinfo_id_row {
     my $self         = shift;
     my $storeinfo_id = shift;
 
-    die 'not $storeinfo_id!!' if !$storeinfo_id;
-
-    my $storeinfo_row
-        = $teng->single( 'storeinfo', +{ id => $storeinfo_id, }, );
-
-    die 'not $storeinfo_row!!' if !$storeinfo_row;
-
-    return $storeinfo_row;
+    return get_single_row_search_id( 'storeinfo', $storeinfo_id );
 }
 
 sub writing_storeinfo {
@@ -79,7 +61,7 @@ sub writing_storeinfo {
     my $type   = shift;
     my $params = shift;
 
-    my $create_data_storeinfo = +{
+    my $create_data = +{
         region_id     => $params->{region_id} || undef,
         admin_id      => $params->{admin_id} || undef,
         name          => $params->{name},
@@ -98,19 +80,10 @@ sub writing_storeinfo {
         modify_on     => now_datetime(),
     };
 
-    my $insert_storeinfo_row;
+    # update 以外は禁止
+    die 'update only' if !$type || ( $type && $type ne 'update' );
 
-    if ( $type eq 'update' ) {
-
-        $insert_storeinfo_row
-            = $teng->single( 'storeinfo', +{ id => $params->{id} }, );
-
-        $insert_storeinfo_row->update($create_data_storeinfo);
-    }
-
-    die 'not $insert_storeinfo_row' if !$insert_storeinfo_row;
-
-    return;
+    return writing_db( 'storeinfo', $type, $create_data, $params->{id} );
 }
 
 
@@ -197,6 +170,8 @@ storeinfo テーブル書込み、修正に対応
 =item * L<utf8>
 
 =item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
 
