@@ -142,69 +142,95 @@ __END__
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Model::Mainte::Storeinfo - storeinfo テーブル管理用 API
+Yoyakku::Model::Mainte::Roominfo - storeinfo テーブル管理用 API
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Model::Mainte::Storeinfo version 0.0.1
+This documentation referes to Yoyakku::Model::Mainte::Roominfo version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-Storeinfo コントローラーのロジック API
+Roominfo コントローラーのロジック API
 
-=head2 search_zipcode_for_address
+=head2 search_storeinfo_id_for_roominfo_rows
 
-    use Yoyakku::Model::Mainte::Storeinfo qw{search_zipcode_for_address};
+    use Yoyakku::Model::Mainte::Roominfo
+        qw{search_storeinfo_id_for_roominfo_rows};
 
-    # 郵便番号から住所検索のアクション時
-    if ( $params->{kensaku} && $params->{kensaku} eq '検索する' ) {
-
-        my $address_params
-            = $self->search_zipcode_for_address( $params->{post} );
-
-        $params->{region_id} = $address_params->{region_id};
-        $params->{post}      = $address_params->{post};
-        $params->{state}     = $address_params->{state};
-        $params->{cities}    = $address_params->{cities};
-
-        return $self->_render_storeinfo($params);
-    }
-
-    # 該当の住所なき場合、各項目は undef を返却
-
-郵便番号から住所を検索、値を返却
-
-=head2 search_storeinfo_id_rows
-
-    use Yoyakku::Model::Mainte::Storeinfo qw{search_storeinfo_id_rows};
+    # id検索時のアクション (該当の店舗を検索)
+    my $storeinfo_id = $self->param('storeinfo_id');
 
     # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $storeinfo_rows = $self->search_storeinfo_id_rows($storeinfo_id);
+    my $roominfo_rows
+        = $self->search_storeinfo_id_for_roominfo_rows($storeinfo_id);
 
-    # 指定の id に該当するレコードなき場合 storeinfo 全てのレコード返却
+    # storeinfo ごとに該当する roominfo レコードを検索
+    # 指定の id に該当するレコードなき場合 roominfo 全てのレコード返却
 
-storeinfo テーブル一覧作成時に利用
+roominfo テーブル一覧作成時に利用
 
-=head2 search_storeinfo_id_row
+=head2 search_roominfo_id_row
 
-    use Yoyakku::Model::Mainte::Storeinfo qw{search_storeinfo_id_row};
+    use Yoyakku::Model::Mainte::Roominfo qw{search_roominfo_id_row};
 
     # 指定の id に該当するレコードを row オブジェクト単体で返却
-    my $storeinfo_row = $self->search_storeinfo_id_row( $params->{id} );
+    my $roominfo_row = $self->search_roominfo_id_row( $params->{id} );
 
     # 指定の id に該当するレコードなき場合エラー発生
 
-storeinfo テーブル修正フォーム表示などに利用
+roominfo テーブル修正フォーム表示などに利用
 
-=head2 writing_storeinfo
+=head2 writing_roominfo
 
-    use Yoyakku::Model::Mainte::Storeinfo qw{writing_storeinfo};
+    use Yoyakku::Model::Mainte::Roominfo qw{writing_roominfo};
 
-    # storeinfo テーブルレコード修正時
-    $self->writing_storeinfo( 'update', $params );
+    # roominfo テーブルレコード修正時
+    $self->writing_roominfo( 'update', $params );
     $self->flash( henkou => '修正完了' );
 
-storeinfo テーブル書込み、修正に対応
+roominfo テーブル書込み、修正に対応
+
+=head2 check_start_and_end_on
+
+    use Yoyakku::Model::Mainte::Roominfo qw{check_start_and_end_on};
+
+    # starttime_on, endingtime_on, 営業時間のバリデート
+    my $check_start_and_end_msg = $self->check_start_and_end_on(
+        $params->{starttime_on},
+        $params->{endingtime_on},
+    );
+
+    # 入力値が不適切な場合はメッセージ出力
+    # 合格時は undef を返却
+
+    if ($check_start_and_end_msg) { # '開始時刻より遅くしてください'
+
+        $self->stash->{endingtime_on} = $check_start_and_end_msg;
+        return $self->_render_roominfo($params);
+    }
+
+starttime_on, endingtime_on, 営業時間の時間指定の確認
+
+=head2 check_rentalunit
+
+    use Yoyakku::Model::Mainte::Roominfo qw{check_rentalunit};
+
+    # starttime_on, endingtime_on, rentalunit, 貸出単位のバリデート
+    my $check_rentalunit_msg = $self->check_rentalunit(
+        $params->{starttime_on},
+        $params->{endingtime_on},
+        $params->{rentalunit},
+    );
+
+    # 入力値が不適切な場合はメッセージ出力
+    # 合格時は undef を返却
+
+    if ($check_rentalunit_msg) { # '営業時間が割り切れません'
+        $self->stash->{rentalunit} = $check_rentalunit_msg;
+        return $self->_render_roominfo($params);
+    }
+
+rentalunit, 貸出単位の指定バリデート
 
 =head1 DEPENDENCIES (依存モジュール)
 

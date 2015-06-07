@@ -113,6 +113,8 @@ yoyakku アプリケーションのデータベース構成
 
 =item L<Yoyakku::Controller::Mainte::Profile>
 
+=item L<Yoyakku::Controller::Mainte::Roominfo>
+
 =item L<Yoyakku::Controller::Mainte::Storeinfo>
 
 =back
@@ -138,6 +140,8 @@ yoyakku アプリケーションのデータベース構成
 =item L<Yoyakku::Model::Mainte::General>
 
 =item L<Yoyakku::Model::Mainte::Profile>
+
+=item L<Yoyakku::Model::Mainte::Roominfo>
 
 =item L<Yoyakku::Model::Mainte::Storeinfo>
 
