@@ -70,6 +70,14 @@ sub startup {
     $r->route('/mainte_storeinfo_new')
         ->to( controller => 'Mainte::Storeinfo', action => 'mainte_storeinfo_new' );
 
+    # システム管理者(roominfo)
+    $r->route('/mainte_roominfo_serch')
+        ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_serch' );
+
+    # システム管理者(roominfo) 新規 編集
+    $r->route('/mainte_roominfo_new')
+        ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_new' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

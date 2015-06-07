@@ -1,0 +1,205 @@
+% layout 'default';
+% title 'yoyakkuデータベース管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+  <h1 class="input_ads">部屋情報設定／テーブル[roominfo]</h1>
+  <div class="input_ads_n">
+    <div class="input_ads_b">
+    <a href="mainte_roominfo_serch">検索画面にもどる</a>
+    </div>
+  </div>
+  <form action="mainte_roominfo_new" method="post">
+  <table id="input_ads_t" border="1">
+  <tr>
+    <th>カラム名</th>
+    <th>項目名</th>
+    <th>入力フォーム</th>
+  </tr>
+  <tr>
+    <td>id</td>
+    <td>部屋情報ID</td>
+    <td><input type="text" name="id" value="" readonly></td>
+  </tr>
+  <tr>
+    <td>storeinfo_id</td>
+    <td>店舗ID</td>
+    <td><input type="text" name="storeinfo_id" value="" readonly></td>
+  </tr>
+  <tr>
+    <td>name</td>
+    <td>部屋名<div class="vali"><%= $name %></div></td>
+    <td><input type="text" name="name" value=""></td>
+  </tr>
+  <tr>
+    <td>starttime_on</td>
+    <td>開始時刻</td>
+    <td><select name="starttime_on">
+      % for (my $i=6;$i < 30;++$i) {
+        <option value="<%= $i %>"><%= $i %>:00</option>
+      % }
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>endingtime_on</td>
+    <td>終了時刻<div class="vali"><%= $endingtime_on %></div></td>
+    <td>
+      <select name="endingtime_on">
+      % for (my $i=7;$i <= 30;++$i) {
+        <option value="<%= $i %>"><%= $i %>:00</option>
+      % }
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>time_change</td>
+    <td>開始時間切替</td>
+    <td>
+      <select name="time_change">
+      <option value="0">：００</option>
+      <option value="1">：３０</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>rentalunit</td>
+    <td>貸出単位<div class="vali"><%= $rentalunit %></div></td>
+    <td>
+      <select name="rentalunit">
+      <option value="1">１時間</option>
+      <option value="2">２時間</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>pricescomments</td>
+    <td>料金コメント<div class="vali"><%= $pricescomments %></div></td>
+    <td><input type="text" name="pricescomments" value=""></td>
+  </tr>
+  <tr>
+    <td>privatepermit</td>
+    <td>個人練習許可設定</td>
+    <td>
+      <select name="privatepermit">
+      <option value="0">許可する</option>
+      <option value="1">許可しない</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>privatepeople</td>
+    <td>個人練習許可人数</td>
+    <td>
+      <select name="privatepeople">
+      <option value="1">１人まで</option>
+      <option value="2">２人まで</option>
+      <option value="3">３人まで</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>privateconditions</td>
+    <td>個人練習許可条件</td>
+    <td>
+      <select name="privateconditions">
+      <option value="0">当日予約のみ</option>
+      <option value="1">１日前より</option>
+      <option value="2">２日前より</option>
+      <option value="3">３日前より</option>
+      <option value="4">４日前より</option>
+      <option value="5">５日前より</option>
+      <option value="6">６日前より</option>
+      <option value="7">７日前より</option>
+      <option value="8">条件なし</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>bookinglimit</td>
+    <td>予約制限</td>
+    <td>
+      <select name="bookinglimit">
+      <option value="0">制限なし</option>
+      <option value="1">１時間前</option>
+      <option value="2">２時間前</option>
+      <option value="3">３時間前</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>cancellimit</td>
+    <td>キャンセル制限</td>
+    <td>
+      <select name="cancellimit">
+      <option value="0">当日不可</option>
+      <option value="1">１日前不可</option>
+      <option value="2">２日前不可</option>
+      <option value="3">３日前不可</option>
+      <option value="4">４日前不可</option>
+      <option value="5">５日前不可</option>
+      <option value="6">６日前不可</option>
+      <option value="7">７日前不可</option>
+      <option value="8">制限なし</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>remarks</td>
+    <td>備考<div class="vali"><%= $remarks %></div></td>
+    <td><input type="text" name="remarks" value=""></td>
+  </tr>
+  <tr>
+    <td>webpublishing</td>
+    <td>web公開設定</td>
+    <td>
+      <select name="webpublishing">
+      <option value="0">公開する</option>
+      <option value="1">公開しない</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>webreserve</td>
+    <td>web予約受付設定</td>
+    <td>
+      <select name="webreserve">
+      <option value="0">今月のみ</option>
+      <option value="1">１ヶ月先</option>
+      <option value="2">２ヶ月先</option>
+      <option value="3">３ヶ月先</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>status</td>
+    <td>ステータス</td>
+    <td>
+      <select name="status">
+      <option value="0">利用停止</option>
+      <option value="1">利用開始</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td>create_on</td>
+    <td>登録日</td>
+    <td><input type="text" name="create_on" value="" readonly></td>
+  </tr>
+  <tr>
+    <td>modify_on</td>
+    <td>修正日</td>
+    <td><input type="text" name="modify_on" value="" readonly></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td><input type="submit" value="登録する"></td>
+  </tr>
+  </table>
+  </form>
+  </div>
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>
