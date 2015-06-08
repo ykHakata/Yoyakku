@@ -72,7 +72,14 @@
         </form>
       </td>
       <td><%= $roominfo_row->storeinfo_id %></td>
-      <td><%= $roominfo_row->name %></td>
+      <td><%= $roominfo_row->name %>
+        % if ($roominfo_row->status && $roominfo_row->status eq 1) {
+          <form action="mainte_reserve_new" method="get">
+          <input type="hidden" name="roominfo_id" value="<%= $roominfo_row->id %>">
+          <input type="submit" value="新規作成">
+          </form>
+        % }
+      </td>
       <td><%= $roominfo_row->starttime_on %></td>
       <td><%= $roominfo_row->endingtime_on %></td>
       <td><%= $roominfo_row->time_change %></td>
