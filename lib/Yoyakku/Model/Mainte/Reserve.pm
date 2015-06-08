@@ -8,18 +8,51 @@ use Yoyakku::Model::Mainte qw{search_id_single_or_all_rows};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_reserve_id_rows
+    get_roominfo_with_storeinfo_name_rows
+    get_general_rows_all
+    get_admin_rows_all
 };
 
 sub search_reserve_id_rows {
-    my $self       = shift;
     my $reserve_id = shift;
 
     return search_id_single_or_all_rows( 'reserve', $reserve_id );
 }
 
 
+sub get_roominfo_with_storeinfo_name_rows {
 
+    my $sql = q{
+        SELECT
+            roominfo.id AS roominfo_id,
+            roominfo.name AS roominfo_name,
+            storeinfo.name AS storeinfo_name
+        FROM roominfo INNER JOIN storeinfo
+        ON roominfo.storeinfo_id = storeinfo.id
+        WHERE roominfo.status = :status
+    };
 
+    my $bind_values = +{
+        status => '1',
+    };
+
+    my @roominfo_with_storeinfo_rows
+        = $teng->search_named( $sql, $bind_values );
+
+    return \@roominfo_with_storeinfo_rows;
+}
+
+sub get_general_rows_all {
+    my @rows = $teng->search('general', +{}, );
+
+    return \@rows;
+}
+
+sub get_admin_rows_all {
+    my @rows = $teng->search('admin', +{}, );
+
+    return \@rows;
+}
 
 
 

@@ -1,0 +1,167 @@
+% layout 'default';
+% title 'yoyakku広告データ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+  <h1 class="input_ads">予約履歴入力フォーム／テーブル[reserve]</h1>
+  <div class="input_ads_n">
+    <div class="input_ads_b">
+      <a href="mainte_reserve_serch">検索画面にもどる</a>
+    </div>
+  </div>
+  <form action="" method="post">
+  <table id="input_ads_t" border="1">
+    <tr>
+      <th>カラム名</th>
+      <th>項目名</th>
+      <th>入力フォーム</th>
+    </tr>
+    <tr>
+      <td>id</td>
+      <td>予約ID<div class="vali"><%= $id %></div></td>
+      <td><input type="text" name="id" value="" readonly></td></td>
+    </tr>
+    <tr>
+      <td>roominfo_id</td>
+      <td>部屋情報ID</td>
+      <td>
+        <select name="roominfo_id">
+        % for my $room_with_store_row ( @{$room_with_store_rows} ) {
+          <option value="<%= $room_with_store_row->roominfo_id %>">
+            <%= $room_with_store_row->roominfo_id %>->
+            <%= $room_with_store_row->roominfo_name %>[部屋]->
+            <%= $room_with_store_row->storeinfo_name %>[店]
+          </option>
+        % }
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>getstarted_on</td>
+      <td>利用開始日時
+        <div class="vali"><%= $getstarted_on_day %></div>
+        <div class="vali"><%= $getstarted_on_time %></div>
+      </td>
+      <td>
+        <input type="text" id="from" name="getstarted_on_day" value=""><br />
+        <select name="getstarted_on_time">
+          % for (my $i=6;$i < 30;++$i) {
+            % if ($time_change) {
+              <option value="<%= $i %>"><%= $i %>:30</option>
+            % }
+            % else {
+              <option value="<%= $i %>"><%= $i %>:00</option>
+            % }
+          % }
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>enduse_on</td>
+      <td>利用終了日時
+        <div class="vali">
+        <%= $enduse_on_day %>
+        <%= $enduse_on_time %>
+        </div>
+      </td>
+      <td>
+        <input type="text" id="to" name="enduse_on_day" value=""><br />
+        <select name="enduse_on_time">
+          % for (my $i=7;$i <= 30;++$i) {
+            % if ($time_change) {
+              <option value="<%= $i %>"><%= $i %>:30</option>
+            % }
+            % else {
+              <option value="<%= $i %>"><%= $i %>:00</option>
+            % }
+          % }
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>useform</td>
+      <td>利用形態名
+        <div class="vali"><%= $useform %></div>
+      </td>
+      <td>
+        <select name="useform">
+          <option value="0">バンド</option>
+          <option value="1">個人</option>
+          <option value="2">利用停止</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>message</td>
+      <td>伝言板<div class="vali"><%= $message %></div></td>
+      <td><input type="text" name="message" value=""></td>
+    </tr>
+    <tr>
+      <td>general_id</td>
+      <td>一般ユーザーID</td>
+      <td>
+        <select name="general_id">
+          <option value="0">選択しない</option>
+          % for my $general_row (@{$general_rows}) {
+            <option value="<%= $general_row->id %>">
+              <%= $general_row->id %>
+              <%= $general_row->login %>
+            </option>
+          % }
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>admin_id</td>
+      <td>管理ユーザーID
+        <div class="vali"><%= $admin_id %></div>
+      </td>
+      <td>
+        <select name="admin_id">
+          <option value="0">選択しない</option>
+          % for my $admin_row (@{$admin_rows}) {
+            <option value="<%= $admin_row->id %>">
+              <%= $admin_row->id %>
+              <%= $admin_row->login %>
+            </option>
+          % }
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>tel</td>
+      <td>電話番号<div class="vali"><%= $tel %></div></td>
+      <td><input type="text" name="tel" value=""></td>
+    </tr>
+    <tr>
+      <td>status</td>
+      <td>ステータス</td>
+      <td>
+        <select name="status">
+          <option value="0">予約中</option>
+          <option value="1">キャンセル</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>create_on</td>
+      <td>登録日</td>
+      <td><input type="text" name="create_on" value="" readonly></td>
+    </tr>
+    <tr>
+      <td>modify_on</td>
+      <td>修正日</td>
+      <td><input type="text" name="modify_on" value="" readonly></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td><input type="submit" value="登録する"></td>
+    </tr>
+  </table>
+  </form>
+  </div>
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>
