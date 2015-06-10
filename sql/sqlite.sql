@@ -207,13 +207,14 @@ CREATE TABLE post(                          -- 郵便番号マスタ
     modify_on       TEXT                    -- 修正日
 );
 
+DROP TABLE reserve;
 
 CREATE TABLE reserve(                                   -- 予約履歴
     id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 予約ID
     roominfo_id     INTEGER,                            -- 部屋情報ID
     getstarted_on   TEXT,                               -- 利用開始日時
     enduse_on       TEXT,                               -- 利用終了日時
-    useform         TEXT,                               -- 利用形態名
+    useform         INTEGER,                            -- 利用形態名
     message         TEXT,                               -- 伝言板
     general_id      INTEGER,                            -- 一般ユーザーID
     admin_id        INTEGER,                            -- 管理ユーザーID

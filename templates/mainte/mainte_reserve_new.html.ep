@@ -9,7 +9,7 @@
       <a href="mainte_reserve_serch">検索画面にもどる</a>
     </div>
   </div>
-  <form action="" method="post">
+  <form action="mainte_reserve_new" method="post">
   <table id="input_ads_t" border="1">
     <tr>
       <th>カラム名</th>
@@ -23,17 +23,14 @@
     </tr>
     <tr>
       <td>roominfo_id</td>
-      <td>部屋情報ID</td>
+      <td>部屋情報ID<div class="vali"><%= $roominfo_id %></div></td>
       <td>
-        <select name="roominfo_id">
-        % for my $room_with_store_row ( @{$room_with_store_rows} ) {
-          <option value="<%= $room_with_store_row->roominfo_id %>">
-            <%= $room_with_store_row->roominfo_id %>->
-            <%= $room_with_store_row->roominfo_name %>[部屋]->
-            <%= $room_with_store_row->storeinfo_name %>[店]
-          </option>
-        % }
-        </select>
+        <input type="text" name="roominfo_id" value="<%= $reserve_fillIn_values->roominfo_id %>" readonly><br />
+        <span>
+          <%= $reserve_fillIn_values->roominfo_id %>->
+          <%= $reserve_fillIn_values->roominfo_name %>[部屋]->
+          <%= $reserve_fillIn_values->storeinfo_name %>[店]
+        </span>
       </td>
     </tr>
     <tr>
@@ -45,14 +42,14 @@
       <td>
         <input type="text" id="from" name="getstarted_on_day" value=""><br />
         <select name="getstarted_on_time">
-          % for (my $i=6;$i < 30;++$i) {
-            % if ($time_change) {
-              <option value="<%= $i %>"><%= $i %>:30</option>
-            % }
-            % else {
-              <option value="<%= $i %>"><%= $i %>:00</option>
-            % }
+        % for my $hour ($start_hour .. $end_hour) {
+          % if ($reserve_fillIn_values->time_change) {
+            <option value="<%= $hour %>:30"><%= $hour %>:30</option>
           % }
+          % else {
+            <option value="<%= $hour %>:00"><%= $hour %>:00</option>
+          % }
+        % }
         </select>
       </td>
     </tr>
@@ -67,14 +64,14 @@
       <td>
         <input type="text" id="to" name="enduse_on_day" value=""><br />
         <select name="enduse_on_time">
-          % for (my $i=7;$i <= 30;++$i) {
-            % if ($time_change) {
-              <option value="<%= $i %>"><%= $i %>:30</option>
-            % }
-            % else {
-              <option value="<%= $i %>"><%= $i %>:00</option>
-            % }
+        % for my $hour ($start_hour .. $end_hour) {
+          % if ($reserve_fillIn_values->time_change) {
+            <option value="<%= $hour %>:30"><%= $hour %>:30</option>
           % }
+          % else {
+            <option value="<%= $hour %>:00"><%= $hour %>:00</option>
+          % }
+        % }
         </select>
       </td>
     </tr>
@@ -85,9 +82,15 @@
       </td>
       <td>
         <select name="useform">
-          <option value="0">バンド</option>
-          <option value="1">個人</option>
-          <option value="2">利用停止</option>
+          % if ( !$reserve_fillIn_values->privatepermit ) {
+            <option value="0">バンド</option>
+            <option value="1">個人</option>
+            <option value="2">利用停止</option>
+          % }
+          % else {
+            <option value="0">バンド</option>
+            <option value="2">利用停止</option>
+          % }
         </select>
       </td>
     </tr>
@@ -98,7 +101,7 @@
     </tr>
     <tr>
       <td>general_id</td>
-      <td>一般ユーザーID</td>
+      <td>一般ユーザーID<div class="vali"><%= $general_id %></div></td>
       <td>
         <select name="general_id">
           <option value="0">選択しない</option>
@@ -117,15 +120,8 @@
         <div class="vali"><%= $admin_id %></div>
       </td>
       <td>
-        <select name="admin_id">
-          <option value="0">選択しない</option>
-          % for my $admin_row (@{$admin_rows}) {
-            <option value="<%= $admin_row->id %>">
-              <%= $admin_row->id %>
-              <%= $admin_row->login %>
-            </option>
-          % }
-        </select>
+        <input type="text" name="admin_id" value="<%= $reserve_fillIn_values->admin_id %>" readonly><br />
+        <span><%= $reserve_fillIn_values->login %></span>
       </td>
     </tr>
     <tr>
@@ -135,7 +131,7 @@
     </tr>
     <tr>
       <td>status</td>
-      <td>ステータス</td>
+      <td>ステータス<div class="vali"><%= $status %></div></td>
       <td>
         <select name="status">
           <option value="0">予約中</option>

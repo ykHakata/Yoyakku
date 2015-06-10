@@ -1,14 +1,21 @@
 package Yoyakku::Controller::Mainte::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
-# use FormValidator::Lite;
+use FormValidator::Lite;
 use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Reserve qw{
     search_reserve_id_rows
-    get_roominfo_with_storeinfo_name_rows
     get_general_rows_all
     get_admin_rows_all
+    get_reserve_fillIn_values
+    change_start_and_endtime
+    change_format_datetime
+    check_reserve_dupli
+    writing_reserve
+    search_reserve_id_row
+    get_startend_day_and_time
 };
+use Data::Dumper;
 
 # 予約情報 一覧 検索
 sub mainte_reserve_serch {
@@ -50,46 +57,52 @@ sub mainte_reserve_new {
     my $class = 'mainte_reserve_new';
     $self->stash( class => $class );
 
-    # 30毎の予約をするめための切り替え
-    my $time_change = 1;
-    $self->stash( time_change => $time_change );
-
-    # 予約可能な部屋情報 ID を紐付いている部屋名、店舗名、同時に出力
-    my $room_with_store_rows
-        = get_roominfo_with_storeinfo_name_rows();
-
-    $self->stash( room_with_store_rows => $room_with_store_rows );
-
-    # roominfo から遷移したときにフィルインする値
-    # roominfo_id     部屋情報ID
-    # getstarted_on   利用開始日時
-    # enduse_on       利用終了日時
-    # useform         利用形態名 (制限をかける)
-    # admin_id        管理ユーザーID
-    # status          ステータス
-
-    # 一般ユーザー情報を取得する(入力につかう)
-    # 管理ユーザー情報を取得する(入力につかう)
-    my $get_general_rows_all = get_general_rows_all();
-    my $get_admin_rows_all   = get_admin_rows_all();
-
-    $self->stash(
-        general_rows => $get_general_rows_all,
-        admin_rows   => $get_admin_rows_all,
-    );
-
     # バリデート用
     $self->stash(
         id                 => '',
+        roominfo_id        => '',
         getstarted_on_day  => '',
         getstarted_on_time => '',
         enduse_on_day      => '',
         enduse_on_time     => '',
         useform            => '',
         message            => '',
+        general_id         => '',
         admin_id           => '',
         tel                => '',
+        status             => '',
     );
+
+    # 部屋情報 (roominfo) からの新規作成時
+    if ( !$self->param('id') && $self->param('roominfo_id') ) {
+
+        # roominfo から遷移したときにフィルインする値
+        # roominfo_id     部屋情報ID
+        # getstarted_on   利用開始日時
+        # enduse_on       利用終了日時
+        # time_change     開始時間切替
+        # useform         利用形態名 (制限をかける)
+        # admin_id        管理ユーザーID
+        # status          ステータス
+
+        my $reserve_fillIn_values
+            = get_reserve_fillIn_values( $self->param('roominfo_id') );
+
+        # 開始日時, 終了日時
+        my $change_start_and_endtime
+            = change_start_and_endtime( $reserve_fillIn_values );
+
+        # 一般ユーザー情報を取得する(入力につかう)
+        my $get_general_rows_all = get_general_rows_all();
+
+        $self->stash(
+            reserve_fillIn_values => $reserve_fillIn_values,
+            start_hour            => $change_start_and_endtime->{start_hour},
+            end_hour              => $change_start_and_endtime->{end_hour},
+            general_rows          => $get_general_rows_all,
+        );
+    }
+
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
@@ -100,49 +113,45 @@ sub mainte_reserve_new {
     if ( 'POST' ne $method ) {
 
         # 修正画面表示用
-        my $roominfo_row = $self->search_roominfo_id_row( $params->{id} );
+        my $reserve_row = search_reserve_id_row( $params->{id} );
 
-        my $starttime_on;
-        my $endingtime_on;
+        my $reserve_fillIn_values
+            = get_reserve_fillIn_values( $reserve_row->roominfo_id );
 
-        # 開始、終了時刻はデータを調整する00->24表示にする
-        if ( $roominfo_row->starttime_on ) {
-            $starttime_on = substr( $roominfo_row->starttime_on, 0, 2 );
-            $starttime_on += 0;
-            if ( $starttime_on =~ /^[0-5]$/ ) {
-                $starttime_on += 24;
-            }
-        }
+        # 開始日時, 終了日時
+        my $change_start_and_endtime
+            = change_start_and_endtime( $reserve_fillIn_values );
 
-        if ( $roominfo_row->endingtime_on ) {
-            $endingtime_on = substr( $roominfo_row->endingtime_on, 0, 2 );
-            $endingtime_on += 0;
-            if ( $endingtime_on =~ /^[0-6]$/ ) {
-                $endingtime_on += 24;
-            }
-        }
+        # 一般ユーザー情報を取得する(入力につかう)
+        my $get_general_rows_all = get_general_rows_all();
+
+        $self->stash(
+            reserve_fillIn_values => $reserve_fillIn_values,
+            start_hour            => $change_start_and_endtime->{start_hour},
+            end_hour              => $change_start_and_endtime->{end_hour},
+            general_rows          => $get_general_rows_all,
+        );
+
+        my $startend_day_time
+            = get_startend_day_and_time( $reserve_row->getstarted_on,
+            $reserve_row->enduse_on, );
 
         # 入力フォームフィルイン用
         $params = +{
-            id                => $roominfo_row->id,
-            storeinfo_id      => $roominfo_row->storeinfo_id,
-            name              => $roominfo_row->name,
-            starttime_on      => $starttime_on,
-            endingtime_on     => $endingtime_on,
-            rentalunit        => $roominfo_row->rentalunit,
-            time_change       => $roominfo_row->time_change,
-            pricescomments    => $roominfo_row->pricescomments,
-            privatepermit     => $roominfo_row->privatepermit,
-            privatepeople     => $roominfo_row->privatepeople,
-            privateconditions => $roominfo_row->privateconditions,
-            bookinglimit      => $roominfo_row->bookinglimit,
-            cancellimit       => $roominfo_row->cancellimit,
-            remarks           => $roominfo_row->remarks,
-            webpublishing     => $roominfo_row->webpublishing,
-            webreserve        => $roominfo_row->webreserve,
-            status            => $roominfo_row->status,
-            create_on         => $roominfo_row->create_on,
-            modify_on         => $roominfo_row->modify_on,
+            id                 => $reserve_row->id,
+            roominfo_id        => $reserve_row->roominfo_id,
+            getstarted_on_day  => $startend_day_time->{getstarted_on_day},
+            getstarted_on_time => $startend_day_time->{getstarted_on_time},
+            enduse_on_day      => $startend_day_time->{enduse_on_day},
+            enduse_on_time     => $startend_day_time->{enduse_on_time},
+            useform            => $reserve_row->useform,
+            message            => $reserve_row->message,
+            general_id         => $reserve_row->general_id,
+            admin_id           => $reserve_row->admin_id,
+            tel                => $reserve_row->tel,
+            status             => $reserve_row->status,
+            create_on          => $reserve_row->create_on,
+            modify_on          => $reserve_row->modify_on,
         };
     }
 
@@ -154,125 +163,119 @@ sub mainte_reserve_new {
     my $validator = FormValidator::Lite->new($params);
 
     $validator->check(
-        name              => [ [ 'LENGTH', 0, 20, ], ],
-        starttime_on      => [ [ 'LENGTH', 0, 20, ], ],
-        endingtime_on     => [ [ 'LENGTH', 0, 20, ], ],
-        rentalunit        => [ 'INT', ],
-        time_change       => [ 'INT', ],
-        pricescomments    => [ [ 'LENGTH', 0, 200, ], ],
-        privatepermit     => [ 'INT', ],
-        privatepeople     => [ 'INT', ],
-        privateconditions => [ 'INT', ],
-        bookinglimit      => [ 'INT', ],
-        cancellimit       => [ 'INT', ],
-        remarks           => [ [ 'LENGTH', 0, 200, ], ],
-        webpublishing     => [ 'INT', ],
-        webreserve        => [ 'INT', ],
-        status            => [ 'INT', ],
+        roominfo_id     => [ 'INT', ],
+        useform         => [ 'INT', ],
+        message         => [ [ 'LENGTH', 0, 20, ], ],
+        general_id      => [ 'INT', ],
+        admin_id        => [ 'INT', ],
+        tel             => [ [ 'LENGTH', 0, 20, ], ],
+        status          => [ 'INT', ],
     );
 
     $validator->set_message(
-        'name.length'          => '文字数!!',
-        'starttime_on.length'  => '文字数!!',
-        'endingtime_on.length' => '文字数!!',
-        'rentalunit.int'  => '指定の形式で入力してください',
-        'time_change.int' => '指定の形式で入力してください',
-        'pricescomments.length' => '文字数!!',
-        'privatepermit.int' => '指定の形式で入力してください',
-        'privatepeople.int' => '指定の形式で入力してください',
-        'privateconditions.int' =>
-            '指定の形式で入力してください',
-        'bookinglimit.int'  => '指定の形式で入力してください',
-        'cancellimit.int'   => '指定の形式で入力してください',
-        'remarks.length'    => '文字数!!',
-        'webpublishing.int' => '指定の形式で入力してください',
-        'webreserve.int'    => '指定の形式で入力してください',
-        'status.int'        => '指定の形式で入力してください',
+        'roominfo_id.int' => '指定の形式で入力してください',
+        'useform.int'    => '指定の形式で入力してください',
+        'message.length' => '文字数!!',
+        'general_id.int' => '指定の形式で入力してください',
+        'admin_id.int'   => '指定の形式で入力してください',
+        'tel.length'     => '文字数!!',
+        'status.int'     => '指定の形式で入力してください',
     );
 
-    my @name_errors = $validator->get_error_messages_from_param('name');
-    my @starttime_on_errors
-        = $validator->get_error_messages_from_param('starttime_on');
-    my @endingtime_on_errors
-        = $validator->get_error_messages_from_param('endingtime_on');
-    my @rentalunit_errors
-        = $validator->get_error_messages_from_param('rentalunit');
-    my @time_change_errors
-        = $validator->get_error_messages_from_param('time_change');
-    my @pricescomments_errors
-        = $validator->get_error_messages_from_param('pricescomments');
-    my @privatepermit_errors
-        = $validator->get_error_messages_from_param('privatepermit');
-    my @privatepeople_errors
-        = $validator->get_error_messages_from_param('privatepeople');
-    my @privateconditions_errors
-        = $validator->get_error_messages_from_param('privateconditions');
-    my @bookinglimit_errors
-        = $validator->get_error_messages_from_param('bookinglimit');
-    my @cancellimit_errors
-        = $validator->get_error_messages_from_param('cancellimit');
-    my @remarks_errors = $validator->get_error_messages_from_param('remarks');
-    my @webpublishing_errors
-        = $validator->get_error_messages_from_param('webpublishing');
-    my @webreserve_errors
-        = $validator->get_error_messages_from_param('webreserve');
+    my @roominfo_id_errors
+        = $validator->get_error_messages_from_param('roominfo_id');
+    my @useform_errors = $validator->get_error_messages_from_param('useform');
+    my @message_errors = $validator->get_error_messages_from_param('message');
+    my @general_id_errors
+        = $validator->get_error_messages_from_param('general_id');
+    my @admin_id_errors
+        = $validator->get_error_messages_from_param('admin_id');
+    my @tel_errors    = $validator->get_error_messages_from_param('tel');
     my @status_errors = $validator->get_error_messages_from_param('status');
 
     # バリデート用メッセージ
     $self->stash(
-        name              => shift @name_errors,
-        starttime_on      => shift @starttime_on_errors,
-        endingtime_on     => shift @endingtime_on_errors,
-        rentalunit        => shift @rentalunit_errors,
-        time_change       => shift @time_change_errors,
-        pricescomments    => shift @pricescomments_errors,
-        privatepermit     => shift @privatepermit_errors,
-        privatepeople     => shift @privatepeople_errors,
-        privateconditions => shift @privateconditions_errors,
-        bookinglimit      => shift @bookinglimit_errors,
-        cancellimit       => shift @cancellimit_errors,
-        remarks           => shift @remarks_errors,
-        webpublishing     => shift @webpublishing_errors,
-        webreserve        => shift @webreserve_errors,
-        status            => shift @status_errors,
+        roominfo_id   => shift @roominfo_id_errors,
+        useform       => shift @useform_errors,
+        message       => shift @message_errors,
+        general_id    => shift @general_id_errors,
+        admin_id      => shift @admin_id_errors,
+        tel           => shift @tel_errors,
+        status        => shift @status_errors,
     );
 
     # 入力バリデート不合格の場合それ以降の作業はしない
     return $self->_render_reserve($params) if $validator->has_error();
 
+    # 日付の形式に変換
+    my $change_format_datetime = change_format_datetime(
+        $params->{getstarted_on_day},
+        $params->{getstarted_on_time},
+        $params->{enduse_on_day},
+        $params->{enduse_on_time},
+    );
+
+    $params->{getstarted_on} = $change_format_datetime->{getstarted_on};
+    $params->{enduse_on}     = $change_format_datetime->{enduse_on};
+
+    # 予約の重複確認の為の値
+    my $args = +{
+        reserve_id    => $params->{id},
+        roominfo_id   => $params->{roominfo_id},
+        getstarted_on => $params->{getstarted_on},
+        enduse_on     => $params->{enduse_on},
+    };
+
     if ( $params->{id} ) {
         # DB バリデート合格の場合 DB 書き込み(修正)
+        # 予約の重複確認
+        my $check_reserve_dupli = check_reserve_dupli( 'update', $args, );
 
-        # starttime_on, endingtime_on, 営業時間のバリデート
-        my $check_start_and_end_msg = $self->check_start_and_end_on(
-            $params->{starttime_on},
-            $params->{endingtime_on},
-        );
+        if ($check_reserve_dupli) {
+            $self->stash->{id} = $check_reserve_dupli;
 
-        if ($check_start_and_end_msg) {
+            my $reserve_fillIn_values
+                = get_reserve_fillIn_values( $self->param('roominfo_id') );
 
-            $self->stash->{endingtime_on} = $check_start_and_end_msg;
+            # 開始日時, 終了日時
+            my $change_start_and_endtime
+                = change_start_and_endtime( $reserve_fillIn_values );
+
+            # 一般ユーザー情報を取得する(入力につかう)
+            my $get_general_rows_all = get_general_rows_all();
+
+            $self->stash(
+                reserve_fillIn_values => $reserve_fillIn_values,
+                start_hour   => $change_start_and_endtime->{start_hour},
+                end_hour     => $change_start_and_endtime->{end_hour},
+                general_rows => $get_general_rows_all,
+            );
+
             return $self->_render_reserve($params);
         }
 
-        # starttime_on, endingtime_on, rentalunit, 貸出単位のバリデート
-        my $check_rentalunit_msg = $self->check_rentalunit(
-            $params->{starttime_on},
-            $params->{endingtime_on},
-            $params->{rentalunit},
-        );
-
-        if ($check_rentalunit_msg) {
-            $self->stash->{rentalunit} = $check_rentalunit_msg;
-            return $self->_render_reserve($params);
-        }
-
-        $self->writing_roominfo( 'update', $params );
+        writing_reserve( 'update', $params );
         $self->flash( henkou => '修正完了' );
 
         # sqlにデータ入力したので list 画面にリダイレクト
-        return $self->redirect_to('mainte_roominfo_serch');
+        return $self->redirect_to('mainte_reserve_serch');
     }
+
+    # 予約新規作成
+    # DB バリデート合格の場合 DB 書き込み(新規)
+    # 予約の重複確認
+    my $check_reserve_dupli = check_reserve_dupli( 'insert', $args, );
+
+    if ($check_reserve_dupli) {
+        $self->stash->{id} = $check_reserve_dupli;
+        return $self->_render_reserve($params);
+    }
+
+    writing_reserve( 'insert', $params );
+    $self->flash( touroku => '登録完了' );
+
+    # sqlにデータ入力したので list 画面にリダイレクト
+    return $self->redirect_to('mainte_reserve_serch');
 
     return _render_reserve($params);
 }
@@ -294,102 +297,8 @@ sub _render_reserve {
 
 1;
 
-# #書いてないけど、新規作成一発目はテンプレートの入力フォームレンダリング
-# #---------
-# #post判定する
-# if (uc $self->req->method eq 'POST') {
-#     #新規入力も修正もボタン押すとpostで入ってくる、両方バリデード実行
-#     # バリデーション()
-#     my $validator = $self->create_validator;
-#     #バリデーションが複雑になってきたのでもう一度順番に整理する
-#     #予約のダブり確認のバリデ
-#     $validator->field('id')->callback(sub {
-#         my $value = shift;
-
-#         my $judg_reserve_id = 0;#予約既にあり
-#         my $judg_reserve_id = 1;#問題なし
 
 
-#     # 予約のダブりが存在を確認するスクリプトをもう一度考えてみる
-#     #入力した値を取得する=======================================================
-#     # 入力した値を取得する(予約id,部屋情報id,利用開始時刻,利用終了時刻)
-#     my $id                 = $self->param('id');
-#     my $roominfo_id        = $self->param('roominfo_id');
-#     my $kibou_date         = $self->param('getstarted_on_day');#入力した予約の希望日付
-#     my $kibou_start        = $self->param('getstarted_on_time');
-#     my $enduse_on_day      = $self->param('enduse_on_day');
-#     my $kibou_end          = $self->param('enduse_on_time');
-
-#     #既に入力済みのデータをsqlから取り出す========================================
-#     # 予約履歴を抽出する
-#     my @reserves = $teng->search_named(q{select * from reserve;});
-
-#     #比較したいデータのみを選別する===============================================
-#         # 比較したいデータとは、入力した部屋id(roominfo_id)と同じもの
-#         # 入力した予約id(id)は比較対象外にする
-#     foreach my $reserve_ref (@reserves) {# 予約データを一件づつすべて引き出す
-#         if ($reserve_ref->roominfo_id == $roominfo_id) { #入力したroominfo_idと同じデータのみ
-#             if ($reserve_ref->id ne $id ) { #入力した予約id以外のもの
-#                 #比較できるよう値を変換
-#                 #データの利用開始と利用終了のデータを取り出し
-#                 #利用開始日時取り出し
-#                 my $getstarted_on = $reserve_ref->getstarted_on;
-#                 #日付と時刻に分ける(ただしまだ通常の0-5時の形式)
-#                 my $getstarted_on_day   = substr($getstarted_on,0,10);#日付
-#                 my $getstarted_on_time  = substr($getstarted_on,11,2);#時刻
-#                 $getstarted_on_time    += 0;#念のために時刻を数字の型にして、最初の0があれば表示しない
-#                 #時刻0-5時の場合は24-29に変換、
-#                 if ($getstarted_on_time =~ /^[0-5]$/) {
-#                     $getstarted_on_time += 24;
-#                     #日付を1日もどる
-#                     $getstarted_on_day = localtime->strptime($getstarted_on_day,'%Y-%m-%d');
-#                     $getstarted_on_day = $getstarted_on_day - ONE_DAY * 1;
-#                     $getstarted_on_day = $getstarted_on_day->date;
-#                 }
-#                 #利用終了日時取り出し
-#                 my $enduse_on = $reserve_ref->enduse_on;
-#                 #日付と時刻に分ける(ただしまだ通常の0-6時の形式)
-#                 my $enduse_on_day   = substr($enduse_on,0,10);#日付
-#                 my $enduse_on_time  = substr($enduse_on,11,2);#時刻
-#                 $enduse_on_time += 0;#念のために時刻を数字の型にして、最初の0があれば表示しない
-#                 #時刻0-6時の場合は24-30に変換、
-#                 if ($enduse_on_time =~ /^[0-6]$/) {
-#                     $enduse_on_time += 24;
-#                     #日付を1日もどる
-#                     $enduse_on_day = localtime->strptime($enduse_on_day,'%Y-%m-%d');
-#                     $enduse_on_day = $enduse_on_day - ONE_DAY * 1;
-#                     $enduse_on_day = $enduse_on_day->date;
-#                 }
-
-#                 #開始時刻から終了時刻一つ前まで、比較してゆく、一致すればdie!ダブり！
-#                 #入力した日付とデータの日付が一致した時比較開始
-#                 if ($getstarted_on_day eq $kibou_date) {
-#                     #今見ているデータの時間軸をだす
-#                     #比較の計算式を書き直し
-#                 my $i = $getstarted_on_time;
-#                 for ($i; $i < $enduse_on_time; ++$i) {#sqlのデータ
-#                     #開始から終了一つ前まで１つづつ取り出し
-#                     my $ii = $kibou_start;
-#                     for ($ii; $ii < $kibou_end; ++$ii) {#入力データ
-#                         if ($i == $ii) {$judg_reserve_id = 0;}
-#                     }
-#                 }
-#                 }
-#             }
-#         }
-#     }
-
-
-# #    #おしまし
-
-
-
-
-
-#         return 1 if $judg_reserve_id ;
-
-#         return (0, '既に予約が存在します');
-#     });
 
 
 #     # 利用開始日時 getstarted_on->日付と時間
@@ -697,26 +606,8 @@ sub _render_reserve {
 #             $self->flash(henkou => '修正完了');
 #         }
 #         else {
-#         #idが無い場合、新規登録sql実行 新規登録データをsqlへ送り込む
-#         my $row = $teng->insert('reserve' => {
-#                     #'id'            => $id,
-#                     'roominfo_id'   => $roominfo_id,
-#                     'getstarted_on' => $getstarted_on,
-#                     'enduse_on'     => $enduse_on,
-#                     'useform'       => $useform,
-#                     'message'       => $message,
-#                     'general_id'    => $general_id,
-#                     'admin_id'      => $admin_id,
-#                     'tel'           => $tel,
-#                     'status'        => $status,
-#                     'create_on'     => $create_on,
-#                    #'modify_on'     => $modify_on,
-#             });
-#             $self->flash(touroku => '登録完了');
-#         }
-#         #sqlにデータ入力したのでlist画面にリダイレクト
-#         return $self->redirect_to('mainte_reserve_serch');
-#         #リターンなのでここでおしまい。
+
+
 #     }
 #     #入力検査合格しなかった場合、もう一度入力フォーム表示Fillinにて
 #     my $html = $self->render_partial()->to_string;

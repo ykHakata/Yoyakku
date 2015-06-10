@@ -13,9 +13,6 @@
       <input class="input_ads_b" type="submit" value="検索する">
     </form>
     </p>
-    <div class="input_ads_b">
-      <a href="mainte_reserve_new">新規作成画面</a>
-    </div>
   </div>
   <table id="input_ads_t" border="1">
     <tr>

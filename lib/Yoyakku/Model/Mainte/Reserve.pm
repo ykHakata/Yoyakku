@@ -3,43 +3,161 @@ use strict;
 use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
-# use Yoyakku::Util qw{now_datetime};
-use Yoyakku::Model::Mainte qw{search_id_single_or_all_rows};
+use Yoyakku::Util qw{now_datetime};
+use Yoyakku::Model::Mainte qw{search_id_single_or_all_rows writing_db};
+use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_reserve_id_rows
-    get_roominfo_with_storeinfo_name_rows
     get_general_rows_all
     get_admin_rows_all
+    get_reserve_fillIn_values
+    change_start_and_endtime
+    change_format_datetime
+    check_reserve_dupli
+    writing_reserve
+    search_reserve_id_row
+    get_startend_day_and_time
 };
+use Data::Dumper;
+
+# 日付と時刻に分かれたものを datetime 形式にもどす
+sub change_format_datetime {
+    my $getstarted_on_day  = shift;
+    my $getstarted_on_time = shift;
+    my $enduse_on_day      = shift;
+    my $enduse_on_time     = shift;
+
+    $getstarted_on_time = sprintf '%05s', $getstarted_on_time;
+    $enduse_on_time     = sprintf '%05s', $enduse_on_time;
+
+    my $change_format_datetime = +{
+        getstarted_on => $getstarted_on_day . ' ' . $getstarted_on_time . ':00',
+        enduse_on     => $enduse_on_day . ' ' . $enduse_on_time . ':00',
+    };
+
+    return $change_format_datetime;
+}
+
+# 予約の重複確認
+sub check_reserve_dupli {
+    my $type = shift;
+    my $args = shift;
+
+    my $reserve_id    = $args->{reserve_id};
+    my $roominfo_id   = $args->{roominfo_id};
+    my $getstarted_on = $args->{getstarted_on};
+    my $enduse_on     = $args->{enduse_on};
+
+    my $search_condition = +{
+        roominfo_id   => $roominfo_id,
+        status        => 0,
+        getstarted_on => [ +{ '>=' => $getstarted_on }, ],
+        enduse_on     => [ +{ '<=' => $enduse_on }, ],
+    };
+
+    if ( $type eq 'update' ) {
+        $search_condition->{id} = +{ '!=' => $reserve_id };
+    }
+
+    my $reserve_row = $teng->single( 'reserve', $search_condition, );
+
+    return '既に予約が存在します' if $reserve_row;
+
+    return;
+}
+
+sub get_startend_day_and_time {
+    my $getstarted_on = shift;
+    my $enduse_on     = shift;
+
+    my $FIELD_SEPARATOR = q{ };
+    my $FIELD_COUNT     = 2;
+
+    my ( $getstarted_on_day, $getstarted_on_time ) = split $FIELD_SEPARATOR,
+        $getstarted_on, $FIELD_COUNT + 1;
+
+    my ( $enduse_on_day, $enduse_on_time ) = split $FIELD_SEPARATOR,
+        $enduse_on, $FIELD_COUNT + 1;
+
+    my $FIELD_SEPARATOR_TIME = q{:};
+    my $FIELD_COUNT_TIME     = 3;
+
+    my ( $start_hour, $start_minute, $start_second, )
+        = split $FIELD_SEPARATOR_TIME, $getstarted_on_time,
+        $FIELD_COUNT_TIME + 1;
+
+    my ( $end_hour, $end_minute, $end_second, ) = split $FIELD_SEPARATOR_TIME,
+        $enduse_on_time, $FIELD_COUNT_TIME + 1;
+
+    # 数字にもどす
+    $start_hour += 0;
+    $end_hour   += 0;
+
+    # 時間の表示を変換
+    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
+        $start_hour += 24;
+    }
+
+    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
+        $end_hour += 24;
+    }
+
+    $getstarted_on_time = $start_hour . $FIELD_SEPARATOR_TIME . $start_minute;
+    $enduse_on_time     = $end_hour . $FIELD_SEPARATOR_TIME . $end_minute;
+
+    # 整形して出力
+    my $startend_day_time = +{
+        getstarted_on_day  => $getstarted_on_day,
+        getstarted_on_time => $getstarted_on_time,
+        enduse_on_day      => $enduse_on_day,
+        enduse_on_time     => $enduse_on_time,
+    };
+
+    return $startend_day_time;
+}
+
+
+sub change_start_and_endtime {
+    my $reserve_fillIn_values = shift;
+
+    my $starttime_on  = $reserve_fillIn_values->starttime_on;
+    my $endingtime_on = $reserve_fillIn_values->endingtime_on;
+
+    my $FIELD_SEPARATOR = q{:};
+    my $FIELD_COUNT     = 2;
+
+    my ( $start_hour, $start_minute ) = split $FIELD_SEPARATOR,
+        $starttime_on, $FIELD_COUNT + 1;
+
+    my ( $end_hour, $end_minute ) = split $FIELD_SEPARATOR,
+        $endingtime_on, $FIELD_COUNT + 1;
+
+    # 数字にもどす
+    $start_hour += 0;
+    $end_hour   += 0;
+
+    # 時間の表示を変換
+    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
+        $start_hour += 24;
+    }
+
+    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
+        $end_hour += 24;
+    }
+
+    my $change_start_and_endtime = +{
+        start_hour => $start_hour,
+        end_hour   => $end_hour,
+    };
+
+    return $change_start_and_endtime;
+}
 
 sub search_reserve_id_rows {
     my $reserve_id = shift;
 
     return search_id_single_or_all_rows( 'reserve', $reserve_id );
-}
-
-
-sub get_roominfo_with_storeinfo_name_rows {
-
-    my $sql = q{
-        SELECT
-            roominfo.id AS roominfo_id,
-            roominfo.name AS roominfo_name,
-            storeinfo.name AS storeinfo_name
-        FROM roominfo INNER JOIN storeinfo
-        ON roominfo.storeinfo_id = storeinfo.id
-        WHERE roominfo.status = :status
-    };
-
-    my $bind_values = +{
-        status => '1',
-    };
-
-    my @roominfo_with_storeinfo_rows
-        = $teng->search_named( $sql, $bind_values );
-
-    return \@roominfo_with_storeinfo_rows;
 }
 
 sub get_general_rows_all {
@@ -54,7 +172,38 @@ sub get_admin_rows_all {
     return \@rows;
 }
 
+sub get_reserve_fillIn_values {
+    my $roominfo_id = shift;
 
+    my $sql = q{
+        SELECT
+            roominfo.id AS roominfo_id,
+            roominfo.name AS roominfo_name,
+            storeinfo.name AS storeinfo_name,
+            roominfo.time_change,
+            roominfo.privatepermit,
+            roominfo.starttime_on,
+            roominfo.endingtime_on,
+            admin.id AS admin_id,
+            admin.login
+        FROM roominfo
+        INNER JOIN storeinfo
+        ON roominfo.storeinfo_id = storeinfo.id
+        INNER JOIN admin
+        ON admin.id = storeinfo.admin_id
+        WHERE roominfo.id = :roominfo_id
+        AND roominfo.status = :roominfo_status
+    };
+
+    my $bind_values = +{
+        roominfo_id     => $roominfo_id,
+        roominfo_status => 1,
+    };
+
+    my @reserve_fillIn_values = $teng->search_named( $sql, $bind_values );
+
+    return $reserve_fillIn_values[0];
+}
 
 
 # sub search_zipcode_for_address {
@@ -83,58 +232,39 @@ sub get_admin_rows_all {
 # }
 
 
-# sub search_reserve_id_row {
-#     my $self         = shift;
-#     my $reserve_id = shift;
+sub search_reserve_id_row {
+    my $reserve_id = shift;
 
-#     die 'not $reserve_id!!' if !$reserve_id;
+    die 'not $reserve_id!!' if !$reserve_id;
 
-#     my $reserve_row
-#         = $teng->single( 'reserve', +{ id => $reserve_id, }, );
+    my $reserve_row
+        = $teng->single( 'reserve', +{ id => $reserve_id, }, );
 
-#     die 'not $reserve_row!!' if !$reserve_row;
+    die 'not $reserve_row!!' if !$reserve_row;
 
-#     return $reserve_row;
-# }
+    return $reserve_row;
+}
 
-# sub writing_reserve {
-#     my $self   = shift;
-#     my $type   = shift;
-#     my $params = shift;
+sub writing_reserve {
+    my $type   = shift;
+    my $params = shift;
 
-#     my $create_data_reserve = +{
-#         region_id     => $params->{region_id} || undef,
-#         admin_id      => $params->{admin_id} || undef,
-#         name          => $params->{name},
-#         icon          => $params->{icon},
-#         post          => $params->{post},
-#         state         => $params->{state},
-#         cities        => $params->{cities},
-#         addressbelow  => $params->{addressbelow},
-#         tel           => $params->{tel},
-#         mail          => $params->{mail},
-#         remarks       => $params->{remarks},
-#         url           => $params->{url},
-#         locationinfor => $params->{locationinfor},
-#         status        => $params->{status},
-#         create_on     => now_datetime(),
-#         modify_on     => now_datetime(),
-#     };
+    my $create_data = +{
+        roominfo_id   => $params->{roominfo_id},
+        getstarted_on => $params->{getstarted_on},
+        enduse_on     => $params->{enduse_on},
+        useform       => $params->{useform},
+        message       => $params->{message},
+        general_id    => $params->{general_id},
+        admin_id      => $params->{admin_id},
+        tel           => $params->{tel},
+        status        => $params->{status},
+        create_on     => now_datetime(),
+        modify_on     => now_datetime(),
+    };
 
-#     my $insert_reserve_row;
-
-#     if ( $type eq 'update' ) {
-
-#         $insert_reserve_row
-#             = $teng->single( 'reserve', +{ id => $params->{id} }, );
-
-#         $insert_reserve_row->update($create_data_reserve);
-#     }
-
-#     die 'not $insert_reserve_row' if !$insert_reserve_row;
-
-#     return;
-# }
+    return writing_db( 'reserve', $type, $create_data, $params->{id} );
+}
 
 
 1;
