@@ -128,8 +128,19 @@ sub get_startend_day_and_time {
         $end_hour += 24;
     }
 
-    $getstarted_on_time = $start_hour . $FIELD_SEPARATOR_TIME . $start_minute;
-    $enduse_on_time     = $end_hour . $FIELD_SEPARATOR_TIME . $end_minute;
+    $getstarted_on_time
+        = $start_hour
+        . $FIELD_SEPARATOR_TIME
+        . $start_minute
+        . $FIELD_SEPARATOR_TIME
+        . $start_second;
+
+    $enduse_on_time
+        = $end_hour
+        . $FIELD_SEPARATOR_TIME
+        . $end_minute
+        . $FIELD_SEPARATOR_TIME
+        . $end_second;
 
     # 整形して出力
     my $startend_day_time = +{
@@ -141,7 +152,6 @@ sub get_startend_day_and_time {
 
     return $startend_day_time;
 }
-
 
 sub change_start_and_endtime {
     my $reserve_fillIn_values = shift;

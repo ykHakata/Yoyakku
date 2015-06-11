@@ -50,9 +50,12 @@ sub mainte_reserve_new {
     # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
+
     # 予約リストからの編集と部屋情報からの新規のみ許可
     return $self->redirect_to('/mainte_reserve_serch')
-        if !$self->param('id') && !$self->param('roominfo_id');
+        if !$params->{id} && !$params->{roominfo_id};
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_reserve_new';
@@ -74,90 +77,138 @@ sub mainte_reserve_new {
         status             => '',
     );
 
-    # 部屋情報 (roominfo) からの新規作成時
-    if ( !$self->param('id') && $self->param('roominfo_id') ) {
+    my $roominfo_id = $params->{roominfo_id};
 
-        # roominfo から遷移したときにフィルインする値
-        # roominfo_id     部屋情報ID
-        # getstarted_on   利用開始日時
-        # enduse_on       利用終了日時
-        # time_change     開始時間切替
-        # useform         利用形態名 (制限をかける)
-        # admin_id        管理ユーザーID
-        # status          ステータス
-
-        my $reserve_fillIn_values
-            = get_reserve_fillIn_values( $self->param('roominfo_id') );
-
-        # 開始日時, 終了日時
-        my $change_start_and_endtime
-            = change_start_and_endtime( $reserve_fillIn_values );
-
-        # 一般ユーザー情報を取得する(入力につかう)
-        my $get_general_rows_all = get_general_rows_all();
-
-        $self->stash(
-            reserve_fillIn_values => $reserve_fillIn_values,
-            start_hour            => $change_start_and_endtime->{start_hour},
-            end_hour              => $change_start_and_endtime->{end_hour},
-            general_rows          => $get_general_rows_all,
-        );
+    if (!$roominfo_id) {
+        my $reserve_row = search_reserve_id_row( $params->{id} );
+        $roominfo_id = $reserve_row->roominfo_id;
     }
 
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    my $reserve_fillIn_values = get_reserve_fillIn_values($roominfo_id);
 
-    # 新規作成画面表示用
+    # 開始日時, 終了日時
+    my $change_start_and_endtime
+        = change_start_and_endtime($reserve_fillIn_values);
+
+    # 一般ユーザー情報を取得する(入力につかう)
+    my $get_general_rows_all = get_general_rows_all();
+
+    $self->stash(
+        reserve_fillIn_values => $reserve_fillIn_values,
+        start_hour            => $change_start_and_endtime->{start_hour},
+        end_hour              => $change_start_and_endtime->{end_hour},
+        general_rows          => $get_general_rows_all,
+    );
+
+    # 部屋情報 (roominfo) からの新規作成時
     return $self->_render_reserve($params)
         if !$params->{id} && $params->{roominfo_id} && ( 'POST' ne $method );
 
-    if ( 'POST' ne $method ) {
+    # 予約情報一覧 (reserve) からの編集作成時
+    return $self->_render_update_form($params)
+        if $params->{id} && !$params->{roominfo_id} && ( 'POST' ne $method );
 
-        # 修正画面表示用
-        my $reserve_row = search_reserve_id_row( $params->{id} );
+    # 以降は post 以外は不可リダイレクト
+    return $self->redirect_to('/mainte_reserve_serch') if 'POST' ne $method;
 
-        my $reserve_fillIn_values
-            = get_reserve_fillIn_values( $reserve_row->roominfo_id );
+    # 入力値をバリデート
+    return $self->_render_reserve($params)
+        if $self->_check_reserve_validator($params);
 
-        # 開始日時, 終了日時
-        my $change_start_and_endtime
-            = change_start_and_endtime( $reserve_fillIn_values );
+    # バリデーションの追加
+    # DB 問い合わせ既存データとのバリデーション
 
-        # 一般ユーザー情報を取得する(入力につかう)
-        my $get_general_rows_all = get_general_rows_all();
+    # 日付の形式に変換
+    my $change_format_datetime = change_format_datetime(
+        $params->{getstarted_on_day},
+        $params->{getstarted_on_time},
+        $params->{enduse_on_day},
+        $params->{enduse_on_time},
+    );
 
-        $self->stash(
-            reserve_fillIn_values => $reserve_fillIn_values,
-            start_hour            => $change_start_and_endtime->{start_hour},
-            end_hour              => $change_start_and_endtime->{end_hour},
-            general_rows          => $get_general_rows_all,
-        );
+    $params->{getstarted_on} = $change_format_datetime->{getstarted_on};
+    $params->{enduse_on}     = $change_format_datetime->{enduse_on};
 
-        my $startend_day_time
-            = get_startend_day_and_time( $reserve_row->getstarted_on,
-            $reserve_row->enduse_on, );
+    # 予約の重複確認の為の値
+    my $args = +{
+        reserve_id    => $params->{id},
+        roominfo_id   => $params->{roominfo_id},
+        getstarted_on => $params->{getstarted_on},
+        enduse_on     => $params->{enduse_on},
+    };
 
-        # 入力フォームフィルイン用
-        $params = +{
-            id                 => $reserve_row->id,
-            roominfo_id        => $reserve_row->roominfo_id,
-            getstarted_on_day  => $startend_day_time->{getstarted_on_day},
-            getstarted_on_time => $startend_day_time->{getstarted_on_time},
-            enduse_on_day      => $startend_day_time->{enduse_on_day},
-            enduse_on_time     => $startend_day_time->{enduse_on_time},
-            useform            => $reserve_row->useform,
-            message            => $reserve_row->message,
-            general_id         => $reserve_row->general_id,
-            admin_id           => $reserve_row->admin_id,
-            tel                => $reserve_row->tel,
-            status             => $reserve_row->status,
-            create_on          => $reserve_row->create_on,
-            modify_on          => $reserve_row->modify_on,
-        };
+    if ( $params->{id} ) {
+        # DB バリデート合格の場合 DB 書き込み(修正)
+        # 予約の重複確認
+        my $check_reserve_dupli = check_reserve_dupli( 'update', $args, );
+
+        if ($check_reserve_dupli) {
+            $self->stash->{id} = $check_reserve_dupli;
+            return $self->_render_reserve($params);
+        }
+
+        writing_reserve( 'update', $params );
+        $self->flash( henkou => '修正完了' );
+
+        # sqlにデータ入力したので list 画面にリダイレクト
+        return $self->redirect_to('mainte_reserve_serch');
     }
 
-    # テンプレート画面のレンダリング
-    return $self->_render_reserve($params) if 'POST' ne $method;
+    # 予約新規作成
+    # DB バリデート合格の場合 DB 書き込み(新規)
+    # 予約の重複確認
+    my $check_reserve_dupli = check_reserve_dupli( 'insert', $args, );
+
+    if ($check_reserve_dupli) {
+        $self->stash->{id} = $check_reserve_dupli;
+        return $self->_render_reserve($params);
+    }
+
+    writing_reserve( 'insert', $params );
+    $self->flash( touroku => '登録完了' );
+
+    # sqlにデータ入力したので list 画面にリダイレクト
+    return $self->redirect_to('mainte_reserve_serch');
+
+    return _render_reserve($params);
+}
+
+sub _render_update_form {
+    my $self   = shift;
+    my $params = shift;
+
+    my $reserve_row = search_reserve_id_row( $params->{id} );
+
+    my $startend_day_time
+        = get_startend_day_and_time( $reserve_row->getstarted_on,
+        $reserve_row->enduse_on, );
+
+    # 入力フォームフィルイン用
+    $params = +{
+        id                 => $reserve_row->id,
+        roominfo_id        => $reserve_row->roominfo_id,
+        getstarted_on_day  => $startend_day_time->{getstarted_on_day},
+        getstarted_on_time => $startend_day_time->{getstarted_on_time},
+        enduse_on_day      => $startend_day_time->{enduse_on_day},
+        enduse_on_time     => $startend_day_time->{enduse_on_time},
+        useform            => $reserve_row->useform,
+        message            => $reserve_row->message,
+        general_id         => $reserve_row->general_id,
+        admin_id           => $reserve_row->admin_id,
+        tel                => $reserve_row->tel,
+        status             => $reserve_row->status,
+        create_on          => $reserve_row->create_on,
+        modify_on          => $reserve_row->modify_on,
+    };
+
+    return $self->_render_reserve($params);
+}
+
+
+# バリデート一式
+sub _check_reserve_validator {
+    my $self   = shift;
+    my $params = shift;
 
     # 入力フォームに値を入力して登録するボタン押した場合
     # バリデード実行
@@ -179,51 +230,37 @@ sub mainte_reserve_new {
         status     => [ 'INT', ],
     );
 
-
-
-
-
-
     $validator->set_message(
         'roominfo_id.int' => '指定の形式で入力してください',
         'getstarted_on_day.not_null' => '必須入力',
-        'enduse_on_day.not_null' => '必須入力',
-        'getstarted_on_day.date' => '日付の形式で入力してください',
+        'enduse_on_day.not_null'     => '必須入力',
+        'getstarted_on_day.date' =>
+            '日付の形式で入力してください',
         'enduse_on_day.date' => '日付の形式で入力してください',
-
-
-        'getstarted_on_time.time' => '時間の形式で入力してください',
+        'getstarted_on_time.time' =>
+            '時間の形式で入力してください',
         'enduse_on_time.time' => '時間の形式で入力してください',
-
-
-
-        'on_day.duplication'=>'開始と同じ日付にして下さい',
-        'useform.int'    => '指定の形式で入力してください',
-        'message.length' => '文字数!!',
-        'general_id.int' => '指定の形式で入力してください',
-        'admin_id.int'   => '指定の形式で入力してください',
-        'tel.not_null'     => '必須入力',
-        'tel.length'     => '文字数!!',
-        'status.int'     => '指定の形式で入力してください',
+        'on_day.duplication'  => '開始と同じ日付にして下さい',
+        'useform.int'         => '指定の形式で入力してください',
+        'message.length'      => '文字数!!',
+        'general_id.int'      => '指定の形式で入力してください',
+        'admin_id.int'        => '指定の形式で入力してください',
+        'tel.not_null'        => '必須入力',
+        'tel.length'          => '文字数!!',
+        'status.int'          => '指定の形式で入力してください',
     );
 
     my @roominfo_id_errors
         = $validator->get_error_messages_from_param('roominfo_id');
-
     my @getstarted_on_day_errors
         = $validator->get_error_messages_from_param('getstarted_on_day');
-
     my @enduse_on_day_errors
         = $validator->get_error_messages_from_param('enduse_on_day');
-
-
-
-
-
-    my @on_day_errors
-        = $validator->get_error_messages_from_param('on_day');
-
-
+    my @getstarted_on_time_errors
+        = $validator->get_error_messages_from_param('getstarted_on_time');
+    my @enduse_on_time_errors
+        = $validator->get_error_messages_from_param('enduse_on_time');
+    my @on_day_errors  = $validator->get_error_messages_from_param('on_day');
     my @useform_errors = $validator->get_error_messages_from_param('useform');
     my @message_errors = $validator->get_error_messages_from_param('message');
     my @general_id_errors
@@ -235,22 +272,20 @@ sub mainte_reserve_new {
 
     # バリデート用メッセージ
     $self->stash(
-        roominfo_id       => shift @roominfo_id_errors,
-        getstarted_on_day => shift @getstarted_on_day_errors,
-        enduse_on_day => shift @enduse_on_day_errors || shift @on_day_errors,
-        useform       => shift @useform_errors,
-        message       => shift @message_errors,
-        general_id    => shift @general_id_errors,
-        admin_id      => shift @admin_id_errors,
-        tel           => shift @tel_errors,
-        status        => shift @status_errors,
+        roominfo_id        => shift @roominfo_id_errors,
+        getstarted_on_day  => shift @getstarted_on_day_errors,
+        getstarted_on_time => shift @getstarted_on_time_errors,
+        enduse_on_day  => shift @enduse_on_day_errors || shift @on_day_errors,
+        enduse_on_time => shift @enduse_on_time_errors,
+        useform        => shift @useform_errors,
+        message        => shift @message_errors,
+        general_id     => shift @general_id_errors,
+        admin_id       => shift @admin_id_errors,
+        tel            => shift @tel_errors,
+        status         => shift @status_errors,
     );
 
-    # 入力バリデート不合格の場合それ以降の作業はしない
-    return $self->_render_reserve($params) if $validator->has_error();
-
-    # バリデーションの追加
-    # 日付入力関連のバリデーション
+    return 1 if $validator->has_error();
 
     # 入力された利用終了時刻が開始時刻より早くなっていないか？(入力値チェック)
     my $check_reserve_use_time = check_reserve_use_time(
@@ -258,13 +293,31 @@ sub mainte_reserve_new {
         $params->{enduse_on_day},     $params->{enduse_on_time},
     );
 
+    $self->stash(
+        enduse_on_time => $check_reserve_use_time,
+    );
 
-    if ($check_reserve_use_time) {
-        $self->stash->{enduse_on_time} = $check_reserve_use_time;
+    return 1 if $check_reserve_use_time;
 
-        return $self->_render_reserve($params);
-    }
+    return;
+}
 
+# テンプレート画面のレンダリング
+sub _render_reserve {
+    my $self   = shift;
+    my $params = shift;
+
+    my $html = $self->render_to_string(
+        template => 'mainte/mainte_reserve_new',
+        format   => 'html',
+    )->to_string;
+
+    my $output = HTML::FillInForm->fill( \$html, $params );
+
+    return $self->render( text => $output );
+}
+
+1;
 
 
     # 入力された利用日付が部屋情報の利用時間内であるか？(DBチェック roominfo)
@@ -351,102 +404,6 @@ sub mainte_reserve_new {
         #     });
 
 
-
-
-
-
-
-
-
-    # 日付の形式に変換
-    my $change_format_datetime = change_format_datetime(
-        $params->{getstarted_on_day},
-        $params->{getstarted_on_time},
-        $params->{enduse_on_day},
-        $params->{enduse_on_time},
-    );
-
-    $params->{getstarted_on} = $change_format_datetime->{getstarted_on};
-    $params->{enduse_on}     = $change_format_datetime->{enduse_on};
-
-    # 予約の重複確認の為の値
-    my $args = +{
-        reserve_id    => $params->{id},
-        roominfo_id   => $params->{roominfo_id},
-        getstarted_on => $params->{getstarted_on},
-        enduse_on     => $params->{enduse_on},
-    };
-
-    if ( $params->{id} ) {
-        # DB バリデート合格の場合 DB 書き込み(修正)
-        # 予約の重複確認
-        my $check_reserve_dupli = check_reserve_dupli( 'update', $args, );
-
-        if ($check_reserve_dupli) {
-            $self->stash->{id} = $check_reserve_dupli;
-
-            my $reserve_fillIn_values
-                = get_reserve_fillIn_values( $self->param('roominfo_id') );
-
-            # 開始日時, 終了日時
-            my $change_start_and_endtime
-                = change_start_and_endtime( $reserve_fillIn_values );
-
-            # 一般ユーザー情報を取得する(入力につかう)
-            my $get_general_rows_all = get_general_rows_all();
-
-            $self->stash(
-                reserve_fillIn_values => $reserve_fillIn_values,
-                start_hour   => $change_start_and_endtime->{start_hour},
-                end_hour     => $change_start_and_endtime->{end_hour},
-                general_rows => $get_general_rows_all,
-            );
-
-            return $self->_render_reserve($params);
-        }
-
-        writing_reserve( 'update', $params );
-        $self->flash( henkou => '修正完了' );
-
-        # sqlにデータ入力したので list 画面にリダイレクト
-        return $self->redirect_to('mainte_reserve_serch');
-    }
-
-    # 予約新規作成
-    # DB バリデート合格の場合 DB 書き込み(新規)
-    # 予約の重複確認
-    my $check_reserve_dupli = check_reserve_dupli( 'insert', $args, );
-
-    if ($check_reserve_dupli) {
-        $self->stash->{id} = $check_reserve_dupli;
-        return $self->_render_reserve($params);
-    }
-
-    writing_reserve( 'insert', $params );
-    $self->flash( touroku => '登録完了' );
-
-    # sqlにデータ入力したので list 画面にリダイレクト
-    return $self->redirect_to('mainte_reserve_serch');
-
-    return _render_reserve($params);
-}
-
-# テンプレート画面のレンダリング
-sub _render_reserve {
-    my $self   = shift;
-    my $params = shift;
-
-    my $html = $self->render_to_string(
-        template => 'mainte/mainte_reserve_new',
-        format   => 'html',
-    )->to_string;
-
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
-    return $self->render( text => $output );
-}
-
-1;
 
 
 
@@ -557,8 +514,9 @@ sub _render_reserve {
 #                :                               1
 #                ;
 #     });
-#     # 伝言板 message->空白でもいいが文字数の制限をする
-#     $validator->field('message')->required(0)->length(0,20);
+
+
+
 #     # 一般ユーザー、管理、 general_id　admin_id->どちらかを選択、両方はNG
 #     $validator->field('admin_id')->callback(sub {
 #         my $admin_id   = shift;
