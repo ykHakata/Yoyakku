@@ -2,6 +2,7 @@ package Yoyakku::Model::Mainte::Reserve;
 use strict;
 use warnings;
 use utf8;
+use Time::Piece;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{now_datetime};
 use Yoyakku::Model::Mainte qw{search_id_single_or_all_rows writing_db};
@@ -18,8 +19,32 @@ our @EXPORT_OK = qw{
     writing_reserve
     search_reserve_id_row
     get_startend_day_and_time
+    check_reserve_use_time
 };
 use Data::Dumper;
+
+# 入力された利用希望時間の適正をチェック
+sub check_reserve_use_time {
+    my $getstarted_on_day  = shift;
+    my $getstarted_on_time = shift;
+    my $enduse_on_day      = shift;
+    my $enduse_on_time     = shift;
+
+    # datetime 形式の文字列に
+    my $start_datetime = $getstarted_on_day . ' ' . $getstarted_on_time;
+    my $end_datetime   = $enduse_on_day . ' ' . $enduse_on_time;
+
+    # 日付のオブジェクトに変換
+    my $start_tp = localtime->strptime( $start_datetime, '%Y-%m-%d %T' );
+    my $end_tp   = localtime->strptime( $end_datetime,   '%Y-%m-%d %T' );
+
+    # 日付のオブジェクトで比較
+    return '開始時刻より遅くして下さい' if $start_tp >= $end_tp;
+
+    # 不合格時はメッセージ、合格時は undef
+    return;
+}
+
 
 # 日付と時刻に分かれたものを datetime 形式にもどす
 sub change_format_datetime {
@@ -28,12 +53,12 @@ sub change_format_datetime {
     my $enduse_on_day      = shift;
     my $enduse_on_time     = shift;
 
-    $getstarted_on_time = sprintf '%05s', $getstarted_on_time;
-    $enduse_on_time     = sprintf '%05s', $enduse_on_time;
+    $getstarted_on_time = sprintf '%08s', $getstarted_on_time;
+    $enduse_on_time     = sprintf '%08s', $enduse_on_time;
 
     my $change_format_datetime = +{
-        getstarted_on => $getstarted_on_day . ' ' . $getstarted_on_time . ':00',
-        enduse_on     => $enduse_on_day . ' ' . $enduse_on_time . ':00',
+        getstarted_on => $getstarted_on_day . ' ' . $getstarted_on_time,
+        enduse_on     => $enduse_on_day . ' ' . $enduse_on_time,
     };
 
     return $change_format_datetime;

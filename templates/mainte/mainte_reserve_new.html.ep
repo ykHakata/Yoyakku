@@ -44,10 +44,10 @@
         <select name="getstarted_on_time">
         % for my $hour ($start_hour .. $end_hour) {
           % if ($reserve_fillIn_values->time_change) {
-            <option value="<%= $hour %>:30"><%= $hour %>:30</option>
+            <option value="<%= $hour %>:30:00"><%= $hour %>:30</option>
           % }
           % else {
-            <option value="<%= $hour %>:00"><%= $hour %>:00</option>
+            <option value="<%= $hour %>:00:00"><%= $hour %>:00</option>
           % }
         % }
         </select>
@@ -66,10 +66,10 @@
         <select name="enduse_on_time">
         % for my $hour ($start_hour .. $end_hour) {
           % if ($reserve_fillIn_values->time_change) {
-            <option value="<%= $hour %>:30"><%= $hour %>:30</option>
+            <option value="<%= $hour %>:30:00"><%= $hour %>:30</option>
           % }
           % else {
-            <option value="<%= $hour %>:00"><%= $hour %>:00</option>
+            <option value="<%= $hour %>:00:00"><%= $hour %>:00</option>
           % }
         % }
         </select>

@@ -1,6 +1,6 @@
 package Yoyakku::Controller::Mainte::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
-use FormValidator::Lite;
+use FormValidator::Lite qw{DATE TIME};
 use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Reserve qw{
@@ -14,6 +14,7 @@ use Yoyakku::Model::Mainte::Reserve qw{
     writing_reserve
     search_reserve_id_row
     get_startend_day_and_time
+    check_reserve_use_time
 };
 use Data::Dumper;
 
@@ -163,27 +164,66 @@ sub mainte_reserve_new {
     my $validator = FormValidator::Lite->new($params);
 
     $validator->check(
-        roominfo_id     => [ 'INT', ],
-        useform         => [ 'INT', ],
-        message         => [ [ 'LENGTH', 0, 20, ], ],
-        general_id      => [ 'INT', ],
-        admin_id        => [ 'INT', ],
-        tel             => [ [ 'LENGTH', 0, 20, ], ],
-        status          => [ 'INT', ],
+        roominfo_id        => [ 'INT', ],
+        getstarted_on_day  => [ 'NOT_NULL', 'DATE', ],
+        enduse_on_day      => [ 'NOT_NULL', 'DATE', ],
+        getstarted_on_time => [ 'NOT_NULL', 'TIME', ],
+        enduse_on_time     => [ 'NOT_NULL', 'TIME', ],
+        +{ on_day => [ 'getstarted_on_day', 'enduse_on_day', ], } =>
+            ['DUPLICATION'],
+        useform    => [ 'INT', ],
+        message    => [ [ 'LENGTH', 0, 20, ], ],
+        general_id => [ 'INT', ],
+        admin_id   => [ 'INT', ],
+        tel        => [ 'NOT_NULL', [ 'LENGTH', 0, 20, ], ],
+        status     => [ 'INT', ],
     );
+
+
+
+
+
 
     $validator->set_message(
         'roominfo_id.int' => '指定の形式で入力してください',
+        'getstarted_on_day.not_null' => '必須入力',
+        'enduse_on_day.not_null' => '必須入力',
+        'getstarted_on_day.date' => '日付の形式で入力してください',
+        'enduse_on_day.date' => '日付の形式で入力してください',
+
+
+        'getstarted_on_time.time' => '時間の形式で入力してください',
+        'enduse_on_time.time' => '時間の形式で入力してください',
+
+
+
+        'on_day.duplication'=>'開始と同じ日付にして下さい',
         'useform.int'    => '指定の形式で入力してください',
         'message.length' => '文字数!!',
         'general_id.int' => '指定の形式で入力してください',
         'admin_id.int'   => '指定の形式で入力してください',
+        'tel.not_null'     => '必須入力',
         'tel.length'     => '文字数!!',
         'status.int'     => '指定の形式で入力してください',
     );
 
     my @roominfo_id_errors
         = $validator->get_error_messages_from_param('roominfo_id');
+
+    my @getstarted_on_day_errors
+        = $validator->get_error_messages_from_param('getstarted_on_day');
+
+    my @enduse_on_day_errors
+        = $validator->get_error_messages_from_param('enduse_on_day');
+
+
+
+
+
+    my @on_day_errors
+        = $validator->get_error_messages_from_param('on_day');
+
+
     my @useform_errors = $validator->get_error_messages_from_param('useform');
     my @message_errors = $validator->get_error_messages_from_param('message');
     my @general_id_errors
@@ -195,7 +235,9 @@ sub mainte_reserve_new {
 
     # バリデート用メッセージ
     $self->stash(
-        roominfo_id   => shift @roominfo_id_errors,
+        roominfo_id       => shift @roominfo_id_errors,
+        getstarted_on_day => shift @getstarted_on_day_errors,
+        enduse_on_day => shift @enduse_on_day_errors || shift @on_day_errors,
         useform       => shift @useform_errors,
         message       => shift @message_errors,
         general_id    => shift @general_id_errors,
@@ -206,6 +248,115 @@ sub mainte_reserve_new {
 
     # 入力バリデート不合格の場合それ以降の作業はしない
     return $self->_render_reserve($params) if $validator->has_error();
+
+    # バリデーションの追加
+    # 日付入力関連のバリデーション
+
+    # 入力された利用終了時刻が開始時刻より早くなっていないか？(入力値チェック)
+    my $check_reserve_use_time = check_reserve_use_time(
+        $params->{getstarted_on_day}, $params->{getstarted_on_time},
+        $params->{enduse_on_day},     $params->{enduse_on_time},
+    );
+
+
+    if ($check_reserve_use_time) {
+        $self->stash->{enduse_on_time} = $check_reserve_use_time;
+
+        return $self->_render_reserve($params);
+    }
+
+
+
+    # 入力された利用日付が部屋情報の利用時間内であるか？(DBチェック roominfo)
+
+#     # 利用開始日時 getstarted_on->日付と時間
+#     #日付の書式のバリデ
+#     $validator->field('getstarted_on_day')->required(1)->constraint('date', split => '-');
+#     # 抽出した部屋情報の開始時刻より遅く、終了時間より早い事
+#     $validator->field('getstarted_on_time')->callback(sub {
+#         my $value = shift;
+
+#         # 部屋の利用開始と終了時刻の範囲内かを調べるバリデ
+#         # 指定したスタジオ、部屋情報idを取得
+#         my $roominfo_id = $self->param('roominfo_id');
+#         my $starttime_on; # 該当する部屋の開始時刻と終了時刻を取得
+#         my @roominfos = $teng->search_named(q{select * from roominfo;});
+#         foreach my $roominfo_ref (@roominfos) {
+#             if ($roominfo_ref->id == $roominfo_id) {
+#                 $starttime_on  = $roominfo_ref->starttime_on;#開始時刻取得
+#             }
+#         }
+#         #比較するため24-29の数字に変換
+#         if ($starttime_on) {
+#             $starttime_on  = substr($starttime_on,0,2);
+#             $starttime_on += 0;
+#             if ($starttime_on =~ /^[0-5]$/) {
+#                 $starttime_on += 24;
+#             }
+#         }
+
+#         return 1 if $starttime_on <= $value;
+
+#         return (0, '営業時間外です');
+#     });
+
+
+
+    # 入力された利用希望時間が貸出単位に適合しているか？(DBチェック roominfo)
+
+        #     $validator->field('enduse_on_time')->callback(sub {
+        #         my $value = shift; #開始より終了が早い場合
+        #         my $getstarted_on_time = $self->param('getstarted_on_time');
+
+        #         my @roominfos = $teng->search_named(q{select * from roominfo;});
+        #         # 指定したスタジオ、部屋情報idを取得
+        #         my $roominfo_id = $self->param('roominfo_id');
+        #         my $endingtime_on;# 該当する部屋の終了時刻を取得
+        #         my $rentalunit;# 該当する部屋の貸出単位を取得
+        #         foreach my $roominfo_ref (@roominfos) {
+        #             if ($roominfo_ref->id == $roominfo_id) {
+        #                 $endingtime_on = $roominfo_ref->endingtime_on;#終了時刻取得
+        #                 $rentalunit    = $roominfo_ref->rentalunit;#貸出単位
+        #             }
+        #         }
+        #         #貸出単位設定で2時間指定されたときの、バリデのためrentalunitも取得
+        #         # 1が１時間、2が２時間、２が選択されているときだけバリデ
+        #         #判定の変数
+        #         my $judg_rentalunit;
+        #         if ($rentalunit == 2) {
+        #             my $val = $value - $getstarted_on_time ;
+        #             if ($val % 2 == 0) { #偶数
+        #                 $judg_rentalunit = 0 ;#問題なし
+        #             }
+        #             else {
+        #                 $judg_rentalunit = 1 ;#奇数、バリデートコメントへ
+        #             }
+        #         }
+        #         #比較するため24-29の数字に変換
+        #         if ($endingtime_on) {
+        #             $endingtime_on   = substr($endingtime_on,0,2);
+        #             $endingtime_on += 0;
+        #             if ($endingtime_on =~ /^[0-6]$/) {
+        #                 $endingtime_on += 24;
+        #             }
+        #         }
+
+        #         return (0, '2時間単位でしか予約できません') if $judg_rentalunit ;
+
+        #         return (0, '開始時刻より遅くして下さい') if $getstarted_on_time >= $value ;
+
+        #         return 1 if $endingtime_on >= $value ;
+
+        #         return (0, '営業時間外です');
+        #     });
+
+
+
+
+
+
+
+
 
     # 日付の形式に変換
     my $change_format_datetime = change_format_datetime(
@@ -301,95 +452,9 @@ sub _render_reserve {
 
 
 
-#     # 利用開始日時 getstarted_on->日付と時間
-#     #日付の書式のバリデ
-#     $validator->field('getstarted_on_day')->required(1)->constraint('date', split => '-');
-#     # 抽出した部屋情報の開始時刻より遅く、終了時間より早い事
-#     $validator->field('getstarted_on_time')->callback(sub {
-#         my $value = shift;
-
-#         # 部屋の利用開始と終了時刻の範囲内かを調べるバリデ
-#         # 指定したスタジオ、部屋情報idを取得
-#         my $roominfo_id = $self->param('roominfo_id');
-#         my $starttime_on; # 該当する部屋の開始時刻と終了時刻を取得
-#         my @roominfos = $teng->search_named(q{select * from roominfo;});
-#         foreach my $roominfo_ref (@roominfos) {
-#             if ($roominfo_ref->id == $roominfo_id) {
-#                 $starttime_on  = $roominfo_ref->starttime_on;#開始時刻取得
-#             }
-#         }
-#         #比較するため24-29の数字に変換
-#         if ($starttime_on) {
-#             $starttime_on  = substr($starttime_on,0,2);
-#             $starttime_on += 0;
-#             if ($starttime_on =~ /^[0-5]$/) {
-#                 $starttime_on += 24;
-#             }
-#         }
-
-#         return 1 if $starttime_on <= $value;
-
-#         return (0, '営業時間外です');
-#     });
 
 
-#     # 利用終了日時 enduse_on->日付と時間
-#     # 日付の書式バリデ、開始、終了同じ日付にさせる
-#     $validator->field('enduse_on_day')->required(1)->
-#         constraint('date', split => '-')->callback(sub {
-#         my $value = shift;
-#         my $getstarted_on_day = $self->param('getstarted_on_day');
 
-#         return 1 if $getstarted_on_day eq $value ;
-
-#         return (0, '開始と同じ日付にして下さい') ;
-#     });
-
-#     $validator->field('enduse_on_time')->callback(sub {
-#         my $value = shift; #開始より終了が早い場合
-#         my $getstarted_on_time = $self->param('getstarted_on_time');
-
-#         my @roominfos = $teng->search_named(q{select * from roominfo;});
-#         # 指定したスタジオ、部屋情報idを取得
-#         my $roominfo_id = $self->param('roominfo_id');
-#         my $endingtime_on;# 該当する部屋の終了時刻を取得
-#         my $rentalunit;# 該当する部屋の貸出単位を取得
-#         foreach my $roominfo_ref (@roominfos) {
-#             if ($roominfo_ref->id == $roominfo_id) {
-#                 $endingtime_on = $roominfo_ref->endingtime_on;#終了時刻取得
-#                 $rentalunit    = $roominfo_ref->rentalunit;#貸出単位
-#             }
-#         }
-#         #貸出単位設定で2時間指定されたときの、バリデのためrentalunitも取得
-#         # 1が１時間、2が２時間、２が選択されているときだけバリデ
-#         #判定の変数
-#         my $judg_rentalunit;
-#         if ($rentalunit == 2) {
-#             my $val = $value - $getstarted_on_time ;
-#             if ($val % 2 == 0) { #偶数
-#                 $judg_rentalunit = 0 ;#問題なし
-#             }
-#             else {
-#                 $judg_rentalunit = 1 ;#奇数、バリデートコメントへ
-#             }
-#         }
-#         #比較するため24-29の数字に変換
-#         if ($endingtime_on) {
-#             $endingtime_on   = substr($endingtime_on,0,2);
-#             $endingtime_on += 0;
-#             if ($endingtime_on =~ /^[0-6]$/) {
-#                 $endingtime_on += 24;
-#             }
-#         }
-
-#         return (0, '2時間単位でしか予約できません') if $judg_rentalunit ;
-
-#         return (0, '開始時刻より遅くして下さい') if $getstarted_on_time >= $value ;
-
-#         return 1 if $endingtime_on >= $value ;
-
-#         return (0, '営業時間外です');
-#     });
 
 #     # 利用形態名 useform->バンド、個人練習、利用停止、いずれも許可が必要
 #     $validator->field('useform')->callback(sub {
@@ -504,8 +569,6 @@ sub _render_reserve {
 #                :                                    1
 #                ;
 #     });
-#     # 電話番号、 tel->必須、文字制限
-#     $validator->field('tel')->required(1)->length(1,30);
 
 #     # 利用開始時間のバリデートについてもう少し考えてみる
 
