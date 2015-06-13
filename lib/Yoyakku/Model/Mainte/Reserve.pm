@@ -12,15 +12,85 @@ use Exporter 'import';
 our @EXPORT_OK = qw{
     search_reserve_id_rows
     change_format_datetime
-    check_reserve_dupli
     writing_reserve
     search_reserve_id_row
     get_startend_day_and_time
     get_init_valid_params_reserve
     get_input_support
     check_reserve_validator
+    check_reserve_validator_db
 };
 use Data::Dumper;
+
+# DB 問い合わせバリデート
+sub check_reserve_validator_db {
+    my $type   = shift;
+    my $params = shift;
+
+    my $valid_msg_reserve_db = +{};
+
+    # 予約の重複確認
+    my $check_reserve_dupli = _check_reserve_dupli( $type, $params, );
+
+    if ($check_reserve_dupli) {
+        $valid_msg_reserve_db = +{ id => $check_reserve_dupli, };
+    }
+
+    return $valid_msg_reserve_db if $check_reserve_dupli;
+
+    # 部屋の利用開始と終了時刻の範囲内かを調べる
+    my $check_roominfo_open_time = _check_roominfo_open_time($params);
+
+
+    return;
+}
+
+# 部屋の利用開始と終了時刻の範囲内かを調べる
+sub _check_roominfo_open_time {
+    my $params = shift;
+
+    # 予約希望した roominfo を取得し、営業時間を調べる
+    my $roominfo_row
+        = $teng->single( 'roominfo', +{ id => $params->{roominfo_id} }, );
+
+    die '$roominfo_row->starttime_on',Dumper($roominfo_row->starttime_on);
+
+    return;
+}
+
+
+
+# 予約の重複確認
+sub _check_reserve_dupli {
+    my $type   = shift;
+    my $params = shift;
+
+    my $reserve_id    = $params->{id};
+    my $roominfo_id   = $params->{roominfo_id};
+    my $getstarted_on = $params->{getstarted_on};
+    my $enduse_on     = $params->{enduse_on};
+
+    my $search_condition = +{
+        roominfo_id   => $roominfo_id,
+        status        => 0,
+        getstarted_on => [ +{ '>=' => $getstarted_on }, ],
+        enduse_on     => [ +{ '<=' => $enduse_on }, ],
+    };
+
+    if ( $type eq 'update' ) {
+        $search_condition->{id} = +{ '!=' => $reserve_id };
+    }
+
+    my $reserve_row = $teng->single( 'reserve', $search_condition, );
+
+    return '既に予約が存在します' if $reserve_row;
+
+    return;
+}
+
+
+
+
 
 # 入力補助の値取得
 sub get_input_support {
@@ -272,34 +342,6 @@ sub change_format_datetime {
     $params->{enduse_on}     = $change_format_datetime->{enduse_on};
 
     return $params;
-}
-
-# 予約の重複確認
-sub check_reserve_dupli {
-    my $type   = shift;
-    my $params = shift;
-
-    my $reserve_id    = $params->{id};
-    my $roominfo_id   = $params->{roominfo_id};
-    my $getstarted_on = $params->{getstarted_on};
-    my $enduse_on     = $params->{enduse_on};
-
-    my $search_condition = +{
-        roominfo_id   => $roominfo_id,
-        status        => 0,
-        getstarted_on => [ +{ '>=' => $getstarted_on }, ],
-        enduse_on     => [ +{ '<=' => $enduse_on }, ],
-    };
-
-    if ( $type eq 'update' ) {
-        $search_condition->{id} = +{ '!=' => $reserve_id };
-    }
-
-    my $reserve_row = $teng->single( 'reserve', $search_condition, );
-
-    return '既に予約が存在します' if $reserve_row;
-
-    return;
 }
 
 # roominfo の開始時刻を入力フォーム用に変換

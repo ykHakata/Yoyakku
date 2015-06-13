@@ -1,18 +1,17 @@
 package Yoyakku::Controller::Mainte::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
-use FormValidator::Lite qw{DATE TIME};
 use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Reserve qw{
     search_reserve_id_rows
     change_format_datetime
-    check_reserve_dupli
     writing_reserve
     search_reserve_id_row
     get_startend_day_and_time
     get_init_valid_params_reserve
     get_input_support
     check_reserve_validator
+    check_reserve_validator_db
 };
 use Data::Dumper;
 
@@ -64,39 +63,59 @@ sub mainte_reserve_new {
 
     $self->stash( %{$init_valid_params_reserve}, %{$input_support_values}, );
 
-    my $type = $params->{id} ? 'update' : 'insert';
+    return $self->_insert() if !$params->{id};
+    return $self->_update();
+}
 
-    return $self->_render_update_form($params)
-        if ( 'GET' eq $method ) && ( $type eq 'update' );
+sub _insert {
+    my $self = shift;
+
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
 
     return $self->_render_reserve($params) if 'GET' eq $method;
 
-    my $valid_msg_reserve = check_reserve_validator($params);
+    my $flash_msg = +{ touroku => '登録完了' };
 
-    return $self->stash($valid_msg_reserve), $self->_render_reserve($params)
-        if $valid_msg_reserve;
+    return $self->_common( 'insert', $flash_msg, );
+}
 
-    # 既存データとのバリデーション DB 問い合わせ
+sub _update {
+    my $self = shift;
+
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
+
+    return $self->_render_update_form($params) if 'GET' eq $method;
+
+    my $flash_msg = +{ henkou => '修正完了', };
+
+    return $self->_common( 'update', $flash_msg, );
+}
+
+sub _common {
+    my $self      = shift;
+    my $type      = shift;
+    my $flash_msg = shift;
+
+    my $params = $self->req->params->to_hash;
+
+    my $valid_msg = check_reserve_validator($params);
+
+    return $self->stash($valid_msg), $self->_render_reserve($params)
+        if $valid_msg;
 
     # 日付の形式に変換
     $params = change_format_datetime($params);
 
-    # 予約の重複確認
-    my $check_reserve_dupli = check_reserve_dupli( $type, $params, );
+    # 既存データとのバリデーション DB 問い合わせ
+    my $valid_msg_db = check_reserve_validator_db( $type, $params, );
 
-    if ($check_reserve_dupli) {
-        $self->stash->{id} = $check_reserve_dupli;
-        return $self->_render_reserve($params);
-    }
+    return $self->stash($valid_msg_db), $self->_render_reserve($params)
+        if $valid_msg_db;
 
     writing_reserve( $type, $params );
-
-    my $flash_msg = +{ touroku => '登録完了' };
-    if ( $type eq 'update' ) {
-         $flash_msg = +{ henkou => '修正完了', };
-     }
-
-    $self->flash( $flash_msg );
+    $self->flash($flash_msg);
 
     return $self->redirect_to('mainte_reserve_serch');
 }
