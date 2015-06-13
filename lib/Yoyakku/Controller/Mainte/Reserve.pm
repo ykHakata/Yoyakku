@@ -5,16 +5,14 @@ use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Reserve qw{
     search_reserve_id_rows
-    get_general_rows_all
-    get_admin_rows_all
-    get_reserve_fillIn_values
-    change_start_and_endtime
     change_format_datetime
     check_reserve_dupli
     writing_reserve
     search_reserve_id_row
     get_startend_day_and_time
-    check_reserve_use_time
+    get_init_valid_params_reserve
+    get_input_support
+    check_reserve_validator
 };
 use Data::Dumper;
 
@@ -22,17 +20,14 @@ use Data::Dumper;
 sub mainte_reserve_serch {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
      # テンプレートbodyのクラス名を定義
     my $class = 'mainte_reserve_serch';
     $self->stash( class => $class );
 
-    # id検索時のアクション (該当の店舗を検索)
     my $reserve_id = $self->param('reserve_id');
 
-    # id 検索時は指定のid検索して出力
     my $reserve_rows = search_reserve_id_rows($reserve_id);
 
     $self->stash( reserve_rows => $reserve_rows );
@@ -47,205 +42,62 @@ sub mainte_reserve_serch {
 sub mainte_reserve_new {
     my $self = shift;
 
-    # ログイン確認
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
-    # パラメーター取得
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    # リクエストの許可 GET, POST のみ
     return $self->redirect_to('/mainte_reserve_serch')
-        if $method ne 'GET' && $method ne 'POST';
+        if ( $method ne 'GET' ) && ( $method ne 'POST' );
 
-    # 予約リストからの編集 id, 部屋情報からの新規 roominfo_id 付のみ
     return $self->redirect_to('/mainte_reserve_serch')
         if !$params->{id} && !$params->{roominfo_id};
 
-    # 入力テンプレート表示に必要な値の準備
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_reserve_new';
     $self->stash( class => $class );
 
-    # バリデート対象パラメータ
-    my $valid_params = [qw{
-        id
-        roominfo_id
-        getstarted_on_day
-        getstarted_on_time
-        enduse_on_day
-        enduse_on_time
-        useform
-        message
-        general_id
-        admin_id
-        tel
-        status
-    }];
+    my $init_valid_params_reserve = get_init_valid_params_reserve();
 
-    # 初期表示用値の作成
-    my $valid_params_stash = +{};
+    my $input_support_values
+        = get_input_support( $params->{id}, $params->{roominfo_id}, );
 
-    for my $param (@{$valid_params}) {
-        $valid_params_stash->{$param} = '';
-    }
+    $self->stash( %{$init_valid_params_reserve}, %{$input_support_values}, );
 
-    # バリデート用
-    $self->stash($valid_params_stash);
+    my $type = $params->{id} ? 'update' : 'insert';
 
-    my $roominfo_id = $params->{roominfo_id};
+    return $self->_render_update_form($params)
+        if ( 'GET' eq $method ) && ( $type eq 'update' );
 
-    if (!$roominfo_id) {
-        my $reserve_row = search_reserve_id_row( $params->{id} );
-        $roominfo_id = $reserve_row->roominfo_id;
-    }
-
-    my $reserve_fillIn_values = get_reserve_fillIn_values($roominfo_id);
-
-    # 開始日時, 終了日時
-    my $change_start_and_endtime
-        = change_start_and_endtime($reserve_fillIn_values);
-
-    # 一般ユーザー情報を取得する(入力につかう)
-    my $get_general_rows_all = get_general_rows_all();
-
-    $self->stash(
-        reserve_fillIn_values => $reserve_fillIn_values,
-        start_hour            => $change_start_and_endtime->{start_hour},
-        end_hour              => $change_start_and_endtime->{end_hour},
-        general_rows          => $get_general_rows_all,
-    );
-
-    # 入力テンプレート表示(新規作成)
-    return $self->_create() if !$params->{id};
-
-    # 入力テンプレート表示(編集作成)
-    return $self->_update();
-}
-
-# 入力テンプレート表示(新規作成)
-sub _create {
-    my $self = shift;
-
-    # パラメーター取得
-    # 入力テンプレートから入力された時の値の受け取り
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
-
-    # 入力テンプレート表示(新規作成)
     return $self->_render_reserve($params) if 'GET' eq $method;
 
-    # 入力テンプレートから入力された値の適合性(バリデートチェック)
-    my $valid_msg_reserve = _check_reserve_validator($params);
+    my $valid_msg_reserve = check_reserve_validator($params);
 
-    # 入力値をバリデート
-    # バリデート不合格時、入力した値とエラーメッセージを
-    #     保持したまま入力テンプレート表示、エラーメッセージ表示させる
     return $self->stash($valid_msg_reserve), $self->_render_reserve($params)
         if $valid_msg_reserve;
 
-    # バリデート合格時、既存データとのバリデーション DB 問い合わせ
+    # 既存データとのバリデーション DB 問い合わせ
 
     # 日付の形式に変換
-    my $change_format_datetime = change_format_datetime(
-        $params->{getstarted_on_day},
-        $params->{getstarted_on_time},
-        $params->{enduse_on_day},
-        $params->{enduse_on_time},
-    );
+    $params = change_format_datetime($params);
 
-    $params->{getstarted_on} = $change_format_datetime->{getstarted_on};
-    $params->{enduse_on}     = $change_format_datetime->{enduse_on};
-
-    # 予約の重複確認の為の値
-    my $args = +{
-        reserve_id    => $params->{id},
-        roominfo_id   => $params->{roominfo_id},
-        getstarted_on => $params->{getstarted_on},
-        enduse_on     => $params->{enduse_on},
-    };
-
-    # DB バリデート合格の場合 DB 書き込み(新規)
     # 予約の重複確認
-    my $check_reserve_dupli = check_reserve_dupli( 'insert', $args, );
+    my $check_reserve_dupli = check_reserve_dupli( $type, $params, );
 
-    # 既存データとのバリデーション不合格時、入力した値とエラーメッセージを
-    #     保持したまま入力テンプレート表示、エラーメッセージ表示させる
     if ($check_reserve_dupli) {
         $self->stash->{id} = $check_reserve_dupli;
         return $self->_render_reserve($params);
     }
 
-    # 既存データバリデート合格時、データベース書き込み
-    writing_reserve( 'insert', $params );
+    writing_reserve( $type, $params );
 
-    # 書き込み終了後、予約一覧へリダイレクト、リダイレクトメッセージつき
-    $self->flash( touroku => '登録完了' );
+    my $flash_msg = +{ touroku => '登録完了' };
+    if ( $type eq 'update' ) {
+         $flash_msg = +{ henkou => '修正完了', };
+     }
 
-    # sqlにデータ入力したので list 画面にリダイレクト
-    return $self->redirect_to('mainte_reserve_serch');
-}
+    $self->flash( $flash_msg );
 
-# 入力テンプレート表示(編集作成)
-sub _update {
-    my $self = shift;
-
-    # パラメーター取得
-    # 入力テンプレートから入力された時の値の受け取り
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
-
-    # 入力テンプレート表示(編集作成)
-    return $self->_render_update_form($params) if 'GET' eq $method;
-
-    # 入力テンプレートから入力された値の適合性(バリデートチェック)
-    my $valid_msg_reserve = _check_reserve_validator($params);
-
-    # 入力値をバリデート
-    # バリデート不合格時、入力した値とエラーメッセージを
-    #     保持したまま入力テンプレート表示、エラーメッセージ表示させる
-    return $self->stash($valid_msg_reserve), $self->_render_reserve($params)
-        if $valid_msg_reserve;
-
-    # バリデート合格時、既存データとのバリデーション DB 問い合わせ
-
-    # 日付の形式に変換
-    my $change_format_datetime = change_format_datetime(
-        $params->{getstarted_on_day},
-        $params->{getstarted_on_time},
-        $params->{enduse_on_day},
-        $params->{enduse_on_time},
-    );
-
-    $params->{getstarted_on} = $change_format_datetime->{getstarted_on};
-    $params->{enduse_on}     = $change_format_datetime->{enduse_on};
-
-    # 予約の重複確認の為の値
-    my $args = +{
-        reserve_id    => $params->{id},
-        roominfo_id   => $params->{roominfo_id},
-        getstarted_on => $params->{getstarted_on},
-        enduse_on     => $params->{enduse_on},
-    };
-
-    # DB バリデート合格の場合 DB 書き込み(修正)
-    # 予約の重複確認
-    my $check_reserve_dupli = check_reserve_dupli( 'update', $args, );
-
-    # 既存データとのバリデーション不合格時、入力した値とエラーメッセージを
-    #     保持したまま入力テンプレート表示、エラーメッセージ表示させる
-    if ($check_reserve_dupli) {
-        $self->stash->{id} = $check_reserve_dupli;
-        return $self->_render_reserve($params);
-    }
-
-    # 既存データバリデート合格時、データベース書き込み
-    writing_reserve( 'update', $params );
-
-    # 書き込み終了後、予約一覧へリダイレクト、リダイレクトメッセージつき
-    $self->flash( henkou => '修正完了' );
-
-    # sqlにデータ入力したので list 画面にリダイレクト
     return $self->redirect_to('mainte_reserve_serch');
 }
 
@@ -253,11 +105,8 @@ sub _render_update_form {
     my $self   = shift;
     my $params = shift;
 
-    my $reserve_row = search_reserve_id_row( $params->{id} );
-
-    my $startend_day_time
-        = get_startend_day_and_time( $reserve_row->getstarted_on,
-        $reserve_row->enduse_on, );
+    my $reserve_row       = search_reserve_id_row( $params->{id} );
+    my $startend_day_time = get_startend_day_and_time($reserve_row);
 
     # 入力フォームフィルイン用
     $params = +{
@@ -278,93 +127,6 @@ sub _render_update_form {
     };
 
     return $self->_render_reserve($params);
-}
-
-# バリデート一式
-sub _check_reserve_validator {
-    my $params = shift;
-
-    # 入力フォームに値を入力して登録するボタン押した場合
-    # バリデード実行
-    my $validator = FormValidator::Lite->new($params);
-
-    $validator->check(
-        roominfo_id        => [ 'INT', ],
-        getstarted_on_day  => [ 'NOT_NULL', 'DATE', ],
-        enduse_on_day      => [ 'NOT_NULL', 'DATE', ],
-        getstarted_on_time => [ 'NOT_NULL', 'TIME', ],
-        enduse_on_time     => [ 'NOT_NULL', 'TIME', ],
-        +{ on_day => [ 'getstarted_on_day', 'enduse_on_day', ], } =>
-            ['DUPLICATION'],
-        useform    => [ 'INT', ],
-        message    => [ [ 'LENGTH', 0, 20, ], ],
-        general_id => [ 'INT', ],
-        admin_id   => [ 'INT', ],
-        tel        => [ 'NOT_NULL', [ 'LENGTH', 0, 20, ], ],
-        status     => [ 'INT', ],
-    );
-
-    $validator->set_message(
-        'roominfo_id.int' => '指定の形式で入力してください',
-        'getstarted_on_day.not_null' => '必須入力',
-        'enduse_on_day.not_null'     => '必須入力',
-        'getstarted_on_day.date' =>
-            '日付の形式で入力してください',
-        'enduse_on_day.date' => '日付の形式で入力してください',
-        'getstarted_on_time.time' =>
-            '時間の形式で入力してください',
-        'enduse_on_time.time' => '時間の形式で入力してください',
-        'on_day.duplication'  => '開始と同じ日付にして下さい',
-        'useform.int'         => '指定の形式で入力してください',
-        'message.length'      => '文字数!!',
-        'general_id.int'      => '指定の形式で入力してください',
-        'admin_id.int'        => '指定の形式で入力してください',
-        'tel.not_null'        => '必須入力',
-        'tel.length'          => '文字数!!',
-        'status.int'          => '指定の形式で入力してください',
-    );
-
-    # エラーのパラメーター名を取得
-    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
-
-    # エラーのパラメーター名の分だけエラーメッセージ取得
-    my $msg = +{};
-
-    for my $error_param ( @{$error_params} ) {
-        $msg->{$error_param}
-            = $validator->get_error_messages_from_param($error_param);
-
-        $msg->{$error_param} = shift @{ $msg->{$error_param} };
-    }
-
-    my $valid_msg_reserve = +{
-        id                 => '',
-        roominfo_id        => $msg->{roominfo_id},
-        getstarted_on_day  => $msg->{getstarted_on_day},
-        getstarted_on_time => $msg->{getstarted_on_time},
-        enduse_on_day      => $msg->{enduse_on_day} || $msg->{on_day},
-        enduse_on_time     => $msg->{enduse_on_time},
-        useform            => $msg->{useform},
-        message            => $msg->{message},
-        general_id         => $msg->{general_id},
-        admin_id           => $msg->{admin_id},
-        tel                => $msg->{tel},
-        status             => $msg->{status},
-    };
-
-    return $valid_msg_reserve if $validator->has_error();
-
-    # 入力された利用終了時刻が開始時刻より早くなっていないか？(入力値チェック)
-    my $check_reserve_use_time = check_reserve_use_time(
-        $params->{getstarted_on_day}, $params->{getstarted_on_time},
-        $params->{enduse_on_day},     $params->{enduse_on_time},
-    );
-
-    $valid_msg_reserve->{enduse_on_time} = $check_reserve_use_time,
-
-    return $valid_msg_reserve if $check_reserve_use_time;
-
-    return;
 }
 
 # テンプレート画面のレンダリング
