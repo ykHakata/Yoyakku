@@ -165,40 +165,6 @@ sub _render_reserve {
 
 1;
 
-    # 入力された利用日付が部屋情報の利用時間内であるか？(DBチェック roominfo)
-
-#     # 利用開始日時 getstarted_on->日付と時間
-#     #日付の書式のバリデ
-#     $validator->field('getstarted_on_day')->required(1)->constraint('date', split => '-');
-#     # 抽出した部屋情報の開始時刻より遅く、終了時間より早い事
-#     $validator->field('getstarted_on_time')->callback(sub {
-#         my $value = shift;
-
-#         # 部屋の利用開始と終了時刻の範囲内かを調べるバリデ
-#         # 指定したスタジオ、部屋情報idを取得
-#         my $roominfo_id = $self->param('roominfo_id');
-#         my $starttime_on; # 該当する部屋の開始時刻と終了時刻を取得
-#         my @roominfos = $teng->search_named(q{select * from roominfo;});
-#         foreach my $roominfo_ref (@roominfos) {
-#             if ($roominfo_ref->id == $roominfo_id) {
-#                 $starttime_on  = $roominfo_ref->starttime_on;#開始時刻取得
-#             }
-#         }
-#         #比較するため24-29の数字に変換
-#         if ($starttime_on) {
-#             $starttime_on  = substr($starttime_on,0,2);
-#             $starttime_on += 0;
-#             if ($starttime_on =~ /^[0-5]$/) {
-#                 $starttime_on += 24;
-#             }
-#         }
-
-#         return 1 if $starttime_on <= $value;
-
-#         return (0, '営業時間外です');
-#     });
-
-
 
     # 入力された利用希望時間が貸出単位に適合しているか？(DBチェック roominfo)
 
