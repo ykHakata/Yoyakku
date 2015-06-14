@@ -23,6 +23,39 @@ our @EXPORT_OK = qw{
 };
 use Data::Dumper;
 
+# _chenge_hour_6_for_30 6:00 を 30:00
+sub _chenge_hour_6_for_30 {
+    my $start_time = shift;
+    my $end_time   = shift;
+
+    my $FIELD_SEPARATOR_TIME = q{:};
+    my $FIELD_COUNT_TIME     = 3;
+
+    my ( $start_hour, $start_min, $start_sec ) = split $FIELD_SEPARATOR_TIME,
+        $start_time, $FIELD_COUNT_TIME + 1;
+
+    my ( $end_hour, $end_min, $end_sec ) = split $FIELD_SEPARATOR_TIME,
+        $end_time, $FIELD_COUNT_TIME + 1;
+
+    # 数字にもどす
+    $start_hour += 0;
+    $end_hour   += 0;
+
+    # 時間の表示を変換
+    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
+        $start_hour += 24;
+    }
+
+    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
+        $end_hour += 24;
+    }
+
+    return (
+        $start_hour, $start_min, $start_sec,
+        $end_hour,   $end_min,   $end_sec,
+    );
+}
+
 # DB 問い合わせバリデート
 sub check_reserve_validator_db {
     my $type   = shift;
@@ -49,6 +82,86 @@ sub check_reserve_validator_db {
 
     return $valid_msg_reserve_db if $check_roominfo_open_time;
 
+    # 入力された利用希望時間が貸出単位に適合しているか
+    my $check_lend_unit = _check_lend_unit($params);
+
+    if ($check_lend_unit) {
+        $valid_msg_reserve_db = +{ enduse_on_time => $check_lend_unit, };
+    }
+
+    return $valid_msg_reserve_db if $check_lend_unit;
+
+# 利用形態名 useform->バンド、個人練習、利用停止、いずれも許可が必要
+    my $check_useform = _check_useform($params);
+
+    if ($check_useform) {
+        $valid_msg_reserve_db = +{ useform => $check_useform, };
+    }
+
+    return $valid_msg_reserve_db if $check_useform;
+
+    return;
+}
+
+# 利用形態名 useform->バンド、個人練習、利用停止、いずれも許可が必要
+sub _check_useform {
+    my $params = shift;
+
+# 予約希望した roominfo を取得し、利用形態名 useformを調べる
+    my $roominfo_row
+        = $teng->single( 'roominfo', +{ id => $params->{roominfo_id} }, );
+
+# privatepermit:  INTEGER (例: 0: 許可する, 1: 許可しない) 個人練習許可
+    $roominfo_row->privatepermit;
+
+    # reserve 入力 # 0:バンド, 1:個人, 2:利用停止
+    my $useform = $params->{useform};
+
+    if ( ( $useform eq 1 ) && ( $roominfo_row->privatepermit && 1 ) ) {
+        return '個人練習が許可されてない';
+    }
+
+# 一般ユーザーが選択されてる時に利用停止->2が選択されてはいけない
+    my $general_id = $params->{general_id};
+
+    if ( ( $useform eq 2 ) && $general_id ) {
+        return '一般ユーザーは利用できない';
+    }
+
+    return;
+}
+
+# 入力された利用希望時間が貸出単位に適合しているか
+sub _check_lend_unit {
+    my $params = shift;
+
+    # 予約希望した roominfo を取得し、貸出単位を調べる
+    my $roominfo_row
+        = $teng->single( 'roominfo', +{ id => $params->{roominfo_id} }, );
+
+# 貸出単位 rentalunit:     INTEGER (例: 1: 1時間, 2: 2時間) 貸出単位
+    my $rentalunit = $roominfo_row->{rentalunit};
+
+    # reserve 入力(そのままの)
+    my $getstarted_on_time = $params->{getstarted_on_time};
+    my $enduse_on_time     = $params->{enduse_on_time};
+
+    my $FIELD_SEPARATOR = q{:};
+    my $FIELD_COUNT     = 2;
+
+    my ( $start_hour, $start_minute ) = split $FIELD_SEPARATOR,
+        $getstarted_on_time, $FIELD_COUNT + 1;
+
+    my ( $end_hour, $end_minute ) = split $FIELD_SEPARATOR,
+        $enduse_on_time, $FIELD_COUNT + 1;
+
+    # 希望している時間
+    my $lend_time = $end_hour - $start_hour;
+
+    if ( $lend_time % 2 ) {
+        return '2時間単位でしか予約できません';
+    }
+
     return;
 }
 
@@ -60,9 +173,6 @@ sub _check_roominfo_open_time {
     my $roominfo_row
         = $teng->single( 'roominfo', +{ id => $params->{roominfo_id} }, );
 
-    # 入力した再計算した日付
-    $params->{getstarted_on};
-
     # roominfo に登録してある設定時間
     $roominfo_row->starttime_on;
 
@@ -73,6 +183,7 @@ sub _check_roominfo_open_time {
 
     # reserve 入力(そのままの)
     my $getstarted_on_time = $params->{getstarted_on_time};
+    my $enduse_on_time     = $params->{enduse_on_time};
 
     my $FIELD_SEPARATOR = q{:};
     my $FIELD_COUNT     = 2;
@@ -80,8 +191,15 @@ sub _check_roominfo_open_time {
     my ( $start_hour, $start_minute ) = split $FIELD_SEPARATOR,
         $getstarted_on_time, $FIELD_COUNT + 1;
 
+    my ( $end_hour, $end_minute ) = split $FIELD_SEPARATOR,
+        $enduse_on_time, $FIELD_COUNT + 1;
+
     # 入力した値の方が早い(少ない)場合エラーメッセージ
     if ( $start_hour < $change_start_and_endtime->{start_hour} ) {
+        return '営業時間外です';
+    }
+
+    if ( $end_hour > $change_start_and_endtime->{end_hour} ) {
         return '営業時間外です';
     }
 
@@ -121,8 +239,8 @@ sub get_input_support {
     my $reserve_id  = shift;
     my $roominfo_id = shift;
 
-    if (!$roominfo_id) {
-        my $reserve_row = search_reserve_id_row( $reserve_id );
+    if ( !$roominfo_id ) {
+        my $reserve_row = search_reserve_id_row($reserve_id);
         $roominfo_id = $reserve_row->roominfo_id;
     }
 
@@ -132,7 +250,7 @@ sub get_input_support {
     my $change_start_and_endtime
         = _change_start_and_endtime($reserve_fillIn_row);
 
-    my @rows = $teng->search('general', +{}, );
+    my @rows = $teng->search( 'general', +{}, );
     my $get_general_rows_all = \@rows;
 
     return +{
@@ -150,27 +268,10 @@ sub _change_start_and_endtime {
     my $starttime_on  = $reserve_fillIn_row->starttime_on;
     my $endingtime_on = $reserve_fillIn_row->endingtime_on;
 
-    my $FIELD_SEPARATOR = q{:};
-    my $FIELD_COUNT     = 2;
-
-    my ( $start_hour, $start_minute ) = split $FIELD_SEPARATOR,
-        $starttime_on, $FIELD_COUNT + 1;
-
-    my ( $end_hour, $end_minute ) = split $FIELD_SEPARATOR,
-        $endingtime_on, $FIELD_COUNT + 1;
-
-    # 数字にもどす
-    $start_hour += 0;
-    $end_hour   += 0;
-
-    # 時間の表示を変換
-    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
-        $start_hour += 24;
-    }
-
-    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
-        $end_hour += 24;
-    }
+    # 時間の表示を6:00-30:00
+    my ($start_hour, $start_minute, $start_second,
+        $end_hour,   $end_minute,   $end_second,
+    ) = _chenge_hour_6_for_30( $starttime_on, $endingtime_on );
 
     my $change_start_and_endtime = +{
         start_hour => $start_hour,
@@ -217,20 +318,22 @@ sub _get_reserve_fillIn_row {
 # バリデートエラー表示値の初期化
 sub get_init_valid_params_reserve {
 
-    my $valid_params = [qw{
-        id
-        roominfo_id
-        getstarted_on_day
-        getstarted_on_time
-        enduse_on_day
-        enduse_on_time
-        useform
-        message
-        general_id
-        admin_id
-        tel
-        status
-    }];
+    my $valid_params = [
+        qw{
+            id
+            roominfo_id
+            getstarted_on_day
+            getstarted_on_time
+            enduse_on_day
+            enduse_on_time
+            useform
+            message
+            general_id
+            admin_id
+            tel
+            status
+            }
+    ];
 
     my $valid_params_stash = +{};
 
@@ -270,14 +373,14 @@ sub check_reserve_validator {
         'getstarted_on_day.date' =>
             '日付の形式で入力してください',
         'enduse_on_day.date' => '日付の形式で入力してください',
-        'on_day.duplication'  => '開始と同じ日付にして下さい',
-        'useform.int'         => '指定の形式で入力してください',
-        'message.length'      => '文字数!!',
-        'general_id.int'      => '指定の形式で入力してください',
-        'admin_id.int'        => '指定の形式で入力してください',
-        'tel.not_null'        => '必須入力',
-        'tel.length'          => '文字数!!',
-        'status.int'          => '指定の形式で入力してください',
+        'on_day.duplication' => '開始と同じ日付にして下さい',
+        'useform.int'        => '指定の形式で入力してください',
+        'message.length'     => '文字数!!',
+        'general_id.int'     => '指定の形式で入力してください',
+        'admin_id.int'       => '指定の形式で入力してください',
+        'tel.not_null'       => '必須入力',
+        'tel.length'         => '文字数!!',
+        'status.int'         => '指定の形式で入力してください',
     );
 
     my $error_params = [ map {$_} keys %{ $validator->errors() } ];
@@ -310,12 +413,12 @@ sub check_reserve_validator {
     # 日付の計算をするために通常の日時の表記に変更
     $params = change_format_datetime($params);
 
-    # 入力された利用終了時刻が開始時刻より早くなっていないか？(入力値チェック)
+# 入力された利用終了時刻が開始時刻より早くなっていないか？(入力値チェック)
     my $check_reserve_use_time = _check_reserve_use_time($params);
 
     $valid_msg_reserve->{enduse_on_time} = $check_reserve_use_time,
 
-    return $valid_msg_reserve if $check_reserve_use_time;
+        return $valid_msg_reserve if $check_reserve_use_time;
 
     return;
 }
@@ -366,35 +469,26 @@ sub change_format_datetime {
     # 時間の表示を変換
     if ( $start_hour >= 24 && $start_hour <= 30 ) {
         $start_hour -= 24;
+
         # 日付を１日すすめる
         my $getstarted_on_day_tp
             = localtime->strptime( $getstarted_on_day, '%Y-%m-%d' );
         $getstarted_on_day_tp = $getstarted_on_day_tp + ONE_DAY;
-        $getstarted_on_day    = $getstarted_on_day_tp->ymd
+        $getstarted_on_day    = $getstarted_on_day_tp->ymd;
     }
 
     if ( $end_hour >= 24 && $end_hour <= 30 ) {
         $end_hour -= 24;
+
         # 日付を１日すすめる
         my $enduse_on_day_tp
             = localtime->strptime( $enduse_on_day, '%Y-%m-%d' );
         $enduse_on_day_tp = $enduse_on_day_tp + ONE_DAY;
-        $enduse_on_day    = $enduse_on_day_tp->ymd
+        $enduse_on_day    = $enduse_on_day_tp->ymd;
     }
 
-    $getstarted_on_time
-        = $start_hour
-        . $FIELD_SEPARATOR_TIME
-        . $start_minute
-        . $FIELD_SEPARATOR_TIME
-        . $start_second;
-
-    $enduse_on_time
-        = $end_hour
-        . $FIELD_SEPARATOR_TIME
-        . $end_minute
-        . $FIELD_SEPARATOR_TIME
-        . $end_second;
+    $getstarted_on_time = join ':', $start_hour, $start_minute, $start_second;
+    $enduse_on_time     = join ':', $end_hour,   $end_minute,   $end_second;
 
     $getstarted_on_time = sprintf '%08s', $getstarted_on_time;
     $enduse_on_time     = sprintf '%08s', $enduse_on_time;
@@ -426,42 +520,28 @@ sub get_startend_day_and_time {
     my ( $enduse_on_day, $enduse_on_time ) = split $FIELD_SEPARATOR,
         $enduse_on, $FIELD_COUNT + 1;
 
-    my $FIELD_SEPARATOR_TIME = q{:};
-    my $FIELD_COUNT_TIME     = 3;
+    # 時間の表示を6:00-30:00
+    my ($start_hour, $start_minute, $start_second,
+        $end_hour,   $end_minute,   $end_second,
+    ) = _chenge_hour_6_for_30( $getstarted_on_time, $enduse_on_time );
 
-    my ( $start_hour, $start_minute, $start_second, )
-        = split $FIELD_SEPARATOR_TIME, $getstarted_on_time,
-        $FIELD_COUNT_TIME + 1;
-
-    my ( $end_hour, $end_minute, $end_second, ) = split $FIELD_SEPARATOR_TIME,
-        $enduse_on_time, $FIELD_COUNT_TIME + 1;
-
-    # 数字にもどす
-    $start_hour += 0;
-    $end_hour   += 0;
-
-    # 時間の表示を変換
-    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
-        $start_hour += 24;
+    # 24 - 30 の場合日付をもどす 時間の表示を変換
+    if ( $start_hour >= 24 && $start_hour <= 30 ) {
+        my $getstarted_on_day_tp
+            = localtime->strptime( $getstarted_on_day, '%Y-%m-%d' );
+        $getstarted_on_day_tp = $getstarted_on_day_tp - ONE_DAY;
+        $getstarted_on_day    = $getstarted_on_day_tp->ymd;
     }
 
-    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
-        $end_hour += 24;
+    if ( $end_hour >= 24 && $end_hour <= 30 ) {
+        my $enduse_on_day_tp
+            = localtime->strptime( $enduse_on_day, '%Y-%m-%d' );
+        $enduse_on_day_tp = $enduse_on_day_tp - ONE_DAY;
+        $enduse_on_day    = $enduse_on_day_tp->ymd;
     }
 
-    $getstarted_on_time
-        = $start_hour
-        . $FIELD_SEPARATOR_TIME
-        . $start_minute
-        . $FIELD_SEPARATOR_TIME
-        . $start_second;
-
-    $enduse_on_time
-        = $end_hour
-        . $FIELD_SEPARATOR_TIME
-        . $end_minute
-        . $FIELD_SEPARATOR_TIME
-        . $end_second;
+    $getstarted_on_time = join ':', $start_hour, $start_minute, $start_second;
+    $enduse_on_time     = join ':', $end_hour,   $end_minute,   $end_second;
 
     # 整形して出力
     my $startend_day_time = +{
@@ -486,8 +566,7 @@ sub search_reserve_id_row {
 
     die 'not $reserve_id!!' if !$reserve_id;
 
-    my $reserve_row
-        = $teng->single( 'reserve', +{ id => $reserve_id, }, );
+    my $reserve_row = $teng->single( 'reserve', +{ id => $reserve_id, }, );
 
     die 'not $reserve_row!!' if !$reserve_row;
 
