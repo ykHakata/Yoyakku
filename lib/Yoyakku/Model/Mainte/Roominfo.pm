@@ -8,14 +8,109 @@ use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_storeinfo_id_for_roominfo_rows
+    get_init_valid_params_roominfo
     search_roominfo_id_row
     writing_roominfo
-    check_start_and_end_on
-    check_rentalunit
+    check_roominfo_validator
 };
 
-sub check_start_and_end_on {
-    my $self          = shift;
+sub check_roominfo_validator {
+    my $params = shift;
+
+    my $validator = FormValidator::Lite->new($params);
+
+    $validator->check(
+        name              => [ [ 'LENGTH', 0, 20, ], ],
+        starttime_on      => [ [ 'LENGTH', 0, 20, ], ],
+        endingtime_on     => [ [ 'LENGTH', 0, 20, ], ],
+        rentalunit        => [ 'INT', ],
+        time_change       => [ 'INT', ],
+        pricescomments    => [ [ 'LENGTH', 0, 200, ], ],
+        privatepermit     => [ 'INT', ],
+        privatepeople     => [ 'INT', ],
+        privateconditions => [ 'INT', ],
+        bookinglimit      => [ 'INT', ],
+        cancellimit       => [ 'INT', ],
+        remarks           => [ [ 'LENGTH', 0, 200, ], ],
+        webpublishing     => [ 'INT', ],
+        webreserve        => [ 'INT', ],
+        status            => [ 'INT', ],
+    );
+
+    $validator->set_message(
+        'name.length'          => '文字数!!',
+        'starttime_on.length'  => '文字数!!',
+        'endingtime_on.length' => '文字数!!',
+        'rentalunit.int'  => '指定の形式で入力してください',
+        'time_change.int' => '指定の形式で入力してください',
+        'pricescomments.length' => '文字数!!',
+        'privatepermit.int' => '指定の形式で入力してください',
+        'privatepeople.int' => '指定の形式で入力してください',
+        'privateconditions.int' =>
+            '指定の形式で入力してください',
+        'bookinglimit.int'  => '指定の形式で入力してください',
+        'cancellimit.int'   => '指定の形式で入力してください',
+        'remarks.length'    => '文字数!!',
+        'webpublishing.int' => '指定の形式で入力してください',
+        'webreserve.int'    => '指定の形式で入力してください',
+        'status.int'        => '指定の形式で入力してください',
+    );
+
+    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
+
+    my $msg = +{};
+    for my $error_param ( @{$error_params} ) {
+        $msg->{$error_param}
+            = $validator->get_error_messages_from_param($error_param);
+
+        $msg->{$error_param} = shift @{ $msg->{$error_param} };
+    }
+
+    my $valid_msg_roominfo = +{
+        name              => $msg->{name},
+        starttime_on      => $msg->{starttime_on},
+        endingtime_on     => $msg->{endingtime_on},
+        rentalunit        => $msg->{rentalunit},
+        time_change       => $msg->{time_change},
+        pricescomments    => $msg->{pricescomments},
+        privatepermit     => $msg->{privatepermit},
+        privatepeople     => $msg->{privatepeople},
+        privateconditions => $msg->{privateconditions},
+        bookinglimit      => $msg->{bookinglimit},
+        cancellimit       => $msg->{cancellimit},
+        remarks           => $msg->{remarks},
+        webpublishing     => $msg->{webpublishing},
+        webreserve        => $msg->{webreserve},
+        status            => $msg->{status},
+    };
+
+    return $valid_msg_roominfo if $validator->has_error();
+
+    # starttime_on, endingtime_on, 営業時間のバリデート
+    my $check_start_and_end_msg = _check_start_and_end_on(
+        $params->{starttime_on},
+        $params->{endingtime_on},
+    );
+
+    $valid_msg_roominfo->{endingtime_on} = $check_start_and_end_msg;
+
+    return $valid_msg_roominfo if $check_start_and_end_msg;
+
+    # starttime_on, endingtime_on, rentalunit, 貸出単位のバリデート
+    my $check_rentalunit_msg = _check_rentalunit(
+        $params->{starttime_on},
+        $params->{endingtime_on},
+        $params->{rentalunit},
+    );
+
+    $valid_msg_roominfo->{rentalunit} = $check_rentalunit_msg;
+
+    return $valid_msg_roominfo if $check_rentalunit_msg;
+
+    return;
+}
+
+sub _check_start_and_end_on {
     my $starttime_on  = shift;
     my $endingtime_on = shift;
 
@@ -26,8 +121,7 @@ sub check_start_and_end_on {
     return;
 }
 
-sub check_rentalunit {
-    my $self          = shift;
+sub _check_rentalunit {
     my $starttime_on  = shift;
     my $endingtime_on = shift;
     my $rentalunit    = shift;
@@ -43,26 +137,43 @@ sub check_rentalunit {
 }
 
 sub search_storeinfo_id_for_roominfo_rows {
-    my $self         = shift;
     my $storeinfo_id = shift;
 
     my @roominfo_rows;
 
     if ( defined $storeinfo_id ) {
         @roominfo_rows
-            = $teng->search( 'roominfo', +{ storeinfo_id => $storeinfo_id, }, );
-        if ( !scalar @roominfo_rows ) {
-
-            # id 検索しないときはテーブルの全てを出力
-            @roominfo_rows = $teng->search( 'roominfo', +{}, );
-        }
+            = $teng->search( 'roominfo', +{ storeinfo_id => $storeinfo_id, },
+            );
     }
-    else {
-        # id 検索しないときはテーブルの全てを出力
+
+    if ( !scalar @roominfo_rows ) {
         @roominfo_rows = $teng->search( 'roominfo', +{}, );
     }
 
     return \@roominfo_rows;
+}
+
+# バリデートエラー表示値の初期化
+sub get_init_valid_params_roominfo {
+
+    my $valid_params = [
+        qw{
+            name
+            endingtime_on
+            rentalunit
+            pricescomments
+            remarks
+            }
+    ];
+
+    my $valid_params_stash = +{};
+
+    for my $param ( @{$valid_params} ) {
+        $valid_params_stash->{$param} = '';
+    }
+
+    return $valid_params_stash;
 }
 
 sub search_roominfo_id_row {
@@ -73,7 +184,6 @@ sub search_roominfo_id_row {
 }
 
 sub writing_roominfo {
-    my $self   = shift;
     my $type   = shift;
     my $params = shift;
 

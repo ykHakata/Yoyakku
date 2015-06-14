@@ -5,17 +5,16 @@ use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Roominfo qw{
     search_storeinfo_id_for_roominfo_rows
+    get_init_valid_params_roominfo
     search_roominfo_id_row
     writing_roominfo
-    check_start_and_end_on
-    check_rentalunit
+    check_roominfo_validator
 };
 
 # 部屋情報 一覧 検索
 sub mainte_roominfo_serch {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
      # テンプレートbodyのクラス名を定義
@@ -26,8 +25,7 @@ sub mainte_roominfo_serch {
     my $storeinfo_id = $self->param('storeinfo_id');
 
     # id 検索時は指定のid検索して出力
-    my $roominfo_rows
-        = $self->search_storeinfo_id_for_roominfo_rows($storeinfo_id);
+    my $roominfo_rows = search_storeinfo_id_for_roominfo_rows($storeinfo_id);
 
     $self->stash( roominfo_rows => $roominfo_rows );
 
@@ -37,215 +35,112 @@ sub mainte_roominfo_serch {
     );
 }
 
-# 部屋情報 新規 編集
+# 部屋情報 編集
 sub mainte_roominfo_new {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
-    # 編集のみを許可
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
+
     return $self->redirect_to('/mainte_roominfo_serch')
-        if !$self->param('id');
+        if ( $method ne 'GET' ) && ( $method ne 'POST' );
+
+    return $self->redirect_to('/mainte_roominfo_serch') if !$params->{id};
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_roominfo_new';
     $self->stash( class => $class );
 
-    # バリデート用
-    $self->stash(
-        name           => '',
-        endingtime_on  => '',
-        rentalunit     => '',
-        pricescomments => '',
-        remarks        => '',
-    );
+    my $init_valid_params_roominfo = get_init_valid_params_roominfo();
+
+    $self->stash($init_valid_params_roominfo);
+
+    return $self->_update();
+}
+
+sub _update {
+    my $self = shift;
 
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    # 新規作成画面表示用
-    return $self->_render_roominfo($params)
-        if !$params->{id} && ( 'POST' ne $method );
+    return $self->_render_update_form($params) if 'GET' eq $method;
 
-    if ( 'POST' ne $method ) {
+    my $flash_msg = +{ henkou => '修正完了', };
 
-        # 修正画面表示用
-        my $roominfo_row = $self->search_roominfo_id_row( $params->{id} );
+    return $self->_common( 'update', $flash_msg, );
+}
 
-        my $starttime_on;
-        my $endingtime_on;
+sub _common {
+    my $self      = shift;
+    my $type      = shift;
+    my $flash_msg = shift;
 
-        # 開始、終了時刻はデータを調整する00->24表示にする
-        if ( $roominfo_row->starttime_on ) {
-            $starttime_on = substr( $roominfo_row->starttime_on, 0, 2 );
-            $starttime_on += 0;
-            if ( $starttime_on =~ /^[0-5]$/ ) {
-                $starttime_on += 24;
-            }
+    my $params = $self->req->params->to_hash;
+
+    my $valid_msg = check_roominfo_validator($params);
+
+    return $self->stash($valid_msg), $self->_render_roominfo($params)
+        if $valid_msg;
+
+    writing_roominfo( $type, $params );
+    $self->flash($flash_msg);
+
+    return $self->redirect_to('mainte_roominfo_serch');
+}
+
+sub _render_update_form {
+    my $self   = shift;
+    my $params = shift;
+
+    my $roominfo_row = $self->search_roominfo_id_row( $params->{id} );
+
+    my $starttime_on;
+    my $endingtime_on;
+
+    # 開始、終了時刻はデータを調整する00->24表示にする
+    if ( $roominfo_row->starttime_on ) {
+        $starttime_on = substr( $roominfo_row->starttime_on, 0, 2 );
+        $starttime_on += 0;
+        if ( $starttime_on =~ /^[0-5]$/ ) {
+            $starttime_on += 24;
         }
-
-        if ( $roominfo_row->endingtime_on ) {
-            $endingtime_on = substr( $roominfo_row->endingtime_on, 0, 2 );
-            $endingtime_on += 0;
-            if ( $endingtime_on =~ /^[0-6]$/ ) {
-                $endingtime_on += 24;
-            }
-        }
-
-        # 入力フォームフィルイン用
-        $params = +{
-            id                => $roominfo_row->id,
-            storeinfo_id      => $roominfo_row->storeinfo_id,
-            name              => $roominfo_row->name,
-            starttime_on      => $starttime_on,
-            endingtime_on     => $endingtime_on,
-            rentalunit        => $roominfo_row->rentalunit,
-            time_change       => $roominfo_row->time_change,
-            pricescomments    => $roominfo_row->pricescomments,
-            privatepermit     => $roominfo_row->privatepermit,
-            privatepeople     => $roominfo_row->privatepeople,
-            privateconditions => $roominfo_row->privateconditions,
-            bookinglimit      => $roominfo_row->bookinglimit,
-            cancellimit       => $roominfo_row->cancellimit,
-            remarks           => $roominfo_row->remarks,
-            webpublishing     => $roominfo_row->webpublishing,
-            webreserve        => $roominfo_row->webreserve,
-            status            => $roominfo_row->status,
-            create_on         => $roominfo_row->create_on,
-            modify_on         => $roominfo_row->modify_on,
-        };
     }
 
-    # テンプレート画面のレンダリング
-    return $self->_render_roominfo($params) if 'POST' ne $method;
-
-    # 入力フォームに値を入力して登録するボタン押した場合
-    # バリデード実行
-    my $validator = FormValidator::Lite->new($params);
-
-    $validator->check(
-        name              => [ [ 'LENGTH', 0, 20, ], ],
-        starttime_on      => [ [ 'LENGTH', 0, 20, ], ],
-        endingtime_on     => [ [ 'LENGTH', 0, 20, ], ],
-        rentalunit        => [ 'INT', ],
-        time_change       => [ 'INT', ],
-        pricescomments    => [ [ 'LENGTH', 0, 200, ], ],
-        privatepermit     => [ 'INT', ],
-        privatepeople     => [ 'INT', ],
-        privateconditions => [ 'INT', ],
-        bookinglimit      => [ 'INT', ],
-        cancellimit       => [ 'INT', ],
-        remarks           => [ [ 'LENGTH', 0, 200, ], ],
-        webpublishing     => [ 'INT', ],
-        webreserve        => [ 'INT', ],
-        status            => [ 'INT', ],
-    );
-
-    $validator->set_message(
-        'name.length'          => '文字数!!',
-        'starttime_on.length'  => '文字数!!',
-        'endingtime_on.length' => '文字数!!',
-        'rentalunit.int'  => '指定の形式で入力してください',
-        'time_change.int' => '指定の形式で入力してください',
-        'pricescomments.length' => '文字数!!',
-        'privatepermit.int' => '指定の形式で入力してください',
-        'privatepeople.int' => '指定の形式で入力してください',
-        'privateconditions.int' =>
-            '指定の形式で入力してください',
-        'bookinglimit.int'  => '指定の形式で入力してください',
-        'cancellimit.int'   => '指定の形式で入力してください',
-        'remarks.length'    => '文字数!!',
-        'webpublishing.int' => '指定の形式で入力してください',
-        'webreserve.int'    => '指定の形式で入力してください',
-        'status.int'        => '指定の形式で入力してください',
-    );
-
-    my @name_errors = $validator->get_error_messages_from_param('name');
-    my @starttime_on_errors
-        = $validator->get_error_messages_from_param('starttime_on');
-    my @endingtime_on_errors
-        = $validator->get_error_messages_from_param('endingtime_on');
-    my @rentalunit_errors
-        = $validator->get_error_messages_from_param('rentalunit');
-    my @time_change_errors
-        = $validator->get_error_messages_from_param('time_change');
-    my @pricescomments_errors
-        = $validator->get_error_messages_from_param('pricescomments');
-    my @privatepermit_errors
-        = $validator->get_error_messages_from_param('privatepermit');
-    my @privatepeople_errors
-        = $validator->get_error_messages_from_param('privatepeople');
-    my @privateconditions_errors
-        = $validator->get_error_messages_from_param('privateconditions');
-    my @bookinglimit_errors
-        = $validator->get_error_messages_from_param('bookinglimit');
-    my @cancellimit_errors
-        = $validator->get_error_messages_from_param('cancellimit');
-    my @remarks_errors = $validator->get_error_messages_from_param('remarks');
-    my @webpublishing_errors
-        = $validator->get_error_messages_from_param('webpublishing');
-    my @webreserve_errors
-        = $validator->get_error_messages_from_param('webreserve');
-    my @status_errors = $validator->get_error_messages_from_param('status');
-
-    # バリデート用メッセージ
-    $self->stash(
-        name              => shift @name_errors,
-        starttime_on      => shift @starttime_on_errors,
-        endingtime_on     => shift @endingtime_on_errors,
-        rentalunit        => shift @rentalunit_errors,
-        time_change       => shift @time_change_errors,
-        pricescomments    => shift @pricescomments_errors,
-        privatepermit     => shift @privatepermit_errors,
-        privatepeople     => shift @privatepeople_errors,
-        privateconditions => shift @privateconditions_errors,
-        bookinglimit      => shift @bookinglimit_errors,
-        cancellimit       => shift @cancellimit_errors,
-        remarks           => shift @remarks_errors,
-        webpublishing     => shift @webpublishing_errors,
-        webreserve        => shift @webreserve_errors,
-        status            => shift @status_errors,
-    );
-
-    # 入力バリデート不合格の場合それ以降の作業はしない
-    return $self->_render_roominfo($params) if $validator->has_error();
-
-    if ( $params->{id} ) {
-        # DB バリデート合格の場合 DB 書き込み(修正)
-
-        # starttime_on, endingtime_on, 営業時間のバリデート
-        my $check_start_and_end_msg = $self->check_start_and_end_on(
-            $params->{starttime_on},
-            $params->{endingtime_on},
-        );
-
-        if ($check_start_and_end_msg) {
-
-            $self->stash->{endingtime_on} = $check_start_and_end_msg;
-            return $self->_render_roominfo($params);
+    if ( $roominfo_row->endingtime_on ) {
+        $endingtime_on = substr( $roominfo_row->endingtime_on, 0, 2 );
+        $endingtime_on += 0;
+        if ( $endingtime_on =~ /^[0-6]$/ ) {
+            $endingtime_on += 24;
         }
-
-        # starttime_on, endingtime_on, rentalunit, 貸出単位のバリデート
-        my $check_rentalunit_msg = $self->check_rentalunit(
-            $params->{starttime_on},
-            $params->{endingtime_on},
-            $params->{rentalunit},
-        );
-
-        if ($check_rentalunit_msg) {
-            $self->stash->{rentalunit} = $check_rentalunit_msg;
-            return $self->_render_roominfo($params);
-        }
-
-        $self->writing_roominfo( 'update', $params );
-        $self->flash( henkou => '修正完了' );
-
-        # sqlにデータ入力したので list 画面にリダイレクト
-        return $self->redirect_to('mainte_roominfo_serch');
     }
 
-    return _render_roominfo($params);
+    # 入力フォームフィルイン用
+    $params = +{
+        id                => $roominfo_row->id,
+        storeinfo_id      => $roominfo_row->storeinfo_id,
+        name              => $roominfo_row->name,
+        starttime_on      => $starttime_on,
+        endingtime_on     => $endingtime_on,
+        rentalunit        => $roominfo_row->rentalunit,
+        time_change       => $roominfo_row->time_change,
+        pricescomments    => $roominfo_row->pricescomments,
+        privatepermit     => $roominfo_row->privatepermit,
+        privatepeople     => $roominfo_row->privatepeople,
+        privateconditions => $roominfo_row->privateconditions,
+        bookinglimit      => $roominfo_row->bookinglimit,
+        cancellimit       => $roominfo_row->cancellimit,
+        remarks           => $roominfo_row->remarks,
+        webpublishing     => $roominfo_row->webpublishing,
+        webreserve        => $roominfo_row->webreserve,
+        status            => $roominfo_row->status,
+        create_on         => $roominfo_row->create_on,
+        modify_on         => $roominfo_row->modify_on,
+    };
+
+    return $self->_render_roominfo($params);
 }
 
 # テンプレート画面のレンダリング
