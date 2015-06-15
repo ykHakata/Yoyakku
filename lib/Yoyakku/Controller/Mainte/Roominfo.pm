@@ -9,6 +9,7 @@ use Yoyakku::Model::Mainte::Roominfo qw{
     search_roominfo_id_row
     writing_roominfo
     check_roominfo_validator
+    chenge_hour_6_for_30
 };
 
 # 部屋情報 一覧 検索
@@ -97,25 +98,11 @@ sub _render_update_form {
 
     my $roominfo_row = $self->search_roominfo_id_row( $params->{id} );
 
-    my $starttime_on;
-    my $endingtime_on;
-
     # 開始、終了時刻はデータを調整する00->24表示にする
-    if ( $roominfo_row->starttime_on ) {
-        $starttime_on = substr( $roominfo_row->starttime_on, 0, 2 );
-        $starttime_on += 0;
-        if ( $starttime_on =~ /^[0-5]$/ ) {
-            $starttime_on += 24;
-        }
-    }
-
-    if ( $roominfo_row->endingtime_on ) {
-        $endingtime_on = substr( $roominfo_row->endingtime_on, 0, 2 );
-        $endingtime_on += 0;
-        if ( $endingtime_on =~ /^[0-6]$/ ) {
-            $endingtime_on += 24;
-        }
-    }
+    my ( $starttime_on, $endingtime_on, ) = chenge_hour_6_for_30(
+        $roominfo_row->starttime_on,
+        $roominfo_row->endingtime_on,
+    );
 
     # 入力フォームフィルイン用
     $params = +{

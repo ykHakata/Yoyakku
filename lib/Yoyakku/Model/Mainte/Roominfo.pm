@@ -5,6 +5,7 @@ use utf8;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{get_single_row_search_id writing_db};
 use Yoyakku::Util qw{now_datetime};
+use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_storeinfo_id_for_roominfo_rows
@@ -12,7 +13,41 @@ our @EXPORT_OK = qw{
     search_roominfo_id_row
     writing_roominfo
     check_roominfo_validator
+    chenge_hour_6_for_30
 };
+
+# chenge_hour_6_for_30 6:00 を 30:00
+sub chenge_hour_6_for_30 {
+    my $start_time = shift;
+    my $end_time   = shift;
+
+    my $FIELD_SEPARATOR_TIME = q{:};
+    my $FIELD_COUNT_TIME     = 3;
+
+    my ( $start_hour, $start_min, $start_sec ) = split $FIELD_SEPARATOR_TIME,
+        $start_time, $FIELD_COUNT_TIME + 1;
+
+    my ( $end_hour, $end_min, $end_sec ) = split $FIELD_SEPARATOR_TIME,
+        $end_time, $FIELD_COUNT_TIME + 1;
+
+    # 数字にもどす
+    $start_hour += 0;
+    $end_hour   += 0;
+
+    # 時間の表示を変換
+    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
+        $start_hour += 24;
+    }
+
+    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
+        $end_hour += 24;
+    }
+
+    $start_time = $start_hour . ':' . $start_min . ':' . $start_sec;
+    $end_time   = $end_hour . ':' . $end_min . ':' . $end_sec;
+
+    return ( $start_time, $end_time, );
+}
 
 sub check_roominfo_validator {
     my $params = shift;
@@ -87,21 +122,14 @@ sub check_roominfo_validator {
     return $valid_msg_roominfo if $validator->has_error();
 
     # starttime_on, endingtime_on, 営業時間のバリデート
-    my $check_start_and_end_msg = _check_start_and_end_on(
-        $params->{starttime_on},
-        $params->{endingtime_on},
-    );
+    my $check_start_and_end_msg = _check_start_and_end_on($params);
 
     $valid_msg_roominfo->{endingtime_on} = $check_start_and_end_msg;
 
     return $valid_msg_roominfo if $check_start_and_end_msg;
 
     # starttime_on, endingtime_on, rentalunit, 貸出単位のバリデート
-    my $check_rentalunit_msg = _check_rentalunit(
-        $params->{starttime_on},
-        $params->{endingtime_on},
-        $params->{rentalunit},
-    );
+    my $check_rentalunit_msg = _check_rentalunit($params);
 
     $valid_msg_roominfo->{rentalunit} = $check_rentalunit_msg;
 
@@ -111,8 +139,10 @@ sub check_roominfo_validator {
 }
 
 sub _check_start_and_end_on {
-    my $starttime_on  = shift;
-    my $endingtime_on = shift;
+    my $params = shift;
+
+    my $starttime_on  = $params->{starttime_on};
+    my $endingtime_on = $params->{endingtime_on};
 
     # 営業時間バリデート
     return '開始時刻より遅くしてください'
@@ -122,9 +152,11 @@ sub _check_start_and_end_on {
 }
 
 sub _check_rentalunit {
-    my $starttime_on  = shift;
-    my $endingtime_on = shift;
-    my $rentalunit    = shift;
+    my $params = shift;
+
+    my $starttime_on  = $params->{starttime_on};
+    my $endingtime_on = $params->{endingtime_on};
+    my $rentalunit    = $params->{rentalunit};
 
     # 貸出単位のバリデート
     my $opening_hours = $endingtime_on - $starttime_on;
@@ -190,18 +222,14 @@ sub writing_roominfo {
     # 書き込む前に開始、終了時刻変換
     if ( $params->{starttime_on} =~ /^[2][4-9]$/ ) {
         $params->{starttime_on} -= 24;
-        $params->{starttime_on} .= ":00";
     }
-    else {
-        $params->{starttime_on} .= ":00";
-    }
+
     if ( $params->{endingtime_on} =~ /^[2][4-9]$|^[3][0]$/ ) {
         $params->{endingtime_on} -= 24;
-        $params->{endingtime_on} .= ":00";
     }
-    else {
-        $params->{endingtime_on} .= ":00";
-    }
+
+    $params->{starttime_on}  = sprintf '%08s', $params->{starttime_on};
+    $params->{endingtime_on} = sprintf '%08s', $params->{endingtime_on};
 
     my $create_data = +{
         storeinfo_id      => $params->{storeinfo_id} || undef,

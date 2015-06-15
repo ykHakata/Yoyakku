@@ -34,9 +34,10 @@
   <tr>
     <td>starttime_on</td>
     <td>開始時刻</td>
-    <td><select name="starttime_on">
-      % for (my $i=6;$i < 30;++$i) {
-        <option value="<%= $i %>"><%= $i %>:00</option>
+    <td>
+      <select name="starttime_on">
+      % for my $hour (6..29) {
+        <option value="<%= $hour %>:00:00"><%= $hour %>:00</option>
       % }
       </select>
     </td>
@@ -46,8 +47,8 @@
     <td>終了時刻<div class="vali"><%= $endingtime_on %></div></td>
     <td>
       <select name="endingtime_on">
-      % for (my $i=7;$i <= 30;++$i) {
-        <option value="<%= $i %>"><%= $i %>:00</option>
+      % for my $hour (7..30) {
+        <option value="<%= $hour %>:00:00"><%= $hour %>:00</option>
       % }
       </select>
     </td>
