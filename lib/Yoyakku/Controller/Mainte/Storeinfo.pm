@@ -5,16 +5,17 @@ use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Storeinfo qw{
     search_storeinfo_id_rows
-    search_storeinfo_id_row
+    get_init_valid_params_storeinfo
     search_zipcode_for_address
+    check_storeinfo_validator
     writing_storeinfo
+    search_storeinfo_id_row
 };
 
 # 店舗情報 一覧 検索
 sub mainte_storeinfo_serch {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
      # テンプレートbodyのクラス名を定義
@@ -25,7 +26,7 @@ sub mainte_storeinfo_serch {
     my $storeinfo_id = $self->param('storeinfo_id');
 
     # id 検索時は指定のid検索して出力
-    my $storeinfo_rows = $self->search_storeinfo_id_rows($storeinfo_id);
+    my $storeinfo_rows = search_storeinfo_id_rows($storeinfo_id);
 
     $self->stash( storeinfo_rows => $storeinfo_rows );
 
@@ -35,160 +36,94 @@ sub mainte_storeinfo_serch {
     );
 }
 
-# 店舗情報 新規 編集
+# 店舗情報 編集
 sub mainte_storeinfo_new {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
-    # 編集のみを許可
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
+
     return $self->redirect_to('/mainte_storeinfo_serch')
-        if !$self->param('id');
+        if ( $method ne 'GET' ) && ( $method ne 'POST' );
+
+    return $self->redirect_to('/mainte_storeinfo_serch') if !$params->{id};
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_storeinfo_new';
     $self->stash( class => $class );
 
-    # バリデート用
-    $self->stash(
-        name          => '',
-        post          => '',
-        state         => '',
-        cities        => '',
-        addressbelow  => '',
-        tel           => '',
-        mail          => '',
-        remarks       => '',
-        url           => '',
-        locationinfor => '',
-        status        => '',
-    );
+    my $init_valid_params_storeinfo = get_init_valid_params_storeinfo();
+
+    $self->stash($init_valid_params_storeinfo);
+
+    return $self->_update();
+}
+
+sub _update {
+    my $self = shift;
 
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    # 新規作成画面表示用
-    return $self->_render_storeinfo($params)
-        if !$params->{id} && ( 'POST' ne $method );
-
-    if ('POST' ne $method) {
-        # 修正画面表示用
-        my $storeinfo_row = $self->search_storeinfo_id_row( $params->{id} );
-
-        # 入力フォームフィルイン用
-        $params = +{
-            id            => $storeinfo_row->id,
-            region_id     => $storeinfo_row->region_id,
-            admin_id      => $storeinfo_row->admin_id,
-            name          => $storeinfo_row->name,
-            icon          => $storeinfo_row->icon,
-            post          => $storeinfo_row->post,
-            state         => $storeinfo_row->state,
-            cities        => $storeinfo_row->cities,
-            addressbelow  => $storeinfo_row->addressbelow,
-            tel           => $storeinfo_row->tel,
-            mail          => $storeinfo_row->mail,
-            remarks       => $storeinfo_row->remarks,
-            url           => $storeinfo_row->url,
-            locationinfor => $storeinfo_row->locationinfor,
-            status        => $storeinfo_row->status,
-            create_on     => $storeinfo_row->create_on,
-            modify_on     => $storeinfo_row->modify_on,
-        };
-    }
-
-    # テンプレート画面のレンダリング
-    return $self->_render_storeinfo($params) if 'POST' ne $method;
+    return $self->_render_update_form($params) if 'GET' eq $method;
 
     # 郵便番号検索ボタンが押されたときの処理
-    if ( $params->{kensaku} && $params->{kensaku} eq '検索する' ) {
+    return $self->_render_storeinfo( search_zipcode_for_address($params) )
+        if $params->{kensaku} && $params->{kensaku} eq '検索する';
 
-        my $address_params
-            = $self->search_zipcode_for_address( $params->{post} );
+    my $flash_msg = +{ henkou => '修正完了', };
 
-        $params->{region_id} = $address_params->{region_id};
-        $params->{post}      = $address_params->{post};
-        $params->{state}     = $address_params->{state};
-        $params->{cities}    = $address_params->{cities};
+    return $self->_common( 'update', $flash_msg, );
+}
 
-        return $self->_render_storeinfo($params);
-    }
+sub _common {
+    my $self      = shift;
+    my $type      = shift;
+    my $flash_msg = shift;
 
-    # 入力フォームに値を入力して登録するボタン押した場合
-    # バリデード実行
-    my $validator = FormValidator::Lite->new($params);
+    my $params = $self->req->params->to_hash;
 
-    $validator->check(
-        name          => [ [ 'LENGTH', 0, 20, ], ],
-        post          => [ 'INT', ],
-        state         => [ [ 'LENGTH', 0, 20, ], ],
-        cities        => [ [ 'LENGTH', 0, 20, ], ],
-        addressbelow  => [ [ 'LENGTH', 0, 20, ], ],
-        tel           => [ [ 'LENGTH', 0, 20, ], ],
-        mail          => [ 'EMAIL_LOOSE', ],
-        remarks       => [ [ 'LENGTH', 0, 200, ], ],
-        url           => [ 'HTTP_URL', ],
-        locationinfor => [ [ 'LENGTH', 0, 20, ], ],
-        status        => [ 'INT', ],
-    );
+    my $valid_msg = check_storeinfo_validator($params);
 
-    $validator->set_message(
-        'name.length'         => '文字数!!',
-        'post.int'            => '指定の形式で入力してください',
-        'state.length'        => '文字数!!',
-        'cities.length'       => '文字数!!',
-        'addressbelow.length' => '文字数!!',
-        'tel.length'          => '文字数!!',
-        'mail.email_loose'    => 'Eメールを入力してください',
-        'remarks.length'      => '文字数!!',
-        'url.http_url'        => '指定の形式で入力してください',
-        'locationinfor.length' => '文字数!!',
-        'status.int' => '指定の形式で入力してください',
-    );
+    return $self->stash($valid_msg), $self->_render_storeinfo($params)
+        if $valid_msg;
 
-    my @name_errors   = $validator->get_error_messages_from_param('name');
-    my @post_errors   = $validator->get_error_messages_from_param('post');
-    my @state_errors  = $validator->get_error_messages_from_param('state');
-    my @cities_errors = $validator->get_error_messages_from_param('cities');
-    my @addressbelow_errors
-        = $validator->get_error_messages_from_param('addressbelow');
-    my @tel_errors     = $validator->get_error_messages_from_param('tel');
-    my @mail_errors    = $validator->get_error_messages_from_param('mail');
-    my @remarks_errors = $validator->get_error_messages_from_param('remarks');
-    my @url_errors     = $validator->get_error_messages_from_param('url');
-    my @locationinfor_errors
-        = $validator->get_error_messages_from_param('locationinfor');
-    my @status_errors = $validator->get_error_messages_from_param('status');
+    writing_storeinfo( $type, $params );
+    $self->flash($flash_msg);
 
-    # バリデート用メッセージ
-    $self->stash(
-        name          => shift @name_errors,
-        post          => shift @post_errors,
-        state         => shift @state_errors,
-        cities        => shift @cities_errors,
-        addressbelow  => shift @addressbelow_errors,
-        tel           => shift @tel_errors,
-        mail          => shift @mail_errors,
-        remarks       => shift @remarks_errors,
-        url           => shift @url_errors,
-        locationinfor => shift @locationinfor_errors,
-        status        => shift @status_errors,
-    );
+    return $self->redirect_to('mainte_storeinfo_serch');
+}
 
-    # 入力バリデート不合格の場合それ以降の作業はしない
-    return $self->_render_storeinfo($params) if $validator->has_error();
+sub _render_update_form {
+    my $self   = shift;
+    my $params = shift;
 
-    if ( $params->{id} ) {
-        # DB バリデート合格の場合 DB 書き込み(修正)
-        $self->writing_storeinfo( 'update', $params );
-        $self->flash( henkou => '修正完了' );
+    my $storeinfo_row = search_storeinfo_id_row( $params->{id} );
 
-        # sqlにデータ入力したので list 画面にリダイレクト
-        return $self->redirect_to('mainte_storeinfo_serch');
-    }
+    # 入力フォームフィルイン用
+    $params = +{
+        id            => $storeinfo_row->id,
+        region_id     => $storeinfo_row->region_id,
+        admin_id      => $storeinfo_row->admin_id,
+        name          => $storeinfo_row->name,
+        icon          => $storeinfo_row->icon,
+        post          => $storeinfo_row->post,
+        state         => $storeinfo_row->state,
+        cities        => $storeinfo_row->cities,
+        addressbelow  => $storeinfo_row->addressbelow,
+        tel           => $storeinfo_row->tel,
+        mail          => $storeinfo_row->mail,
+        remarks       => $storeinfo_row->remarks,
+        url           => $storeinfo_row->url,
+        locationinfor => $storeinfo_row->locationinfor,
+        status        => $storeinfo_row->status,
+        create_on     => $storeinfo_row->create_on,
+        modify_on     => $storeinfo_row->modify_on,
+    };
 
-    return _render_storeinfo($params);
+    return $self->_render_storeinfo($params);
 }
 
 # テンプレート画面のレンダリング

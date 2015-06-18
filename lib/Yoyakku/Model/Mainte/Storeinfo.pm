@@ -12,52 +12,122 @@ use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_storeinfo_id_rows
-    search_storeinfo_id_row
+    get_init_valid_params_storeinfo
     search_zipcode_for_address
+    check_storeinfo_validator
     writing_storeinfo
+    search_storeinfo_id_row
 };
 
-sub search_zipcode_for_address {
-    my $self = shift;
-    my $post = shift;
-
-    my $address_params = +{
-        region_id => undef,
-        post      => $post,
-        state     => undef,
-        cities    => undef,
-    };
-
-    my $post_row = $teng->single( 'post', +{ post_id => $post }, );
-
-    if ($post_row) {
-        $address_params = +{
-            region_id => $post_row->region_id,
-            post      => $post_row->post,
-            state     => $post_row->state,
-            cities    => $post_row->cities,
-        };
-    }
-
-    return $address_params;
-}
-
 sub search_storeinfo_id_rows {
-    my $self         = shift;
     my $storeinfo_id = shift;
-
     return search_id_single_or_all_rows( 'storeinfo', $storeinfo_id );
 }
 
-sub search_storeinfo_id_row {
-    my $self         = shift;
-    my $storeinfo_id = shift;
+sub get_init_valid_params_storeinfo {
 
-    return get_single_row_search_id( 'storeinfo', $storeinfo_id );
+    my $valid_params = [
+        qw{
+            name
+            post
+            state
+            cities
+            addressbelow
+            tel
+            mail
+            remarks
+            url
+            locationinfor
+            status
+            }
+    ];
+
+    my $valid_params_stash = +{};
+
+    for my $param ( @{$valid_params} ) {
+        $valid_params_stash->{$param} = '';
+    }
+
+    return $valid_params_stash;
+}
+
+sub search_zipcode_for_address {
+    my $params = shift;
+
+    my $post_row = $teng->single( 'post', +{ post_id => $params->{post} }, );
+
+    if ($post_row) {
+        $params->{region_id} = $post_row->region_id;
+        $params->{post}      = $post_row->post;
+        $params->{state}     = $post_row->state;
+        $params->{cities}    = $post_row->cities;
+    }
+    return $params;
+}
+
+sub check_storeinfo_validator {
+    my $params = shift;
+
+    my $validator = FormValidator::Lite->new($params);
+
+    $validator->check(
+        name          => [ [ 'LENGTH', 0, 20, ], ],
+        post          => [ 'INT', ],
+        state         => [ [ 'LENGTH', 0, 20, ], ],
+        cities        => [ [ 'LENGTH', 0, 20, ], ],
+        addressbelow  => [ [ 'LENGTH', 0, 20, ], ],
+        tel           => [ [ 'LENGTH', 0, 20, ], ],
+        mail          => [ 'EMAIL_LOOSE', ],
+        remarks       => [ [ 'LENGTH', 0, 200, ], ],
+        url           => [ 'HTTP_URL', ],
+        locationinfor => [ [ 'LENGTH', 0, 20, ], ],
+        status        => [ 'INT', ],
+    );
+
+    $validator->set_message(
+        'name.length'         => '文字数!!',
+        'post.int'            => '指定の形式で入力してください',
+        'state.length'        => '文字数!!',
+        'cities.length'       => '文字数!!',
+        'addressbelow.length' => '文字数!!',
+        'tel.length'          => '文字数!!',
+        'mail.email_loose'    => 'Eメールを入力してください',
+        'remarks.length'      => '文字数!!',
+        'url.http_url'        => '指定の形式で入力してください',
+        'locationinfor.length' => '文字数!!',
+        'status.int' => '指定の形式で入力してください',
+    );
+
+    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
+
+    my $msg = +{};
+    for my $error_param ( @{$error_params} ) {
+        $msg->{$error_param}
+            = $validator->get_error_messages_from_param($error_param);
+
+        $msg->{$error_param} = shift @{ $msg->{$error_param} };
+    }
+
+    my $valid_msg_storeinfo = +{
+        name          => $msg->{name},
+        post          => $msg->{post},
+        state         => $msg->{state},
+        cities        => $msg->{cities},
+        addressbelow  => $msg->{addressbelow},
+        tel           => $msg->{tel},
+        mail          => $msg->{mail},
+        remarks       => $msg->{remarks},
+        url           => $msg->{url},
+        locationinfor => $msg->{locationinfor},
+        status        => $msg->{status},
+    };
+
+    return $valid_msg_storeinfo if $validator->has_error();
+
+    return;
 }
 
 sub writing_storeinfo {
-    my $self   = shift;
     my $type   = shift;
     my $params = shift;
 
@@ -83,9 +153,15 @@ sub writing_storeinfo {
     # update 以外は禁止
     die 'update only' if !$type || ( $type && $type ne 'update' );
 
+    delete $create_data->{create_on} if $type eq 'update';
+
     return writing_db( 'storeinfo', $type, $create_data, $params->{id} );
 }
 
+sub search_storeinfo_id_row {
+    my $storeinfo_id = shift;
+    return get_single_row_search_id( 'storeinfo', $storeinfo_id );
+}
 
 1;
 
