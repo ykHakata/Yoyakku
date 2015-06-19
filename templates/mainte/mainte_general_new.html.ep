@@ -7,7 +7,7 @@
     <div class="input_ads_n">
       <a href="mainte_general_serch">検索画面にもどる</a>
     </div>
-    <form action="" method="post">
+    <form action="mainte_general_new" method="post">
       <table id="input_ads_t" border="1">
         <tr>
           <th>カラム名</th>

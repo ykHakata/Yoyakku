@@ -2,6 +2,7 @@ package Yoyakku::Model::Mainte::General;
 use strict;
 use warnings;
 use utf8;
+use FormValidator::Lite;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
     search_id_single_or_all_rows
@@ -12,36 +13,105 @@ use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_general_id_rows
+    get_init_valid_params_general
     search_general_id_row
-    check_general_login_name
+    check_general_validator
+    check_general_validator_db
     writing_general
 };
 
-sub check_general_login_name {
-    my $self  = shift;
-    my $login = shift;
-
-    my $general_row = $teng->single( 'general', +{ login => $login, }, );
-
-    return $general_row;
-}
-
 sub search_general_id_rows {
-    my $self       = shift;
     my $general_id = shift;
-
     return search_id_single_or_all_rows( 'general', $general_id );
 }
 
-sub search_general_id_row {
-    my $self       = shift;
-    my $general_id = shift;
+sub get_init_valid_params_general {
 
-   return get_single_row_search_id( 'general', $general_id );
+    my $valid_params = [qw{login password}];
+
+    my $valid_params_stash = +{};
+
+    for my $param ( @{$valid_params} ) {
+        $valid_params_stash->{$param} = '';
+    }
+    return $valid_params_stash;
+}
+
+sub search_general_id_row {
+    my $general_id = shift;
+    return get_single_row_search_id( 'general', $general_id );
+}
+
+sub check_general_validator {
+    my $params = shift;
+
+    my $validator = FormValidator::Lite->new($params);
+
+    $validator->check(
+        login    => [ 'NOT_NULL', ],
+        password => [ 'NOT_NULL', ],
+    );
+
+    $validator->set_message(
+        'login.not_null'    => '必須入力',
+        'password.not_null' => '必須入力',
+    );
+
+    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
+
+    my $msg = +{};
+    for my $error_param ( @{$error_params} ) {
+        $msg->{$error_param}
+            = $validator->get_error_messages_from_param($error_param);
+
+        $msg->{$error_param} = shift @{ $msg->{$error_param} };
+    }
+
+    my $valid_msg_general = +{
+        login    => $msg->{login},
+        password => $msg->{password},
+    };
+    return $valid_msg_general if $validator->has_error();
+    return;
+}
+
+sub check_general_validator_db {
+    my $type   = shift;
+    my $params = shift;
+
+    my $valid_msg_general_db = +{};
+
+    my $check_general_msg = _check_general_login_name( $params );
+
+    if ($check_general_msg) {
+        $valid_msg_general_db = +{ login => $check_general_msg };
+    }
+    return $valid_msg_general_db if $check_general_msg;
+    return;
+}
+
+sub _check_general_login_name {
+    my $params = shift;
+
+    my $login      = $params->{login};
+    my $general_id = $params->{id};
+
+    my $general_row = $teng->single( 'general', +{ login => $login, }, );
+
+    # 新規
+    return '既に利用されています'
+        if $general_row && !$general_id;
+
+    # 更新
+    return '既に利用されています'
+        if $general_row
+        && $general_id
+        && ( $general_id ne $general_row->id );
+
+    return;
 }
 
 sub writing_general {
-    my $self   = shift;
     my $type   = shift;
     my $params = shift;
 
@@ -52,7 +122,7 @@ sub writing_general {
         create_on => now_datetime(),
         modify_on => now_datetime(),
     };
-
+    delete $create_data->{create_on} if $type eq 'update';
     return writing_db( 'general', $type, $create_data, $params->{id} );
 }
 

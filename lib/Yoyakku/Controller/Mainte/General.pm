@@ -1,12 +1,13 @@
 package Yoyakku::Controller::Mainte::General;
 use Mojo::Base 'Mojolicious::Controller';
-use FormValidator::Lite;
 use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::General qw{
     search_general_id_rows
+    get_init_valid_params_general
     search_general_id_row
-    check_general_login_name
+    check_general_validator
+    check_general_validator_db
     writing_general
 };
 
@@ -14,7 +15,6 @@ use Yoyakku::Model::Mainte::General qw{
 sub mainte_general_serch {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
     # テンプレートbodyのクラス名を定義
@@ -25,7 +25,7 @@ sub mainte_general_serch {
     my $general_id = $self->param('general_id');
 
     # id 検索時は指定のid検索して出力
-    my $general_rows = $self->search_general_id_rows($general_id);
+    my $general_rows = search_general_id_rows($general_id);
 
     $self->stash( general_rows => $general_rows );
 
@@ -39,96 +39,84 @@ sub mainte_general_serch {
 sub mainte_general_new {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
+
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
+
+    return $self->redirect_to('/mainte_general_serch')
+        if ( $method ne 'GET' ) && ( $method ne 'POST' );
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_general_new';
     $self->stash( class => $class );
 
-    # バリデート用
-    $self->stash(
-        login    => '',
-        password => '',
-    );
+    my $init_valid_params_general = get_init_valid_params_general();
 
-    my $req    = $self->req;
-    my $params = $req->params->to_hash;
-    my $method = uc $req->method;
+    $self->stash($init_valid_params_general);
 
-    # 新規作成画面表示用
-    return $self->_render_general($params)
-        if !$params->{id} && ( 'POST' ne $method );
+    return $self->_insert() if !$params->{id};
+    return $self->_update();
+}
 
-    if ('POST' ne $method) {
-        # 修正画面表示用
-        my $general_row = $self->search_general_id_row( $params->{id} );
+sub _insert {
+    my $self = shift;
 
-        # 入力フォームフィルイン用
-        $params = +{
-            id        => $general_row->id,
-            login     => $general_row->login,
-            password  => $general_row->password,
-            status    => $general_row->status,
-            create_on => $general_row->create_on,
-            modify_on => $general_row->modify_on,
-        };
-    }
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
 
-    # テンプレート画面のレンダリング
-    return $self->_render_general($params) if 'POST' ne $method;
+    return $self->_render_general($params) if 'GET' eq $method;
+    return $self->_common( 'insert', +{ touroku => '登録完了' }, );
+}
 
-    # 入力フォームに値を入力して登録するボタン押した場合
-    # バリデード実行
-    my $validator = FormValidator::Lite->new($req);
+sub _update {
+    my $self = shift;
 
-    $validator->check(
-        login    => [ 'NOT_NULL', ],
-        password => [ 'NOT_NULL', ],
-    );
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
 
-    $validator->set_message(
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-    );
+    return $self->_render_update_form($params) if 'GET' eq $method;
+    return $self->_common( 'update', +{ henkou => '修正完了' }, );
+}
 
-    my @login_errors = $validator->get_error_messages_from_param('login');
-    my @pass_errors  = $validator->get_error_messages_from_param('password');
+sub _common {
+    my $self      = shift;
+    my $type      = shift;
+    my $flash_msg = shift;
 
-    $self->stash->{login}    = shift @login_errors;
-    $self->stash->{password} = shift @pass_errors;
+    my $params = $self->req->params->to_hash;
 
-    # 入力バリデート不合格の場合それ以降の作業はしない
-    return $self->_render_general($params) if $validator->has_error();
+    my $valid_msg = check_general_validator($params);
 
-    # ログイン名(メルアド)の既存データとの照合
-    # 既存データとの照合(DB バリデートチェック)
-    if ( $params->{id} ) {
-        # DB バリデート合格の場合 DB 書き込み(修正)
-        $self->writing_general( 'update', $params );
-        $self->flash( henkou => '修正完了' );
+    return $self->stash($valid_msg), $self->_render_general($params)
+        if $valid_msg;
 
-        # sqlにデータ入力したので list 画面にリダイレクト
-        return $self->redirect_to('mainte_general_serch');
-    }
+    my $valid_msg_db = check_general_validator_db( $type, $params, );
 
-    # DB バリデート合格の場合 DB 書き込み(新規)
-    my $check_general_row
-        = $self->check_general_login_name( $req->param('login') );
+    return $self->stash($valid_msg_db), $self->_render_general($params)
+        if $valid_msg_db;
 
-    if ($check_general_row) {
-
-        # ログイン名がすでに存在している
-        $self->stash->{login} = '既に使用されてます';
-
-        # テンプレート画面のレンダリング
-        return $self->_render_general($params);
-    }
-
-    $self->writing_general( 'insert', $params );
-    $self->flash( touroku => '登録完了' );
+    writing_general( $type, $params );
+    $self->flash($flash_msg);
 
     return $self->redirect_to('mainte_general_serch');
+}
+
+sub _render_update_form {
+    my $self   = shift;
+    my $params = shift;
+
+    my $general_row = search_general_id_row( $params->{id} );
+
+    $params = +{
+        id        => $general_row->id,
+        login     => $general_row->login,
+        password  => $general_row->password,
+        status    => $general_row->status,
+        create_on => $general_row->create_on,
+        modify_on => $general_row->modify_on,
+    };
+    return $self->_render_general($params);
 }
 
 # テンプレート画面のレンダリング
