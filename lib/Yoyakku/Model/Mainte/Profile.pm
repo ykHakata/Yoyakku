@@ -2,6 +2,7 @@ package Yoyakku::Model::Mainte::Profile;
 use strict;
 use warnings;
 use utf8;
+use FormValidator::Lite qw{Email};
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
     search_id_single_or_all_rows
@@ -12,34 +13,133 @@ use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_profile_id_rows
+    get_init_valid_params_profile
     get_general_rows_all
     get_admin_rows_all
     search_profile_id_row
-    check_admin_and_general_id
+    check_profile_validator
+    check_profile_validator_db
     writing_profile
 };
 
+sub search_profile_id_rows {
+    my $profile_id = shift;
+    return search_id_single_or_all_rows( 'profile', $profile_id );
+}
+
+sub get_init_valid_params_profile {
+
+    my $valid_params = [
+        qw{
+            general_id
+            admin_id
+            nick_name
+            full_name
+            phonetic_name
+            tel
+            mail
+            }
+    ];
+
+    my $valid_params_stash = +{};
+
+    for my $param ( @{$valid_params} ) {
+        $valid_params_stash->{$param} = '';
+    }
+
+    return $valid_params_stash;
+}
+
 sub get_general_rows_all {
-    my $self = shift;
-
     my @general_rows = $teng->search( 'general', +{}, );
-
     return \@general_rows;
 }
 
 sub get_admin_rows_all {
-    my $self = shift;
-
     my @admin_rows = $teng->search( 'admin', +{}, );
-
     return \@admin_rows;
 }
 
-sub check_admin_and_general_id {
-    my $self       = shift;
-    my $general_id = shift;
-    my $admin_id   = shift;
+sub search_profile_id_row {
     my $profile_id = shift;
+    return get_single_row_search_id( 'profile', $profile_id );
+}
+
+sub check_profile_validator {
+    my $params = shift;
+
+    my $validator = FormValidator::Lite->new($params);
+
+    $validator->check(
+        general_id    => [ 'INT', ],
+        admin_id      => [ 'INT', ],
+        nick_name     => [ [ 'LENGTH', 0, 20, ], ],
+        full_name     => [ [ 'LENGTH', 0, 20, ], ],
+        phonetic_name => [ [ 'LENGTH', 0, 20, ], ],
+        tel           => [ [ 'LENGTH', 0, 20, ], ],
+        mail          => [ 'EMAIL_LOOSE', ],
+    );
+
+    $validator->set_message(
+        'general_id.not_null'  => '指定の形式で入力してください',
+        'admin_id.not_null'    => '指定の形式で入力してください',
+        'nick_name.length'     => '文字数!!',
+        'full_name.length'     => '文字数!!',
+        'phonetic_name.length' => '文字数!!',
+        'tel.length'           => '文字数!!',
+        'mail.email_loose'     => 'Eメールを入力してください',
+    );
+
+    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
+
+    my $msg = +{};
+    for my $error_param ( @{$error_params} ) {
+        $msg->{$error_param}
+            = $validator->get_error_messages_from_param($error_param);
+
+        $msg->{$error_param} = shift @{ $msg->{$error_param} };
+    }
+
+    my $valid_msg_profile = +{
+        general_id    => $msg->{general_id},
+        admin_id      => $msg->{admin_id},
+        nick_name     => $msg->{nick_name},
+        full_name     => $msg->{full_name},
+        phonetic_name => $msg->{phonetic_name},
+        tel           => $msg->{tel},
+        mail          => $msg->{mail},
+    };
+
+    return $valid_msg_profile if $validator->has_error();
+
+    return;
+}
+
+sub check_profile_validator_db {
+    my $type   = shift;
+    my $params = shift;
+
+    my $valid_msg_profile_db = +{};
+
+    # general_id, admin_id, 重複、既存の確認
+    my $check_admin_and_general_msg = _check_admin_and_general_id( $params );
+
+    if ($check_admin_and_general_msg) {
+        $valid_msg_profile_db
+            = +{ general_id => $check_admin_and_general_msg };
+    }
+
+    return $valid_msg_profile_db if $check_admin_and_general_msg;
+
+    return;
+}
+
+sub _check_admin_and_general_id {
+    my $params = shift;
+
+    my $general_id = $params->{general_id};
+    my $admin_id   = $params->{admin_id};
+    my $profile_id = $params->{id};
 
     # admin_id, general_id の他のレコードでの重複利用をさける
     # 両方に id の指定が存在する場合
@@ -53,40 +153,25 @@ sub check_admin_and_general_id {
             = $teng->single( 'profile', +{ admin_id => $admin_id }, );
     }
 
-    return '既に利用されています'
-        if $check_profile_row
-        && $profile_id
-        && ( $check_profile_row->id ne $profile_id );
-
     if ($general_id) {
         $check_profile_row
             = $teng->single( 'profile', +{ general_id => $general_id }, );
     }
 
+    # 新規
+    return '既に利用されています'
+        if $check_profile_row && !$profile_id;
+
+    # 更新
     return '既に利用されています'
         if $check_profile_row
         && $profile_id
-        && ( $check_profile_row->id ne $profile_id );
+        && ( $profile_id ne $check_profile_row->id );
 
     return;
 }
 
-sub search_profile_id_rows {
-    my $self       = shift;
-    my $profile_id = shift;
-
-    return search_id_single_or_all_rows( 'profile', $profile_id );
-}
-
-sub search_profile_id_row {
-    my $self       = shift;
-    my $profile_id = shift;
-
-    return get_single_row_search_id( 'profile', $profile_id );
-}
-
 sub writing_profile {
-    my $self   = shift;
     my $type   = shift;
     my $params = shift;
 
@@ -102,7 +187,7 @@ sub writing_profile {
         create_on     => now_datetime(),
         modify_on     => now_datetime(),
     };
-
+    delete $create_data->{create_on} if $type eq 'update';
     return writing_db( 'profile', $type, $create_data, $params->{id} );
 }
 

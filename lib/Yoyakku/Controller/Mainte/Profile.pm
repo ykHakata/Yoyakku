@@ -1,14 +1,15 @@
 package Yoyakku::Controller::Mainte::Profile;
 use Mojo::Base 'Mojolicious::Controller';
-use FormValidator::Lite qw{Email};
 use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Profile qw{
     search_profile_id_rows
+    get_init_valid_params_profile
     get_general_rows_all
     get_admin_rows_all
     search_profile_id_row
-    check_admin_and_general_id
+    check_profile_validator
+    check_profile_validator_db
     writing_profile
 };
 
@@ -16,7 +17,6 @@ use Yoyakku::Model::Mainte::Profile qw{
 sub mainte_profile_serch {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
     # テンプレートbodyのクラス名を定義
@@ -27,7 +27,7 @@ sub mainte_profile_serch {
     my $profile_id = $self->param('profile_id');
 
     # id 検索時は指定のid検索して出力
-    my $profile_rows = $self->search_profile_id_rows($profile_id);
+    my $profile_rows = search_profile_id_rows($profile_id);
 
     $self->stash( profile_rows => $profile_rows );
 
@@ -41,156 +41,96 @@ sub mainte_profile_serch {
 sub mainte_profile_new {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
+
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
+
+    return $self->redirect_to('/mainte_profile_serch')
+        if ( $method ne 'GET' ) && ( $method ne 'POST' );
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_profile_new';
     $self->stash( class => $class );
 
-    # バリデート用
+    my $init_valid_params_profile = get_init_valid_params_profile();
+
+    $self->stash($init_valid_params_profile);
+
+    # 入力画面セレクト用の general admin ログイン名表示
     $self->stash(
-        general_id    => '',
-        admin_id      => '',
-        nick_name     => '',
-        full_name     => '',
-        phonetic_name => '',
-        tel           => '',
-        mail          => '',
+        general_rows => get_general_rows_all(),
+        admin_rows   => get_admin_rows_all(),
     );
+
+    return $self->_insert() if !$params->{id};
+    return $self->_update();
+}
+
+sub _insert {
+    my $self = shift;
 
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    # 入力画面セレクト用の general admin ログイン名表示
-    $self->stash(
-        general_rows => $self->get_general_rows_all(),
-        admin_rows   => $self->get_admin_rows_all(),
-    );
+    return $self->_render_profile($params) if 'GET' eq $method;
+    return $self->_common( 'insert', +{ touroku => '登録完了' }, );
+}
 
-    # 新規作成画面表示用
-    return $self->_render_profile($params)
-        if !$params->{id} && ( 'POST' ne $method );
+sub _update {
+    my $self = shift;
 
-    if ('POST' ne $method) {
-        # 修正画面表示用
-        my $profile_row = $self->search_profile_id_row( $params->{id} );
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
 
-        # 入力フォームフィルイン用
-        $params = +{
-            id            => $profile_row->id,
-            general_id    => $profile_row->general_id,
-            admin_id      => $profile_row->admin_id,
-            nick_name     => $profile_row->nick_name,
-            full_name     => $profile_row->full_name,
-            phonetic_name => $profile_row->phonetic_name,
-            tel           => $profile_row->tel,
-            mail          => $profile_row->mail,
-            status        => $profile_row->status,
-            create_on     => $profile_row->create_on,
-            modify_on     => $profile_row->modify_on,
-        };
-    }
+    return $self->_render_update_form($params) if 'GET' eq $method;
+    return $self->_common( 'update', +{ henkou => '修正完了' }, );
+}
 
-    # テンプレート画面のレンダリング
-    return $self->_render_profile($params) if 'POST' ne $method;
+sub _common {
+    my $self      = shift;
+    my $type      = shift;
+    my $flash_msg = shift;
 
-    # 入力フォームに値を入力して登録するボタン押した場合
-    # バリデード実行
-    my $validator = FormValidator::Lite->new($params);
+    my $params = $self->req->params->to_hash;
 
-    $validator->check(
-        general_id    => [ 'INT', ],
-        admin_id      => [ 'INT', ],
-        nick_name     => [ [ 'LENGTH', 0, 20, ], ],
-        full_name     => [ [ 'LENGTH', 0, 20, ], ],
-        phonetic_name => [ [ 'LENGTH', 0, 20, ], ],
-        tel           => [ [ 'LENGTH', 0, 20, ], ],
-        mail          => [ 'EMAIL_LOOSE', ],
-    );
+    my $valid_msg = check_profile_validator($params);
 
-    $validator->set_message(
-        'general_id.not_null'  => '指定の形式で入力してください',
-        'admin_id.not_null'    => '指定の形式で入力してください',
-        'nick_name.length'     => '文字数!!',
-        'full_name.length'     => '文字数!!',
-        'phonetic_name.length' => '文字数!!',
-        'tel.length'           => '文字数!!',
-        'mail.email_loose'     => 'Eメールを入力してください',
-    );
+    return $self->stash($valid_msg), $self->_render_profile($params)
+        if $valid_msg;
 
-    my @general_id_errors
-        = $validator->get_error_messages_from_param('general_id');
-    my @admin_id_errors
-        = $validator->get_error_messages_from_param('admin_id');
-    my @nick_name_errors
-        = $validator->get_error_messages_from_param('nick_name');
-    my @full_name_errors
-        = $validator->get_error_messages_from_param('full_name');
-    my @phonetic_name_errors
-        = $validator->get_error_messages_from_param('phonetic_name');
-    my @tel_errors    = $validator->get_error_messages_from_param('tel');
-    my @mail_errors   = $validator->get_error_messages_from_param('mail');
+    my $valid_msg_db = check_profile_validator_db( $type, $params, );
 
-    # バリデート用メッセージ
-    $self->stash(
-        general_id    => shift @general_id_errors,
-        admin_id      => shift @admin_id_errors,
-        nick_name     => shift @nick_name_errors,
-        full_name     => shift @full_name_errors,
-        phonetic_name => shift @phonetic_name_errors,
-        tel           => shift @tel_errors,
-        mail          => shift @mail_errors,
-    );
+    return $self->stash($valid_msg_db), $self->_render_profile($params)
+        if $valid_msg_db;
 
-    # 入力バリデート不合格の場合それ以降の作業はしない
-    return $self->_render_profile($params) if $validator->has_error();
-
-    # 既存データとの照合(DB バリデートチェック)
-    if ( $params->{id} ) {
-        # DB バリデート合格の場合 DB 書き込み(修正)
-        # general_id, admin_id, 重複、既存の確認
-        my $check_admin_and_general_msg = $self->check_admin_and_general_id(
-            $params->{general_id},
-            $params->{admin_id},
-            $params->{id},
-        );
-
-        if ($check_admin_and_general_msg) {
-
-            $self->stash->{general_id} = $check_admin_and_general_msg;
-
-            # テンプレート画面のレンダリング
-            return $self->_render_profile($params);
-        }
-
-        $self->writing_profile( 'update', $params );
-        $self->flash( henkou => '修正完了' );
-
-        # sqlにデータ入力したので list 画面にリダイレクト
-        return $self->redirect_to('mainte_profile_serch');
-    }
-
-    # DB バリデート合格の場合 DB 書き込み(新規)
-
-    # general_id, admin_id, 重複、既存の確認
-    my $check_admin_and_general_msg = $self->check_admin_and_general_id(
-        $params->{general_id},
-        $params->{admin_id},
-    );
-
-    if ($check_admin_and_general_msg) {
-
-        $self->stash->{general_id} = $check_admin_and_general_msg;
-
-        # テンプレート画面のレンダリング
-        return $self->_render_profile($params);
-    }
-
-    $self->writing_profile( 'insert', $params );
-    $self->flash( touroku => '登録完了' );
+    writing_profile( $type, $params );
+    $self->flash($flash_msg);
 
     return $self->redirect_to('mainte_profile_serch');
+}
+
+sub _render_update_form {
+    my $self   = shift;
+    my $params = shift;
+
+    my $profile_row = search_profile_id_row( $params->{id} );
+
+    $params = +{
+        id            => $profile_row->id,
+        general_id    => $profile_row->general_id,
+        admin_id      => $profile_row->admin_id,
+        nick_name     => $profile_row->nick_name,
+        full_name     => $profile_row->full_name,
+        phonetic_name => $profile_row->phonetic_name,
+        tel           => $profile_row->tel,
+        mail          => $profile_row->mail,
+        status        => $profile_row->status,
+        create_on     => $profile_row->create_on,
+        modify_on     => $profile_row->modify_on,
+    };
+
+    return $self->_render_profile($params);
 }
 
 # テンプレート画面のレンダリング
