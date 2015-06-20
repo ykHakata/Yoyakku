@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use Time::Piece;
-use FormValidator::Lite qw{Email};
+use FormValidator::Lite qw{Email URL};
 use Yoyakku::Util qw{switch_header_params};
 use Yoyakku::Model qw{$teng};
 use Exporter 'import';
@@ -39,6 +39,10 @@ sub get_table_columns {
         profile => [
             qw{id general_id admin_id nick_name full_name
                 phonetic_name tel mail status create_on modify_on}
+        ],
+        storeinfo => [
+            qw{id region_id admin_id name icon post state cities addressbelow
+                tel mail remarks url locationinfor status create_on modify_on}
         ],
     };
     return $table_columns->{$table};

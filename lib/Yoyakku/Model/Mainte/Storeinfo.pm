@@ -5,7 +5,9 @@ use utf8;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
     search_id_single_or_all_rows
-    get_single_row_search_id
+    get_init_valid_params
+    get_update_form_params
+    get_msg_validator
     writing_db
 };
 use Yoyakku::Util qw{now_datetime};
@@ -13,10 +15,10 @@ use Exporter 'import';
 our @EXPORT_OK = qw{
     search_storeinfo_id_rows
     get_init_valid_params_storeinfo
+    get_update_form_params_storeinfo
     search_zipcode_for_address
     check_storeinfo_validator
     writing_storeinfo
-    search_storeinfo_id_row
 };
 
 sub search_storeinfo_id_rows {
@@ -25,30 +27,17 @@ sub search_storeinfo_id_rows {
 }
 
 sub get_init_valid_params_storeinfo {
-
     my $valid_params = [
-        qw{
-            name
-            post
-            state
-            cities
-            addressbelow
-            tel
-            mail
-            remarks
-            url
-            locationinfor
-            status
-            }
+        qw{name post state cities addressbelow tel mail remarks url
+            locationinfor status }
     ];
+    return get_init_valid_params($valid_params);
+}
 
-    my $valid_params_stash = +{};
-
-    for my $param ( @{$valid_params} ) {
-        $valid_params_stash->{$param} = '';
-    }
-
-    return $valid_params_stash;
+sub get_update_form_params_storeinfo {
+    my $params = shift;
+    $params = get_update_form_params( $params, 'storeinfo', );
+    return $params;
 }
 
 sub search_zipcode_for_address {
@@ -68,9 +57,7 @@ sub search_zipcode_for_address {
 sub check_storeinfo_validator {
     my $params = shift;
 
-    my $validator = FormValidator::Lite->new($params);
-
-    $validator->check(
+    my $check_params = [
         name          => [ [ 'LENGTH', 0, 20, ], ],
         post          => [ 'INT', ],
         state         => [ [ 'LENGTH', 0, 20, ], ],
@@ -82,9 +69,9 @@ sub check_storeinfo_validator {
         url           => [ 'HTTP_URL', ],
         locationinfor => [ [ 'LENGTH', 0, 20, ], ],
         status        => [ 'INT', ],
-    );
+    ];
 
-    $validator->set_message(
+    my $msg_params = [
         'name.length'         => '文字数!!',
         'post.int'            => '指定の形式で入力してください',
         'state.length'        => '文字数!!',
@@ -96,17 +83,11 @@ sub check_storeinfo_validator {
         'url.http_url'        => '指定の形式で入力してください',
         'locationinfor.length' => '文字数!!',
         'status.int' => '指定の形式で入力してください',
-    );
+    ];
 
-    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
+    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
 
-    my $msg = +{};
-    for my $error_param ( @{$error_params} ) {
-        $msg->{$error_param}
-            = $validator->get_error_messages_from_param($error_param);
-
-        $msg->{$error_param} = shift @{ $msg->{$error_param} };
-    }
+    return if !$msg;
 
     my $valid_msg_storeinfo = +{
         name          => $msg->{name},
@@ -122,9 +103,7 @@ sub check_storeinfo_validator {
         status        => $msg->{status},
     };
 
-    return $valid_msg_storeinfo if $validator->has_error();
-
-    return;
+    return $valid_msg_storeinfo;
 }
 
 sub writing_storeinfo {
@@ -152,15 +131,7 @@ sub writing_storeinfo {
 
     # update 以外は禁止
     die 'update only' if !$type || ( $type && $type ne 'update' );
-
-    delete $create_data->{create_on} if $type eq 'update';
-
     return writing_db( 'storeinfo', $type, $create_data, $params->{id} );
-}
-
-sub search_storeinfo_id_row {
-    my $storeinfo_id = shift;
-    return get_single_row_search_id( 'storeinfo', $storeinfo_id );
 }
 
 1;

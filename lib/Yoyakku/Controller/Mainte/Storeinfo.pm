@@ -1,15 +1,14 @@
 package Yoyakku::Controller::Mainte::Storeinfo;
 use Mojo::Base 'Mojolicious::Controller';
-use FormValidator::Lite qw{Email URL};
 use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Storeinfo qw{
     search_storeinfo_id_rows
     get_init_valid_params_storeinfo
+    get_update_form_params_storeinfo
     search_zipcode_for_address
     check_storeinfo_validator
     writing_storeinfo
-    search_storeinfo_id_row
 };
 
 # 店舗情報 一覧 検索
@@ -22,12 +21,8 @@ sub mainte_storeinfo_serch {
     my $class = 'mainte_storeinfo_serch';
     $self->stash( class => $class );
 
-    # id検索時のアクション
-    my $storeinfo_id = $self->param('storeinfo_id');
-
-    # id 検索時は指定のid検索して出力
-    my $storeinfo_rows = search_storeinfo_id_rows($storeinfo_id);
-
+    my $storeinfo_rows
+        = search_storeinfo_id_rows( $self->param('storeinfo_id') );
     $self->stash( storeinfo_rows => $storeinfo_rows );
 
     return $self->render(
@@ -67,15 +62,15 @@ sub _update {
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    return $self->_render_update_form($params) if 'GET' eq $method;
+    return $self->_render_storeinfo(
+        get_update_form_params_storeinfo($params) )
+        if 'GET' eq $method;
 
     # 郵便番号検索ボタンが押されたときの処理
     return $self->_render_storeinfo( search_zipcode_for_address($params) )
         if $params->{kensaku} && $params->{kensaku} eq '検索する';
 
-    my $flash_msg = +{ henkou => '修正完了', };
-
-    return $self->_common( 'update', $flash_msg, );
+    return $self->_common( 'update', +{ henkou => '修正完了', }, );
 }
 
 sub _common {
@@ -96,37 +91,6 @@ sub _common {
     return $self->redirect_to('mainte_storeinfo_serch');
 }
 
-sub _render_update_form {
-    my $self   = shift;
-    my $params = shift;
-
-    my $storeinfo_row = search_storeinfo_id_row( $params->{id} );
-
-    # 入力フォームフィルイン用
-    $params = +{
-        id            => $storeinfo_row->id,
-        region_id     => $storeinfo_row->region_id,
-        admin_id      => $storeinfo_row->admin_id,
-        name          => $storeinfo_row->name,
-        icon          => $storeinfo_row->icon,
-        post          => $storeinfo_row->post,
-        state         => $storeinfo_row->state,
-        cities        => $storeinfo_row->cities,
-        addressbelow  => $storeinfo_row->addressbelow,
-        tel           => $storeinfo_row->tel,
-        mail          => $storeinfo_row->mail,
-        remarks       => $storeinfo_row->remarks,
-        url           => $storeinfo_row->url,
-        locationinfor => $storeinfo_row->locationinfor,
-        status        => $storeinfo_row->status,
-        create_on     => $storeinfo_row->create_on,
-        modify_on     => $storeinfo_row->modify_on,
-    };
-
-    return $self->_render_storeinfo($params);
-}
-
-# テンプレート画面のレンダリング
 sub _render_storeinfo {
     my $self   = shift;
     my $params = shift;
