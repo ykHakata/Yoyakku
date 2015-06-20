@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use Time::Piece;
+use FormValidator::Lite;
 use Yoyakku::Util qw{switch_header_params};
 use Yoyakku::Model qw{$teng};
 use Exporter 'import';
@@ -11,7 +12,47 @@ our @EXPORT_OK = qw{
     search_id_single_or_all_rows
     get_single_row_search_id
     writing_db
+    get_update_form_params
+    get_msg_validator
 };
+
+# 入力値バリデート処理
+sub get_msg_validator {
+    my $params       = shift;
+    my $check_params = shift;
+    my $msg_params   = shift;
+
+    my $validator = FormValidator::Lite->new($params);
+
+    $validator->check( @{$check_params} );
+    $validator->set_message( @{$msg_params} );
+
+    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
+
+    my $msg = +{};
+    for my $error_param ( @{$error_params} ) {
+        $msg->{$error_param}
+            = $validator->get_error_messages_from_param($error_param);
+        $msg->{$error_param} = shift @{ $msg->{$error_param} };
+    }
+
+    return $msg if $validator->has_error();
+    return;
+}
+
+# update 用フィルインパラメーター作成
+sub get_update_form_params {
+    my $params  = shift;
+    my $table   = shift;
+    my $columns = shift;
+
+    my $row = get_single_row_search_id( $table, $params->{id} );
+
+    for my $param ( @{$columns} ) {
+        $params->{$param} = $row->$param;
+    }
+    return $params;
+}
 
 # データベースへの書き込み
 sub writing_db {

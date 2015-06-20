@@ -1,29 +1,28 @@
 package Yoyakku::Controller::Mainte::Admin;
 use Mojo::Base 'Mojolicious::Controller';
-use FormValidator::Lite;
 use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
-use Yoyakku::Model::Mainte::Admin
-    qw{search_admin_id_rows search_admin_id_row writing_admin check_admin_login_name};
+use Yoyakku::Model::Mainte::Admin qw{
+    search_admin_id_rows
+    get_init_valid_params_admin
+    get_update_form_params_admin
+    check_admin_validator
+    check_admin_validator_db
+    writing_admin
+};
 
-# 管理ユーザー(admin) registrant_serch.html.ep
+# 管理ユーザー 一覧 検索
 sub mainte_registrant_serch {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_registrant_serch';
     $self->stash( class => $class );
 
-    # id検索時のアクション
-    my $admin_id = $self->param('admin_id');
-
-    # id 検索時は指定のid検索して出力
-    my $admin_rows = $self->search_admin_id_rows($admin_id);
-
-    $self->stash( admins_ref => $admin_rows );
+    my $admin_rows = search_admin_id_rows( $self->param('admin_id') );
+    $self->stash( admin_rows => $admin_rows );
 
     return $self->render(
         template => 'mainte/mainte_registrant_serch',
@@ -31,103 +30,75 @@ sub mainte_registrant_serch {
     );
 }
 
-# 管理ユーザー 新規 編集 (admin) registrant_new.html.ep
+# 管理ユーザー 新規 編集
 sub mainte_registrant_new {
     my $self = shift;
 
-    # ログイン確認する
     return $self->redirect_to('/index') if $self->check_login_mainte();
+
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
+
+    return $self->redirect_to('/mainte_registrant_serch')
+        if ( $method ne 'GET' ) && ( $method ne 'POST' );
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_registrant_new';
     $self->stash( class => $class );
 
-    # バリデート用
-    $self->stash(
-        login    => '',
-        password => '',
-    );
+    my $init_valid_params_admin = get_init_valid_params_admin();
 
-    my $req    = $self->req;
-    my $params = $req->params->to_hash;
-    my $method = uc $req->method;
+    $self->stash($init_valid_params_admin);
 
-    # 新規作成画面表示用
-    return $self->_render_registrant($params)
-        if !$params->{id} && ( 'POST' ne $method );
+    return $self->_insert() if !$params->{id};
+    return $self->_update();
+}
 
-    if ('POST' ne $method) {
-        # 修正画面表示用
-        my $admin_row = $self->search_admin_id_row( $params->{id} );
+sub _insert {
+    my $self = shift;
 
-        # 入力フォームフィルイン用
-        $params = +{
-            id        => $admin_row->id,
-            login     => $admin_row->login,
-            password  => $admin_row->password,
-            status    => $admin_row->status,
-            create_on => $admin_row->create_on,
-            modify_on => $admin_row->modify_on,
-        };
-    }
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
 
-    # テンプレート画面のレンダリング
-    return $self->_render_registrant($params) if 'POST' ne $method;
+    return $self->_render_registrant($params) if 'GET' eq $method;
+    return $self->_common( 'insert', +{ touroku => '登録完了' }, );
+}
 
-    # 入力フォームに値を入力して登録するボタン押した場合
-    # バリデード実行
-    my $validator = FormValidator::Lite->new($req);
+sub _update {
+    my $self = shift;
 
-    $validator->check(
-        login    => [ 'NOT_NULL', ],
-        password => [ 'NOT_NULL', ],
-    );
+    my $params = $self->req->params->to_hash;
+    my $method = uc $self->req->method;
 
-    $validator->set_message(
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-    );
+    return $self->_render_registrant( get_update_form_params_admin($params) )
+        if 'GET' eq $method;
 
-    my @login_errors = $validator->get_error_messages_from_param('login');
-    my @pass_errors  = $validator->get_error_messages_from_param('password');
+    return $self->_common( 'update', +{ henkou => '修正完了' }, );
+}
 
-    $self->stash->{login}    = shift @login_errors;
-    $self->stash->{password} = shift @pass_errors;
+sub _common {
+    my $self      = shift;
+    my $type      = shift;
+    my $flash_msg = shift;
 
-    # 入力バリデート不合格の場合それ以降の作業はしない
-    return $self->_render_registrant($params) if $validator->has_error();
+    my $params = $self->req->params->to_hash;
 
-    # ログイン名(メルアド)の既存データとの照合
-    # 既存データとの照合(DB バリデートチェック)
-    if ( $params->{id} ) {
-        # DB バリデート合格の場合 DB 書き込み(修正)
-        $self->writing_admin( 'update', $params );
-        $self->flash( henkou => '修正完了' );
+    my $valid_msg = check_admin_validator($params);
 
-        # sqlにデータ入力したので list 画面にリダイレクト
-        return $self->redirect_to('mainte_registrant_serch');
-    }
+    return $self->stash($valid_msg), $self->_render_registrant($params)
+        if $valid_msg;
 
-    # DB バリデート合格の場合 DB 書き込み(新規)
-    my $check_admin_row
-        = $self->check_admin_login_name( $req->param('login') );
+    my $valid_msg_db = check_admin_validator_db( $type, $params, );
 
-    if ($check_admin_row) {
+    return $self->stash($valid_msg_db), $self->_render_registrant($params)
+        if $valid_msg_db;
 
-        # ログイン名がすでに存在している
-        $self->stash->{login} = '既に使用されてます';
-
-        # テンプレート画面のレンダリング
-        return $self->_render_registrant($params);
-    }
-
-    $self->writing_admin( 'insert', $params );
-    $self->flash( touroku => '登録完了' );
+    writing_admin( $type, $params );
+    $self->flash($flash_msg);
 
     return $self->redirect_to('mainte_registrant_serch');
 }
 
-# テンプレート画面のレンダリング
 sub _render_registrant {
     my $self   = shift;
     my $params = shift;
@@ -141,7 +112,6 @@ sub _render_registrant {
 
     return $self->render( text => $output );
 }
-
 
 1;
 

@@ -34,19 +34,19 @@
         <td>create_on</td>
         <td>modify_on</td>
       </tr>
-      % foreach my $admin_ref (@$admins_ref) {
+      % for my $admin_row (@{$admin_rows}) {
       <tr>
-        <td><%= $admin_ref->id %>
+        <td><%= $admin_row->id %>
           <form action="mainte_registrant_new" method="get">
-          <input type="hidden" name="id" value="<%= $admin_ref->id %>">
+          <input type="hidden" name="id" value="<%= $admin_row->id %>">
           <input type="submit" value="修正">
         </form>
         </td>
-        <td><%= $admin_ref->login %></td>
-        <td><%= $admin_ref->password %></td>
-        <td><%= $admin_ref->status %></td>
-        <td><%= $admin_ref->create_on %></td>
-        <td><%= $admin_ref->modify_on %></td>
+        <td><%= $admin_row->login %></td>
+        <td><%= $admin_row->password %></td>
+        <td><%= $admin_row->status %></td>
+        <td><%= $admin_row->create_on %></td>
+        <td><%= $admin_row->modify_on %></td>
       </tr>
       % }
     <!-- /#input_ads_t --></table>

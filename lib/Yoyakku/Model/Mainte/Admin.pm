@@ -6,41 +6,110 @@ use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
     search_id_single_or_all_rows
     get_single_row_search_id
+    get_update_form_params
+    get_msg_validator
 };
 use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_admin_id_rows
-    search_admin_id_row
+    get_init_valid_params_admin
+    get_update_form_params_admin
+    check_admin_validator
+    check_admin_validator_db
     writing_admin
-    check_admin_login_name
 };
 
-sub check_admin_login_name {
-    my $self  = shift;
-    my $login = shift;
-
-    my $admin_row = $teng->single( 'admin', +{ login => $login, }, );
-
-    return $admin_row;
-}
-
 sub search_admin_id_rows {
-    my $self     = shift;
     my $admin_id = shift;
-
     return search_id_single_or_all_rows( 'admin', $admin_id );
 }
 
-sub search_admin_id_row {
-    my $self     = shift;
-    my $admin_id = shift;
+sub get_init_valid_params_admin {
 
-    return get_single_row_search_id( 'admin', $admin_id );
+    my $valid_params = [qw{login password}];
+
+    my $valid_params_stash = +{};
+
+    for my $param ( @{$valid_params} ) {
+        $valid_params_stash->{$param} = '';
+    }
+    return $valid_params_stash;
+}
+
+sub get_update_form_params_admin {
+    my $params = shift;
+    $params = get_update_form_params( $params, 'admin', _admin_params(), );
+    return $params;
+}
+
+sub _admin_params {
+    my $params = [qw{id login password status create_on modify_on}];
+    return $params;
+}
+
+sub check_admin_validator {
+    my $params = shift;
+
+    my $check_params = [
+        login    => [ 'NOT_NULL', ],
+        password => [ 'NOT_NULL', ],
+    ];
+
+    my $msg_params = [
+        'login.not_null'    => '必須入力',
+        'password.not_null' => '必須入力',
+    ];
+
+    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
+
+    return if !$msg;
+
+    my $valid_msg_admin = +{
+        login    => $msg->{login},
+        password => $msg->{password},
+    };
+
+    return $valid_msg_admin
+}
+
+sub check_admin_validator_db {
+    my $type   = shift;
+    my $params = shift;
+
+    my $valid_msg_admin_db = +{};
+
+    my $check_admin_msg = _check_admin_login_name( $params );
+
+    if ($check_admin_msg) {
+        $valid_msg_admin_db = +{ login => $check_admin_msg };
+    }
+    return $valid_msg_admin_db if $check_admin_msg;
+    return;
+}
+
+sub _check_admin_login_name {
+    my $params = shift;
+
+    my $login    = $params->{login};
+    my $admin_id = $params->{id};
+
+    my $admin_row = $teng->single( 'admin', +{ login => $login, }, );
+
+    # 新規
+    return '既に利用されています'
+        if $admin_row && !$admin_id;
+
+    # 更新
+    return '既に利用されています'
+        if $admin_row
+        && $admin_id
+        && ( $admin_id ne $admin_row->id );
+
+    return;
 }
 
 sub writing_admin {
-    my $self   = shift;
     my $type   = shift;
     my $params = shift;
 
@@ -53,17 +122,13 @@ sub writing_admin {
     };
 
     my $insert_admin_row;
-
-    if ($type eq 'insert') {
-
+    if ( $type eq 'insert' ) {
         $insert_admin_row = $teng->insert( 'admin', $create_data_admin, );
-
     }
-    elsif ($type eq 'update') {
-
+    elsif ( $type eq 'update' ) {
+        delete $create_data_admin->{create_on};
         $insert_admin_row
             = $teng->single( 'admin', +{ id => $params->{id} }, );
-
         $insert_admin_row->update($create_data_admin);
     }
 
@@ -82,8 +147,7 @@ sub writing_admin {
     # 承認済み 1 の場合該当の storeinfo のデータを検索
     if ($new_admin_status eq '1') {
         my $storeinfo_row
-            = $teng->single( 'storeinfo',
-            +{ admin_id => $new_admin_id, }, );
+            = $teng->single( 'storeinfo', +{ admin_id => $new_admin_id, }, );
 
         # storeinfo 見つからないときは新規にレコード作成
         if (!$storeinfo_row) {
@@ -100,20 +164,19 @@ sub writing_admin {
 
             # roominfo を 10 件作成
             my $create_data_roominfo = +{
-                storeinfo_id   => $insert_storeinfo_row->id,
-                name           => undef,
-                starttime_on   => '10:00',
-                endingtime_on  => '22:00',
-                time_change    => 0,
-                rentalunit     => 1,
-                pricescomments => '例）１時間２０００円より',
-                privatepermit  => 0,
-                privatepeople  => 2,
+                storeinfo_id      => $insert_storeinfo_row->id,
+                name              => undef,
+                starttime_on      => '10:00:00',
+                endingtime_on     => '22:00:00',
+                time_change       => 0,
+                rentalunit        => 1,
+                pricescomments    => '例）１時間２０００円より',
+                privatepermit     => 0,
+                privatepeople     => 2,
                 privateconditions => 0,
                 bookinglimit      => 0,
                 cancellimit       => 8,
-                remarks =>
-                    '例）スタジオ内の飲食は禁止です。',
+                remarks => '例）スタジオ内の飲食は禁止です。',
                 webpublishing => 1,
                 webreserve    => 3,
                 status        => 0,
