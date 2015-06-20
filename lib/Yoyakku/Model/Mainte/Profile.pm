@@ -2,7 +2,6 @@ package Yoyakku::Model::Mainte::Profile;
 use strict;
 use warnings;
 use utf8;
-use FormValidator::Lite qw{Email};
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
     search_id_single_or_all_rows

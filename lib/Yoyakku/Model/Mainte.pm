@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use Time::Piece;
-use FormValidator::Lite;
+use FormValidator::Lite qw{Email};
 use Yoyakku::Util qw{switch_header_params};
 use Yoyakku::Model qw{$teng};
 use Exporter 'import';
