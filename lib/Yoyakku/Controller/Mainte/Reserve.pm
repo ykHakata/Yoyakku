@@ -4,16 +4,14 @@ use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Reserve qw{
     search_reserve_id_rows
-    change_format_datetime
-    writing_reserve
-    search_reserve_id_row
-    get_startend_day_and_time
     get_init_valid_params_reserve
     get_input_support
+    change_format_datetime
+    get_update_form_params_reserve
     check_reserve_validator
     check_reserve_validator_db
+    writing_reserve
 };
-use Data::Dumper;
 
 # 予約情報 一覧 検索
 sub mainte_reserve_serch {
@@ -25,10 +23,7 @@ sub mainte_reserve_serch {
     my $class = 'mainte_reserve_serch';
     $self->stash( class => $class );
 
-    my $reserve_id = $self->param('reserve_id');
-
-    my $reserve_rows = search_reserve_id_rows($reserve_id);
-
+    my $reserve_rows = search_reserve_id_rows( $self->param('reserve_id') );
     $self->stash( reserve_rows => $reserve_rows );
 
     return $self->render(
@@ -57,9 +52,7 @@ sub mainte_reserve_new {
     $self->stash( class => $class );
 
     my $init_valid_params_reserve = get_init_valid_params_reserve();
-
-    my $input_support_values
-        = get_input_support( $params->{id}, $params->{roominfo_id}, );
+    my $input_support_values      = get_input_support($params);
 
     $self->stash( %{$init_valid_params_reserve}, %{$input_support_values}, );
 
@@ -75,9 +68,7 @@ sub _insert {
 
     return $self->_render_reserve($params) if 'GET' eq $method;
 
-    my $flash_msg = +{ touroku => '登録完了' };
-
-    return $self->_common( 'insert', $flash_msg, );
+    return $self->_common( 'insert', +{ touroku => '登録完了' }, );
 }
 
 sub _update {
@@ -86,11 +77,10 @@ sub _update {
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    return $self->_render_update_form($params) if 'GET' eq $method;
+    return $self->_render_reserve( get_update_form_params_reserve($params) )
+        if 'GET' eq $method;
 
-    my $flash_msg = +{ henkou => '修正完了', };
-
-    return $self->_common( 'update', $flash_msg, );
+    return $self->_common( 'update', +{ henkou => '修正完了', }, );
 }
 
 sub _common {
@@ -120,35 +110,6 @@ sub _common {
     return $self->redirect_to('mainte_reserve_serch');
 }
 
-sub _render_update_form {
-    my $self   = shift;
-    my $params = shift;
-
-    my $reserve_row       = search_reserve_id_row( $params->{id} );
-    my $startend_day_time = get_startend_day_and_time($reserve_row);
-
-    # 入力フォームフィルイン用
-    $params = +{
-        id                 => $reserve_row->id,
-        roominfo_id        => $reserve_row->roominfo_id,
-        getstarted_on_day  => $startend_day_time->{getstarted_on_day},
-        getstarted_on_time => $startend_day_time->{getstarted_on_time},
-        enduse_on_day      => $startend_day_time->{enduse_on_day},
-        enduse_on_time     => $startend_day_time->{enduse_on_time},
-        useform            => $reserve_row->useform,
-        message            => $reserve_row->message,
-        general_id         => $reserve_row->general_id,
-        admin_id           => $reserve_row->admin_id,
-        tel                => $reserve_row->tel,
-        status             => $reserve_row->status,
-        create_on          => $reserve_row->create_on,
-        modify_on          => $reserve_row->modify_on,
-    };
-
-    return $self->_render_reserve($params);
-}
-
-# テンプレート画面のレンダリング
 sub _render_reserve {
     my $self   = shift;
     my $params = shift;

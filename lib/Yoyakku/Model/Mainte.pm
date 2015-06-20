@@ -3,7 +3,8 @@ use strict;
 use warnings;
 use utf8;
 use Time::Piece;
-use FormValidator::Lite qw{Email URL};
+use Time::Seconds;
+use FormValidator::Lite qw{Email URL DATE TIME};
 use Yoyakku::Util qw{switch_header_params};
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Yoyakku::Model qw{$teng};
@@ -17,10 +18,35 @@ our @EXPORT_OK = qw{
     get_msg_validator
     check_login_name
     get_init_valid_params
+    chenge_hour_6_for_30
+    split_time
+    join_time
 };
 
-# chenge_hour_6_for_30 6:00 を 30:00
-sub chenge_hour_6_for_30 {
+# time 形式を組み立て
+sub join_time {
+    my $split_t = shift;
+
+    my $FIELD_SEPARATOR_TIME = q{:};
+
+    my $start_time = join $FIELD_SEPARATOR_TIME,
+        $split_t->{start_hour},
+        $split_t->{start_min},
+        $split_t->{start_sec};
+
+    my $end_time = join $FIELD_SEPARATOR_TIME,
+        $split_t->{end_hour},
+        $split_t->{end_min},
+        $split_t->{end_sec};
+
+    $start_time = sprintf '%08s', $start_time;
+    $end_time   = sprintf '%08s', $end_time;
+
+    return ( $start_time, $end_time, );
+}
+
+# time 形式を分解
+sub split_time {
     my $start_time = shift;
     my $end_time   = shift;
 
@@ -33,23 +59,14 @@ sub chenge_hour_6_for_30 {
     my ( $end_hour, $end_min, $end_sec ) = split $FIELD_SEPARATOR_TIME,
         $end_time, $FIELD_COUNT_TIME + 1;
 
-    # 数字にもどす
-    $start_hour += 0;
-    $end_hour   += 0;
-
-    # 時間の表示を変換
-    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
-        $start_hour += 24;
-    }
-
-    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
-        $end_hour += 24;
-    }
-
-    $start_time = $start_hour . ':' . $start_min . ':' . $start_sec;
-    $end_time   = $end_hour . ':' . $end_min . ':' . $end_sec;
-
-    return ( $start_time, $end_time, );
+    return +{
+        start_hour => $start_hour,
+        start_min  => $start_min,
+        start_sec  => $start_sec,
+        end_hour   => $end_hour,
+        end_min    => $end_min,
+        end_sec    => $end_sec,
+    };
 }
 
 # バリデート用パラメータ初期値
@@ -83,6 +100,10 @@ sub get_table_columns {
                 time_change pricescomments privatepermit privatepeople
                 privateconditions bookinglimit cancellimit remarks
                 webpublishing webreserve status create_on modify_on}
+        ],
+        reserve => [
+            qw{id roominfo_id getstarted_on enduse_on useform message
+                general_id admin_id tel status create_on modify_on}
         ],
     };
     return $table_columns->{$table};
@@ -131,7 +152,7 @@ sub get_msg_validator {
     return $msg if $validator->has_error();
     return;
 }
-
+use Data::Dumper;
 # update 用フィルインパラメーター作成
 sub get_update_form_params {
     my $params  = shift;
@@ -146,13 +167,112 @@ sub get_update_form_params {
 
     # roominfo のみ 開始、終了時刻はデータを調整する00->24表示にする
     if ( $table eq 'roominfo' ) {
-        ( $params->{starttime_on}, $params->{endingtime_on}, )
+
+        my ($start_hour, $start_minute, $start_second,
+            $end_hour,   $end_minute,   $end_second,
+            )
             = chenge_hour_6_for_30(
             $params->{starttime_on},
             $params->{endingtime_on},
             );
+
+            $params->{starttime_on} = join ':', $start_hour, $start_minute,
+                $start_second;
+            $params->{endingtime_on} = join ':', $end_hour, $end_minute,
+                $end_second;
     }
+
+    # reserve のみ 日付変換
+    if ( $table eq 'reserve' ) {
+        my $day_and_time = get_startend_day_and_time($row);
+        $params->{getstarted_on_day}  = $day_and_time->{getstarted_on_day};
+        $params->{getstarted_on_time} = $day_and_time->{getstarted_on_time};
+        $params->{enduse_on_day}      = $day_and_time->{enduse_on_day};
+        $params->{enduse_on_time}     = $day_and_time->{enduse_on_time};
+    }
+
     return $params;
+}
+
+# roominfo の開始時刻を入力フォーム用に変換
+sub get_startend_day_and_time {
+    my $reserve_row = shift;
+
+    my $getstarted_on = $reserve_row->getstarted_on;
+    my $enduse_on     = $reserve_row->enduse_on;
+
+    my $FIELD_SEPARATOR = q{ };
+    my $FIELD_COUNT     = 2;
+
+    my ( $getstarted_on_day, $getstarted_on_time ) = split $FIELD_SEPARATOR,
+        $getstarted_on, $FIELD_COUNT + 1;
+
+    my ( $enduse_on_day, $enduse_on_time ) = split $FIELD_SEPARATOR,
+        $enduse_on, $FIELD_COUNT + 1;
+
+    # 時間の表示を6:00-30:00
+    my ($start_hour, $start_minute, $start_second,
+        $end_hour,   $end_minute,   $end_second,
+    ) = chenge_hour_6_for_30( $getstarted_on_time, $enduse_on_time );
+
+    # 24 - 30 の場合日付をもどす 時間の表示を変換
+    if ( $start_hour >= 24 && $start_hour <= 30 ) {
+        my $getstarted_on_day_tp
+            = localtime->strptime( $getstarted_on_day, '%Y-%m-%d' );
+        $getstarted_on_day_tp = $getstarted_on_day_tp - ONE_DAY;
+        $getstarted_on_day    = $getstarted_on_day_tp->ymd;
+    }
+
+    if ( $end_hour >= 24 && $end_hour <= 30 ) {
+        my $enduse_on_day_tp
+            = localtime->strptime( $enduse_on_day, '%Y-%m-%d' );
+        $enduse_on_day_tp = $enduse_on_day_tp - ONE_DAY;
+        $enduse_on_day    = $enduse_on_day_tp->ymd;
+    }
+
+    $getstarted_on_time = join ':', $start_hour, $start_minute, $start_second;
+    $enduse_on_time     = join ':', $end_hour,   $end_minute,   $end_second;
+
+    # 整形して出力
+    my $startend_day_time = +{
+        getstarted_on_day  => $getstarted_on_day,
+        getstarted_on_time => $getstarted_on_time,
+        enduse_on_day      => $enduse_on_day,
+        enduse_on_time     => $enduse_on_time,
+    };
+
+    return $startend_day_time;
+}
+
+# chenge_hour_6_for_30 6:00 を 30:00
+sub chenge_hour_6_for_30 {
+    my $start_time = shift;
+    my $end_time   = shift;
+
+    my $split_t = split_time( $start_time, $end_time, );
+
+    # 数字にもどす
+    $split_t->{start_hour} += 0;
+    $split_t->{end_hour}   += 0;
+
+    # 時間の表示を変換
+    if (   $split_t->{start_hour} >= $HOUR_00
+        && $split_t->{start_hour} < $HOUR_06 )
+    {
+        $split_t->{start_hour} += 24;
+    }
+
+    if (   $split_t->{end_hour} >= $HOUR_00
+        && $split_t->{end_hour} <= $HOUR_06 )
+    {
+        $split_t->{end_hour} += 24;
+    }
+    # die '$split_t',Dumper($split_t);
+    return (
+        $split_t->{start_hour}, $split_t->{start_min},
+        $split_t->{start_sec},  $split_t->{end_hour},
+        $split_t->{end_min},    $split_t->{end_sec},
+    );
 }
 
 # データベースへの書き込み
