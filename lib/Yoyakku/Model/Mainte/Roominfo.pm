@@ -151,13 +151,32 @@ sub writing_roominfo {
     my $params = shift;
 
     # 書き込む前に開始、終了時刻変換
-    if ( $params->{starttime_on} =~ /^[2][4-9]$/ ) {
-        $params->{starttime_on} -= 24;
+    my $FIELD_SEPARATOR_TIME = q{:};
+    my $FIELD_COUNT_TIME     = 3;
+
+    my ( $start_hour, $start_minute, $start_second, )
+        = split $FIELD_SEPARATOR_TIME, $params->{starttime_on},
+        $FIELD_COUNT_TIME + 1;
+
+    my ( $end_hour, $end_minute, $end_second, ) = split $FIELD_SEPARATOR_TIME,
+        $params->{endingtime_on}, $FIELD_COUNT_TIME + 1;
+
+    # 数字にもどす
+    $start_hour += 0;
+    $end_hour   += 0;
+
+    # 時間の表示を変換
+    if ( $start_hour >= 24 && $start_hour <= 30 ) {
+        $start_hour -= 24;
     }
 
-    if ( $params->{endingtime_on} =~ /^[2][4-9]$|^[3][0]$/ ) {
-        $params->{endingtime_on} -= 24;
+    if ( $end_hour >= 24 && $end_hour <= 30 ) {
+        $end_hour -= 24;
     }
+
+    $params->{starttime_on} = join ':', $start_hour, $start_minute,
+        $start_second;
+    $params->{endingtime_on} = join ':', $end_hour, $end_minute, $end_second;
 
     $params->{starttime_on}  = sprintf '%08s', $params->{starttime_on};
     $params->{endingtime_on} = sprintf '%08s', $params->{endingtime_on};
