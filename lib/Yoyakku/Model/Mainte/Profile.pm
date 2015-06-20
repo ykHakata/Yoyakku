@@ -6,7 +6,9 @@ use FormValidator::Lite qw{Email};
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
     search_id_single_or_all_rows
-    get_single_row_search_id
+    get_init_valid_params
+    get_update_form_params
+    get_msg_validator
     writing_db
 };
 use Yoyakku::Util qw{now_datetime};
@@ -14,9 +16,9 @@ use Exporter 'import';
 our @EXPORT_OK = qw{
     search_profile_id_rows
     get_init_valid_params_profile
+    get_update_form_params_profile
     get_general_rows_all
     get_admin_rows_all
-    search_profile_id_row
     check_profile_validator
     check_profile_validator_db
     writing_profile
@@ -28,26 +30,16 @@ sub search_profile_id_rows {
 }
 
 sub get_init_valid_params_profile {
+    my $valid_params
+        = [
+        qw{general_id admin_id nick_name full_name phonetic_name tel mail}];
+    return get_init_valid_params($valid_params);
+}
 
-    my $valid_params = [
-        qw{
-            general_id
-            admin_id
-            nick_name
-            full_name
-            phonetic_name
-            tel
-            mail
-            }
-    ];
-
-    my $valid_params_stash = +{};
-
-    for my $param ( @{$valid_params} ) {
-        $valid_params_stash->{$param} = '';
-    }
-
-    return $valid_params_stash;
+sub get_update_form_params_profile {
+    my $params = shift;
+    $params = get_update_form_params( $params, 'profile', );
+    return $params;
 }
 
 sub get_general_rows_all {
@@ -60,17 +52,10 @@ sub get_admin_rows_all {
     return \@admin_rows;
 }
 
-sub search_profile_id_row {
-    my $profile_id = shift;
-    return get_single_row_search_id( 'profile', $profile_id );
-}
-
 sub check_profile_validator {
     my $params = shift;
 
-    my $validator = FormValidator::Lite->new($params);
-
-    $validator->check(
+    my $check_params = [
         general_id    => [ 'INT', ],
         admin_id      => [ 'INT', ],
         nick_name     => [ [ 'LENGTH', 0, 20, ], ],
@@ -78,9 +63,9 @@ sub check_profile_validator {
         phonetic_name => [ [ 'LENGTH', 0, 20, ], ],
         tel           => [ [ 'LENGTH', 0, 20, ], ],
         mail          => [ 'EMAIL_LOOSE', ],
-    );
+    ];
 
-    $validator->set_message(
+    my $msg_params = [
         'general_id.not_null'  => '指定の形式で入力してください',
         'admin_id.not_null'    => '指定の形式で入力してください',
         'nick_name.length'     => '文字数!!',
@@ -88,17 +73,11 @@ sub check_profile_validator {
         'phonetic_name.length' => '文字数!!',
         'tel.length'           => '文字数!!',
         'mail.email_loose'     => 'Eメールを入力してください',
-    );
+    ];
 
-    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
+    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
 
-    my $msg = +{};
-    for my $error_param ( @{$error_params} ) {
-        $msg->{$error_param}
-            = $validator->get_error_messages_from_param($error_param);
-
-        $msg->{$error_param} = shift @{ $msg->{$error_param} };
-    }
+    return if !$msg;
 
     my $valid_msg_profile = +{
         general_id    => $msg->{general_id},
@@ -110,9 +89,7 @@ sub check_profile_validator {
         mail          => $msg->{mail},
     };
 
-    return $valid_msg_profile if $validator->has_error();
-
-    return;
+    return $valid_msg_profile;
 }
 
 sub check_profile_validator_db {
@@ -130,7 +107,6 @@ sub check_profile_validator_db {
     }
 
     return $valid_msg_profile_db if $check_admin_and_general_msg;
-
     return;
 }
 
@@ -142,9 +118,9 @@ sub _check_admin_and_general_id {
     my $profile_id = $params->{id};
 
     # admin_id, general_id の他のレコードでの重複利用をさける
-    # 両方に id の指定が存在する場合
+    # 両方に id の指定が存在する場合 両方ない場合
     return '一般,管理どちらかにしてください'
-        if $admin_id && $general_id;
+        if ($admin_id && $general_id) || (!$admin_id && !$general_id);
 
     my $check_profile_row;
 
@@ -187,7 +163,6 @@ sub writing_profile {
         create_on     => now_datetime(),
         modify_on     => now_datetime(),
     };
-    delete $create_data->{create_on} if $type eq 'update';
     return writing_db( 'profile', $type, $create_data, $params->{id} );
 }
 

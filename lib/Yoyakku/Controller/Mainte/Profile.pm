@@ -5,9 +5,9 @@ use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Profile qw{
     search_profile_id_rows
     get_init_valid_params_profile
+    get_update_form_params_profile
     get_general_rows_all
     get_admin_rows_all
-    search_profile_id_row
     check_profile_validator
     check_profile_validator_db
     writing_profile
@@ -23,12 +23,7 @@ sub mainte_profile_serch {
     my $class = 'mainte_profile_serch';
     $self->stash( class => $class );
 
-    # id検索時のアクション
-    my $profile_id = $self->param('profile_id');
-
-    # id 検索時は指定のid検索して出力
-    my $profile_rows = search_profile_id_rows($profile_id);
-
+    my $profile_rows = search_profile_id_rows( $self->param('profile_id') );
     $self->stash( profile_rows => $profile_rows );
 
     return $self->render(
@@ -83,7 +78,9 @@ sub _update {
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    return $self->_render_update_form($params) if 'GET' eq $method;
+    return $self->_render_profile( get_update_form_params_profile($params) )
+        if 'GET' eq $method;
+
     return $self->_common( 'update', +{ henkou => '修正完了' }, );
 }
 
@@ -110,30 +107,6 @@ sub _common {
     return $self->redirect_to('mainte_profile_serch');
 }
 
-sub _render_update_form {
-    my $self   = shift;
-    my $params = shift;
-
-    my $profile_row = search_profile_id_row( $params->{id} );
-
-    $params = +{
-        id            => $profile_row->id,
-        general_id    => $profile_row->general_id,
-        admin_id      => $profile_row->admin_id,
-        nick_name     => $profile_row->nick_name,
-        full_name     => $profile_row->full_name,
-        phonetic_name => $profile_row->phonetic_name,
-        tel           => $profile_row->tel,
-        mail          => $profile_row->mail,
-        status        => $profile_row->status,
-        create_on     => $profile_row->create_on,
-        modify_on     => $profile_row->modify_on,
-    };
-
-    return $self->_render_profile($params);
-}
-
-# テンプレート画面のレンダリング
 sub _render_profile {
     my $self   = shift;
     my $params = shift;

@@ -34,8 +34,12 @@ sub get_table_columns {
     my $table = shift;
 
     my $table_columns = +{
-        admin => [qw{id login password status create_on modify_on}],
+        admin   => [qw{id login password status create_on modify_on}],
         general => [qw{id login password status create_on modify_on}],
+        profile => [
+            qw{id general_id admin_id nick_name full_name
+                phonetic_name tel mail status create_on modify_on}
+        ],
     };
     return $table_columns->{$table};
 }
