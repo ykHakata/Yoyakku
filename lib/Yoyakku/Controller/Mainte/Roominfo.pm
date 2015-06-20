@@ -1,15 +1,13 @@
 package Yoyakku::Controller::Mainte::Roominfo;
 use Mojo::Base 'Mojolicious::Controller';
-use FormValidator::Lite;
 use HTML::FillInForm;
 use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Roominfo qw{
     search_storeinfo_id_for_roominfo_rows
     get_init_valid_params_roominfo
-    search_roominfo_id_row
-    writing_roominfo
+    get_update_form_params_roominfo
     check_roominfo_validator
-    chenge_hour_6_for_30
+    writing_roominfo
 };
 
 # 部屋情報 一覧 検索
@@ -23,11 +21,8 @@ sub mainte_roominfo_serch {
     $self->stash( class => $class );
 
     # id検索時のアクション (該当の店舗を検索)
-    my $storeinfo_id = $self->param('storeinfo_id');
-
-    # id 検索時は指定のid検索して出力
-    my $roominfo_rows = search_storeinfo_id_for_roominfo_rows($storeinfo_id);
-
+    my $roominfo_rows = search_storeinfo_id_for_roominfo_rows(
+        $self->param('storeinfo_id') );
     $self->stash( roominfo_rows => $roominfo_rows );
 
     return $self->render(
@@ -67,11 +62,10 @@ sub _update {
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    return $self->_render_update_form($params) if 'GET' eq $method;
+    return $self->_render_roominfo( get_update_form_params_roominfo($params) )
+        if 'GET' eq $method;
 
-    my $flash_msg = +{ henkou => '修正完了', };
-
-    return $self->_common( 'update', $flash_msg, );
+    return $self->_common( 'update', +{ henkou => '修正完了', }, );
 }
 
 sub _common {
@@ -92,45 +86,6 @@ sub _common {
     return $self->redirect_to('mainte_roominfo_serch');
 }
 
-sub _render_update_form {
-    my $self   = shift;
-    my $params = shift;
-
-    my $roominfo_row = $self->search_roominfo_id_row( $params->{id} );
-
-    # 開始、終了時刻はデータを調整する00->24表示にする
-    my ( $starttime_on, $endingtime_on, ) = chenge_hour_6_for_30(
-        $roominfo_row->starttime_on,
-        $roominfo_row->endingtime_on,
-    );
-
-    # 入力フォームフィルイン用
-    $params = +{
-        id                => $roominfo_row->id,
-        storeinfo_id      => $roominfo_row->storeinfo_id,
-        name              => $roominfo_row->name,
-        starttime_on      => $starttime_on,
-        endingtime_on     => $endingtime_on,
-        rentalunit        => $roominfo_row->rentalunit,
-        time_change       => $roominfo_row->time_change,
-        pricescomments    => $roominfo_row->pricescomments,
-        privatepermit     => $roominfo_row->privatepermit,
-        privatepeople     => $roominfo_row->privatepeople,
-        privateconditions => $roominfo_row->privateconditions,
-        bookinglimit      => $roominfo_row->bookinglimit,
-        cancellimit       => $roominfo_row->cancellimit,
-        remarks           => $roominfo_row->remarks,
-        webpublishing     => $roominfo_row->webpublishing,
-        webreserve        => $roominfo_row->webreserve,
-        status            => $roominfo_row->status,
-        create_on         => $roominfo_row->create_on,
-        modify_on         => $roominfo_row->modify_on,
-    };
-
-    return $self->_render_roominfo($params);
-}
-
-# テンプレート画面のレンダリング
 sub _render_roominfo {
     my $self   = shift;
     my $params = shift;

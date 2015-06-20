@@ -3,58 +3,44 @@ use strict;
 use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
-use Yoyakku::Model::Mainte qw{get_single_row_search_id writing_db};
+use Yoyakku::Model::Mainte qw{
+    search_id_single_or_all_rows
+    get_init_valid_params
+    get_update_form_params
+    get_msg_validator
+    writing_db
+};
 use Yoyakku::Util qw{now_datetime};
-use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     search_storeinfo_id_for_roominfo_rows
     get_init_valid_params_roominfo
-    search_roominfo_id_row
-    writing_roominfo
+    get_update_form_params_roominfo
     check_roominfo_validator
-    chenge_hour_6_for_30
+    writing_roominfo
 };
 
-# chenge_hour_6_for_30 6:00 を 30:00
-sub chenge_hour_6_for_30 {
-    my $start_time = shift;
-    my $end_time   = shift;
+sub search_storeinfo_id_for_roominfo_rows {
+    my $storeinfo_id = shift;
+    return search_id_single_or_all_rows( 'roominfo', $storeinfo_id );
+}
 
-    my $FIELD_SEPARATOR_TIME = q{:};
-    my $FIELD_COUNT_TIME     = 3;
+sub get_init_valid_params_roominfo {
+    my $valid_params
+        = [qw{name endingtime_on rentalunit pricescomments remarks}];
+    return get_init_valid_params($valid_params);
+}
 
-    my ( $start_hour, $start_min, $start_sec ) = split $FIELD_SEPARATOR_TIME,
-        $start_time, $FIELD_COUNT_TIME + 1;
-
-    my ( $end_hour, $end_min, $end_sec ) = split $FIELD_SEPARATOR_TIME,
-        $end_time, $FIELD_COUNT_TIME + 1;
-
-    # 数字にもどす
-    $start_hour += 0;
-    $end_hour   += 0;
-
-    # 時間の表示を変換
-    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
-        $start_hour += 24;
-    }
-
-    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
-        $end_hour += 24;
-    }
-
-    $start_time = $start_hour . ':' . $start_min . ':' . $start_sec;
-    $end_time   = $end_hour . ':' . $end_min . ':' . $end_sec;
-
-    return ( $start_time, $end_time, );
+sub get_update_form_params_roominfo {
+    my $params = shift;
+    $params = get_update_form_params( $params, 'roominfo', );
+    return $params;
 }
 
 sub check_roominfo_validator {
     my $params = shift;
 
-    my $validator = FormValidator::Lite->new($params);
-
-    $validator->check(
+    my $check_params = [
         name              => [ [ 'LENGTH', 0, 20, ], ],
         starttime_on      => [ [ 'LENGTH', 0, 20, ], ],
         endingtime_on     => [ [ 'LENGTH', 0, 20, ], ],
@@ -70,9 +56,9 @@ sub check_roominfo_validator {
         webpublishing     => [ 'INT', ],
         webreserve        => [ 'INT', ],
         status            => [ 'INT', ],
-    );
+    ];
 
-    $validator->set_message(
+    my $msg_params = [
         'name.length'          => '文字数!!',
         'starttime_on.length'  => '文字数!!',
         'endingtime_on.length' => '文字数!!',
@@ -89,17 +75,9 @@ sub check_roominfo_validator {
         'webpublishing.int' => '指定の形式で入力してください',
         'webreserve.int'    => '指定の形式で入力してください',
         'status.int'        => '指定の形式で入力してください',
-    );
+    ];
 
-    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
-
-    my $msg = +{};
-    for my $error_param ( @{$error_params} ) {
-        $msg->{$error_param}
-            = $validator->get_error_messages_from_param($error_param);
-
-        $msg->{$error_param} = shift @{ $msg->{$error_param} };
-    }
+    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
 
     my $valid_msg_roominfo = +{
         name              => $msg->{name},
@@ -119,7 +97,7 @@ sub check_roominfo_validator {
         status            => $msg->{status},
     };
 
-    return $valid_msg_roominfo if $validator->has_error();
+    return $valid_msg_roominfo if scalar values %{$msg};
 
     # starttime_on, endingtime_on, 営業時間のバリデート
     my $check_start_and_end_msg = _check_start_and_end_on($params);
@@ -168,53 +146,6 @@ sub _check_rentalunit {
     return;
 }
 
-sub search_storeinfo_id_for_roominfo_rows {
-    my $storeinfo_id = shift;
-
-    my @roominfo_rows;
-
-    if ( defined $storeinfo_id ) {
-        @roominfo_rows
-            = $teng->search( 'roominfo', +{ storeinfo_id => $storeinfo_id, },
-            );
-    }
-
-    if ( !scalar @roominfo_rows ) {
-        @roominfo_rows = $teng->search( 'roominfo', +{}, );
-    }
-
-    return \@roominfo_rows;
-}
-
-# バリデートエラー表示値の初期化
-sub get_init_valid_params_roominfo {
-
-    my $valid_params = [
-        qw{
-            name
-            endingtime_on
-            rentalunit
-            pricescomments
-            remarks
-            }
-    ];
-
-    my $valid_params_stash = +{};
-
-    for my $param ( @{$valid_params} ) {
-        $valid_params_stash->{$param} = '';
-    }
-
-    return $valid_params_stash;
-}
-
-sub search_roominfo_id_row {
-    my $self        = shift;
-    my $roominfo_id = shift;
-
-    return get_single_row_search_id( 'roominfo', $roominfo_id );
-}
-
 sub writing_roominfo {
     my $type   = shift;
     my $params = shift;
@@ -254,7 +185,6 @@ sub writing_roominfo {
 
     # update 以外は禁止
     die 'update only' if !$type || ( $type && $type ne 'update' );
-
     return writing_db( 'roominfo', $type, $create_data, $params->{id} );
 }
 

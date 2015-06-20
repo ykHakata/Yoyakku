@@ -5,6 +5,7 @@ use utf8;
 use Time::Piece;
 use FormValidator::Lite qw{Email URL};
 use Yoyakku::Util qw{switch_header_params};
+use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Yoyakku::Model qw{$teng};
 use Exporter 'import';
 our @EXPORT_OK = qw{
@@ -17,6 +18,39 @@ our @EXPORT_OK = qw{
     check_login_name
     get_init_valid_params
 };
+
+# chenge_hour_6_for_30 6:00 を 30:00
+sub chenge_hour_6_for_30 {
+    my $start_time = shift;
+    my $end_time   = shift;
+
+    my $FIELD_SEPARATOR_TIME = q{:};
+    my $FIELD_COUNT_TIME     = 3;
+
+    my ( $start_hour, $start_min, $start_sec ) = split $FIELD_SEPARATOR_TIME,
+        $start_time, $FIELD_COUNT_TIME + 1;
+
+    my ( $end_hour, $end_min, $end_sec ) = split $FIELD_SEPARATOR_TIME,
+        $end_time, $FIELD_COUNT_TIME + 1;
+
+    # 数字にもどす
+    $start_hour += 0;
+    $end_hour   += 0;
+
+    # 時間の表示を変換
+    if ( $start_hour >= $HOUR_00 && $start_hour < $HOUR_06 ) {
+        $start_hour += 24;
+    }
+
+    if ( $end_hour >= $HOUR_00 && $end_hour <= $HOUR_06 ) {
+        $end_hour += 24;
+    }
+
+    $start_time = $start_hour . ':' . $start_min . ':' . $start_sec;
+    $end_time   = $end_hour . ':' . $end_min . ':' . $end_sec;
+
+    return ( $start_time, $end_time, );
+}
 
 # バリデート用パラメータ初期値
 sub get_init_valid_params {
@@ -43,6 +77,12 @@ sub get_table_columns {
         storeinfo => [
             qw{id region_id admin_id name icon post state cities addressbelow
                 tel mail remarks url locationinfor status create_on modify_on}
+        ],
+        roominfo => [
+            qw{id storeinfo_id name starttime_on endingtime_on rentalunit
+                time_change pricescomments privatepermit privatepeople
+                privateconditions bookinglimit cancellimit remarks
+                webpublishing webreserve status create_on modify_on}
         ],
     };
     return $table_columns->{$table};
@@ -103,6 +143,15 @@ sub get_update_form_params {
     for my $param ( @{$columns} ) {
         $params->{$param} = $row->$param;
     }
+
+    # roominfo のみ 開始、終了時刻はデータを調整する00->24表示にする
+    if ( $table eq 'roominfo' ) {
+        ( $params->{starttime_on}, $params->{endingtime_on}, )
+            = chenge_hour_6_for_30(
+            $params->{starttime_on},
+            $params->{endingtime_on},
+            );
+    }
     return $params;
 }
 
@@ -144,10 +193,16 @@ sub search_id_single_or_all_rows {
     my $table     = shift;
     my $search_id = shift;
 
+    my $search_column = 'id';
+
+    if ( $table eq 'roominfo' ) {
+        $search_column = 'storeinfo_id';
+    }
+
     my @rows;
 
     if ( defined $search_id ) {
-        @rows = $teng->search( $table, +{ id => $search_id, }, );
+        @rows = $teng->search( $table, +{ $search_column => $search_id, }, );
         if ( !scalar @rows ) {
 
             # id 検索しないときはテーブルの全てを出力
