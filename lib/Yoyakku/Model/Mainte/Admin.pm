@@ -5,9 +5,11 @@ use utf8;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
     search_id_single_or_all_rows
-    get_single_row_search_id
+    get_init_valid_params
     get_update_form_params
     get_msg_validator
+    check_login_name
+    writing_db
 };
 use Yoyakku::Util qw{now_datetime};
 use Exporter 'import';
@@ -26,25 +28,13 @@ sub search_admin_id_rows {
 }
 
 sub get_init_valid_params_admin {
-
     my $valid_params = [qw{login password}];
-
-    my $valid_params_stash = +{};
-
-    for my $param ( @{$valid_params} ) {
-        $valid_params_stash->{$param} = '';
-    }
-    return $valid_params_stash;
+    return get_init_valid_params($valid_params);
 }
 
 sub get_update_form_params_admin {
     my $params = shift;
-    $params = get_update_form_params( $params, 'admin', _admin_params(), );
-    return $params;
-}
-
-sub _admin_params {
-    my $params = [qw{id login password status create_on modify_on}];
+    $params = get_update_form_params( $params, 'admin', );
     return $params;
 }
 
@@ -70,7 +60,7 @@ sub check_admin_validator {
         password => $msg->{password},
     };
 
-    return $valid_msg_admin
+    return $valid_msg_admin;
 }
 
 sub check_admin_validator_db {
@@ -78,8 +68,7 @@ sub check_admin_validator_db {
     my $params = shift;
 
     my $valid_msg_admin_db = +{};
-
-    my $check_admin_msg = _check_admin_login_name( $params );
+    my $check_admin_msg = check_login_name( $params, 'admin', );
 
     if ($check_admin_msg) {
         $valid_msg_admin_db = +{ login => $check_admin_msg };
@@ -88,32 +77,11 @@ sub check_admin_validator_db {
     return;
 }
 
-sub _check_admin_login_name {
-    my $params = shift;
-
-    my $login    = $params->{login};
-    my $admin_id = $params->{id};
-
-    my $admin_row = $teng->single( 'admin', +{ login => $login, }, );
-
-    # 新規
-    return '既に利用されています'
-        if $admin_row && !$admin_id;
-
-    # 更新
-    return '既に利用されています'
-        if $admin_row
-        && $admin_id
-        && ( $admin_id ne $admin_row->id );
-
-    return;
-}
-
 sub writing_admin {
     my $type   = shift;
     my $params = shift;
 
-    my $create_data_admin = +{
+    my $create_data = +{
         login     => $params->{login},
         password  => $params->{password},
         status    => $params->{status},
@@ -121,16 +89,8 @@ sub writing_admin {
         modify_on => now_datetime(),
     };
 
-    my $insert_admin_row;
-    if ( $type eq 'insert' ) {
-        $insert_admin_row = $teng->insert( 'admin', $create_data_admin, );
-    }
-    elsif ( $type eq 'update' ) {
-        delete $create_data_admin->{create_on};
-        $insert_admin_row
-            = $teng->single( 'admin', +{ id => $params->{id} }, );
-        $insert_admin_row->update($create_data_admin);
-    }
+    my $insert_admin_row
+        = writing_db( 'admin', $type, $create_data, $params->{id} );
 
     die 'not $insert_admin_row' if !$insert_admin_row;
 

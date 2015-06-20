@@ -5,7 +5,7 @@ use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::General qw{
     search_general_id_rows
     get_init_valid_params_general
-    search_general_id_row
+    get_update_form_params_general
     check_general_validator
     check_general_validator_db
     writing_general
@@ -21,12 +21,7 @@ sub mainte_general_serch {
     my $class = 'mainte_general_serch';
     $self->stash( class => $class );
 
-    # id検索時のアクション
-    my $general_id = $self->param('general_id');
-
-    # id 検索時は指定のid検索して出力
-    my $general_rows = search_general_id_rows($general_id);
-
+    my $general_rows = search_general_id_rows( $self->param('general_id') );
     $self->stash( general_rows => $general_rows );
 
     return $self->render(
@@ -75,7 +70,9 @@ sub _update {
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
 
-    return $self->_render_update_form($params) if 'GET' eq $method;
+    return $self->_render_general( get_update_form_params_general($params) )
+        if 'GET' eq $method;
+
     return $self->_common( 'update', +{ henkou => '修正完了' }, );
 }
 
@@ -102,24 +99,6 @@ sub _common {
     return $self->redirect_to('mainte_general_serch');
 }
 
-sub _render_update_form {
-    my $self   = shift;
-    my $params = shift;
-
-    my $general_row = search_general_id_row( $params->{id} );
-
-    $params = +{
-        id        => $general_row->id,
-        login     => $general_row->login,
-        password  => $general_row->password,
-        status    => $general_row->status,
-        create_on => $general_row->create_on,
-        modify_on => $general_row->modify_on,
-    };
-    return $self->_render_general($params);
-}
-
-# テンプレート画面のレンダリング
 sub _render_general {
     my $self   = shift;
     my $params = shift;

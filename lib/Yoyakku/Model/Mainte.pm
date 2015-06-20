@@ -14,7 +14,51 @@ our @EXPORT_OK = qw{
     writing_db
     get_update_form_params
     get_msg_validator
+    check_login_name
+    get_init_valid_params
 };
+
+# バリデート用パラメータ初期値
+sub get_init_valid_params {
+    my $valid_params = shift;
+
+    my $valid_params_stash = +{};
+    for my $param ( @{$valid_params} ) {
+        $valid_params_stash->{$param} = '';
+    }
+    return $valid_params_stash;
+}
+
+# 各テーブルカラム取得
+sub get_table_columns {
+    my $table = shift;
+
+    my $table_columns = +{
+        admin => [qw{id login password status create_on modify_on}],
+        general => [qw{id login password status create_on modify_on}],
+    };
+    return $table_columns->{$table};
+}
+
+# ログイン名の重複確認
+sub check_login_name {
+    my $params = shift;
+    my $table  = shift;
+
+    my $login = $params->{login};
+    my $id    = $params->{id};
+
+    my $row = $teng->single( $table, +{ login => $login, }, );
+
+    # 新規
+    return '既に利用されています' if $row && !$id;
+
+    # 更新
+    return '既に利用されています'
+        if $row && $id && ( $id ne $row->id );
+
+    return;
+}
 
 # 入力値バリデート処理
 sub get_msg_validator {
@@ -44,8 +88,8 @@ sub get_msg_validator {
 sub get_update_form_params {
     my $params  = shift;
     my $table   = shift;
-    my $columns = shift;
 
+    my $columns = get_table_columns($table);
     my $row = get_single_row_search_id( $table, $params->{id} );
 
     for my $param ( @{$columns} ) {
@@ -62,22 +106,17 @@ sub writing_db {
     my $update_id = shift;
 
     my $insert_row;
-
     if ( $type eq 'insert' ) {
-
         $insert_row = $teng->insert( $table, $params, );
-
     }
     elsif ( $type eq 'update' ) {
-
+        delete $params->{create_on};
         $insert_row = $teng->single( $table, +{ id => $update_id }, );
-
         $insert_row->update($params);
     }
-
     die 'not $insert_row' if !$insert_row;
 
-    return;
+    return $insert_row;
 }
 
 # レコード更新の為の情報取得
