@@ -172,48 +172,73 @@ This documentation referes to Yoyakku::Model::Mainte::Admin version 0.0.1
 
 Admin コントローラーのロジック API
 
-=head2 check_admin_login_name
-
-    use Yoyakku::Model::Mainte::Admin qw{check_admin_login_name};
-
-    # login の値、存在確認、存在しない場合は undef を返却
-    my $check_admin_row
-        = $self->check_admin_login_name( $req->param('login') );
-
-login の値の重複登録をさけるために利用
-
 =head2 search_admin_id_rows
 
     use Yoyakku::Model::Mainte::Admin qw{search_admin_id_rows};
 
     # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $admin_rows = $self->search_admin_id_rows($admin_id);
+    my $admin_rows = search_admin_id_rows($admin_id);
 
     # 指定の id に該当するレコードなき場合 admin 全てのレコード返却
 
 admin テーブル一覧作成時に利用
 
-=head2 search_admin_id_row
+=head2 get_init_valid_params_admin
 
-    use Yoyakku::Model::Mainte::Admin qw{search_admin_id_row};
+    use Yoyakku::Model::Mainte::Admin qw{get_init_valid_params_admin};
 
-    # 指定の id に該当するレコードを row オブジェクト単体で返却
-    my $admin_row = $self->search_admin_id_row( $params->{id} );
+    # バリデートエラーメッセージ用パラメーター初期値
+    my $init_valid_params_admin = get_init_valid_params_admin();
+    $self->stash($init_valid_params_admin);
 
-    # 指定の id に該当するレコードなき場合エラー発生
+admin 入力フォーム表示の際に利用
 
-admin テーブル修正フォーム表示などに利用
+=head2 get_update_form_params_admin
+
+    use Yoyakku::Model::Mainte::Admin qw{get_update_form_params_admin};
+
+    # 修正画面表示用のパラメーターを取得
+    return $self->_render_registrant( get_update_form_params_admin($params) )
+        if 'GET' eq $method;
+
+admin 修正用入力フォーム表示の際に利用
+
+=head2 check_admin_validator
+
+    use Yoyakku::Model::Mainte::Admin qw{check_admin_validator};
+
+    # バリデート不合格時はエラーメッセージ
+    my $valid_msg = check_admin_validator($params);
+
+    # バリデート合格時は undef を返却
+    return $self->stash($valid_msg), $self->_render_registrant($params)
+        if $valid_msg;
+
+admin 入力値バリデートチェックに利用
+
+=head2 check_admin_validator_db
+
+    use Yoyakku::Model::Mainte::Admin qw{check_admin_validator_db};
+
+    # バリデート不合格時はエラーメッセージ
+    my $valid_msg_db = check_admin_validator_db( $type, $params, );
+
+    # バリデート合格時は undef を返却
+    return $self->stash($valid_msg_db), $self->_render_registrant($params)
+        if $valid_msg_db;
+
+admin 入力値データベースとのバリデートチェックに利用
 
 =head2 writing_admin
 
     use Yoyakku::Model::Mainte::Admin qw{writing_admin};
 
-    # admin テーブル新規レコード作成時
-    $self->writing_admin( 'insert', $params );
+    # admin レコード新規
+    writing_admin( 'insert', $params );
     $self->flash( touroku => '登録完了' );
 
-    # admin テーブルレコード修正時
-    $self->writing_admin( 'update', $params );
+    # admin レコード修正
+    writing_admin( 'update', $params );
     $self->flash( henkou => '修正完了' );
 
 admin テーブル書込み、新規、修正、両方に対応

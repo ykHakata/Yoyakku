@@ -11,7 +11,6 @@ use Yoyakku::Model::Mainte::Admin qw{
     writing_admin
 };
 
-# 管理ユーザー 一覧 検索
 sub mainte_registrant_serch {
     my $self = shift;
 
@@ -30,7 +29,6 @@ sub mainte_registrant_serch {
     );
 }
 
-# 管理ユーザー 新規 編集
 sub mainte_registrant_new {
     my $self = shift;
 
@@ -47,7 +45,6 @@ sub mainte_registrant_new {
     $self->stash( class => $class );
 
     my $init_valid_params_admin = get_init_valid_params_admin();
-
     $self->stash($init_valid_params_admin);
 
     return $self->_insert() if !$params->{id};
@@ -150,7 +147,7 @@ This documentation referes to Yoyakku::Controller::Mainte::Admin version 0.0.1
     GET リクエストに id が指定された場合該当レコード表示
     該当レコードなき場合は全てのレコード表示
 
-admin テーブル登録情報の確認、検索
+admin テーブル登録情報の一覧、検索
 
 =head2 mainte_registrant_new
 
@@ -180,12 +177,12 @@ admin テーブル登録情報の確認、検索
     URL: http:// ... /mainte_registrant_new
     METHOD: POST
     PARAMETERS:
-        id: (自動連番)
-        login: (指定の ASCII 文字)
-        password: (指定の ASCII 文字)
-        status: (0: 未承認, 1: 承認済み, 2: 削除)
-        create_on: (作成日 datetime 形式)
-        modify_on: (修正日 datetime 形式)
+        id:         INT  (例: 5) 管理ユーザーID
+        login:      TEXT (例: 'yoyakku@gmail.com') ログインID名
+        password:   TEXT (例: 'yoyakku0000') ログインパスワード
+        status:     INT  (例: 0: 未承認, 1: 承認済み, 2: 削除) ステータス
+        create_on:  TEXT (例: '2015-06-06 12:24:12') 登録日
+        modify_on:  TEXT (例: '2015-06-06 12:24:12') 修正日
 
     レスポンス (バリデートエラー時)
     CONTENT-TYPE: text/html;charset=UTF-8
@@ -206,8 +203,6 @@ admin テーブルに新規レコード追加、既存レコード修正
 =item * L<Mojo::Base>
 
 =item * L<Mojolicious::Controller>
-
-=item * L<FormValidator::Lite>
 
 =item * L<HTML::FillInForm>
 
