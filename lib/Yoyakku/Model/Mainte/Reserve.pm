@@ -2,19 +2,22 @@ package Yoyakku::Model::Mainte::Reserve;
 use strict;
 use warnings;
 use utf8;
-use Time::Piece;
-use Time::Seconds;
 use Yoyakku::Model qw{$teng};
-use Yoyakku::Util qw{now_datetime};
+use Yoyakku::Util qw{
+    now_datetime
+    join_time
+    split_time
+    chenge_time_over
+    next_day_ymd
+    join_date_time
+    get_start_end_tp
+};
 use Yoyakku::Model::Mainte qw{
     search_id_single_or_all_rows
     get_init_valid_params
     get_update_form_params
     get_msg_validator
     writing_db
-    chenge_hour_6_for_30
-    split_time
-    join_time
 };
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Exporter 'import';
@@ -55,9 +58,12 @@ sub get_input_support {
 
     my $reserve_fillIn_row = _get_reserve_fillIn_row($roominfo_id);
 
-    # 開始時刻表示切り替え
-    my $change_start_and_endtime
-        = _change_start_and_endtime($reserve_fillIn_row);
+    # 開始時刻表示切り替え 時間の表示を6:00-30:00
+    my $change_start_and_endtime = chenge_time_over(
+        +{  start_time => $reserve_fillIn_row->starttime_on,
+            end_time   => $reserve_fillIn_row->endingtime_on,
+        }
+    );
 
     my @rows = $teng->search( 'general', +{}, );
     my $get_general_rows_all = \@rows;
@@ -103,67 +109,38 @@ sub _get_reserve_fillIn_row {
     return $reserve_fillIn_rows[0];
 }
 
-sub _change_start_and_endtime {
-    my $reserve_fillIn_row = shift;
-
-    my $starttime_on  = $reserve_fillIn_row->starttime_on;
-    my $endingtime_on = $reserve_fillIn_row->endingtime_on;
-
-    # 時間の表示を6:00-30:00
-    my ($start_hour, $start_minute, $start_second,
-        $end_hour,   $end_minute,   $end_second,
-    ) = chenge_hour_6_for_30( $starttime_on, $endingtime_on );
-
-    my $change_start_and_endtime = +{
-        start_hour => $start_hour,
-        end_hour   => $end_hour,
-    };
-
-    return $change_start_and_endtime;
-}
-
 # 日付と時刻に分かれたものを datetime 形式にもどす
 sub change_format_datetime {
     my $params = shift;
 
-    my $getstarted_on_day  = $params->{getstarted_on_day};
-    my $getstarted_on_time = $params->{getstarted_on_time};
-    my $enduse_on_day      = $params->{enduse_on_day};
-    my $enduse_on_time     = $params->{enduse_on_time};
+    my $start_date = $params->{getstarted_on_day};
+    my $start_time = $params->{getstarted_on_time};
+    my $end_date   = $params->{enduse_on_day};
+    my $end_time   = $params->{enduse_on_time};
 
     # time 24:00 ~ 30:30 までの表示の場合 0:00 ~ 06:30 用に変換
-    # 日付を一日進めておく
-    my $split_t = split_time( $getstarted_on_time, $enduse_on_time, );
+    # 時間の表示を24:00表記にもどす
+    my $split_t = chenge_time_over(
+        +{ start_time => $start_time, end_time => $end_time, }, 'normal', );
 
-    # 数字にもどす
-    $split_t->{start_hour} += 0;
-    $split_t->{end_hour}   += 0;
-
-    # 時間の表示を変換
-    if ( $split_t->{start_hour} >= 24 && $split_t->{start_hour} <= 30 ) {
-        $split_t->{start_hour} -= 24;
-
-        # 日付を１日すすめる
-        my $getstarted_on_day_tp
-            = localtime->strptime( $getstarted_on_day, '%Y-%m-%d' );
-        $getstarted_on_day_tp = $getstarted_on_day_tp + ONE_DAY;
-        $getstarted_on_day    = $getstarted_on_day_tp->ymd;
+    # 時間の表示を変換 日付を１日進める
+    if ( $split_t->{start_hour} >= 0 && $split_t->{start_hour} < 6 ) {
+        $start_date = next_day_ymd( $start_date );
     }
 
-    if ( $split_t->{end_hour} >= 24 && $split_t->{end_hour} <= 30 ) {
-        $split_t->{end_hour} -= 24;
-
-        # 日付を１日すすめる
-        my $enduse_on_day_tp
-            = localtime->strptime( $enduse_on_day, '%Y-%m-%d' );
-        $enduse_on_day_tp = $enduse_on_day_tp + ONE_DAY;
-        $enduse_on_day    = $enduse_on_day_tp->ymd;
+    if ( $split_t->{end_hour} >= 0 && $split_t->{end_hour} <= 6 ) {
+        $end_date = next_day_ymd( $end_date );
     }
 
-    ( $getstarted_on_time, $enduse_on_time, ) = join_time($split_t);
+    ( $start_time, $end_time, ) = join_time($split_t);
 
-    $params->{getstarted_on} = $getstarted_on_day . ' ' . $getstarted_on_time;
-    $params->{enduse_on}     = $enduse_on_day . ' ' . $enduse_on_time;
+    ( $params->{getstarted_on}, $params->{enduse_on}, ) = join_date_time(
+        +{  start_date => $start_date,
+            start_time => $start_time,
+            end_date   => $end_date,
+            end_time   => $end_time,
+        },
+    );
 
     return $params;
 }
@@ -246,12 +223,12 @@ sub check_reserve_validator {
 sub _check_reserve_use_time {
     my $params = shift;
 
-    my $start_datetime = $params->{getstarted_on};
-    my $end_datetime   = $params->{enduse_on};
+    my $start_date_time = $params->{getstarted_on};
+    my $end_date_time   = $params->{enduse_on};
 
     # 日付のオブジェクトに変換
-    my $start_tp = localtime->strptime( $start_datetime, '%Y-%m-%d %T' );
-    my $end_tp   = localtime->strptime( $end_datetime,   '%Y-%m-%d %T' );
+    my ( $start_tp, $end_tp, )
+        = get_start_end_tp( $start_date_time, $end_date_time, );
 
     # 日付のオブジェクトで比較
     return '開始時刻より遅くして下さい' if $start_tp >= $end_tp;
@@ -343,13 +320,13 @@ sub _check_roominfo_open_time {
     my $roominfo_row
         = $teng->single( 'roominfo', +{ id => $params->{roominfo_id} }, );
 
-    # roominfo に登録してある設定時間
-    $roominfo_row->starttime_on;
-
     # 比較するため、両方を6:00-29:00の表記
-
     # roominfo -> reserve 入力
-    my $change_start_and_endtime = _change_start_and_endtime($roominfo_row);
+    my $change_start_and_endtime = chenge_time_over(
+        +{  start_time => $roominfo_row->starttime_on,
+            end_time   => $roominfo_row->endingtime_on,
+        },
+    );
 
     # reserve 入力(そのままの)
     my $split_t = split_time(

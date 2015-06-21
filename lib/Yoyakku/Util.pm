@@ -10,7 +10,172 @@ our @EXPORT_OK = qw{
     chang_date_6
     switch_header_params
     now_datetime
+    join_time
+    split_time
+    chenge_time_over
+    previous_day_ymd
+    split_date_time
+    next_day_ymd
+    join_date_time
+    get_start_end_tp
 };
+
+# 開始、終了日付を time::Piece オブジェクト変換
+sub get_start_end_tp {
+    my $start_date_time = shift;
+    my $end_date_time   = shift;
+
+    my $start_tp = localtime->strptime( $start_date_time, '%Y-%m-%d %T' );
+    my $end_tp   = localtime->strptime( $end_date_time,   '%Y-%m-%d %T' );
+
+    return ( $start_tp, $end_tp, );
+}
+
+# datetime 形式を組み立て
+sub join_date_time {
+    my $split_dt = shift;
+
+    my $start_date = $split_dt->{start_date};
+    my $start_time = $split_dt->{start_time};
+    my $end_date   = $split_dt->{end_date};
+    my $end_time   = $split_dt->{end_time};
+
+    my $start_date_time = join $SPACE, $split_dt->{start_date},
+        $split_dt->{start_time};
+
+    my $end_date_time = join $SPACE, $split_dt->{end_date},
+        $split_dt->{end_time};
+
+    return ( $start_date_time, $end_date_time, );
+}
+
+# 日付と時間をわける
+sub split_date_time {
+    my $start_date_time = shift;
+    my $end_date_time   = shift;
+
+    my $FIELD_COUNT = 2;
+
+    my ( $start_date, $start_time, ) = split $SPACE, $start_date_time,
+        $FIELD_COUNT + 1;
+
+    my ( $end_date, $end_time, ) = split $SPACE, $end_date_time,
+        $FIELD_COUNT + 1;
+
+    return +{
+        start_date => $start_date,
+        start_time => $start_time,
+        end_date   => $end_date,
+        end_time   => $end_time,
+    };
+}
+
+# 日付を一日進める
+sub next_day_ymd {
+    my $date = shift;
+    my $date_tp = localtime->strptime( $date, '%Y-%m-%d' );
+    $date_tp = $date_tp + ONE_DAY;
+    $date    = $date_tp->ymd;
+    return $date;
+}
+
+# 日付を一日もどす
+sub previous_day_ymd {
+    my $date = shift;
+    my $date_tp = localtime->strptime( $date, '%Y-%m-%d' );
+    $date_tp = $date_tp - ONE_DAY;
+    $date    = $date_tp->ymd;
+    return $date;
+}
+
+# 24:00 表記と 30:00 表記を切り替え normal, over,
+sub chenge_time_over {
+    my $times = shift;
+    my $type  = shift;
+
+    my $start_time = $times->{start_time};
+    my $end_time   = $times->{end_time};
+
+    my $split_t = split_time( $start_time, $end_time, );
+
+    # 数字にもどす
+    $split_t->{start_hour} += 0;
+    $split_t->{end_hour}   += 0;
+
+    # type 指定ない場合は over 30:00 表記に
+    if (   $split_t->{start_hour} >= $HOUR_00
+        && $split_t->{start_hour} < $HOUR_06 )
+    {
+        $split_t->{start_hour} += 24;
+    }
+
+    if (   $split_t->{end_hour} >= $HOUR_00
+        && $split_t->{end_hour} <= $HOUR_06 )
+    {
+        $split_t->{end_hour} += 24;
+    }
+    # die;
+    if ($type && $type eq 'normal') {
+        if ( $split_t->{start_hour} >= 24 && $split_t->{start_hour} <= 30 ) {
+            $split_t->{start_hour} -= 24;
+        }
+        # die;
+        if ( $split_t->{end_hour} >= 24 && $split_t->{end_hour} <= 30 ) {
+            $split_t->{end_hour} -= 24;
+        }
+    }
+
+    return $split_t;
+}
+
+# time 形式を組み立て none 時間の頭の0つけない
+sub join_time {
+    my $split_t = shift;
+    my $type    = shift;
+
+    my $FIELD_SEPARATOR_TIME = q{:};
+
+    my $start_time = join $FIELD_SEPARATOR_TIME,
+        $split_t->{start_hour},
+        $split_t->{start_min},
+        $split_t->{start_sec};
+
+    my $end_time = join $FIELD_SEPARATOR_TIME,
+        $split_t->{end_hour},
+        $split_t->{end_min},
+        $split_t->{end_sec};
+
+    if (!$type) {
+        $start_time = sprintf '%08s', $start_time;
+        $end_time   = sprintf '%08s', $end_time;
+    }
+
+    return ( $start_time, $end_time, );
+}
+
+# time 形式を分解
+sub split_time {
+    my $start_time = shift;
+    my $end_time   = shift;
+
+    my $FIELD_SEPARATOR_TIME = q{:};
+    my $FIELD_COUNT_TIME     = 3;
+
+    my ( $start_hour, $start_min, $start_sec ) = split $FIELD_SEPARATOR_TIME,
+        $start_time, $FIELD_COUNT_TIME + 1;
+
+    my ( $end_hour, $end_min, $end_sec ) = split $FIELD_SEPARATOR_TIME,
+        $end_time, $FIELD_COUNT_TIME + 1;
+
+    return +{
+        start_hour => $start_hour,
+        start_min  => $start_min,
+        start_sec  => $start_sec,
+        end_hour   => $end_hour,
+        end_min    => $end_min,
+        end_sec    => $end_sec,
+    };
+}
 
 sub now_datetime {
     my $now = localtime;
