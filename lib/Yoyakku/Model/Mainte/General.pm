@@ -109,48 +109,73 @@ This documentation referes to Yoyakku::Model::Mainte::General version 0.0.1
 
 General コントローラーのロジック API
 
-=head2 check_general_login_name
-
-    use Yoyakku::Model::Mainte::General qw{check_general_login_name};
-
-    # login の値、存在確認、存在しない場合は undef を返却
-    my $check_general_row
-        = $self->check_general_login_name( $req->param('login') );
-
-login の値の重複登録をさけるために利用
-
 =head2 search_general_id_rows
 
     use Yoyakku::Model::Mainte::General qw{search_general_id_rows};
 
     # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $general_rows = $self->search_general_id_rows($general_id);
+    my $general_rows = search_general_id_rows($general_id);
 
     # 指定の id に該当するレコードなき場合 general 全てのレコード返却
 
 general テーブル一覧作成時に利用
 
-=head2 search_general_id_row
+=head2 get_init_valid_params_general
 
-    use Yoyakku::Model::Mainte::General qw{search_general_id_row};
+    use Yoyakku::Model::Mainte::General qw{get_init_valid_params_general};
 
-    # 指定の id に該当するレコードを row オブジェクト単体で返却
-    my $general_row = $self->search_general_id_row( $params->{id} );
+    # バリデートエラーメッセージ用パラメーター初期値
+    my $init_valid_params_general = get_init_valid_params_general();
+    $self->stash($init_valid_params_general);
 
-    # 指定の id に該当するレコードなき場合エラー発生
+general 入力フォーム表示の際に利用
 
-general テーブル修正フォーム表示などに利用
+=head2 get_update_form_params_general
+
+    use Yoyakku::Model::Mainte::General qw{get_update_form_params_general};
+
+    # 修正画面表示用のパラメーターを取得
+    return $self->_render_general( get_update_form_params_general($params) )
+        if 'GET' eq $method;
+
+general 修正用入力フォーム表示の際に利用
+
+=head2 check_general_validator
+
+    use Yoyakku::Model::Mainte::General qw{check_general_validator};
+
+    # バリデート不合格時はエラーメッセージ
+    my $valid_msg = check_general_validator($params);
+
+    # バリデート合格時は undef を返却
+    return $self->stash($valid_msg), $self->_render_general($params)
+        if $valid_msg;
+
+general 入力値バリデートチェックに利用
+
+=head2 check_general_validator_db
+
+    use Yoyakku::Model::Mainte::General qw{check_general_validator_db};
+
+    # バリデート不合格時はエラーメッセージ
+    my $valid_msg_db = check_general_validator_db( $type, $params, );
+
+    # バリデート合格時は undef を返却
+    return $self->stash($valid_msg_db), $self->_render_general($params)
+        if $valid_msg_db;
+
+general 入力値データベースとのバリデートチェックに利用
 
 =head2 writing_general
 
     use Yoyakku::Model::Mainte::General qw{writing_general};
 
-    # general テーブル新規レコード作成時
-    $self->writing_general( 'insert', $params );
+    # general レコード新規
+    writing_general( 'insert', $params );
     $self->flash( touroku => '登録完了' );
 
-    # general テーブルレコード修正時
-    $self->writing_general( 'update', $params );
+    # general レコード修正
+    writing_general( 'update', $params );
     $self->flash( henkou => '修正完了' );
 
 general テーブル書込み、新規、修正、両方に対応
