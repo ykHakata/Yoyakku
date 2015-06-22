@@ -1,20 +1,29 @@
 package Yoyakku::Controller::Mainte::Admin;
 use Mojo::Base 'Mojolicious::Controller';
-use HTML::FillInForm;
-use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Admin qw{
+    check_auth_admin
     search_admin_id_rows
     get_init_valid_params_admin
     get_update_form_params_admin
     check_admin_validator
     check_admin_validator_db
     writing_admin
+    get_fill_in_registrant
 };
+
+sub _auth {
+    my $self       = shift;
+    my $session    = $self->session->{root_id};
+    my $header_stash = check_auth_admin($session);
+    return 1 if !$header_stash;
+    $self->stash($header_stash);
+    return;
+}
 
 sub mainte_registrant_serch {
     my $self = shift;
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    return $self->redirect_to('/index') if $self->_auth();
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_registrant_serch';
@@ -32,7 +41,7 @@ sub mainte_registrant_serch {
 sub mainte_registrant_new {
     my $self = shift;
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    return $self->redirect_to('/index') if $self->_auth();
 
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
@@ -105,7 +114,7 @@ sub _render_registrant {
         format   => 'html',
     )->to_string;
 
-    my $output = HTML::FillInForm->fill( \$html, $params );
+    my $output = get_fill_in_registrant( \$html, $params );
 
     return $self->render( text => $output );
 }

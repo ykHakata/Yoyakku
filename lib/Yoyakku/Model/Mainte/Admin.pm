@@ -4,6 +4,8 @@ use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
+    auth_mainte
+    switch_stash_mainte_list
     search_id_single_or_all_rows
     get_init_valid_params
     get_update_form_params
@@ -11,16 +13,35 @@ use Yoyakku::Model::Mainte qw{
     check_login_name
     writing_db
 };
-use Yoyakku::Util qw{now_datetime};
+use Yoyakku::Util qw{now_datetime get_fill_in_params};
 use Exporter 'import';
 our @EXPORT_OK = qw{
+    check_auth_admin
     search_admin_id_rows
     get_init_valid_params_admin
     get_update_form_params_admin
     check_admin_validator
     check_admin_validator_db
     writing_admin
+    get_fill_in_registrant
 };
+
+# フィルインする値を作成
+sub get_fill_in_registrant {
+    my $html   = shift;
+    my $params = shift;
+    my $output = get_fill_in_params( $html, $params );
+    return $output;
+}
+
+# ログインチェック、ヘッダー用値作成
+sub check_auth_admin {
+    my $session = shift;
+    return if !$session;
+    my $id = auth_mainte($session);
+    return if !$id;
+    return switch_stash_mainte_list( $id, 'root', );
+}
 
 sub search_admin_id_rows {
     my $admin_id = shift;

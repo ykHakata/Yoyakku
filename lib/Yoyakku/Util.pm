@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 use Time::Piece;
 use Time::Seconds;
+use HTML::FillInForm;
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06 $SPACE};
 use Exporter 'import';
 our @EXPORT_OK = qw{
@@ -18,7 +19,16 @@ our @EXPORT_OK = qw{
     next_day_ymd
     join_date_time
     get_start_end_tp
+    get_fill_in_params
 };
+
+# フィルインする値を作成
+sub get_fill_in_params {
+    my $html   = shift;
+    my $params = shift;
+    my $output = HTML::FillInForm->fill( $html, $params );
+    return $output;
+}
 
 # 開始、終了日付を time::Piece オブジェクト変換
 sub get_start_end_tp {

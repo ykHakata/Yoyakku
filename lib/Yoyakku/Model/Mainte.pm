@@ -17,6 +17,7 @@ use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Yoyakku::Model qw{$teng};
 use Exporter 'import';
 our @EXPORT_OK = qw{
+    auth_mainte
     switch_stash_mainte_list
     search_id_single_or_all_rows
     get_single_row_search_id
@@ -246,6 +247,14 @@ sub search_id_single_or_all_rows {
     }
 
     return \@rows;
+}
+
+# 管理者画面用のログイン確認
+sub auth_mainte {
+    my $session = shift;
+    return if !$session;
+    return if $session ne 'yoyakku';
+    return $session;
 }
 
 # ログイン成功時に作成する初期値
