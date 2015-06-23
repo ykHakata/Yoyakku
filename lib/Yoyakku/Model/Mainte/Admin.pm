@@ -26,15 +26,6 @@ our @EXPORT_OK = qw{
     get_fill_in_registrant
 };
 
-# フィルインする値を作成
-sub get_fill_in_registrant {
-    my $html   = shift;
-    my $params = shift;
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
-}
-
-# ログインチェック、ヘッダー用値作成
 sub check_auth_admin {
     my $session = shift;
     return if !$session;
@@ -174,6 +165,12 @@ sub writing_admin {
     return;
 }
 
+sub get_fill_in_registrant {
+    my $html   = shift;
+    my $params = shift;
+    my $output = get_fill_in_params( $html, $params );
+    return $output;
+}
 
 1;
 
@@ -192,6 +189,17 @@ This documentation referes to Yoyakku::Model::Mainte::Admin version 0.0.1
 =head1 SYNOPSIS (概要)
 
 Admin コントローラーのロジック API
+
+=head2 check_auth_admin
+
+    use Yoyakku::Model::Mainte::Admin qw{check_auth_admin};
+
+    # session からログインチェック、ヘッダー用の値を取得
+    my $header_stash = check_auth_admin( $self->session->{root_id} );
+
+    # session が不正な場合は undef を返却
+
+ログイン確認
 
 =head2 search_admin_id_rows
 
@@ -263,6 +271,16 @@ admin 入力値データベースとのバリデートチェックに利用
     $self->flash( henkou => '修正完了' );
 
 admin テーブル書込み、新規、修正、両方に対応
+
+=head2 get_fill_in_params
+
+    use Yoyakku::Model::Mainte::Admin qw{get_fill_in_params};
+
+    # テンプレートの html と出力の params から表示用の html を生成
+    my $output = get_fill_in_registrant( \$html, $params );
+    return $self->render( text => $output );
+
+表示用 html を生成
 
 =head1 DEPENDENCIES (依存モジュール)
 

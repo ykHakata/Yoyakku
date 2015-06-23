@@ -12,9 +12,8 @@ use Yoyakku::Model::Mainte::Admin qw{
 };
 
 sub _auth {
-    my $self       = shift;
-    my $session    = $self->session->{root_id};
-    my $header_stash = check_auth_admin($session);
+    my $self         = shift;
+    my $header_stash = check_auth_admin( $self->session->{root_id} );
     return 1 if !$header_stash;
     $self->stash($header_stash);
     return;
@@ -115,7 +114,6 @@ sub _render_registrant {
     )->to_string;
 
     my $output = get_fill_in_registrant( \$html, $params );
-
     return $self->render( text => $output );
 }
 
@@ -212,10 +210,6 @@ admin テーブルに新規レコード追加、既存レコード修正
 =item * L<Mojo::Base>
 
 =item * L<Mojolicious::Controller>
-
-=item * L<HTML::FillInForm>
-
-=item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Model::Mainte::Admin>
 
