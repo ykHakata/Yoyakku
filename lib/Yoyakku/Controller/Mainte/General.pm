@@ -1,20 +1,28 @@
 package Yoyakku::Controller::Mainte::General;
 use Mojo::Base 'Mojolicious::Controller';
-use HTML::FillInForm;
-use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::General qw{
+    check_auth_general
     search_general_id_rows
     get_init_valid_params_general
     get_update_form_params_general
     check_general_validator
     check_general_validator_db
     writing_general
+    get_fill_in_general
 };
+
+sub _auth {
+    my $self         = shift;
+    my $header_stash = check_auth_general( $self->session->{root_id} );
+    return 1 if !$header_stash;
+    $self->stash($header_stash);
+    return;
+}
 
 sub mainte_general_serch {
     my $self = shift;
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    return $self->redirect_to('/index') if $self->_auth();
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_general_serch';
@@ -32,7 +40,7 @@ sub mainte_general_serch {
 sub mainte_general_new {
     my $self = shift;
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    return $self->redirect_to('/index') if $self->_auth();
 
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
@@ -106,8 +114,7 @@ sub _render_general {
         format   => 'html',
     )->to_string;
 
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
+    my $output = get_fill_in_general( \$html, $params );
     return $self->render( text => $output );
 }
 

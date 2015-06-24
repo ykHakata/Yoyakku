@@ -4,6 +4,8 @@ use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
+    auth_mainte
+    switch_stash_mainte_list
     search_id_single_or_all_rows
     get_init_valid_params
     get_update_form_params
@@ -11,16 +13,26 @@ use Yoyakku::Model::Mainte qw{
     check_login_name
     writing_db
 };
-use Yoyakku::Util qw{now_datetime};
+use Yoyakku::Util qw{now_datetime get_fill_in_params};
 use Exporter 'import';
 our @EXPORT_OK = qw{
+    check_auth_general
     search_general_id_rows
     get_init_valid_params_general
     get_update_form_params_general
     check_general_validator
     check_general_validator_db
     writing_general
+    get_fill_in_general
 };
+
+sub check_auth_general {
+    my $session = shift;
+    return if !$session;
+    my $id = auth_mainte($session);
+    return if !$id;
+    return switch_stash_mainte_list( $id, 'root', );
+}
 
 sub search_general_id_rows {
     my $general_id = shift;
@@ -91,6 +103,13 @@ sub writing_general {
     return writing_db( 'general', $type, $create_data, $params->{id} );
 }
 
+sub get_fill_in_general {
+    my $html   = shift;
+    my $params = shift;
+    my $output = get_fill_in_params( $html, $params );
+    return $output;
+}
+
 1;
 
 __END__
@@ -108,6 +127,17 @@ This documentation referes to Yoyakku::Model::Mainte::General version 0.0.1
 =head1 SYNOPSIS (概要)
 
 General コントローラーのロジック API
+
+=head2 check_auth_general
+
+    use Yoyakku::Model::Mainte::General qw{check_auth_general};
+
+    # session からログインチェック、ヘッダー用の値を取得
+    my $header_stash = check_auth_general( $self->session->{root_id} );
+
+    # session が不正な場合は undef を返却
+
+ログイン確認
 
 =head2 search_general_id_rows
 
@@ -179,6 +209,16 @@ general 入力値データベースとのバリデートチェックに利用
     $self->flash( henkou => '修正完了' );
 
 general テーブル書込み、新規、修正、両方に対応
+
+=head2 get_fill_in_general
+
+    use Yoyakku::Model::Mainte::General qw{get_fill_in_general};
+
+    # テンプレートの html と出力の params から表示用の html を生成
+    my $output = get_fill_in_general( \$html, $params );
+    return $self->render( text => $output );
+
+表示用 html を生成
 
 =head1 DEPENDENCIES (依存モジュール)
 
