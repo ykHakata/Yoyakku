@@ -212,10 +212,6 @@ general テーブルに新規レコード追加、既存レコード修正
 
 =item * L<Mojolicious::Controller>
 
-=item * L<HTML::FillInForm>
-
-=item * L<Yoyakku::Model::Mainte>
-
 =item * L<Yoyakku::Model::Mainte::General>
 
 =back
