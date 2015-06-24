@@ -272,9 +272,9 @@ admin 入力値データベースとのバリデートチェックに利用
 
 admin テーブル書込み、新規、修正、両方に対応
 
-=head2 get_fill_in_params
+=head2 get_fill_in_registrant
 
-    use Yoyakku::Model::Mainte::Admin qw{get_fill_in_params};
+    use Yoyakku::Model::Mainte::Admin qw{get_fill_in_registrant};
 
     # テンプレートの html と出力の params から表示用の html を生成
     my $output = get_fill_in_registrant( \$html, $params );
