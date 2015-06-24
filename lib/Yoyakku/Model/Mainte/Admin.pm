@@ -4,8 +4,7 @@ use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
-    auth_mainte
-    switch_stash_mainte_list
+    get_header_stash_auth_mainte
     search_id_single_or_all_rows
     get_init_valid_params
     get_update_form_params
@@ -28,10 +27,7 @@ our @EXPORT_OK = qw{
 
 sub check_auth_admin {
     my $session = shift;
-    return if !$session;
-    my $id = auth_mainte($session);
-    return if !$id;
-    return switch_stash_mainte_list( $id, 'root', );
+    return get_header_stash_auth_mainte($session);
 }
 
 sub search_admin_id_rows {
