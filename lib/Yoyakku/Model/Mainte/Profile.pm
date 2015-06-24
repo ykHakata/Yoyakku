@@ -4,15 +4,18 @@ use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
+    get_header_stash_auth_mainte
     search_id_single_or_all_rows
     get_init_valid_params
     get_update_form_params
     get_msg_validator
     writing_db
+    check_table_column
 };
-use Yoyakku::Util qw{now_datetime};
+use Yoyakku::Util qw{now_datetime get_fill_in_params};
 use Exporter 'import';
 our @EXPORT_OK = qw{
+    check_auth_profile
     search_profile_id_rows
     get_init_valid_params_profile
     get_update_form_params_profile
@@ -21,7 +24,13 @@ our @EXPORT_OK = qw{
     check_profile_validator
     check_profile_validator_db
     writing_profile
+    get_fill_in_profile
 };
+
+sub check_auth_profile {
+    my $session = shift;
+    return get_header_stash_auth_mainte($session);
+}
 
 sub search_profile_id_rows {
     my $profile_id = shift;
@@ -121,29 +130,21 @@ sub _check_admin_and_general_id {
     return '一般,管理どちらかにしてください'
         if ($admin_id && $general_id) || (!$admin_id && !$general_id);
 
-    my $check_profile_row;
+    my $check_params = +{
+        column => 'admin_id',
+        param  => $admin_id,
+        table  => 'profile',
+        id     => $profile_id,
+    };
 
-    if ($admin_id) {
-        $check_profile_row
-            = $teng->single( 'profile', +{ admin_id => $admin_id }, );
-    }
+    # 管理ユーザー
+    return check_table_column($check_params) if $admin_id;
 
-    if ($general_id) {
-        $check_profile_row
-            = $teng->single( 'profile', +{ general_id => $general_id }, );
-    }
+    $check_params->{column} = 'general_id';
+    $check_params->{param}  = $general_id;
 
-    # 新規
-    return '既に利用されています'
-        if $check_profile_row && !$profile_id;
-
-    # 更新
-    return '既に利用されています'
-        if $check_profile_row
-        && $profile_id
-        && ( $profile_id ne $check_profile_row->id );
-
-    return;
+    # 一般ユーザー
+    return check_table_column($check_params) if $general_id;
 }
 
 sub writing_profile {
@@ -163,6 +164,13 @@ sub writing_profile {
         modify_on     => now_datetime(),
     };
     return writing_db( 'profile', $type, $create_data, $params->{id} );
+}
+
+sub get_fill_in_profile {
+    my $html   = shift;
+    my $params = shift;
+    my $output = get_fill_in_params( $html, $params );
+    return $output;
 }
 
 1;

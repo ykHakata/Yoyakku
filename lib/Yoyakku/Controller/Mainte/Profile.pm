@@ -1,8 +1,7 @@
 package Yoyakku::Controller::Mainte::Profile;
 use Mojo::Base 'Mojolicious::Controller';
-use HTML::FillInForm;
-use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
 use Yoyakku::Model::Mainte::Profile qw{
+    check_auth_profile
     search_profile_id_rows
     get_init_valid_params_profile
     get_update_form_params_profile
@@ -11,13 +10,21 @@ use Yoyakku::Model::Mainte::Profile qw{
     check_profile_validator
     check_profile_validator_db
     writing_profile
+    get_fill_in_profile
 };
 
-# 個人情報 一覧 検索
+sub _auth {
+    my $self         = shift;
+    my $header_stash = check_auth_profile( $self->session->{root_id} );
+    return 1 if !$header_stash;
+    $self->stash($header_stash);
+    return;
+}
+
 sub mainte_profile_serch {
     my $self = shift;
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    return $self->redirect_to('/index') if $self->_auth();
 
     # テンプレートbodyのクラス名を定義
     my $class = 'mainte_profile_serch';
@@ -32,11 +39,10 @@ sub mainte_profile_serch {
     );
 }
 
-# 個人情報 新規 編集
 sub mainte_profile_new {
     my $self = shift;
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    return $self->redirect_to('/index') if $self->_auth();
 
     my $params = $self->req->params->to_hash;
     my $method = uc $self->req->method;
@@ -116,8 +122,7 @@ sub _render_profile {
         format   => 'html',
     )->to_string;
 
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
+    my $output = get_fill_in_profile( \$html, $params );
     return $self->render( text => $output );
 }
 
@@ -158,7 +163,7 @@ This documentation referes to Yoyakku::Controller::Mainte::Profile version 0.0.1
     GET リクエストに id が指定された場合該当レコード表示
     該当レコードなき場合は全てのレコード表示
 
-profile テーブル登録情報の確認、検索
+profile テーブル登録情報の一覧、検索
 
 =head2 mainte_profile_new
 
@@ -188,17 +193,17 @@ profile テーブル登録情報の確認、検索
     URL: http:// ... /mainte_profile_new
     METHOD: POST
     PARAMETERS:
-        id:            INTEGER ( 例: 10, 自動連番)
-        general_id:    INTEGER ( 例: 12, admin_id が存在する場合は null)
-        admin_id:      INTEGER ( 例: 14, general_id が存在する場合は null)
-        nick_name:     TEXT ( 例: ヨヤック, )
-        full_name:     TEXT ( 例: 黒田清隆, )
-        phonetic_name: TEXT ( 例: くろだ きよたか, )
-        tel:           TEXT ( 例: 080-3456-4321, )
-        mail:          TEXT ( 例: yoyakku@gmail.com, メールアドレス形式)
-        status:        INTEGER ( 例: 0: 未承認, 1: 承認済み, 2: 削除)
-        create_on:     TEXT ( 例: 2015-06-06 12:24:12, datetime 形式)
-        modify_on:     TEXT ( 例: 2015-06-06 12:24:12, datetime 形式)
+        id:             INT  (例: 5) 個人情報ID
+        general_id:     INT  (例: 5, admin_id 存在時 null) 一般ユーザーID
+        admin_id:       INT  (例: 5, general_id 存在時 null) 管理ユーザーID
+        nick_name:      TEXT (例: 'ヨヤック') ニックネーム
+        full_name:      TEXT (例: '黒田清隆') 氏名
+        phonetic_name:  TEXT (例: 'くろだ きよたか') ふりがな
+        tel:            TEXT (例: '080-3456-4321') 電話番号
+        mail:           TEXT (例: 'yoyakku@gmail.com') メールアドレス
+        status:         INT  (例: 0: 未承認, 1: 承認済み, 2: 削除) ステータス
+        create_on:      TEXT (例: '2015-06-06 12:24:12') 登録日
+        modify_on:      TEXT (例: '2015-06-06 12:24:12') 修正日
 
     レスポンス (バリデートエラー時)
     CONTENT-TYPE: text/html;charset=UTF-8
@@ -219,12 +224,6 @@ profile テーブルに新規レコード追加、既存レコード修正
 =item * L<Mojo::Base>
 
 =item * L<Mojolicious::Controller>
-
-=item * L<FormValidator::Lite>
-
-=item * L<HTML::FillInForm>
-
-=item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Model::Mainte::Profile>
 

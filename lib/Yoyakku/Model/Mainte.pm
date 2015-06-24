@@ -27,6 +27,7 @@ our @EXPORT_OK = qw{
     get_msg_validator
     check_login_name
     get_init_valid_params
+    check_table_column
 };
 
 # バリデート用パラメータ初期値
@@ -69,15 +70,16 @@ sub get_table_columns {
     return $table_columns->{$table};
 }
 
-# ログイン名の重複確認
-sub check_login_name {
-    my $params = shift;
-    my $table  = shift;
+# 指定パラメーターの存在確認
+sub check_table_column {
+    my $check_params = shift;
 
-    my $login = $params->{login};
-    my $id    = $params->{id};
+    my $column = $check_params->{column};
+    my $param  = $check_params->{param};
+    my $table  = $check_params->{table};
+    my $id     = $check_params->{id};
 
-    my $row = $teng->single( $table, +{ login => $login, }, );
+    my $row = $teng->single( $table, +{ $column => $param, }, );
 
     # 新規
     return '既に利用されています' if $row && !$id;
@@ -87,6 +89,24 @@ sub check_login_name {
         if $row && $id && ( $id ne $row->id );
 
     return;
+}
+
+# ログイン名の重複確認
+sub check_login_name {
+    my $params = shift;
+    my $table  = shift;
+
+    my $login = $params->{login};
+    my $id    = $params->{id};
+
+    my $check_params = +{
+        column => 'login',
+        param  => $login,
+        table  => $table,
+        id     => $id,
+    };
+
+    return check_table_column($check_params);
 }
 
 # 入力値バリデート処理
