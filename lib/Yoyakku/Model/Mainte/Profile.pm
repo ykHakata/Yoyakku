@@ -191,82 +191,119 @@ This documentation referes to Yoyakku::Model::Mainte::Profile version 0.0.1
 
 Profile コントローラーのロジック API
 
-=head2 get_general_rows_all
+=head2 check_auth_profile
 
-    # 入力画面セレクト用の general ログイン名表示
-    $self->stash(
-        general_rows => $self->get_general_rows_all(),
-    );
+    use Yoyakku::Model::Mainte::profile qw{check_auth_profile};
 
-general テーブルの全てのレコードを row オブジェクトで返却
+    # session からログインチェック、ヘッダー用の値を取得
+    my $header_stash = check_auth_profile( $self->session->{root_id} );
 
-=head2 get_admin_rows_all
+    # session が不正な場合は undef を返却
 
-    # 入力画面セレクト用の admin ログイン名表示
-    $self->stash(
-        admin_rows => $self->get_admin_rows_all(),
-    );
-
-admin テーブルの全てのレコードを row オブジェクトで返却
-
-=head2 check_admin_and_general_id
-
-    use Yoyakku::Model::Mainte::Profile qw{check_admin_and_general_id};
-
-    # general_id, admin_id, 重複、既存の確認
-    my $check_admin_and_general_msg = $self->check_admin_and_general_id(
-        $params->{general_id},
-        $params->{admin_id},
-        $params->{id},
-    );
-
-    # 入力値が重複や DB に既存の場合はメッセージ出力
-    # 合格時は undef を返却
-
-    if ($check_admin_and_general_msg) { # '既に利用されています'
-
-        $self->stash->{general_id} = $check_admin_and_general_msg;
-
-        return $self->_render_profile($params);
-    }
-
-profile テーブルに general_id, admin_id, 重複、既存の確認
+ログイン確認
 
 =head2 search_profile_id_rows
 
     use Yoyakku::Model::Mainte::Profile qw{search_profile_id_rows};
 
     # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $profile_rows = $self->search_profile_id_rows($profile_id);
+    my $profile_rows = search_profile_id_rows($profile_id);
 
     # 指定の id に該当するレコードなき場合 profile 全てのレコード返却
 
 profile テーブル一覧作成時に利用
 
-=head2 search_profile_id_row
+=head2 get_init_valid_params_profile
 
-    use Yoyakku::Model::Mainte::Profile qw{search_profile_id_row};
+    use Yoyakku::Model::Mainte::Profile qw{get_init_valid_params_profile};
 
-    # 指定の id に該当するレコードを row オブジェクト単体で返却
-    my $profile_row = $self->search_profile_id_row( $params->{id} );
+    # バリデートエラーメッセージ用パラメーター初期値
+    my $init_valid_params_profile = get_init_valid_params_profile();
+    $self->stash($init_valid_params_profile);
 
-    # 指定の id に該当するレコードなき場合エラー発生
+profile 入力フォーム表示の際に利用
 
-profile テーブル修正フォーム表示などに利用
+=head2 get_update_form_params_profile
+
+    use Yoyakku::Model::Mainte::Profile qw{get_update_form_params_profile};
+
+    # 修正画面表示用のパラメーターを取得
+    return $self->_render_profile( get_update_form_params_profile($params) )
+        if 'GET' eq $method;
+
+profile 修正用入力フォーム表示の際に利用
+
+=head2 get_general_rows_all
+
+    use Yoyakku::Model::Mainte::Profile qw{get_general_rows_all};
+
+    # 入力画面セレクト用の general admin ログイン名表示
+    $self->stash(
+        general_rows => get_general_rows_all(),
+    );
+
+profile 入力画面セレクト用のログイン名表示
+
+=head2 get_admin_rows_all
+
+    use Yoyakku::Model::Mainte::Profile qw{get_admin_rows_all};
+
+    # 入力画面セレクト用の general admin ログイン名表示
+    $self->stash(
+        admin_rows   => get_admin_rows_all(),
+    );
+
+profile 入力画面セレクト用のログイン名表示
+
+=head2 check_profile_validator
+
+    use Yoyakku::Model::Mainte::Profile qw{check_profile_validator};
+
+    # バリデート不合格時はエラーメッセージ
+    my $valid_msg = check_profile_validator($params);
+
+    # バリデート合格時は undef を返却
+    return $self->stash($valid_msg), $self->_render_profile($params)
+        if $valid_msg;
+
+profile 入力値バリデートチェックに利用
+
+=head2 check_profile_validator_db
+
+    use Yoyakku::Model::Mainte::Profile qw{check_profile_validator_db};
+
+    # バリデート不合格時はエラーメッセージ
+    my $valid_msg_db = check_profile_validator_db( $type, $params, );
+
+    # バリデート合格時は undef を返却
+    return $self->stash($valid_msg_db), $self->_render_profile($params)
+        if $valid_msg_db;
+
+profile 入力値データベースとのバリデートチェックに利用
 
 =head2 writing_profile
 
     use Yoyakku::Model::Mainte::Profile qw{writing_profile};
 
-    # profile テーブル新規レコード作成時
-    $self->writing_profile( 'insert', $params );
+    # profile レコード新規
+    writing_profile( 'insert', $params );
     $self->flash( touroku => '登録完了' );
 
-    # profile テーブルレコード修正時
-    $self->writing_profile( 'update', $params );
+    # profile レコード修正
+    writing_profile( 'update', $params );
     $self->flash( henkou => '修正完了' );
 
 profile テーブル書込み、新規、修正、両方に対応
+
+=head2 get_fill_in_profile
+
+    use Yoyakku::Model::Mainte::Profile qw{get_fill_in_profile};
+
+    # テンプレートの html と出力の params から表示用の html を生成
+    my $output = get_fill_in_profile( \$html, $params );
+    return $self->render( text => $output );
+
+表示用 html を生成
 
 =head1 DEPENDENCIES (依存モジュール)
 
