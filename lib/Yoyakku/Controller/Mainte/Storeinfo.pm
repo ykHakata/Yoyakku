@@ -1,29 +1,34 @@
 package Yoyakku::Controller::Mainte::Storeinfo;
 use Mojo::Base 'Mojolicious::Controller';
-use HTML::FillInForm;
-use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
-use Yoyakku::Model::Mainte::Storeinfo qw{
-    search_storeinfo_id_rows
-    get_init_valid_params_storeinfo
-    get_update_form_params_storeinfo
-    search_zipcode_for_address
-    check_storeinfo_validator
-    writing_storeinfo
-};
+use Yoyakku::Model::Mainte::Storeinfo;
 
-# 店舗情報 一覧 検索
+sub _init {
+    my $self  = shift;
+    my $model = Yoyakku::Model::Mainte::Storeinfo->new();
+
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session->{root_id} );
+
+    my $header_stash = $model->check_auth_storeinfo();
+
+    return $self->redirect_to('/index') if !$header_stash;
+
+    $self->stash($header_stash);
+
+    return $model;
+}
+
 sub mainte_storeinfo_serch {
-    my $self = shift;
+    my $self  = shift;
+    my $model = $self->_init();
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    my $storeinfo_rows = $model->search_storeinfo_id_rows();
 
-     # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_storeinfo_serch';
-    $self->stash( class => $class );
-
-    my $storeinfo_rows
-        = search_storeinfo_id_rows( $self->param('storeinfo_id') );
-    $self->stash( storeinfo_rows => $storeinfo_rows );
+    $self->stash(
+        class          => 'mainte_storeinfo_serch',
+        storeinfo_rows => $storeinfo_rows,
+    );
 
     return $self->render(
         template => 'mainte/mainte_storeinfo_serch',
@@ -31,77 +36,72 @@ sub mainte_storeinfo_serch {
     );
 }
 
-# 店舗情報 編集
 sub mainte_storeinfo_new {
-    my $self = shift;
-
-    return $self->redirect_to('/index') if $self->check_login_mainte();
-
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    my $self  = shift;
+    my $model = $self->_init();
 
     return $self->redirect_to('/mainte_storeinfo_serch')
-        if ( $method ne 'GET' ) && ( $method ne 'POST' );
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
 
-    return $self->redirect_to('/mainte_storeinfo_serch') if !$params->{id};
+    return $self->redirect_to('/mainte_storeinfo_serch')
+        if !$model->params()->{id};
 
-    # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_storeinfo_new';
-    $self->stash( class => $class );
+    my $init_valid_params_storeinfo
+        = $model->get_init_valid_params_storeinfo();
 
-    my $init_valid_params_storeinfo = get_init_valid_params_storeinfo();
+    $self->stash(
+        class => 'mainte_storeinfo_new',
+        %{$init_valid_params_storeinfo},
+    );
 
-    $self->stash($init_valid_params_storeinfo);
-
-    return $self->_update();
+    return $self->_update($model);
 }
 
 sub _update {
-    my $self = shift;
-
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    my $self  = shift;
+    my $model = shift;
 
     return $self->_render_storeinfo(
-        get_update_form_params_storeinfo($params) )
-        if 'GET' eq $method;
+        $model->get_update_form_params_storeinfo() )
+        if 'GET' eq $model->method();
 
     # 郵便番号検索ボタンが押されたときの処理
-    return $self->_render_storeinfo( search_zipcode_for_address($params) )
-        if $params->{kensaku} && $params->{kensaku} eq '検索する';
+    return $self->_render_storeinfo( $model->search_zipcode_for_address() )
+        if $model->params()->{kensaku}
+        && $model->params()->{kensaku} eq '検索する';
 
-    return $self->_common( 'update', +{ henkou => '修正完了', }, );
+    $model->type('update');
+    $model->flash_msg( +{ henkou => '修正完了' } );
+
+    return $self->_common($model);
 }
 
 sub _common {
-    my $self      = shift;
-    my $type      = shift;
-    my $flash_msg = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
+    my $valid_msg = $model->check_storeinfo_validator();
 
-    my $valid_msg = check_storeinfo_validator($params);
-
-    return $self->stash($valid_msg), $self->_render_storeinfo($params)
+    return $self->stash($valid_msg), $self->_render_storeinfo($model)
         if $valid_msg;
 
-    writing_storeinfo( $type, $params );
-    $self->flash($flash_msg);
+    $model->writing_storeinfo();
+    $self->flash( $model->flash_msg() );
 
     return $self->redirect_to('mainte_storeinfo_serch');
 }
 
 sub _render_storeinfo {
-    my $self   = shift;
-    my $params = shift;
+    my $self  = shift;
+    my $model = shift;
 
     my $html = $self->render_to_string(
         template => 'mainte/mainte_storeinfo_new',
         format   => 'html',
     )->to_string;
 
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
+    $model->html( \$html );
+    my $output = $model->get_fill_in_storeinfo();
     return $self->render( text => $output );
 }
 
