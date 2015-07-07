@@ -1,29 +1,34 @@
 package Yoyakku::Controller::Mainte::Roominfo;
 use Mojo::Base 'Mojolicious::Controller';
-use HTML::FillInForm;
-use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
-use Yoyakku::Model::Mainte::Roominfo qw{
-    search_storeinfo_id_for_roominfo_rows
-    get_init_valid_params_roominfo
-    get_update_form_params_roominfo
-    check_roominfo_validator
-    writing_roominfo
-};
+use Yoyakku::Model::Mainte::Roominfo;
 
-# 部屋情報 一覧 検索
+sub _init {
+    my $self  = shift;
+    my $model = Yoyakku::Model::Mainte::Roominfo->new();
+
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session->{root_id} );
+
+    my $header_stash = $model->check_auth_roominfo();
+
+    return $self->redirect_to('/index') if !$header_stash;
+
+    $self->stash($header_stash);
+
+    return $model;
+}
+
 sub mainte_roominfo_serch {
-    my $self = shift;
+    my $self  = shift;
+    my $model = $self->_init();
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    my $roominfo_rows = $model->search_storeinfo_id_for_roominfo_rows();
 
-     # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_roominfo_serch';
-    $self->stash( class => $class );
-
-    # id検索時のアクション (該当の店舗を検索)
-    my $roominfo_rows = search_storeinfo_id_for_roominfo_rows(
-        $self->param('storeinfo_id') );
-    $self->stash( roominfo_rows => $roominfo_rows );
+    $self->stash(
+        class         => 'mainte_roominfo_serch',
+        roominfo_rows => $roominfo_rows,
+    );
 
     return $self->render(
         template => 'mainte/mainte_roominfo_serch',
@@ -31,72 +36,66 @@ sub mainte_roominfo_serch {
     );
 }
 
-# 部屋情報 編集
 sub mainte_roominfo_new {
-    my $self = shift;
-
-    return $self->redirect_to('/index') if $self->check_login_mainte();
-
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    my $self  = shift;
+    my $model = $self->_init();
 
     return $self->redirect_to('/mainte_roominfo_serch')
-        if ( $method ne 'GET' ) && ( $method ne 'POST' );
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
 
-    return $self->redirect_to('/mainte_roominfo_serch') if !$params->{id};
+    return $self->redirect_to('/mainte_roominfo_serch')
+        if !$model->params()->{id};
 
-    # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_roominfo_new';
-    $self->stash( class => $class );
+    my $init_valid_params_roominfo = $model->get_init_valid_params_roominfo();
 
-    my $init_valid_params_roominfo = get_init_valid_params_roominfo();
+    $self->stash(
+        class => 'mainte_roominfo_new',
+        %{$init_valid_params_roominfo},
+    );
 
-    $self->stash($init_valid_params_roominfo);
-
-    return $self->_update();
+    return $self->_update($model);
 }
 
 sub _update {
-    my $self = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    return $self->_render_roominfo(
+        $model->get_update_form_params_roominfo() )
+        if 'GET' eq $model->method();
 
-    return $self->_render_roominfo( get_update_form_params_roominfo($params) )
-        if 'GET' eq $method;
+    $model->type('update');
+    $model->flash_msg( +{ henkou => '修正完了' } );
 
-    return $self->_common( 'update', +{ henkou => '修正完了', }, );
+    return $self->_common($model);
 }
 
 sub _common {
-    my $self      = shift;
-    my $type      = shift;
-    my $flash_msg = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
+    my $valid_msg = $model->check_roominfo_validator();
 
-    my $valid_msg = check_roominfo_validator($params);
-
-    return $self->stash($valid_msg), $self->_render_roominfo($params)
+    return $self->stash($valid_msg), $self->_render_roominfo($model)
         if $valid_msg;
 
-    writing_roominfo( $type, $params );
-    $self->flash($flash_msg);
+    $model->writing_roominfo();
+    $self->flash( $model->flash_msg() );
 
     return $self->redirect_to('mainte_roominfo_serch');
 }
 
 sub _render_roominfo {
-    my $self   = shift;
-    my $params = shift;
+    my $self  = shift;
+    my $model = shift;
 
     my $html = $self->render_to_string(
         template => 'mainte/mainte_roominfo_new',
         format   => 'html',
     )->to_string;
 
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
+    $model->html( \$html );
+    my $output = $model->get_fill_in_roominfo();
     return $self->render( text => $output );
 }
 

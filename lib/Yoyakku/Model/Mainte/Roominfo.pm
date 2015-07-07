@@ -4,41 +4,105 @@ use warnings;
 use utf8;
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Mainte qw{
+    get_header_stash_auth_mainte
     search_id_single_or_all_rows
     get_init_valid_params
     get_update_form_params
     get_msg_validator
     writing_db
 };
-use Yoyakku::Util qw{now_datetime};
-use Exporter 'import';
-our @EXPORT_OK = qw{
-    search_storeinfo_id_for_roominfo_rows
-    get_init_valid_params_roominfo
-    get_update_form_params_roominfo
-    check_roominfo_validator
-    writing_roominfo
-};
+use Yoyakku::Util qw{now_datetime get_fill_in_params};
+
+sub new {
+    my $class  = shift;
+    my $params = +{};
+    my $self   = bless $params, $class;
+    return $self;
+}
+
+sub params {
+    my $self   = shift;
+    my $params = shift;
+    if ($params) {
+        $self->{params} = $params;
+    }
+    return $self->{params};
+}
+
+sub session {
+    my $self    = shift;
+    my $session = shift;
+    if ($session) {
+        $self->{session} = $session;
+    }
+    return $self->{session};
+}
+
+sub method {
+    my $self   = shift;
+    my $method = shift;
+    if ($method) {
+        $self->{method} = $method;
+    }
+    return $self->{method};
+}
+
+sub type {
+    my $self = shift;
+    my $type = shift;
+    if ($type) {
+        $self->{type} = $type;
+    }
+    return $self->{type};
+}
+
+sub flash_msg {
+    my $self      = shift;
+    my $flash_msg = shift;
+    if ($flash_msg) {
+        $self->{flash_msg} = $flash_msg;
+    }
+    return $self->{flash_msg};
+}
+
+sub html {
+    my $self = shift;
+    my $html = shift;
+    if ($html) {
+        $self->{html} = $html;
+    }
+    return $self->{html};
+}
+
+sub check_auth_roominfo {
+    my $self = shift;
+    return get_header_stash_auth_mainte( $self->session() );
+}
 
 sub search_storeinfo_id_for_roominfo_rows {
-    my $storeinfo_id = shift;
-    return search_id_single_or_all_rows( 'roominfo', $storeinfo_id );
+    my $self = shift;
+    return search_id_single_or_all_rows( 'roominfo',
+        $self->params()->{storeinfo_id} );
 }
 
 sub get_init_valid_params_roominfo {
+    my $self = shift;
     my $valid_params
         = [qw{name endingtime_on rentalunit pricescomments remarks}];
     return get_init_valid_params($valid_params);
 }
 
 sub get_update_form_params_roominfo {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
     $params = get_update_form_params( $params, 'roominfo', );
-    return $params;
+    $self->params($params);
+    return $self;
 }
 
 sub check_roominfo_validator {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $check_params = [
         name              => [ [ 'LENGTH', 0, 20, ], ],
@@ -147,8 +211,9 @@ sub _check_rentalunit {
 }
 
 sub writing_roominfo {
-    my $type   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $type   = $self->type();
+    my $params = $self->params();
 
     # 書き込む前に開始、終了時刻変換
     my $FIELD_SEPARATOR_TIME = q{:};
@@ -205,6 +270,14 @@ sub writing_roominfo {
     # update 以外は禁止
     die 'update only' if !$type || ( $type && $type ne 'update' );
     return writing_db( 'roominfo', $type, $create_data, $params->{id} );
+}
+
+sub get_fill_in_roominfo {
+    my $self   = shift;
+    my $html   = $self->html();
+    my $params = $self->params();
+    my $output = get_fill_in_params( $html, $params );
+    return $output;
 }
 
 1;
