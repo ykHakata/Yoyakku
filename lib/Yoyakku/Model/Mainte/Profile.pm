@@ -13,31 +13,81 @@ use Yoyakku::Model::Mainte qw{
     check_table_column
 };
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
-use Exporter 'import';
-our @EXPORT_OK = qw{
-    check_auth_profile
-    search_profile_id_rows
-    get_init_valid_params_profile
-    get_update_form_params_profile
-    get_general_rows_all
-    get_admin_rows_all
-    check_profile_validator
-    check_profile_validator_db
-    writing_profile
-    get_fill_in_profile
-};
+
+sub new {
+    my $class  = shift;
+    my $params = +{};
+    my $self   = bless $params, $class;
+    return $self;
+}
+
+sub params {
+    my $self   = shift;
+    my $params = shift;
+    if ($params) {
+        $self->{params} = $params;
+    }
+    return $self->{params};
+}
+
+sub session {
+    my $self    = shift;
+    my $session = shift;
+    if ($session) {
+        $self->{session} = $session;
+    }
+    return $self->{session};
+}
+
+sub method {
+    my $self   = shift;
+    my $method = shift;
+    if ($method) {
+        $self->{method} = $method;
+    }
+    return $self->{method};
+}
+
+sub type {
+    my $self = shift;
+    my $type = shift;
+    if ($type) {
+        $self->{type} = $type;
+    }
+    return $self->{type};
+}
+
+sub flash_msg {
+    my $self      = shift;
+    my $flash_msg = shift;
+    if ($flash_msg) {
+        $self->{flash_msg} = $flash_msg;
+    }
+    return $self->{flash_msg};
+}
+
+sub html {
+    my $self = shift;
+    my $html = shift;
+    if ($html) {
+        $self->{html} = $html;
+    }
+    return $self->{html};
+}
 
 sub check_auth_profile {
-    my $session = shift;
-    return get_header_stash_auth_mainte($session);
+    my $self = shift;
+    return get_header_stash_auth_mainte( $self->session() );
 }
 
 sub search_profile_id_rows {
-    my $profile_id = shift;
-    return search_id_single_or_all_rows( 'profile', $profile_id );
+    my $self = shift;
+    return search_id_single_or_all_rows( 'profile',
+        $self->params()->{profile_id} );
 }
 
 sub get_init_valid_params_profile {
+    my $self = shift;
     my $valid_params
         = [
         qw{general_id admin_id nick_name full_name phonetic_name tel mail}];
@@ -45,23 +95,28 @@ sub get_init_valid_params_profile {
 }
 
 sub get_update_form_params_profile {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
     $params = get_update_form_params( $params, 'profile', );
-    return $params;
+    $self->params($params);
+    return $self;
 }
 
 sub get_general_rows_all {
+    my $self = shift;
     my @general_rows = $teng->search( 'general', +{}, );
     return \@general_rows;
 }
 
 sub get_admin_rows_all {
+    my $self = shift;
     my @admin_rows = $teng->search( 'admin', +{}, );
     return \@admin_rows;
 }
 
 sub check_profile_validator {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $check_params = [
         general_id    => [ 'INT', ],
@@ -101,8 +156,9 @@ sub check_profile_validator {
 }
 
 sub check_profile_validator_db {
-    my $type   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $type   = $self->type();
+    my $params = $self->params();
 
     my $valid_msg_profile_db = +{};
 
@@ -148,8 +204,9 @@ sub _check_admin_and_general_id {
 }
 
 sub writing_profile {
-    my $type   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $type   = $self->type();
+    my $params = $self->params();
 
     my $create_data = +{
         general_id    => $params->{general_id} || undef,
@@ -167,8 +224,9 @@ sub writing_profile {
 }
 
 sub get_fill_in_profile {
-    my $html   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $html   = $self->html();
+    my $params = $self->params();
     my $output = get_fill_in_params( $html, $params );
     return $output;
 }
