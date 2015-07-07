@@ -1,30 +1,34 @@
 package Yoyakku::Controller::Mainte::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
-use HTML::FillInForm;
-use Yoyakku::Controller::Mainte qw{check_login_mainte switch_stash};
-use Yoyakku::Model::Mainte::Reserve qw{
-    search_reserve_id_rows
-    get_init_valid_params_reserve
-    get_input_support
-    change_format_datetime
-    get_update_form_params_reserve
-    check_reserve_validator
-    check_reserve_validator_db
-    writing_reserve
-};
+use Yoyakku::Model::Mainte::Reserve;
 
-# 予約情報 一覧 検索
+sub _init {
+    my $self  = shift;
+    my $model = Yoyakku::Model::Mainte::Reserve->new();
+
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session->{root_id} );
+
+    my $header_stash = $model->check_auth_reserve();
+
+    return $self->redirect_to('/index') if !$header_stash;
+
+    $self->stash($header_stash);
+
+    return $model;
+}
+
 sub mainte_reserve_serch {
-    my $self = shift;
+    my $self  = shift;
+    my $model = $self->_init();
 
-    return $self->redirect_to('/index') if $self->check_login_mainte();
+    my $reserve_rows = $model->search_reserve_id_rows();
 
-     # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_reserve_serch';
-    $self->stash( class => $class );
-
-    my $reserve_rows = search_reserve_id_rows( $self->param('reserve_id') );
-    $self->stash( reserve_rows => $reserve_rows );
+    $self->stash(
+        class        => 'mainte_reserve_serch',
+        reserve_rows => $reserve_rows,
+    );
 
     return $self->render(
         template => 'mainte/mainte_reserve_serch',
@@ -32,95 +36,88 @@ sub mainte_reserve_serch {
     );
 }
 
-# 予約情報 新規 編集
 sub mainte_reserve_new {
-    my $self = shift;
-
-    return $self->redirect_to('/index') if $self->check_login_mainte();
-
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    my $self  = shift;
+    my $model = $self->_init();
 
     return $self->redirect_to('/mainte_reserve_serch')
-        if ( $method ne 'GET' ) && ( $method ne 'POST' );
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
 
     return $self->redirect_to('/mainte_reserve_serch')
-        if !$params->{id} && !$params->{roominfo_id};
+        if !$model->params()->{id} && !$model->params()->{roominfo_id};
 
-    # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_reserve_new';
-    $self->stash( class => $class );
+    my $init_valid_params_reserve = $model->get_init_valid_params_reserve();
+    my $input_support_values      = $model->get_input_support();
 
-    my $init_valid_params_reserve = get_init_valid_params_reserve();
-    my $input_support_values      = get_input_support($params);
+    $self->stash(
+        class => 'mainte_reserve_new',
+        %{$init_valid_params_reserve}, %{$input_support_values},
+    );
 
-    $self->stash( %{$init_valid_params_reserve}, %{$input_support_values}, );
-
-    return $self->_insert() if !$params->{id};
-    return $self->_update();
+    return $self->_insert($model) if !$model->params()->{id};
+    return $self->_update($model);
 }
 
 sub _insert {
-    my $self = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    return $self->_render_reserve($model) if 'GET' eq $model->method();
 
-    return $self->_render_reserve($params) if 'GET' eq $method;
+    $model->type('insert');
+    $model->flash_msg( +{ touroku => '登録完了' } );
 
-    return $self->_common( 'insert', +{ touroku => '登録完了' }, );
+    return $self->_common($model);
 }
 
 sub _update {
-    my $self = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    return $self->_render_reserve( $model->get_update_form_params_reserve() )
+        if 'GET' eq $model->method();
 
-    return $self->_render_reserve( get_update_form_params_reserve($params) )
-        if 'GET' eq $method;
+    $model->type('update');
+    $model->flash_msg( +{ henkou => '修正完了' } );
 
-    return $self->_common( 'update', +{ henkou => '修正完了', }, );
+    return $self->_common($model);
 }
 
 sub _common {
-    my $self      = shift;
-    my $type      = shift;
-    my $flash_msg = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
+    my $valid_msg = $model->check_reserve_validator();
 
-    my $valid_msg = check_reserve_validator($params);
-
-    return $self->stash($valid_msg), $self->_render_reserve($params)
+    return $self->stash($valid_msg), $self->_render_reserve($model)
         if $valid_msg;
 
     # 日付の形式に変換
-    $params = change_format_datetime($params);
+    $model->params( $model->change_format_datetime() );
 
     # 既存データとのバリデーション DB 問い合わせ
-    my $valid_msg_db = check_reserve_validator_db( $type, $params, );
+    my $valid_msg_db = $model->check_reserve_validator_db();
 
-    return $self->stash($valid_msg_db), $self->_render_reserve($params)
+    return $self->stash($valid_msg_db), $self->_render_reserve($model)
         if $valid_msg_db;
 
-    writing_reserve( $type, $params );
-    $self->flash($flash_msg);
+    $model->writing_reserve();
+    $self->flash( $model->flash_msg() );
 
     return $self->redirect_to('mainte_reserve_serch');
 }
 
 sub _render_reserve {
-    my $self   = shift;
-    my $params = shift;
+    my $self  = shift;
+    my $model = shift;
 
     my $html = $self->render_to_string(
         template => 'mainte/mainte_reserve_new',
         format   => 'html',
     )->to_string;
 
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
+    $model->html( \$html );
+    my $output = $model->get_fill_in_reserve();
     return $self->render( text => $output );
 }
 

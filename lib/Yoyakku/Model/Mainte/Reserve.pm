@@ -11,8 +11,10 @@ use Yoyakku::Util qw{
     next_day_ymd
     join_date_time
     get_start_end_tp
+    get_fill_in_params
 };
 use Yoyakku::Model::Mainte qw{
+    get_header_stash_auth_mainte
     search_id_single_or_all_rows
     get_init_valid_params
     get_update_form_params
@@ -20,24 +22,81 @@ use Yoyakku::Model::Mainte qw{
     writing_db
 };
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
-use Exporter 'import';
-our @EXPORT_OK = qw{
-    search_reserve_id_rows
-    get_init_valid_params_reserve
-    get_input_support
-    change_format_datetime
-    get_update_form_params_reserve
-    check_reserve_validator
-    check_reserve_validator_db
-    writing_reserve
-};
+
+sub new {
+    my $class  = shift;
+    my $params = +{};
+    my $self   = bless $params, $class;
+    return $self;
+}
+
+sub params {
+    my $self   = shift;
+    my $params = shift;
+    if ($params) {
+        $self->{params} = $params;
+    }
+    return $self->{params};
+}
+
+sub session {
+    my $self    = shift;
+    my $session = shift;
+    if ($session) {
+        $self->{session} = $session;
+    }
+    return $self->{session};
+}
+
+sub method {
+    my $self   = shift;
+    my $method = shift;
+    if ($method) {
+        $self->{method} = $method;
+    }
+    return $self->{method};
+}
+
+sub type {
+    my $self = shift;
+    my $type = shift;
+    if ($type) {
+        $self->{type} = $type;
+    }
+    return $self->{type};
+}
+
+sub flash_msg {
+    my $self      = shift;
+    my $flash_msg = shift;
+    if ($flash_msg) {
+        $self->{flash_msg} = $flash_msg;
+    }
+    return $self->{flash_msg};
+}
+
+sub html {
+    my $self = shift;
+    my $html = shift;
+    if ($html) {
+        $self->{html} = $html;
+    }
+    return $self->{html};
+}
+
+sub check_auth_reserve {
+    my $self = shift;
+    return get_header_stash_auth_mainte( $self->session() );
+}
 
 sub search_reserve_id_rows {
-    my $reserve_id = shift;
-    return search_id_single_or_all_rows( 'reserve', $reserve_id );
+    my $self = shift;
+    return search_id_single_or_all_rows( 'reserve',
+        $self->params()->{reserve_id} );
 }
 
 sub get_init_valid_params_reserve {
+    my $self = shift;
     my $valid_params = [
         qw{id roominfo_id getstarted_on_day getstarted_on_time enduse_on_day
             enduse_on_time useform message general_id admin_id tel status}
@@ -46,7 +105,8 @@ sub get_init_valid_params_reserve {
 }
 
 sub get_input_support {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $reserve_id  = $params->{id};
     my $roominfo_id = $params->{roominfo_id};
@@ -111,7 +171,8 @@ sub _get_reserve_fillIn_row {
 
 # 日付と時刻に分かれたものを datetime 形式にもどす
 sub change_format_datetime {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $start_date = $params->{getstarted_on_day};
     my $start_time = $params->{getstarted_on_time};
@@ -146,13 +207,16 @@ sub change_format_datetime {
 }
 
 sub get_update_form_params_reserve {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
     $params = get_update_form_params( $params, 'reserve', );
-    return $params;
+    $self->params($params);
+    return $self;
 }
 
 sub check_reserve_validator {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $check_params = [
         roominfo_id        => [ 'INT', ],
@@ -207,7 +271,7 @@ sub check_reserve_validator {
     return $valid_msg_reserve if scalar values %{$msg};
 
     # 日付の計算をするために通常の日時の表記に変更
-    $params = change_format_datetime($params);
+    $params = $self->change_format_datetime();
 
     # 利用終了時刻が開始時刻より早くなっていないか？
     my $check_reserve_use_time = _check_reserve_use_time($params);
@@ -239,8 +303,9 @@ sub _check_reserve_use_time {
 
 # DB 問い合わせバリデート
 sub check_reserve_validator_db {
-    my $type   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $type   = $self->type();
+    my $params = $self->params();
 
     my $valid_msg_reserve_db = +{};
 
@@ -402,8 +467,9 @@ sub _check_useform {
 }
 
 sub writing_reserve {
-    my $type   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $type   = $self->type();
+    my $params = $self->params();
 
     my $create_data = +{
         roominfo_id   => $params->{roominfo_id},
@@ -419,6 +485,14 @@ sub writing_reserve {
         modify_on     => now_datetime(),
     };
     return writing_db( 'reserve', $type, $create_data, $params->{id} );
+}
+
+sub get_fill_in_reserve {
+    my $self   = shift;
+    my $html   = $self->html();
+    my $params = $self->params();
+    my $output = get_fill_in_params( $html, $params );
+    return $output;
 }
 
 1;
