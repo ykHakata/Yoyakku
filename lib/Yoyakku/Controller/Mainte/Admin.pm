@@ -1,35 +1,34 @@
 package Yoyakku::Controller::Mainte::Admin;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Mainte::Admin qw{
-    check_auth_admin
-    search_admin_id_rows
-    get_init_valid_params_admin
-    get_update_form_params_admin
-    check_admin_validator
-    check_admin_validator_db
-    writing_admin
-    get_fill_in_registrant
-};
+use Yoyakku::Model::Mainte::Admin;
 
-sub _auth {
-    my $self         = shift;
-    my $header_stash = check_auth_admin( $self->session->{root_id} );
-    return 1 if !$header_stash;
+sub _init {
+    my $self  = shift;
+    my $model = Yoyakku::Model::Mainte::Admin->new();
+
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session->{root_id} );
+
+    my $header_stash = $model->check_auth_admin();
+
+    return $self->redirect_to('/index') if !$header_stash;
+
     $self->stash($header_stash);
-    return;
+
+    return $model;
 }
 
 sub mainte_registrant_serch {
-    my $self = shift;
+    my $self  = shift;
+    my $model = $self->_init();
 
-    return $self->redirect_to('/index') if $self->_auth();
+    my $admin_rows = $model->search_admin_id_rows();
 
-    # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_registrant_serch';
-    $self->stash( class => $class );
-
-    my $admin_rows = search_admin_id_rows( $self->param('admin_id') );
-    $self->stash( admin_rows => $admin_rows );
+    $self->stash(
+        class      => 'mainte_registrant_serch',
+        admin_rows => $admin_rows,
+    );
 
     return $self->render(
         template => 'mainte/mainte_registrant_serch',
@@ -38,82 +37,79 @@ sub mainte_registrant_serch {
 }
 
 sub mainte_registrant_new {
-    my $self = shift;
-
-    return $self->redirect_to('/index') if $self->_auth();
-
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    my $self  = shift;
+    my $model = $self->_init();
 
     return $self->redirect_to('/mainte_registrant_serch')
-        if ( $method ne 'GET' ) && ( $method ne 'POST' );
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
 
-    # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_registrant_new';
-    $self->stash( class => $class );
+    my $init_valid_params_admin = $model->get_init_valid_params_admin();
 
-    my $init_valid_params_admin = get_init_valid_params_admin();
-    $self->stash($init_valid_params_admin);
+    $self->stash(
+        class => 'mainte_registrant_new',
+        %{$init_valid_params_admin},
+    );
 
-    return $self->_insert() if !$params->{id};
-    return $self->_update();
+    return $self->_insert($model) if !$model->params()->{id};
+    return $self->_update($model);
 }
 
 sub _insert {
-    my $self = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    return $self->_render_registrant($model) if 'GET' eq $model->method();
 
-    return $self->_render_registrant($params) if 'GET' eq $method;
-    return $self->_common( 'insert', +{ touroku => '登録完了' }, );
+    $model->type('insert');
+    $model->flash_msg( +{ touroku => '登録完了' } );
+
+    return $self->_common($model);
 }
 
 sub _update {
-    my $self = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
-    my $method = uc $self->req->method;
+    return $self->_render_registrant( $model->get_update_form_params_admin() )
+        if 'GET' eq $model->method();
 
-    return $self->_render_registrant( get_update_form_params_admin($params) )
-        if 'GET' eq $method;
+    $model->type('update');
+    $model->flash_msg( +{ henkou => '修正完了' } );
 
-    return $self->_common( 'update', +{ henkou => '修正完了' }, );
+    return $self->_common($model);
 }
 
 sub _common {
-    my $self      = shift;
-    my $type      = shift;
-    my $flash_msg = shift;
+    my $self  = shift;
+    my $model = shift;
 
-    my $params = $self->req->params->to_hash;
+    my $valid_msg = $model->check_admin_validator();
 
-    my $valid_msg = check_admin_validator($params);
-
-    return $self->stash($valid_msg), $self->_render_registrant($params)
+    return $self->stash($valid_msg), $self->_render_registrant($model)
         if $valid_msg;
 
-    my $valid_msg_db = check_admin_validator_db( $type, $params, );
+    my $valid_msg_db = $model->check_admin_validator_db();
 
-    return $self->stash($valid_msg_db), $self->_render_registrant($params)
+    return $self->stash($valid_msg_db), $self->_render_registrant($model)
         if $valid_msg_db;
 
-    writing_admin( $type, $params );
-    $self->flash($flash_msg);
+    $model->writing_admin();
+    $self->flash( $model->flash_msg() );
 
     return $self->redirect_to('mainte_registrant_serch');
 }
 
 sub _render_registrant {
-    my $self   = shift;
-    my $params = shift;
+    my $self  = shift;
+    my $model = shift;
 
     my $html = $self->render_to_string(
         template => 'mainte/mainte_registrant_new',
         format   => 'html',
     )->to_string;
 
-    my $output = get_fill_in_registrant( \$html, $params );
+    $model->html( \$html );
+    my $output = $model->get_fill_in_registrant();
     return $self->render( text => $output );
 }
 

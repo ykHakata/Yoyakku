@@ -13,41 +13,95 @@ use Yoyakku::Model::Mainte qw{
     writing_db
 };
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
-use Exporter 'import';
-our @EXPORT_OK = qw{
-    check_auth_admin
-    search_admin_id_rows
-    get_init_valid_params_admin
-    get_update_form_params_admin
-    check_admin_validator
-    check_admin_validator_db
-    writing_admin
-    get_fill_in_registrant
-};
+
+sub new {
+    my $class  = shift;
+    my $params = +{};
+    my $self   = bless $params, $class;
+    return $self;
+}
+
+sub params {
+    my $self   = shift;
+    my $params = shift;
+    if ($params) {
+        $self->{params} = $params;
+    }
+    return $self->{params};
+}
+
+sub session {
+    my $self    = shift;
+    my $session = shift;
+    if ($session) {
+        $self->{session} = $session;
+    }
+    return $self->{session};
+}
+
+sub method {
+    my $self   = shift;
+    my $method = shift;
+    if ($method) {
+        $self->{method} = $method;
+    }
+    return $self->{method};
+}
+
+sub type {
+    my $self = shift;
+    my $type = shift;
+    if ($type) {
+        $self->{type} = $type;
+    }
+    return $self->{type};
+}
+
+sub flash_msg {
+    my $self      = shift;
+    my $flash_msg = shift;
+    if ($flash_msg) {
+        $self->{flash_msg} = $flash_msg;
+    }
+    return $self->{flash_msg};
+}
+
+sub html {
+    my $self = shift;
+    my $html = shift;
+    if ($html) {
+        $self->{html} = $html;
+    }
+    return $self->{html};
+}
 
 sub check_auth_admin {
-    my $session = shift;
-    return get_header_stash_auth_mainte($session);
+    my $self = shift;
+    return get_header_stash_auth_mainte( $self->session() );
 }
 
 sub search_admin_id_rows {
-    my $admin_id = shift;
-    return search_id_single_or_all_rows( 'admin', $admin_id );
+    my $self = shift;
+    return search_id_single_or_all_rows( 'admin', $self->params()->{admin_id} );
 }
 
 sub get_init_valid_params_admin {
+    my $self = shift;
     my $valid_params = [qw{login password}];
     return get_init_valid_params($valid_params);
 }
 
 sub get_update_form_params_admin {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
     $params = get_update_form_params( $params, 'admin', );
-    return $params;
+    $self->params($params);
+    return $self;
 }
 
 sub check_admin_validator {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $check_params = [
         login    => [ 'NOT_NULL', ],
@@ -72,8 +126,9 @@ sub check_admin_validator {
 }
 
 sub check_admin_validator_db {
-    my $type   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $type   = $self->type();
+    my $params = $self->params();
 
     my $valid_msg_admin_db = +{};
     my $check_admin_msg = check_login_name( $params, 'admin', );
@@ -86,8 +141,9 @@ sub check_admin_validator_db {
 }
 
 sub writing_admin {
-    my $type   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $type   = $self->type();
+    my $params = $self->params();
 
     my $create_data = +{
         login     => $params->{login},
@@ -162,8 +218,9 @@ sub writing_admin {
 }
 
 sub get_fill_in_registrant {
-    my $html   = shift;
-    my $params = shift;
+    my $self   = shift;
+    my $html   = $self->html();
+    my $params = $self->params();
     my $output = get_fill_in_params( $html, $params );
     return $output;
 }
