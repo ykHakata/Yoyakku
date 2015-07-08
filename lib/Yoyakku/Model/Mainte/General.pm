@@ -2,107 +2,29 @@ package Yoyakku::Model::Mainte::General;
 use strict;
 use warnings;
 use utf8;
+use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Model qw{$teng};
-use Yoyakku::Model::Mainte qw{
-    get_header_stash_auth_mainte
-    search_id_single_or_all_rows
-    get_init_valid_params
-    get_update_form_params
-    get_msg_validator
-    check_login_name
-    writing_db
-};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
-
-sub new {
-    my $class  = shift;
-    my $params = +{};
-    my $self   = bless $params, $class;
-    return $self;
-}
-
-sub params {
-    my $self   = shift;
-    my $params = shift;
-    if ($params) {
-        $self->{params} = $params;
-    }
-    return $self->{params};
-}
-
-sub session {
-    my $self    = shift;
-    my $session = shift;
-    if ($session) {
-        $self->{session} = $session;
-    }
-    return $self->{session};
-}
-
-sub method {
-    my $self   = shift;
-    my $method = shift;
-    if ($method) {
-        $self->{method} = $method;
-    }
-    return $self->{method};
-}
-
-sub type {
-    my $self = shift;
-    my $type = shift;
-    if ($type) {
-        $self->{type} = $type;
-    }
-    return $self->{type};
-}
-
-sub flash_msg {
-    my $self      = shift;
-    my $flash_msg = shift;
-    if ($flash_msg) {
-        $self->{flash_msg} = $flash_msg;
-    }
-    return $self->{flash_msg};
-}
-
-sub html {
-    my $self = shift;
-    my $html = shift;
-    if ($html) {
-        $self->{html} = $html;
-    }
-    return $self->{html};
-}
-
-sub check_auth_general {
-    my $self = shift;
-    return get_header_stash_auth_mainte( $self->session() );
-}
 
 sub search_general_id_rows {
     my $self = shift;
-    return search_id_single_or_all_rows( 'general',
+    return $self->search_id_single_or_all_rows( 'general',
         $self->params()->{general_id} );
 }
 
 sub get_init_valid_params_general {
     my $self = shift;
-    my $valid_params = [qw{login password}];
-    return get_init_valid_params($valid_params);
+    return $self->get_init_valid_params( [qw{login password}] );
 }
 
 sub get_update_form_params_general {
-    my $self   = shift;
-    my $params = $self->params();
-    $params = get_update_form_params( $params, 'general', );
-    $self->params($params);
+    my $self = shift;
+    $self->get_update_form_params('general');
     return $self;
 }
 
 sub check_general_validator {
     my $self   = shift;
-    my $params = $self->params();
 
     my $check_params = [
         login    => [ 'NOT_NULL', ],
@@ -114,7 +36,7 @@ sub check_general_validator {
         'password.not_null' => '必須入力',
     ];
 
-    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
 
     return if !$msg;
 
@@ -127,12 +49,10 @@ sub check_general_validator {
 }
 
 sub check_general_validator_db {
-    my $self   = shift;
-    my $type   = $self->type();
-    my $params = $self->params();
+    my $self = shift;
 
     my $valid_msg_general_db = +{};
-    my $check_general_msg = check_login_name( $params, 'general', );
+    my $check_general_msg    = $self->check_login_name('general');
 
     if ($check_general_msg) {
         $valid_msg_general_db = +{ login => $check_general_msg };
@@ -142,18 +62,17 @@ sub check_general_validator_db {
 }
 
 sub writing_general {
-    my $self   = shift;
-    my $type   = $self->type();
-    my $params = $self->params();
+    my $self = shift;
 
     my $create_data = +{
-        login     => $params->{login},
-        password  => $params->{password},
-        status    => $params->{status},
+        login     => $self->params()->{login},
+        password  => $self->params()->{password},
+        status    => $self->params()->{status},
         create_on => now_datetime(),
         modify_on => now_datetime(),
     };
-    return writing_db( 'general', $type, $create_data, $params->{id} );
+    return $self->writing_db( 'general', $create_data,
+        $self->params()->{id} );
 }
 
 sub get_fill_in_general {
