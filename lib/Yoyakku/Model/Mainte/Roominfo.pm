@@ -2,107 +2,30 @@ package Yoyakku::Model::Mainte::Roominfo;
 use strict;
 use warnings;
 use utf8;
+use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Model qw{$teng};
-use Yoyakku::Model::Mainte qw{
-    get_header_stash_auth_mainte
-    search_id_single_or_all_rows
-    get_init_valid_params
-    get_update_form_params
-    get_msg_validator
-    writing_db
-};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
-
-sub new {
-    my $class  = shift;
-    my $params = +{};
-    my $self   = bless $params, $class;
-    return $self;
-}
-
-sub params {
-    my $self   = shift;
-    my $params = shift;
-    if ($params) {
-        $self->{params} = $params;
-    }
-    return $self->{params};
-}
-
-sub session {
-    my $self    = shift;
-    my $session = shift;
-    if ($session) {
-        $self->{session} = $session;
-    }
-    return $self->{session};
-}
-
-sub method {
-    my $self   = shift;
-    my $method = shift;
-    if ($method) {
-        $self->{method} = $method;
-    }
-    return $self->{method};
-}
-
-sub type {
-    my $self = shift;
-    my $type = shift;
-    if ($type) {
-        $self->{type} = $type;
-    }
-    return $self->{type};
-}
-
-sub flash_msg {
-    my $self      = shift;
-    my $flash_msg = shift;
-    if ($flash_msg) {
-        $self->{flash_msg} = $flash_msg;
-    }
-    return $self->{flash_msg};
-}
-
-sub html {
-    my $self = shift;
-    my $html = shift;
-    if ($html) {
-        $self->{html} = $html;
-    }
-    return $self->{html};
-}
-
-sub check_auth_roominfo {
-    my $self = shift;
-    return get_header_stash_auth_mainte( $self->session() );
-}
 
 sub search_storeinfo_id_for_roominfo_rows {
     my $self = shift;
-    return search_id_single_or_all_rows( 'roominfo',
+    return $self->search_id_single_or_all_rows( 'roominfo',
         $self->params()->{storeinfo_id} );
 }
 
 sub get_init_valid_params_roominfo {
     my $self = shift;
-    my $valid_params
-        = [qw{name endingtime_on rentalunit pricescomments remarks}];
-    return get_init_valid_params($valid_params);
+    return $self->get_init_valid_params(
+        [qw{name endingtime_on rentalunit pricescomments remarks}] );
 }
 
 sub get_update_form_params_roominfo {
-    my $self   = shift;
-    my $params = $self->params();
-    $params = get_update_form_params( $params, 'roominfo', );
-    $self->params($params);
+    my $self = shift;
+    $self->get_update_form_params('roominfo');
     return $self;
 }
 
 sub check_roominfo_validator {
-    my $self   = shift;
-    my $params = $self->params();
+    my $self = shift;
 
     my $check_params = [
         name              => [ [ 'LENGTH', 0, 20, ], ],
@@ -141,7 +64,7 @@ sub check_roominfo_validator {
         'status.int'        => '指定の形式で入力してください',
     ];
 
-    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
 
     my $valid_msg_roominfo = +{
         name              => $msg->{name},
@@ -164,14 +87,14 @@ sub check_roominfo_validator {
     return $valid_msg_roominfo if scalar values %{$msg};
 
     # starttime_on, endingtime_on, 営業時間のバリデート
-    my $check_start_and_end_msg = _check_start_and_end_on($params);
+    my $check_start_and_end_msg = $self->_check_start_and_end_on();
 
     $valid_msg_roominfo->{endingtime_on} = $check_start_and_end_msg;
 
     return $valid_msg_roominfo if $check_start_and_end_msg;
 
     # starttime_on, endingtime_on, rentalunit, 貸出単位のバリデート
-    my $check_rentalunit_msg = _check_rentalunit($params);
+    my $check_rentalunit_msg = $self->_check_rentalunit();
 
     $valid_msg_roominfo->{rentalunit} = $check_rentalunit_msg;
 
@@ -181,7 +104,8 @@ sub check_roominfo_validator {
 }
 
 sub _check_start_and_end_on {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $starttime_on  = $params->{starttime_on};
     my $endingtime_on = $params->{endingtime_on};
@@ -194,7 +118,8 @@ sub _check_start_and_end_on {
 }
 
 sub _check_rentalunit {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $starttime_on  = $params->{starttime_on};
     my $endingtime_on = $params->{endingtime_on};
@@ -212,7 +137,6 @@ sub _check_rentalunit {
 
 sub writing_roominfo {
     my $self   = shift;
-    my $type   = $self->type();
     my $params = $self->params();
 
     # 書き込む前に開始、終了時刻変換
@@ -268,8 +192,10 @@ sub writing_roominfo {
     };
 
     # update 以外は禁止
-    die 'update only' if !$type || ( $type && $type ne 'update' );
-    return writing_db( 'roominfo', $type, $create_data, $params->{id} );
+    die 'update only'
+        if !$self->type() || ( $self->type() && $self->type() ne 'update' );
+
+    return $self->writing_db( 'roominfo', $create_data, $params->{id} );
 }
 
 sub get_fill_in_roominfo {
