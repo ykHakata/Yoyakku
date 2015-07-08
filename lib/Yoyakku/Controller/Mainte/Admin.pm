@@ -1,6 +1,7 @@
 package Yoyakku::Controller::Mainte::Admin;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Mainte::Admin;
+use Yoyakku::Util qw{now_datetime};
 
 sub _init {
     my $self  = shift;
@@ -9,8 +10,30 @@ sub _init {
     $model->params( $self->req->params->to_hash );
     $model->method( uc $self->req->method );
     $model->session( $self->session->{root_id} );
+    $model->table('admin');
+    $model->search_id( $self->param('admin_id') );
+    $model->valid_params( [qw{login password}] );
+    $model->check_params(
+        [   login    => [ 'NOT_NULL', ],
+            password => [ 'NOT_NULL', ],
+        ]
+    );
+    $model->msg_params(
+        [   'login.not_null'    => '必須入力',
+            'password.not_null' => '必須入力',
+        ]
+    );
+    $model->create_data(
+        +{  login     => $self->params('login'),
+            password  => $self->params('password'),
+            status    => $self->params('status'),
+            create_on => now_datetime(),
+            modify_on => now_datetime(),
+        },
+    );
+    $model->update_id( $self->param('id') );
 
-    my $header_stash = $model->check_auth_admin();
+    my $header_stash = $model->get_header_stash_auth_mainte();
 
     return $self->redirect_to('/index') if !$header_stash;
 
@@ -23,7 +46,7 @@ sub mainte_registrant_serch {
     my $self  = shift;
     my $model = $self->_init();
 
-    my $admin_rows = $model->search_admin_id_rows();
+    my $admin_rows = $model->search_id_single_or_all_rows();
 
     $self->stash(
         class      => 'mainte_registrant_serch',
@@ -43,7 +66,7 @@ sub mainte_registrant_new {
     return $self->redirect_to('/mainte_registrant_serch')
         if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
 
-    my $init_valid_params_admin = $model->get_init_valid_params_admin();
+    my $init_valid_params_admin = $model->get_init_valid_params();
 
     $self->stash(
         class => 'mainte_registrant_new',
@@ -70,7 +93,7 @@ sub _update {
     my $self  = shift;
     my $model = shift;
 
-    return $self->_render_registrant( $model->get_update_form_params_admin() )
+    return $self->_render_registrant( $model->get_update_form_params() )
         if 'GET' eq $model->method();
 
     $model->type('update');

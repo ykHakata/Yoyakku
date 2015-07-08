@@ -15,24 +15,135 @@ use Yoyakku::Util qw{
 };
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 use Yoyakku::Model qw{$teng};
-use Exporter 'import';
-our @EXPORT_OK = qw{
-    get_header_stash_auth_mainte
-    auth_mainte
-    switch_stash_mainte_list
-    search_id_single_or_all_rows
-    get_single_row_search_id
-    writing_db
-    get_update_form_params
-    get_msg_validator
-    check_login_name
-    get_init_valid_params
-    check_table_column
-};
+
+sub new {
+    my $class  = shift;
+    my $params = +{};
+    my $self   = bless $params, $class;
+    return $self;
+}
+
+sub params {
+    my $self   = shift;
+    my $params = shift;
+    if ($params) {
+        $self->{params} = $params;
+    }
+    return $self->{params};
+}
+
+sub session {
+    my $self    = shift;
+    my $session = shift;
+    if ($session) {
+        $self->{session} = $session;
+    }
+    return $self->{session};
+}
+
+sub method {
+    my $self   = shift;
+    my $method = shift;
+    if ($method) {
+        $self->{method} = $method;
+    }
+    return $self->{method};
+}
+
+sub type {
+    my $self = shift;
+    my $type = shift;
+    if ($type) {
+        $self->{type} = $type;
+    }
+    return $self->{type};
+}
+
+sub flash_msg {
+    my $self      = shift;
+    my $flash_msg = shift;
+    if ($flash_msg) {
+        $self->{flash_msg} = $flash_msg;
+    }
+    return $self->{flash_msg};
+}
+
+sub html {
+    my $self = shift;
+    my $html = shift;
+    if ($html) {
+        $self->{html} = $html;
+    }
+    return $self->{html};
+}
+
+sub table {
+    my $self  = shift;
+    my $table = shift;
+    if ($table) {
+        $self->{table} = $table;
+    }
+    return $self->{table};
+}
+
+sub search_id {
+    my $self      = shift;
+    my $search_id = shift;
+    if ($search_id) {
+        $self->{search_id} = $search_id;
+    }
+    return $self->{search_id};
+}
+
+sub valid_params {
+    my $self         = shift;
+    my $valid_params = shift;
+    if ($valid_params) {
+        $self->{valid_params} = $valid_params;
+    }
+    return $self->{valid_params};
+}
+
+sub check_params {
+    my $self         = shift;
+    my $check_params = shift;
+    if ($check_params) {
+        $self->{check_params} = $check_params;
+    }
+    return $self->{check_params};
+}
+
+sub msg_params {
+    my $self       = shift;
+    my $msg_params = shift;
+    if ($msg_params) {
+        $self->{msg_params} = $msg_params;
+    }
+    return $self->{msg_params};
+}
+
+sub create_data {
+    my $self        = shift;
+    my $create_data = shift;
+    if ($create_data) {
+        $self->{create_data} = $create_data;
+    }
+    return $self->{create_data};
+}
+
+sub update_id {
+    my $self      = shift;
+    my $update_id = shift;
+    if ($update_id) {
+        $self->{update_id} = $update_id;
+    }
+    return $self->{update_id};
+}
 
 # バリデート用パラメータ初期値
 sub get_init_valid_params {
-    my $valid_params = shift;
+    my $self         = shift;
+    my $valid_params = $self->valid_params();
 
     my $valid_params_stash = +{};
     for my $param ( @{$valid_params} ) {
@@ -93,8 +204,9 @@ sub check_table_column {
 
 # ログイン名の重複確認
 sub check_login_name {
-    my $params = shift;
-    my $table  = shift;
+    my $self   = shift;
+    my $params = $self->params();
+    my $table  = $self->table();
 
     my $login = $params->{login};
     my $id    = $params->{id};
@@ -111,9 +223,10 @@ sub check_login_name {
 
 # 入力値バリデート処理
 sub get_msg_validator {
-    my $params       = shift;
-    my $check_params = shift;
-    my $msg_params   = shift;
+    my $self         = shift;
+    my $params       = $self->params();
+    my $check_params = $self->check_params();
+    my $msg_params   = $self->msg_params();
 
     my $validator = FormValidator::Lite->new($params);
 
@@ -135,8 +248,9 @@ sub get_msg_validator {
 use Data::Dumper;
 # update 用フィルインパラメーター作成
 sub get_update_form_params {
-    my $params  = shift;
-    my $table   = shift;
+    my $self   = shift;
+    my $params = $self->params();
+    my $table  = $self->table();
 
     my $columns = get_table_columns($table);
     my $row = get_single_row_search_id( $table, $params->{id} );
@@ -167,7 +281,8 @@ sub get_update_form_params {
         $params->{enduse_on_time}     = $day_and_time->{enduse_on_time};
     }
 
-    return $params;
+    $self->params( $params );
+    return $self;
 }
 
 # roominfo の開始時刻を入力フォーム用に変換
@@ -210,19 +325,20 @@ sub get_startend_day_and_time {
 
 # データベースへの書き込み
 sub writing_db {
-    my $table     = shift;
-    my $type      = shift;
-    my $params    = shift;
-    my $update_id = shift;
+    my $self        = shift;
+    my $table       = $self->table();
+    my $type        = $self->type();
+    my $create_data = $self->create_data();
+    my $update_id   = $self->update_id();
 
     my $insert_row;
     if ( $type eq 'insert' ) {
-        $insert_row = $teng->insert( $table, $params, );
+        $insert_row = $teng->insert( $table, $create_data, );
     }
     elsif ( $type eq 'update' ) {
-        delete $params->{create_on};
+        delete $create_data->{create_on};
         $insert_row = $teng->single( $table, +{ id => $update_id }, );
-        $insert_row->update($params);
+        $insert_row->update($create_data);
     }
     die 'not $insert_row' if !$insert_row;
 
@@ -243,8 +359,9 @@ sub get_single_row_search_id {
 
 # テーブル一覧表示の為の検索
 sub search_id_single_or_all_rows {
-    my $table     = shift;
-    my $search_id = shift;
+    my $self      = shift;
+    my $table     = $self->table();
+    my $search_id = $self->search_id();
 
     my $search_column = 'id';
 
@@ -272,7 +389,8 @@ sub search_id_single_or_all_rows {
 
 # ログイン確認、ヘッダー初期値取得
 sub get_header_stash_auth_mainte {
-    my $session = shift;
+    my $self    = shift;
+    my $session = $self->session();
     return if !$session;
     my $id = auth_mainte($session);
     return if !$id;

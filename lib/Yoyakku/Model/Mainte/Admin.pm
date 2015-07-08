@@ -2,118 +2,14 @@ package Yoyakku::Model::Mainte::Admin;
 use strict;
 use warnings;
 use utf8;
+use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Model qw{$teng};
-use Yoyakku::Model::Mainte qw{
-    get_header_stash_auth_mainte
-    search_id_single_or_all_rows
-    get_init_valid_params
-    get_update_form_params
-    get_msg_validator
-    check_login_name
-    writing_db
-};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
-sub new {
-    my $class  = shift;
-    my $params = +{};
-    my $self   = bless $params, $class;
-    return $self;
-}
-
-sub params {
-    my $self   = shift;
-    my $params = shift;
-    if ($params) {
-        $self->{params} = $params;
-    }
-    return $self->{params};
-}
-
-sub session {
-    my $self    = shift;
-    my $session = shift;
-    if ($session) {
-        $self->{session} = $session;
-    }
-    return $self->{session};
-}
-
-sub method {
-    my $self   = shift;
-    my $method = shift;
-    if ($method) {
-        $self->{method} = $method;
-    }
-    return $self->{method};
-}
-
-sub type {
-    my $self = shift;
-    my $type = shift;
-    if ($type) {
-        $self->{type} = $type;
-    }
-    return $self->{type};
-}
-
-sub flash_msg {
-    my $self      = shift;
-    my $flash_msg = shift;
-    if ($flash_msg) {
-        $self->{flash_msg} = $flash_msg;
-    }
-    return $self->{flash_msg};
-}
-
-sub html {
-    my $self = shift;
-    my $html = shift;
-    if ($html) {
-        $self->{html} = $html;
-    }
-    return $self->{html};
-}
-
-sub check_auth_admin {
-    my $self = shift;
-    return get_header_stash_auth_mainte( $self->session() );
-}
-
-sub search_admin_id_rows {
-    my $self = shift;
-    return search_id_single_or_all_rows( 'admin', $self->params()->{admin_id} );
-}
-
-sub get_init_valid_params_admin {
-    my $self = shift;
-    my $valid_params = [qw{login password}];
-    return get_init_valid_params($valid_params);
-}
-
-sub get_update_form_params_admin {
-    my $self   = shift;
-    my $params = $self->params();
-    $params = get_update_form_params( $params, 'admin', );
-    $self->params($params);
-    return $self;
-}
-
 sub check_admin_validator {
-    my $self   = shift;
-    my $params = $self->params();
+    my $self  = shift;
 
-    my $check_params = [
-        login    => [ 'NOT_NULL', ],
-        password => [ 'NOT_NULL', ],
-    ];
-
-    my $msg_params = [
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-    ];
-
-    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
+    my $msg = $self->get_msg_validator();
 
     return if !$msg;
 
@@ -126,12 +22,10 @@ sub check_admin_validator {
 }
 
 sub check_admin_validator_db {
-    my $self   = shift;
-    my $type   = $self->type();
-    my $params = $self->params();
+    my $self = shift;
 
     my $valid_msg_admin_db = +{};
-    my $check_admin_msg = check_login_name( $params, 'admin', );
+    my $check_admin_msg    = $self->check_login_name();
 
     if ($check_admin_msg) {
         $valid_msg_admin_db = +{ login => $check_admin_msg };
@@ -141,20 +35,9 @@ sub check_admin_validator_db {
 }
 
 sub writing_admin {
-    my $self   = shift;
-    my $type   = $self->type();
-    my $params = $self->params();
+    my $self = shift;
 
-    my $create_data = +{
-        login     => $params->{login},
-        password  => $params->{password},
-        status    => $params->{status},
-        create_on => now_datetime(),
-        modify_on => now_datetime(),
-    };
-
-    my $insert_admin_row
-        = writing_db( 'admin', $type, $create_data, $params->{id} );
+    my $insert_admin_row = $self->writing_db();
 
     die 'not $insert_admin_row' if !$insert_admin_row;
 
@@ -169,12 +52,12 @@ sub writing_admin {
     my $new_admin_status = $insert_admin_row->status;
 
     # 承認済み 1 の場合該当の storeinfo のデータを検索
-    if ($new_admin_status eq '1') {
+    if ( $new_admin_status eq '1' ) {
         my $storeinfo_row
             = $teng->single( 'storeinfo', +{ admin_id => $new_admin_id, }, );
 
         # storeinfo 見つからないときは新規にレコード作成
-        if (!$storeinfo_row) {
+        if ( !$storeinfo_row ) {
 
             my $create_data_storeinfo = +{
                 admin_id  => $new_admin_id,
