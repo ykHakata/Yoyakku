@@ -6,10 +6,37 @@ use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
-sub check_admin_validator {
-    my $self  = shift;
+sub search_admin_id_rows {
+    my $self = shift;
+    return $self->search_id_single_or_all_rows( 'admin',
+        $self->params()->{admin_id} );
+}
 
-    my $msg = $self->get_msg_validator();
+sub get_init_valid_params_admin {
+    my $self = shift;
+    return $self->get_init_valid_params( [qw{login password}] );
+}
+
+sub get_update_form_params_admin {
+    my $self = shift;
+    $self->get_update_form_params('admin');
+    return $self;
+}
+
+sub check_admin_validator {
+    my $self = shift;
+
+    my $check_params = [
+        login    => [ 'NOT_NULL', ],
+        password => [ 'NOT_NULL', ],
+    ];
+
+    my $msg_params = [
+        'login.not_null'    => '必須入力',
+        'password.not_null' => '必須入力',
+    ];
+
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
 
     return if !$msg;
 
@@ -25,7 +52,7 @@ sub check_admin_validator_db {
     my $self = shift;
 
     my $valid_msg_admin_db = +{};
-    my $check_admin_msg    = $self->check_login_name();
+    my $check_admin_msg    = $self->check_login_name('admin');
 
     if ($check_admin_msg) {
         $valid_msg_admin_db = +{ login => $check_admin_msg };
@@ -37,7 +64,16 @@ sub check_admin_validator_db {
 sub writing_admin {
     my $self = shift;
 
-    my $insert_admin_row = $self->writing_db();
+    my $create_data = +{
+        login     => $self->params()->{login},
+        password  => $self->params()->{password},
+        status    => $self->params()->{status},
+        create_on => now_datetime(),
+        modify_on => now_datetime(),
+    };
+
+    my $insert_admin_row
+        = $self->writing_db( 'admin', $create_data, $self->params()->{id} );
 
     die 'not $insert_admin_row' if !$insert_admin_row;
 

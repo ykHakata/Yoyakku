@@ -77,73 +77,10 @@ sub html {
     return $self->{html};
 }
 
-sub table {
-    my $self  = shift;
-    my $table = shift;
-    if ($table) {
-        $self->{table} = $table;
-    }
-    return $self->{table};
-}
-
-sub search_id {
-    my $self      = shift;
-    my $search_id = shift;
-    if ($search_id) {
-        $self->{search_id} = $search_id;
-    }
-    return $self->{search_id};
-}
-
-sub valid_params {
-    my $self         = shift;
-    my $valid_params = shift;
-    if ($valid_params) {
-        $self->{valid_params} = $valid_params;
-    }
-    return $self->{valid_params};
-}
-
-sub check_params {
-    my $self         = shift;
-    my $check_params = shift;
-    if ($check_params) {
-        $self->{check_params} = $check_params;
-    }
-    return $self->{check_params};
-}
-
-sub msg_params {
-    my $self       = shift;
-    my $msg_params = shift;
-    if ($msg_params) {
-        $self->{msg_params} = $msg_params;
-    }
-    return $self->{msg_params};
-}
-
-sub create_data {
-    my $self        = shift;
-    my $create_data = shift;
-    if ($create_data) {
-        $self->{create_data} = $create_data;
-    }
-    return $self->{create_data};
-}
-
-sub update_id {
-    my $self      = shift;
-    my $update_id = shift;
-    if ($update_id) {
-        $self->{update_id} = $update_id;
-    }
-    return $self->{update_id};
-}
-
 # バリデート用パラメータ初期値
 sub get_init_valid_params {
     my $self         = shift;
-    my $valid_params = $self->valid_params();
+    my $valid_params = shift;
 
     my $valid_params_stash = +{};
     for my $param ( @{$valid_params} ) {
@@ -205,8 +142,8 @@ sub check_table_column {
 # ログイン名の重複確認
 sub check_login_name {
     my $self   = shift;
+    my $table  = shift;
     my $params = $self->params();
-    my $table  = $self->table();
 
     my $login = $params->{login};
     my $id    = $params->{id};
@@ -224,9 +161,9 @@ sub check_login_name {
 # 入力値バリデート処理
 sub get_msg_validator {
     my $self         = shift;
+    my $check_params = shift;
+    my $msg_params   = shift;
     my $params       = $self->params();
-    my $check_params = $self->check_params();
-    my $msg_params   = $self->msg_params();
 
     my $validator = FormValidator::Lite->new($params);
 
@@ -249,8 +186,8 @@ use Data::Dumper;
 # update 用フィルインパラメーター作成
 sub get_update_form_params {
     my $self   = shift;
+    my $table  = shift;
     my $params = $self->params();
-    my $table  = $self->table();
 
     my $columns = get_table_columns($table);
     my $row = get_single_row_search_id( $table, $params->{id} );
@@ -326,10 +263,10 @@ sub get_startend_day_and_time {
 # データベースへの書き込み
 sub writing_db {
     my $self        = shift;
-    my $table       = $self->table();
+    my $table       = shift;
+    my $create_data = shift;
+    my $update_id   = shift;
     my $type        = $self->type();
-    my $create_data = $self->create_data();
-    my $update_id   = $self->update_id();
 
     my $insert_row;
     if ( $type eq 'insert' ) {
@@ -360,8 +297,8 @@ sub get_single_row_search_id {
 # テーブル一覧表示の為の検索
 sub search_id_single_or_all_rows {
     my $self      = shift;
-    my $table     = $self->table();
-    my $search_id = $self->search_id();
+    my $table     = shift;
+    my $search_id = shift;
 
     my $search_column = 'id';
 
