@@ -10,7 +10,7 @@ sub _init {
     $model->method( uc $self->req->method );
     $model->session( $self->session->{root_id} );
 
-    my $header_stash = $model->check_auth_reserve();
+    my $header_stash = $model->get_header_stash_auth_mainte();
 
     return $self->redirect_to('/index') if !$header_stash;
 

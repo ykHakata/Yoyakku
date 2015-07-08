@@ -2,6 +2,7 @@ package Yoyakku::Model::Mainte::Reserve;
 use strict;
 use warnings;
 use utf8;
+use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{
     now_datetime
@@ -13,95 +14,21 @@ use Yoyakku::Util qw{
     get_start_end_tp
     get_fill_in_params
 };
-use Yoyakku::Model::Mainte qw{
-    get_header_stash_auth_mainte
-    search_id_single_or_all_rows
-    get_init_valid_params
-    get_update_form_params
-    get_msg_validator
-    writing_db
-};
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
-
-sub new {
-    my $class  = shift;
-    my $params = +{};
-    my $self   = bless $params, $class;
-    return $self;
-}
-
-sub params {
-    my $self   = shift;
-    my $params = shift;
-    if ($params) {
-        $self->{params} = $params;
-    }
-    return $self->{params};
-}
-
-sub session {
-    my $self    = shift;
-    my $session = shift;
-    if ($session) {
-        $self->{session} = $session;
-    }
-    return $self->{session};
-}
-
-sub method {
-    my $self   = shift;
-    my $method = shift;
-    if ($method) {
-        $self->{method} = $method;
-    }
-    return $self->{method};
-}
-
-sub type {
-    my $self = shift;
-    my $type = shift;
-    if ($type) {
-        $self->{type} = $type;
-    }
-    return $self->{type};
-}
-
-sub flash_msg {
-    my $self      = shift;
-    my $flash_msg = shift;
-    if ($flash_msg) {
-        $self->{flash_msg} = $flash_msg;
-    }
-    return $self->{flash_msg};
-}
-
-sub html {
-    my $self = shift;
-    my $html = shift;
-    if ($html) {
-        $self->{html} = $html;
-    }
-    return $self->{html};
-}
-
-sub check_auth_reserve {
-    my $self = shift;
-    return get_header_stash_auth_mainte( $self->session() );
-}
 
 sub search_reserve_id_rows {
     my $self = shift;
-    return search_id_single_or_all_rows( 'reserve',
+    return $self->search_id_single_or_all_rows( 'reserve',
         $self->params()->{reserve_id} );
 }
 
 sub get_init_valid_params_reserve {
     my $self = shift;
-    my $valid_params = [
-        qw{id roominfo_id getstarted_on_day getstarted_on_time enduse_on_day
-            enduse_on_time useform message general_id admin_id tel status}
-    ];
-    return get_init_valid_params($valid_params);
+    return $self->get_init_valid_params(
+        [   qw{id roominfo_id getstarted_on_day getstarted_on_time enduse_on_day
+                enduse_on_time useform message general_id admin_id tel status}
+        ]
+    );
 }
 
 sub get_input_support {
@@ -116,7 +43,7 @@ sub get_input_support {
         $roominfo_id = $reserve_row->roominfo_id;
     }
 
-    my $reserve_fillIn_row = _get_reserve_fillIn_row($roominfo_id);
+    my $reserve_fillIn_row = $self->_get_reserve_fillIn_row($roominfo_id);
 
     # 開始時刻表示切り替え 時間の表示を6:00-30:00
     my $change_start_and_endtime = chenge_time_over(
@@ -137,6 +64,7 @@ sub get_input_support {
 }
 
 sub _get_reserve_fillIn_row {
+    my $self = shift;
     my $roominfo_id = shift;
 
     my $sql = q{
@@ -207,10 +135,8 @@ sub change_format_datetime {
 }
 
 sub get_update_form_params_reserve {
-    my $self   = shift;
-    my $params = $self->params();
-    $params = get_update_form_params( $params, 'reserve', );
-    $self->params($params);
+    my $self = shift;
+    $self->get_update_form_params('reserve');
     return $self;
 }
 
@@ -251,7 +177,7 @@ sub check_reserve_validator {
         'status.int'         => '指定の形式で入力してください',
     ];
 
-    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
 
     my $valid_msg_reserve = +{
         id                 => '',
@@ -467,24 +393,23 @@ sub _check_useform {
 }
 
 sub writing_reserve {
-    my $self   = shift;
-    my $type   = $self->type();
-    my $params = $self->params();
+    my $self = shift;
 
     my $create_data = +{
-        roominfo_id   => $params->{roominfo_id},
-        getstarted_on => $params->{getstarted_on},
-        enduse_on     => $params->{enduse_on},
-        useform       => $params->{useform},
-        message       => $params->{message},
-        general_id    => $params->{general_id},
-        admin_id      => $params->{admin_id},
-        tel           => $params->{tel},
-        status        => $params->{status},
+        roominfo_id   => $self->params()->{roominfo_id},
+        getstarted_on => $self->params()->{getstarted_on},
+        enduse_on     => $self->params()->{enduse_on},
+        useform       => $self->params()->{useform},
+        message       => $self->params()->{message},
+        general_id    => $self->params()->{general_id},
+        admin_id      => $self->params()->{admin_id},
+        tel           => $self->params()->{tel},
+        status        => $self->params()->{status},
         create_on     => now_datetime(),
         modify_on     => now_datetime(),
     };
-    return writing_db( 'reserve', $type, $create_data, $params->{id} );
+    return $self->writing_db( 'reserve', $create_data,
+        $self->params()->{id} );
 }
 
 sub get_fill_in_reserve {

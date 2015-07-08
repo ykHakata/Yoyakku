@@ -156,7 +156,7 @@ sub check_login_name {
         id     => $id,
     };
 
-    return check_table_column($check_params);
+    return $self->check_table_column($check_params);
 }
 
 # 入力値バリデート処理
