@@ -120,6 +120,7 @@ sub get_table_columns {
 
 # 指定パラメーターの存在確認
 sub check_table_column {
+    my $self         = shift;
     my $check_params = shift;
 
     my $column = $check_params->{column};

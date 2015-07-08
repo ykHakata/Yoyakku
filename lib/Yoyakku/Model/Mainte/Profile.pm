@@ -2,103 +2,26 @@ package Yoyakku::Model::Mainte::Profile;
 use strict;
 use warnings;
 use utf8;
+use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Model qw{$teng};
-use Yoyakku::Model::Mainte qw{
-    get_header_stash_auth_mainte
-    search_id_single_or_all_rows
-    get_init_valid_params
-    get_update_form_params
-    get_msg_validator
-    writing_db
-    check_table_column
-};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
-
-sub new {
-    my $class  = shift;
-    my $params = +{};
-    my $self   = bless $params, $class;
-    return $self;
-}
-
-sub params {
-    my $self   = shift;
-    my $params = shift;
-    if ($params) {
-        $self->{params} = $params;
-    }
-    return $self->{params};
-}
-
-sub session {
-    my $self    = shift;
-    my $session = shift;
-    if ($session) {
-        $self->{session} = $session;
-    }
-    return $self->{session};
-}
-
-sub method {
-    my $self   = shift;
-    my $method = shift;
-    if ($method) {
-        $self->{method} = $method;
-    }
-    return $self->{method};
-}
-
-sub type {
-    my $self = shift;
-    my $type = shift;
-    if ($type) {
-        $self->{type} = $type;
-    }
-    return $self->{type};
-}
-
-sub flash_msg {
-    my $self      = shift;
-    my $flash_msg = shift;
-    if ($flash_msg) {
-        $self->{flash_msg} = $flash_msg;
-    }
-    return $self->{flash_msg};
-}
-
-sub html {
-    my $self = shift;
-    my $html = shift;
-    if ($html) {
-        $self->{html} = $html;
-    }
-    return $self->{html};
-}
-
-sub check_auth_profile {
-    my $self = shift;
-    return get_header_stash_auth_mainte( $self->session() );
-}
 
 sub search_profile_id_rows {
     my $self = shift;
-    return search_id_single_or_all_rows( 'profile',
+    return $self->search_id_single_or_all_rows( 'profile',
         $self->params()->{profile_id} );
 }
 
 sub get_init_valid_params_profile {
     my $self = shift;
-    my $valid_params
-        = [
-        qw{general_id admin_id nick_name full_name phonetic_name tel mail}];
-    return get_init_valid_params($valid_params);
+    return $self->get_init_valid_params(
+        [qw{general_id admin_id nick_name full_name phonetic_name tel mail}]
+    );
 }
 
 sub get_update_form_params_profile {
-    my $self   = shift;
-    my $params = $self->params();
-    $params = get_update_form_params( $params, 'profile', );
-    $self->params($params);
+    my $self = shift;
+    $self->get_update_form_params('profile');
     return $self;
 }
 
@@ -115,8 +38,7 @@ sub get_admin_rows_all {
 }
 
 sub check_profile_validator {
-    my $self   = shift;
-    my $params = $self->params();
+    my $self = shift;
 
     my $check_params = [
         general_id    => [ 'INT', ],
@@ -129,16 +51,16 @@ sub check_profile_validator {
     ];
 
     my $msg_params = [
-        'general_id.not_null'  => '指定の形式で入力してください',
-        'admin_id.not_null'    => '指定の形式で入力してください',
-        'nick_name.length'     => '文字数!!',
-        'full_name.length'     => '文字数!!',
+        'general_id.not_null' => '指定の形式で入力してください',
+        'admin_id.not_null'   => '指定の形式で入力してください',
+        'nick_name.length'    => '文字数!!',
+        'full_name.length'    => '文字数!!',
         'phonetic_name.length' => '文字数!!',
         'tel.length'           => '文字数!!',
         'mail.email_loose'     => 'Eメールを入力してください',
     ];
 
-    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
 
     return if !$msg;
 
@@ -156,14 +78,12 @@ sub check_profile_validator {
 }
 
 sub check_profile_validator_db {
-    my $self   = shift;
-    my $type   = $self->type();
-    my $params = $self->params();
+    my $self = shift;
 
     my $valid_msg_profile_db = +{};
 
     # general_id, admin_id, 重複、既存の確認
-    my $check_admin_and_general_msg = _check_admin_and_general_id( $params );
+    my $check_admin_and_general_msg = $self->_check_admin_and_general_id();
 
     if ($check_admin_and_general_msg) {
         $valid_msg_profile_db
@@ -175,7 +95,8 @@ sub check_profile_validator_db {
 }
 
 sub _check_admin_and_general_id {
-    my $params = shift;
+    my $self   = shift;
+    my $params = $self->params();
 
     my $general_id = $params->{general_id};
     my $admin_id   = $params->{admin_id};
@@ -194,33 +115,32 @@ sub _check_admin_and_general_id {
     };
 
     # 管理ユーザー
-    return check_table_column($check_params) if $admin_id;
+    return $self->check_table_column($check_params) if $admin_id;
 
     $check_params->{column} = 'general_id';
     $check_params->{param}  = $general_id;
 
     # 一般ユーザー
-    return check_table_column($check_params) if $general_id;
+    return $self->check_table_column($check_params) if $general_id;
 }
 
 sub writing_profile {
-    my $self   = shift;
-    my $type   = $self->type();
-    my $params = $self->params();
+    my $self = shift;
 
     my $create_data = +{
-        general_id    => $params->{general_id} || undef,
-        admin_id      => $params->{admin_id} || undef,
-        nick_name     => $params->{nick_name},
-        full_name     => $params->{full_name},
-        phonetic_name => $params->{phonetic_name},
-        tel           => $params->{tel},
-        mail          => $params->{mail},
-        status        => $params->{status},
+        general_id => $self->params()->{general_id} || undef,
+        admin_id   => $self->params()->{admin_id}   || undef,
+        nick_name  => $self->params()->{nick_name},
+        full_name  => $self->params()->{full_name},
+        phonetic_name => $self->params()->{phonetic_name},
+        tel           => $self->params()->{tel},
+        mail          => $self->params()->{mail},
+        status        => $self->params()->{status},
         create_on     => now_datetime(),
         modify_on     => now_datetime(),
     };
-    return writing_db( 'profile', $type, $create_data, $params->{id} );
+    return $self->writing_db( 'profile', $create_data,
+        $self->params()->{id} );
 }
 
 sub get_fill_in_profile {
