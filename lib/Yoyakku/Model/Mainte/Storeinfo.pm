@@ -2,103 +2,28 @@ package Yoyakku::Model::Mainte::Storeinfo;
 use strict;
 use warnings;
 use utf8;
+use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Model qw{$teng};
-use Yoyakku::Model::Mainte qw{
-    get_header_stash_auth_mainte
-    search_id_single_or_all_rows
-    get_init_valid_params
-    get_update_form_params
-    get_msg_validator
-    writing_db
-};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
-
-sub new {
-    my $class  = shift;
-    my $params = +{};
-    my $self   = bless $params, $class;
-    return $self;
-}
-
-sub params {
-    my $self   = shift;
-    my $params = shift;
-    if ($params) {
-        $self->{params} = $params;
-    }
-    return $self->{params};
-}
-
-sub session {
-    my $self    = shift;
-    my $session = shift;
-    if ($session) {
-        $self->{session} = $session;
-    }
-    return $self->{session};
-}
-
-sub method {
-    my $self   = shift;
-    my $method = shift;
-    if ($method) {
-        $self->{method} = $method;
-    }
-    return $self->{method};
-}
-
-sub type {
-    my $self = shift;
-    my $type = shift;
-    if ($type) {
-        $self->{type} = $type;
-    }
-    return $self->{type};
-}
-
-sub flash_msg {
-    my $self      = shift;
-    my $flash_msg = shift;
-    if ($flash_msg) {
-        $self->{flash_msg} = $flash_msg;
-    }
-    return $self->{flash_msg};
-}
-
-sub html {
-    my $self = shift;
-    my $html = shift;
-    if ($html) {
-        $self->{html} = $html;
-    }
-    return $self->{html};
-}
-
-sub check_auth_storeinfo {
-    my $self = shift;
-    return get_header_stash_auth_mainte( $self->session() );
-}
 
 sub search_storeinfo_id_rows {
     my $self = shift;
-    return search_id_single_or_all_rows( 'storeinfo',
+    return $self->search_id_single_or_all_rows( 'storeinfo',
         $self->params()->{storeinfo_id} );
 }
 
 sub get_init_valid_params_storeinfo {
-    my $self         = shift;
-    my $valid_params = [
-        qw{name post state cities addressbelow tel mail remarks url
-            locationinfor status }
-    ];
-    return get_init_valid_params($valid_params);
+    my $self = shift;
+    return $self->get_init_valid_params(
+        [   qw{name post state cities addressbelow tel mail remarks url
+                locationinfor status }
+        ]
+    );
 }
 
 sub get_update_form_params_storeinfo {
-    my $self   = shift;
-    my $params = $self->params();
-    $params = get_update_form_params( $params, 'storeinfo', );
-    $self->params($params);
+    my $self = shift;
+    $self->get_update_form_params('storeinfo');
     return $self;
 }
 
@@ -119,8 +44,7 @@ sub search_zipcode_for_address {
 }
 
 sub check_storeinfo_validator {
-    my $self   = shift;
-    my $params = $self->params();
+    my $self = shift;
 
     my $check_params = [
         name          => [ [ 'LENGTH', 0, 20, ], ],
@@ -150,7 +74,7 @@ sub check_storeinfo_validator {
         'status.int' => '指定の形式で入力してください',
     ];
 
-    my $msg = get_msg_validator( $params, $check_params, $msg_params, );
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
 
     return if !$msg;
 
@@ -172,32 +96,33 @@ sub check_storeinfo_validator {
 }
 
 sub writing_storeinfo {
-    my $self   = shift;
-    my $type   = $self->type();
-    my $params = $self->params();
+    my $self = shift;
 
     my $create_data = +{
-        region_id     => $params->{region_id} || undef,
-        admin_id      => $params->{admin_id} || undef,
-        name          => $params->{name},
-        icon          => $params->{icon},
-        post          => $params->{post},
-        state         => $params->{state},
-        cities        => $params->{cities},
-        addressbelow  => $params->{addressbelow},
-        tel           => $params->{tel},
-        mail          => $params->{mail},
-        remarks       => $params->{remarks},
-        url           => $params->{url},
-        locationinfor => $params->{locationinfor},
-        status        => $params->{status},
+        region_id     => $self->params()->{region_id} || undef,
+        admin_id      => $self->params()->{admin_id} || undef,
+        name          => $self->params()->{name},
+        icon          => $self->params()->{icon},
+        post          => $self->params()->{post},
+        state         => $self->params()->{state},
+        cities        => $self->params()->{cities},
+        addressbelow  => $self->params()->{addressbelow},
+        tel           => $self->params()->{tel},
+        mail          => $self->params()->{mail},
+        remarks       => $self->params()->{remarks},
+        url           => $self->params()->{url},
+        locationinfor => $self->params()->{locationinfor},
+        status        => $self->params()->{status},
         create_on     => now_datetime(),
         modify_on     => now_datetime(),
     };
 
     # update 以外は禁止
-    die 'update only' if !$type || ( $type && $type ne 'update' );
-    return writing_db( 'storeinfo', $type, $create_data, $params->{id} );
+    die 'update only'
+        if !$self->type() || ( $self->type() && $self->type() ne 'update' );
+
+    return $self->writing_db( 'storeinfo', $create_data,
+        $self->params()->{id} );
 }
 
 sub get_fill_in_storeinfo {
