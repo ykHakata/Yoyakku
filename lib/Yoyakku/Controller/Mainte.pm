@@ -1,52 +1,34 @@
 package Yoyakku::Controller::Mainte;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Mainte qw{switch_stash_mainte_list};
-use Exporter 'import';
-our @EXPORT_OK = qw{
-    check_login_mainte
-    switch_stash
-};
+use Yoyakku::Model::Mainte;
 
-# ログイン成功時に作成する初期値
-sub switch_stash {
+sub _init {
     my $self  = shift;
-    my $id    = shift;
-    my $table = shift;
+    my $model = Yoyakku::Model::Mainte->new();
 
-    my $stash_mainte = switch_stash_mainte_list( $id, $table, );
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session->{root_id} );
 
-    $self->stash($stash_mainte);
+    my $header_stash = $model->get_header_stash_auth_mainte();
 
-    return;
+    return $self->redirect_to('/index') if !$header_stash;
+
+    $self->stash($header_stash);
+
+    return $model;
 }
 
-# ログインチェック
-sub check_login_mainte {
-    my $self = shift;
-
-    my $login_id = $self->session->{root_id};
-
-    # セッションないときは終了
-    return 1 if !$login_id;
-
-    return $self->switch_stash( $login_id, 'root' ) if $login_id;
-}
-
-# システム管理のオープニング画面
 sub mainte_list {
-    my $self = shift;
+    my $self  = shift;
+    my $model = $self->_init();
 
-    # ログイン確認する
-    return $self->redirect_to('/index') if $self->check_login_mainte();
-
-    # テンプレートbodyのクラス名を定義
-    my $class = 'mainte_list';
-    $self->stash( class => $class );
-
-    # ログイン確認時に取得したデータ取り出し
     my $login_data = $self->stash->{login_data};
 
-    $self->stash( today => $login_data->{today} );
+    $self->stash(
+        class => 'mainte_list',
+        today => $login_data->{today},
+    );
 
     return $self->render(
         template => 'mainte/mainte_list',
