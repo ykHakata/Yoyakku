@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 sub search_admin_id_rows {
@@ -63,6 +62,7 @@ sub check_admin_validator_db {
 
 sub writing_admin {
     my $self = shift;
+    my $teng = $self->teng();
 
     my $create_data = +{
         login     => $self->params()->{login},

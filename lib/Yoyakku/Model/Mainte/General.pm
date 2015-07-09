@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 sub search_general_id_rows {

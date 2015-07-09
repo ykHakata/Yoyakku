@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 sub search_storeinfo_id_rows {
@@ -30,6 +29,7 @@ sub get_update_form_params_storeinfo {
 sub search_zipcode_for_address {
     my $self   = shift;
     my $params = $self->params();
+    my $teng   = $self->teng();
 
     my $post_row = $teng->single( 'post', +{ post_id => $params->{post} }, );
 

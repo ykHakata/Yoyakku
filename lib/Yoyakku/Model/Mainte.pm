@@ -5,6 +5,7 @@ use utf8;
 use Time::Piece;
 use Time::Seconds;
 use FormValidator::Lite qw{Email URL DATE TIME};
+use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{
     switch_header_params
     join_time
@@ -14,14 +15,6 @@ use Yoyakku::Util qw{
     split_date_time
 };
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
-use Yoyakku::Model qw{$teng};
-
-sub new {
-    my $class  = shift;
-    my $params = +{};
-    my $self   = bless $params, $class;
-    return $self;
-}
 
 sub params {
     my $self   = shift;
@@ -123,6 +116,8 @@ sub check_table_column {
     my $self         = shift;
     my $check_params = shift;
 
+    my $teng = $self->teng();
+
     my $column = $check_params->{column};
     my $param  = $check_params->{param};
     my $table  = $check_params->{table};
@@ -183,7 +178,7 @@ sub get_msg_validator {
     return $msg if $validator->has_error();
     return;
 }
-use Data::Dumper;
+
 # update 用フィルインパラメーター作成
 sub get_update_form_params {
     my $self   = shift;
@@ -191,7 +186,7 @@ sub get_update_form_params {
     my $params = $self->params();
 
     my $columns = get_table_columns($table);
-    my $row = get_single_row_search_id( $table, $params->{id} );
+    my $row = $self->get_single_row_search_id( $table, $params->{id} );
 
     for my $param ( @{$columns} ) {
         $params->{$param} = $row->$param;
@@ -269,6 +264,8 @@ sub writing_db {
     my $update_id   = shift;
     my $type        = $self->type();
 
+    my $teng = $self->teng();
+
     my $insert_row;
     if ( $type eq 'insert' ) {
         $insert_row = $teng->insert( $table, $create_data, );
@@ -285,8 +282,11 @@ sub writing_db {
 
 # レコード更新の為の情報取得
 sub get_single_row_search_id {
+    my $self      = shift;
     my $table     = shift;
     my $search_id = shift;
+
+    my $teng = $self->teng();
 
     my $row = $teng->single( $table, +{ id => $search_id, }, );
 
@@ -300,6 +300,8 @@ sub search_id_single_or_all_rows {
     my $self      = shift;
     my $table     = shift;
     my $search_id = shift;
+
+    my $teng = $self->teng();
 
     my $search_column = 'id';
 

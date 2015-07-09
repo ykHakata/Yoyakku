@@ -25,6 +25,35 @@ our $teng = Teng::Schema::Loader->load(
     namespace => 'yoyakku_table',
 );
 
+sub new {
+    my $class  = shift;
+    my $params = +{};
+    my $self   = bless $params, $class;
+    return $self;
+}
+
+sub teng {
+    my $self = shift;
+
+    my $dbh = DBI->connect(
+        'dbi:SQLite:./db/yoyakku.db',
+        '', '',
+        +{  RaiseError        => 1,
+            PrintError        => 0,
+            AutoCommit        => 1,
+            sqlite_unicode    => 1,
+            mysql_enable_utf8 => 1,
+        },
+    );
+
+    my $teng = Teng::Schema::Loader->load(
+        dbh       => $dbh,
+        namespace => 'yoyakku_table',
+    );
+
+    return $teng;
+}
+
 1;
 
 __END__

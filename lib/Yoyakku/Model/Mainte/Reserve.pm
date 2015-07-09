@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{
     now_datetime
     join_time
@@ -34,6 +33,7 @@ sub get_init_valid_params_reserve {
 sub get_input_support {
     my $self   = shift;
     my $params = $self->params();
+    my $teng   = $self->teng();
 
     my $reserve_id  = $params->{id};
     my $roominfo_id = $params->{roominfo_id};
@@ -64,8 +64,9 @@ sub get_input_support {
 }
 
 sub _get_reserve_fillIn_row {
-    my $self = shift;
+    my $self        = shift;
     my $roominfo_id = shift;
+    my $teng        = $self->teng();
 
     my $sql = q{
         SELECT
@@ -236,7 +237,7 @@ sub check_reserve_validator_db {
     my $valid_msg_reserve_db = +{};
 
     # 予約の重複確認
-    my $check_reserve_dupli = _check_reserve_dupli( $type, $params, );
+    my $check_reserve_dupli = $self->_check_reserve_dupli( $type, $params, );
 
     if ($check_reserve_dupli) {
         $valid_msg_reserve_db = +{ id => $check_reserve_dupli, };
@@ -245,7 +246,7 @@ sub check_reserve_validator_db {
     return $valid_msg_reserve_db if $check_reserve_dupli;
 
     # 部屋の利用開始と終了時刻の範囲内かを調べる
-    my $check_roominfo_open_time = _check_roominfo_open_time($params);
+    my $check_roominfo_open_time = $self->_check_roominfo_open_time($params);
 
     if ($check_roominfo_open_time) {
         $valid_msg_reserve_db
@@ -255,7 +256,7 @@ sub check_reserve_validator_db {
     return $valid_msg_reserve_db if $check_roominfo_open_time;
 
     # 入力された利用希望時間が貸出単位に適合しているか
-    my $check_lend_unit = _check_lend_unit($params);
+    my $check_lend_unit = $self->_check_lend_unit($params);
 
     if ($check_lend_unit) {
         $valid_msg_reserve_db = +{ enduse_on_time => $check_lend_unit, };
@@ -264,7 +265,7 @@ sub check_reserve_validator_db {
     return $valid_msg_reserve_db if $check_lend_unit;
 
     # 利用形態名バンド、個人練習、利用停止、許可が必要
-    my $check_useform = _check_useform($params);
+    my $check_useform = $self->_check_useform($params);
 
     if ($check_useform) {
         $valid_msg_reserve_db = +{ useform => $check_useform, };
@@ -277,8 +278,11 @@ sub check_reserve_validator_db {
 
 # 予約の重複確認
 sub _check_reserve_dupli {
+    my $self   = shift;
     my $type   = shift;
     my $params = shift;
+
+    my $teng = $self->teng();
 
     my $reserve_id    = $params->{id};
     my $roominfo_id   = $params->{roominfo_id};
@@ -305,7 +309,10 @@ sub _check_reserve_dupli {
 
 # 部屋の利用開始と終了時刻の範囲内かを調べる
 sub _check_roominfo_open_time {
+    my $self   = shift;
     my $params = shift;
+
+    my $teng = $self->teng();
 
     # 予約希望した roominfo を取得し、営業時間を調べる
     my $roominfo_row
@@ -339,7 +346,10 @@ sub _check_roominfo_open_time {
 
 # 入力された利用希望時間が貸出単位に適合しているか
 sub _check_lend_unit {
+    my $self   = shift;
     my $params = shift;
+
+    my $teng = $self->teng();
 
     # 予約希望した roominfo を取得し、貸出単位を調べる
     my $roominfo_row
@@ -366,7 +376,10 @@ sub _check_lend_unit {
 
 # 利用形態名 useform->バンド、個人練習、利用停止、いずれも許可が必要
 sub _check_useform {
+    my $self   = shift;
     my $params = shift;
+
+    my $teng = $self->teng();
 
     # 予約希望したroominfoを取得し、利用形態名調査
     my $roominfo_row

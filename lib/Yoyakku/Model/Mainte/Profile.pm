@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 sub search_profile_id_rows {
@@ -27,12 +26,14 @@ sub get_update_form_params_profile {
 
 sub get_general_rows_all {
     my $self = shift;
+    my $teng = $self->teng();
     my @general_rows = $teng->search( 'general', +{}, );
     return \@general_rows;
 }
 
 sub get_admin_rows_all {
     my $self = shift;
+    my $teng = $self->teng();
     my @admin_rows = $teng->search( 'admin', +{}, );
     return \@admin_rows;
 }
