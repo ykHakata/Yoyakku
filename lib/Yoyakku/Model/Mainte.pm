@@ -332,16 +332,17 @@ sub get_header_stash_auth_mainte {
     my $self    = shift;
     my $session = $self->session();
     return if !$session;
-    my $id = auth_mainte($session);
+    my $id = $self->auth_mainte($session);
     return if !$id;
     return switch_stash_mainte_list( $id, 'root', );
 }
 
 # 管理者画面用のログイン確認
 sub auth_mainte {
+    my $self    = shift;
     my $session = shift;
     return if !$session;
-    return if $session ne 'yoyakku';
+    $session = $self->check_auth_db( $session, 'mainte' );
     return $session;
 }
 

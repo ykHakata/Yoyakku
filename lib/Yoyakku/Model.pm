@@ -32,6 +32,15 @@ sub new {
     return $self;
 }
 
+sub check_auth_db {
+    my $self         = shift;
+    my $session      = shift;
+    my $session_type = shift;
+    return if !$session || !$session_type;
+    return $session if $session eq 'yoyakku' && $session_type eq 'mainte';
+    return;
+}
+
 sub teng {
     my $self = shift;
 
