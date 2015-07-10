@@ -12,7 +12,7 @@ sub _init {
 
     my $header_stash = $model->get_header_stash_auth_mainte();
 
-    return $self->redirect_to('/index') if !$header_stash;
+    return if !$header_stash;
 
     $self->stash($header_stash);
 
@@ -22,6 +22,8 @@ sub _init {
 sub mainte_registrant_serch {
     my $self  = shift;
     my $model = $self->_init();
+
+    return $self->redirect_to('/index') if !$model;
 
     my $admin_rows = $model->search_admin_id_rows();
 
@@ -39,6 +41,8 @@ sub mainte_registrant_serch {
 sub mainte_registrant_new {
     my $self  = shift;
     my $model = $self->_init();
+
+    return $self->redirect_to('/index') if !$model;
 
     return $self->redirect_to('/mainte_registrant_serch')
         if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
