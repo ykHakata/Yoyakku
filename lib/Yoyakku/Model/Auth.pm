@@ -6,7 +6,12 @@ use Exporter 'import';
 our @EXPORT_OK = qw{
     check_valid_login
 };
-use Yoyakku::Model qw{$teng};
+use parent 'Yoyakku::Model';
+
+sub _init {
+    my $model = Yoyakku::Model::Auth->new();
+    return $model;
+}
 
 sub check_valid_login {
     my $self   = shift;
@@ -24,6 +29,9 @@ sub check_valid_login {
             password => '',
         },
     };
+
+    my $model = _init();
+    my $teng  = $model->teng();
 
     my $row = $teng->single( $table, +{ login => $params->{login} } );
 
