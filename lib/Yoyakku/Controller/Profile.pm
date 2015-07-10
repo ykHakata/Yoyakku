@@ -1,7 +1,6 @@
 package Yoyakku::Controller::Profile;
 use Mojo::Base 'Mojolicious::Controller';
 use HTML::FillInForm;
-use Yoyakku::Model qw{$teng};
 use Yoyakku::Model::Profile qw{switch_stash_profile};
 
 # ログイン成功時に作成する初期値

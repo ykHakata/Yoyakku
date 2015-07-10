@@ -4,26 +4,6 @@ use warnings;
 use utf8;
 use Teng;
 use Teng::Schema::Loader;
-use Exporter 'import';
-our @EXPORT_OK = qw{
-    $teng
-};
-
-my $dbh = DBI->connect(
-    'dbi:SQLite:./db/yoyakku.db',
-    '', '',
-    +{  RaiseError        => 1,
-        PrintError        => 0,
-        AutoCommit        => 1,
-        sqlite_unicode    => 1,
-        mysql_enable_utf8 => 1,
-    },
-);
-
-our $teng = Teng::Schema::Loader->load(
-    dbh       => $dbh,
-    namespace => 'yoyakku_table',
-);
 
 sub new {
     my $class  = shift;

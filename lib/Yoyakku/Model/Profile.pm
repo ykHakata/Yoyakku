@@ -4,17 +4,25 @@ use warnings;
 use utf8;
 use Time::Piece;
 use Time::Seconds;
-use Yoyakku::Model qw{$teng};
 use Yoyakku::Util qw{switch_header_params};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     switch_stash_profile
 };
+use parent 'Yoyakku::Model';
+
+sub _init {
+    my $model = Yoyakku::Model::Profile->new();
+    return $model;
+}
 
 # ログイン成功時に作成する初期値
 sub switch_stash_profile {
     my $id    = shift;
     my $table = shift;
+
+    my $model = _init();
+    my $teng  = $model->teng();
 
     # id table ないとき強制終了
     die 'not id table!: ' if !$id || !$table;
