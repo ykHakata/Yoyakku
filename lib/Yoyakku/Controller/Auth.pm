@@ -6,35 +6,37 @@ use Yoyakku::Model::Auth qw{check_valid_login};
 
 sub up_login {
     my $self = shift;
-
     return $self->redirect_to('/index') if $self->_check_login();
-
-    # テンプレート用bodyのクラス名
-    my $class = 'up_login';
-
-    $self->stash( class => $class );
-
+    $self->stash( class => 'up_login' );
     return $self->render( template => 'auth/up_login', format => 'html' );
 }
 
 sub up_login_general {
     my $self = shift;
 
+    my $req    = $self->req;
+    my $params = $req->params->to_hash;
+    my $method = uc $req->method;
+
     return $self->redirect_to('/index') if $self->_check_login();
 
-    # テンプレート用bodyのクラス名
-    my $class = 'up_login_general';
+    return $self->redirect_to('/up_login')
+        if ( $method ne 'GET' ) && ( $method ne 'POST' );
 
-    $self->stash( class => $class );
+    $self->stash( class => 'up_login_general' );
 
     $self->stash(
         login    => '',
         password => '',
     );
 
-    my $req    = $self->req;
-    my $params = $req->params->to_hash;
-    my $method = uc $req->method;
+    return $self->_input_form($model) if !$model->params()->{id};
+    return $self->_input_login($model);
+
+
+
+
+
 
     # post の場合はバリデート
     return $self->render( template => 'auth/up_login_general', format => 'html' )
