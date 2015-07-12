@@ -4,7 +4,6 @@ use warnings;
 use utf8;
 use Time::Piece;
 use Time::Seconds;
-use FormValidator::Lite qw{Email URL DATE TIME};
 use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{
     switch_header_params
@@ -15,33 +14,6 @@ use Yoyakku::Util qw{
     split_date_time
 };
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
-
-sub params {
-    my $self   = shift;
-    my $params = shift;
-    if ($params) {
-        $self->{params} = $params;
-    }
-    return $self->{params};
-}
-
-sub session {
-    my $self    = shift;
-    my $session = shift;
-    if ($session) {
-        $self->{session} = $session;
-    }
-    return $self->{session};
-}
-
-sub method {
-    my $self   = shift;
-    my $method = shift;
-    if ($method) {
-        $self->{method} = $method;
-    }
-    return $self->{method};
-}
 
 sub type {
     my $self = shift;
@@ -59,27 +31,6 @@ sub flash_msg {
         $self->{flash_msg} = $flash_msg;
     }
     return $self->{flash_msg};
-}
-
-sub html {
-    my $self = shift;
-    my $html = shift;
-    if ($html) {
-        $self->{html} = $html;
-    }
-    return $self->{html};
-}
-
-# バリデート用パラメータ初期値
-sub get_init_valid_params {
-    my $self         = shift;
-    my $valid_params = shift;
-
-    my $valid_params_stash = +{};
-    for my $param ( @{$valid_params} ) {
-        $valid_params_stash->{$param} = '';
-    }
-    return $valid_params_stash;
 }
 
 # 各テーブルカラム取得
@@ -152,31 +103,6 @@ sub check_login_name {
     };
 
     return $self->check_table_column($check_params);
-}
-
-# 入力値バリデート処理
-sub get_msg_validator {
-    my $self         = shift;
-    my $check_params = shift;
-    my $msg_params   = shift;
-    my $params       = $self->params();
-
-    my $validator = FormValidator::Lite->new($params);
-
-    $validator->check( @{$check_params} );
-    $validator->set_message( @{$msg_params} );
-
-    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
-
-    my $msg = +{};
-    for my $error_param ( @{$error_params} ) {
-        $msg->{$error_param}
-            = $validator->get_error_messages_from_param($error_param);
-        $msg->{$error_param} = shift @{ $msg->{$error_param} };
-    }
-
-    return $msg if $validator->has_error();
-    return;
 }
 
 # update 用フィルインパラメーター作成

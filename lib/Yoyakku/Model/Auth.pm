@@ -2,82 +2,179 @@ package Yoyakku::Model::Auth;
 use strict;
 use warnings;
 use utf8;
-use Exporter 'import';
-our @EXPORT_OK = qw{
-    check_valid_login
-};
 use parent 'Yoyakku::Model';
+use Yoyakku::Util qw{get_fill_in_params};
 
-sub _init {
-    my $model = Yoyakku::Model::Auth->new();
-    return $model;
+sub template {
+    my $self     = shift;
+    my $template = shift;
+    if ($template) {
+        $self->{template} = $template;
+    }
+    return $self->{template};
 }
 
-sub check_valid_login {
-    my $self   = shift;
-    my $table  = shift;
-    my $params = shift;
+sub login_id {
+    my $self     = shift;
+    my $login_id = shift;
+    if ($login_id) {
+        $self->{login_id} = $login_id;
+    }
+    return $self->{login_id};
+}
 
-    die 'check_valid_login' if !$self || !$table || !$params;
+sub login_profile_row {
+    my $self              = shift;
+    my $login_profile_row = shift;
+    if ($login_profile_row) {
+        $self->{login_profile_row} = $login_profile_row;
+    }
+    return $self->{login_profile_row};
+}
 
-    my $check_valid = +{
-        error         => undef,
-        session_id    => undef,
-        check_profile => undef,
-        msg           => +{
-            login    => '',
-            password => '',
-        },
+sub check_login {
+    my $self = shift;
+
+    return 1
+        if $self->session->{session_general_id}
+        || $self->session->{session_admin_id};
+
+    return;
+}
+
+sub check_logout {
+    my $self = shift;
+
+    return 1
+        if !$self->session->{session_general_id}
+        && !$self->session->{session_admin_id};
+
+    return;
+}
+
+sub get_init_valid_params_auth {
+    my $self = shift;
+    return $self->get_init_valid_params( [qw{login password}] );
+}
+
+sub check_root_validator {
+    my $self = shift;
+
+    my $check_params = [
+        login    => [ 'NOT_NULL', [ EQUAL => 'yoyakku' ] ],
+        password => [ 'NOT_NULL', [ EQUAL => '0520' ] ],
+    ];
+
+    my $msg_params = [
+        'login.not_null'    => '必須入力',
+        'password.not_null' => '必須入力',
+        'login.equal'       => 'ID違い',
+        'password.equal'    => 'password違い',
+    ];
+
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
+
+    return if !$msg;
+
+    my $valid_msg = +{
+        login    => $msg->{login},
+        password => $msg->{password},
     };
 
-    my $model = _init();
-    my $teng  = $model->teng();
+    return $valid_msg;
+}
+
+sub check_auth_validator {
+    my $self = shift;
+
+    my $check_params = [
+        login    => [ 'NOT_NULL', ],
+        password => [ 'NOT_NULL', ],
+    ];
+
+    my $msg_params = [
+        'login.not_null'    => '必須入力',
+        'password.not_null' => '必須入力',
+    ];
+
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
+
+    return if !$msg;
+
+    my $valid_msg = +{
+        login    => $msg->{login},
+        password => $msg->{password},
+    };
+
+    return $valid_msg;
+}
+
+sub check_auth_validator_db {
+    my $self   = shift;
+    my $table  = shift;
+    my $params = $self->params();
+    my $teng   = $self->teng();
+
+    my $valid_msg_db = +{};
 
     my $row = $teng->single( $table, +{ login => $params->{login} } );
 
     # 不合格の場合 (DB検証 メルアド違い)
     if ( !$row ) {
-        $check_valid->{msg}->{login} = 'メールアドレス違い';
-        $check_valid->{error} = 1;
+        $valid_msg_db->{login} = 'メールアドレス違い';
+        return $valid_msg_db;
     }
-
-    return $check_valid if $check_valid->{error};
 
     # 不合格の場合 (DB検証 パスワード違い)
     if ( $row->password ne $params->{password} ) {
-        $check_valid->{msg}->{password} = 'パスワードが違います';
-        $check_valid->{error} = 1;
+        $valid_msg_db->{password} = 'パスワードが違います';
+        return $valid_msg_db;
     }
 
-    return $check_valid if $check_valid->{error};
-
-    $check_valid->{session_id} = $row->id;
-
-    # リダイレクト先を選択するための検証(profile テーブル)
     my $search_column
         = $table eq 'general' ? 'general_id'
         : $table eq 'admin'   ? 'admin_id'
         :                       '';
 
+    # 指定されたログイン情報に profile 情報が存在しない
     my $profile_row
         = $teng->single( 'profile', +{ $search_column => $row->id } );
 
     if ( !$profile_row ) {
-        $check_valid->{msg}->{login} = '管理者へ連絡ください';
-        $check_valid->{error} = 1;
+        $valid_msg_db->{login} = '管理者へ連絡ください';
+        return $valid_msg_db;
     }
 
-    return $check_valid if $check_valid->{error};
-
-    # profile の設定確認
-    $check_valid->{check_profile} = 'profile';
-    if ( $profile_row->status ) {
-        $check_valid->{check_profile} = 'index';
-    }
-
-    return $check_valid;
+    $self->login_id( $row->id );
+    $self->login_profile_row($profile_row);
+    return;
 }
 
+sub get_session_id_with_routing {
+    my $self        = shift;
+    my $profile_row = $self->login_profile_row();
+
+    # 指定されたログイン情報に profile 情報が有効になっているか確認
+    my $redirect_to = 'profile';
+    if ( $profile_row->status ) {
+        $redirect_to = 'index';
+    }
+
+    my $session_id_with_routing = +{
+        session_id  => $self->login_id(),
+        redirect_to => $redirect_to,
+    };
+
+    return $session_id_with_routing;
+}
+
+sub get_fill_in_auth {
+    my $self   = shift;
+    my $html   = $self->html();
+    my $params = $self->params();
+    my $output = get_fill_in_params( $html, $params );
+    return $output;
+}
 
 1;
 

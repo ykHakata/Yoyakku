@@ -1,293 +1,153 @@
 package Yoyakku::Controller::Auth;
 use Mojo::Base 'Mojolicious::Controller';
-use FormValidator::Lite;
-use HTML::FillInForm;
-use Yoyakku::Model::Auth qw{check_valid_login};
+use Yoyakku::Model::Auth;
+
+sub _init {
+    my $self  = shift;
+    my $model = Yoyakku::Model::Auth->new();
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session );
+    return $model;
+}
 
 sub up_login {
-    my $self = shift;
-    return $self->redirect_to('/index') if $self->_check_login();
+    my $self  = shift;
+    my $model = $self->_init();
+    return $self->redirect_to('/index') if $model->check_login();
     $self->stash( class => 'up_login' );
     return $self->render( template => 'auth/up_login', format => 'html' );
 }
 
-sub up_login_general {
+sub up_logout {
     my $self = shift;
+    my $model = $self->_init();
+    return $self->redirect_to('/index') if $model->check_logout();
+    $self->stash( class => 'up_logout' );
+    $self->session( expires => 1 );
+    return $self->render( template => 'auth/up_logout', format => 'html' );
+}
 
-    my $req    = $self->req;
-    my $params = $req->params->to_hash;
-    my $method = uc $req->method;
+sub up_login_general {
+    my $self  = shift;
+    my $model = $self->_init();
 
-    return $self->redirect_to('/index') if $self->_check_login();
+    $model->template('auth/up_login_general');
+
+    return $self->redirect_to('/index') if $model->check_login();
 
     return $self->redirect_to('/up_login')
-        if ( $method ne 'GET' ) && ( $method ne 'POST' );
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
 
-    $self->stash( class => 'up_login_general' );
+    my $init_valid_params_auth = $model->get_init_valid_params_auth();
 
     $self->stash(
-        login    => '',
-        password => '',
+        class => 'up_login_general',
+        %{$init_valid_params_auth},
     );
 
-    return $self->_input_form($model) if !$model->params()->{id};
-    return $self->_input_login($model);
+    return $self->render( template => $model->template(), format => 'html' )
+        if 'GET' eq $model->method();
 
-
-
-
-
-
-    # post の場合はバリデート
-    return $self->render( template => 'auth/up_login_general', format => 'html' )
-        if 'POST' ne $method;
-
-    # バリデード実行
-    my $validator = FormValidator::Lite->new($req);
-
-    # 本来はデーターベースにアクセスするが暫定値でチェック
-    $validator->check(
-        login    => [ 'NOT_NULL', ],
-        password => [ 'NOT_NULL', ],
-    );
-
-    $validator->set_message(
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-    );
-
-    my @login_errors = $validator->get_error_messages_from_param('login');
-    my @pass_errors  = $validator->get_error_messages_from_param('password');
-
-    $self->stash->{login}    = shift @login_errors;
-    $self->stash->{password} = shift @pass_errors;
-
-    # 入力された情報をもとにデータベースにアクセス、検証(general テーブル)
-    # 入力値が存在する場合だけ問い合わせ
-    my $check_routing;
-    if ( !$validator->has_error() ) {
-        $check_routing = $self->_make_msg_with_routing( 'general', $params );
-    }
-
-    # profile 設定による切り替え
-    return $self->redirect_to('index')
-        if $check_routing && $check_routing->{redirect_to} eq 'index';
-
-    return $self->redirect_to('profile')
-        if $check_routing && $check_routing->{redirect_to} eq 'profile';
-
-    # エラー時の出力
-    my $html = $self->render_to_string(
-        template => 'auth/up_login_general',
-        format   => 'html',
-    )->to_string;
-
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
-    # 不合格の場合 (入力値検証)
-    return $self->render( text => $output ) if $validator->has_error();
-
-    # 不合格の場合 (DB 検証)
-    return $self->render( text => $output );
+    return $self->_render_input_form( $model, 'general', );
 };
 
 sub up_login_admin {
-    my $self = shift;
+    my $self  = shift;
+    my $model = $self->_init();
 
-    return $self->redirect_to('/index') if $self->_check_login();
+    $model->template('auth/up_login_admin');
 
-    # テンプレート用bodyのクラス名
-    my $class = "up_login_admin";
+    return $self->redirect_to('/index') if $model->check_login();
 
-    $self->stash( class => $class );
+    return $self->redirect_to('/up_login')
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+
+    my $init_valid_params_auth = $model->get_init_valid_params_auth();
 
     $self->stash(
-        login    => '',
-        password => '',
+        class => 'up_login_admin',
+        %{$init_valid_params_auth},
     );
 
-    my $req    = $self->req;
-    my $params = $req->params->to_hash;
-    my $method = uc $req->method;
+    return $self->render( template => $model->template(), format => 'html' )
+        if 'GET' eq $model->method();
 
-    # post の場合はバリデート
-    return $self->render( template => 'auth/up_login_admin', format => 'html' )
-        if 'POST' ne $method;
-
-    # バリデード実行
-    my $validator = FormValidator::Lite->new($req);
-
-    # 本来はデーターベースにアクセスするが暫定値でチェック
-    $validator->check(
-        login    => [ 'NOT_NULL', ],
-        password => [ 'NOT_NULL', ],
-    );
-
-    $validator->set_message(
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-    );
-
-    my @login_errors = $validator->get_error_messages_from_param('login');
-    my @pass_errors  = $validator->get_error_messages_from_param('password');
-
-    $self->stash->{login}    = shift @login_errors;
-    $self->stash->{password} = shift @pass_errors;
-
-    # 入力された情報をもとにデータベースにアクセス、検証(admin テーブル)
-    # 入力値が存在する場合だけ問い合わせ
-    my $check_routing;
-    if ( !$validator->has_error() ) {
-        $check_routing = $self->_make_msg_with_routing( 'admin', $params );
-    }
-
-    # profile 設定による切り替え
-    return $self->redirect_to('index')
-        if $check_routing && $check_routing->{redirect_to} eq 'index';
-
-    return $self->redirect_to('profile')
-        if $check_routing && $check_routing->{redirect_to} eq 'profile';
-
-    # エラー時の出力
-    my $html = $self->render_to_string(
-        template => 'auth/up_login_admin',
-        format   => 'html',
-    )->to_string;
-
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
-    # 不合格の場合 (入力値検証)
-    return $self->render( text => $output ) if $validator->has_error();
-
-    # 不合格の場合 (DB 検証)
-    return $self->render( text => $output );
+    return $self->_render_input_form( $model, 'admin', );
 };
 
 sub root_login {
-    my $self = shift;
+    my $self  = shift;
+    my $model = $self->_init();
 
-    # テンプレート用bodyのクラス名
-    my $class = "root_login";
+    $model->template('auth/root_login');
 
-    $self->stash( class => $class );
+    return $self->redirect_to('/up_login')
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+
+    my $init_valid_params_auth = $model->get_init_valid_params_auth();
 
     $self->stash(
-        login    => '',
-        password => '',
+        class => 'root_login',
+        %{$init_valid_params_auth},
     );
 
-    my $req    = $self->req;
-    my $params = $req->params->to_hash;
-    my $method = uc $req->method;
+    return $self->render( template => $model->template(), format => 'html' )
+        if 'GET' eq $model->method();
 
-    # post の場合はバリデート
-    return $self->render( template => 'auth/root_login', format => 'html' )
-        if 'POST' ne $method;
+    return $self->_render_input_form( $model, 'root', );
+}
 
-    # バリデート実行
-    my $validator = FormValidator::Lite->new($req);
+sub _render_input_form {
+    my $self  = shift;
+    my $model = shift;
+    my $table = shift;
 
-    $validator->check(
-        login    => [ 'NOT_NULL', [ EQUAL => 'yoyakku' ] ],
-        password => [ 'NOT_NULL', [ EQUAL => '0520' ] ],
-    );
+    # root ログインの場合は別処理(暫定)
+    if ($table eq 'root') {
 
-    # 合格の場合指定の画面へ遷移 (mainte_list) セッション書き込み
-    return
-        $self->session( root_id => $self->param('login') ),
-        $self->redirect_to('mainte_list')
-        if !$validator->has_error();
+        my $valid_root_msg = $model->check_root_validator();
 
-    # バリデートエラー処理
-    $validator->set_message(
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-        'login.equal'       => 'ID違い',
-        'password.equal'    => 'password違い',
-    );
+        return $self->stash($valid_root_msg), $self->_render_auth($model)
+            if $valid_root_msg;
 
-    my @login_errors = $validator->get_error_messages_from_param('login');
-    my @pass_errors  = $validator->get_error_messages_from_param('password');
+        # 合格の場合指定の画面へ遷移 (mainte_list) セッション書き込み
+        return $self->session( root_id => $self->param('login') ),
+            $self->redirect_to('mainte_list');
+    }
 
-    $self->stash->{login}    = shift @login_errors;
-    $self->stash->{password} = shift @pass_errors;
+    my $valid_msg = $model->check_auth_validator();
+
+    return $self->stash($valid_msg), $self->_render_auth($model)
+        if $valid_msg;
+
+    my $valid_msg_db = $model->check_auth_validator_db($table);
+
+    return $self->stash($valid_msg_db), $self->_render_auth($model)
+        if $valid_msg_db;
+
+    my $session_id_with_routing = $model->get_session_id_with_routing($table);
+
+    my $session_name = 'session_' . $table . '_id';
+
+    $self->session(
+        $session_name => $session_id_with_routing->{session_id} );
+
+    return $self->redirect_to( $session_id_with_routing->{redirect_to} );
+}
+
+sub _render_auth {
+    my $self  = shift;
+    my $model = shift;
 
     my $html = $self->render_to_string(
-        template => 'auth/root_login',
+        template => $model->template(),
         format   => 'html',
     )->to_string;
 
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
+    $model->html( \$html );
+    my $output = $model->get_fill_in_auth();
     return $self->render( text => $output );
-}
-
-sub up_logout {
-    my $self = shift;
-
-    return $self->redirect_to('/index') if $self->_check_logout();
-
-    # テンプレート用bodyのクラス名
-    my $class = 'up_logout';
-
-    $self->stash( class => $class );
-
-    $self->session( expires => 1 );
-
-    return $self->render( template => 'auth/up_logout', format => 'html' )
-};
-
-sub _make_msg_with_routing {
-    my $self   = shift;
-    my $table  = shift;
-    my $params = shift;
-
-    die '_make_msg_with_routing' if !$self || !$table || !$params;
-
-    my $check_valid_login_routing = +{
-        redirect_to => '',
-    };
-
-    my $check_valid = $self->check_valid_login($table, $params);
-
-    # エラーメッセージ作成
-    $self->stash->{login}    = $check_valid->{msg}->{login};
-    $self->stash->{password} = $check_valid->{msg}->{password};
-
-    # エラー時はセッション書き込みせず終了
-    return $check_valid_login_routing if $check_valid->{error};
-
-    # セッション書き込み
-    my $session_name
-        = $table eq 'general' ? 'session_general_id'
-        : $table eq 'admin'   ? 'session_admin_id'
-        :                       'session_id';
-
-    $self->session( $session_name => $check_valid->{session_id} );
-
-    $check_valid_login_routing->{redirect_to} = $check_valid->{check_profile};
-
-    return $check_valid_login_routing;
-}
-
-sub _check_login {
-    my $self = shift;
-
-    return 1
-        if $self->session->{session_general_id}
-        || $self->session->{session_admin_id};
-
-    return;
-}
-
-sub _check_logout {
-    my $self = shift;
-
-    return 1
-        if !$self->session->{session_general_id}
-        && !$self->session->{session_admin_id};
-
-    return;
 }
 
 1;
