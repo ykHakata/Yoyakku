@@ -86,6 +86,14 @@ sub startup {
     $r->route('/mainte_reserve_new')
         ->to( controller => 'Mainte::Reserve', action => 'mainte_reserve_new' );
 
+    # システム管理者(acting)
+    $r->route('/mainte_acting_serch')
+        ->to( controller => 'Mainte::Acting', action => 'mainte_acting_serch' );
+
+    # システム管理者(acting) 新規 編集
+    $r->route('/mainte_acting_new')
+        ->to( controller => 'Mainte::Acting', action => 'mainte_acting_new' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

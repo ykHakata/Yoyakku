@@ -1,0 +1,88 @@
+% layout 'default';
+% title 'yoyakkuデータベース管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">代行リスト／テーブル[acting]</h1>
+    <div class="input_ads_n">
+      <a href="mainte_acting_serch">検索画面にもどる</a>
+    </div>
+    <form action="mainte_acting_new" method="post">
+      <table id="input_ads_t" border="1">
+        <tr>
+          <th>カラム名</th>
+          <th>項目名</th>
+          <th>入力フォーム</th>
+        </tr>
+        <tr>
+          <td>id</td>
+          <td>代行リストID</td>
+          <td><input type="text" name="id" value="" readonly></td>
+        </tr>
+        <tr>
+          <td>general_id</td>
+          <td>一般ユーザーID
+            <div class="vali"><%= $general_id %></div>
+          </td>
+          <td>
+            <select name="general_id">
+              <option value="not_selected">選択しない</option>
+              % for my $general_row (@{$general_rows}) {
+                <option value="<%= $general_row->id %>">
+                  <%= $general_row->id %>--->(<%= $general_row->login %>)
+                </option>
+              % }
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>storeinfo_id</td>
+          <td>店舗ID
+            <div class="vali"><%= $storeinfo_id %></div>
+          </td>
+          <td>
+            <select name="storeinfo_id">
+            <option value="not_selected">選択しない</option>
+            % for my $storeinfo_row (@{$storeinfo_rows}) {
+              <option value="<%= $storeinfo_row->id %>">
+                <%= $storeinfo_row->id %>--->(<%= $storeinfo_row->name %>)
+              </option>
+            % }
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>status</td>
+          <td>ステータス</td>
+          <td>
+            <select name="status">
+              <option value="0" >0　無効</option>
+              <option value="1" >1　有効</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>create_on</td>
+          <td>登録日</td>
+          <td><input type="text" name="create_on" value="" readonly></td>
+        </tr>
+        <tr>
+          <td>modify_on</td>
+          <td>修正日</td>
+          <td><input type="text" name="modify_on" value="" readonly></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+            <input type="hidden" name="id" value="">
+            <input type="submit" value="登録する">
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>

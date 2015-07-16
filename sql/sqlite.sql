@@ -223,3 +223,13 @@ CREATE TABLE reserve(                                   -- 予約履歴
     create_on       TEXT,                               -- 登録日
     modify_on       TEXT                                -- 修正日
 );
+
+CREATE TABLE acting(                                    -- 代行リスト
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 代行リストID
+    general_id      INTEGER,                            -- 一般ユーザーID
+    storeinfo_id    INTEGER,                            -- 店舗ID
+    status          INTEGER,                            -- ステータス
+    create_on       TEXT,                               -- 登録日
+    modify_on       TEXT                                -- 修正日
+);
+
