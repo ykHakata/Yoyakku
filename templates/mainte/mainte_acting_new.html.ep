@@ -26,7 +26,7 @@
           </td>
           <td>
             <select name="general_id">
-              <option value="not_selected">選択しない</option>
+              <option value="">選択しない</option>
               % for my $general_row (@{$general_rows}) {
                 <option value="<%= $general_row->id %>">
                   <%= $general_row->id %>--->(<%= $general_row->login %>)
@@ -42,7 +42,7 @@
           </td>
           <td>
             <select name="storeinfo_id">
-            <option value="not_selected">選択しない</option>
+            <option value="">選択しない</option>
             % for my $storeinfo_row (@{$storeinfo_rows}) {
               <option value="<%= $storeinfo_row->id %>">
                 <%= $storeinfo_row->id %>--->(<%= $storeinfo_row->name %>)
@@ -75,7 +75,6 @@
           <td></td>
           <td></td>
           <td>
-            <input type="hidden" name="id" value="">
             <input type="submit" value="登録する">
           </td>
         </tr>

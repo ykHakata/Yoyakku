@@ -38,7 +38,6 @@ sub mainte_acting_serch {
     );
 }
 
-# #mainte_acting_new.html.ep
 sub mainte_acting_new {
     my $self  = shift;
     my $model = $self->_init();
@@ -67,10 +66,10 @@ sub _insert {
 
     return $self->_render_acting($model) if 'GET' eq $model->method();
 
-    # $model->type('insert');
-    # $model->flash_msg( +{ touroku => '登録完了' } );
+    $model->type('insert');
+    $model->flash_msg( +{ touroku => '登録完了' } );
 
-    # return $self->_common($model);
+    return $self->_common($model);
 }
 
 sub _update {
@@ -86,6 +85,26 @@ sub _update {
     # return $self->_common($model);
 }
 
+sub _common {
+    my $self  = shift;
+    my $model = shift;
+
+    my $valid_msg = $model->check_acting_validator();
+
+    return $self->stash($valid_msg), $self->_render_acting($model)
+        if $valid_msg;
+
+    my $valid_msg_db = $model->check_acting_validator_db();
+
+    return $self->stash($valid_msg_db), $self->_render_acting($model)
+        if $valid_msg_db;
+
+    $model->writing_acting();
+    $self->flash( $model->flash_msg() );
+
+    return $self->redirect_to('mainte_acting_serch');
+}
+
 sub _render_acting {
     my $self  = shift;
     my $model = shift;
@@ -99,19 +118,6 @@ sub _render_acting {
     my $output = $model->get_fill_in_acting();
     return $self->render( text => $output );
 }
-
-
-
-
-
-
-# # 入力サポート用にgeneral_idとadmin_idのログイン名を送り込み
-# #店舗IDと店舗名を表示する
-# my @generals = $teng->search_named(q{select * from general;});
-# $self->stash(generals_ref => \@generals);
-# my @storeinfos = $teng->search_named(q{select * from storeinfo;});
-# $self->stash(storeinfos_ref => \@storeinfos);
-
 
 # #書いてないけど、新規作成一発目はテンプレートの入力フォームレンダリング
 # #---------
