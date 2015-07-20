@@ -23,7 +23,7 @@
           <td>kind</td>
           <td>広告種別</td>
           <td>
-            <select name="kind_ads">
+            <select name="kind">
               <option value="1" >1　イベント広告</option>
               <option value="2" >2　一行広告</option>
               <option value="3" >3　ナビゲーション枠広告</option>
@@ -36,7 +36,7 @@
           <td>店舗ID</td>
           <td>
           %# 店舗IDをもってくるスクリプト
-          <select name="storeinfo_id_ads">
+          <select name="storeinfo_id">
           % for my $storeinfo_row (@{$storeinfo_rows}) {
               <option value="<%= $storeinfo_row->id %>" >
                 <%= $storeinfo_row->id %>　<%= $storeinfo_row->name %>
@@ -50,7 +50,7 @@
           <td>地域区分ID</td>
           <td>
           %# 地域IDをもってくるスクリプト
-          <select name="region_id_ads">
+          <select name="region_id">
           % for my $region_row (@{$region_rows}) {
               <option value="<%= $region_row->id %>" >
                 <%= $region_row->id %>　<%= $region_row->name %>
@@ -61,50 +61,50 @@
         </tr>
         <tr>
           <td>url</td>
-          <td>広告リンク先<div class="vali"><%= $url_ads %></div></td>
-          <td><input type="text" name="url_ads" value=""></td>
+          <td>広告リンク先<div class="vali"><%= $url %></div></td>
+          <td><input type="text" name="url" value=""></td>
         </tr>
         <tr>
           <td>displaystart_on</td>
           <td>表示開始日時
-            <div class="vali"><%= $displaystart_on_ads %></div>
+            <div class="vali"><%= $displaystart_on %></div>
           </td>
           <td>
-            <input type="text" class="datepicker" name="displaystart_on_ads" value="">
+            <input type="text" class="datepicker" name="displaystart_on" value="">
           </td>
         </tr>
         <tr>
           <td>displayend_on</td>
           <td>表示終了日時
-            <div class="vali"><%= $displayend_on_ads %></div>
+            <div class="vali"><%= $displayend_on %></div>
           </td>
           <td>
-            <input type="text" class="datepicker" name="displayend_on_ads" value="">
+            <input type="text" class="datepicker" name="displayend_on" value="">
           </td>
         </tr>
         <tr>
           <td>name</td>
           <td>広告名
-            <div class="vali"><%= $name_ads %></div>
+            <div class="vali"><%= $name %></div>
           </td>
           <td>
-            <input type="text" name="name_ads" value="">
+            <input type="text" name="name" value="">
           </td>
         </tr>
         <tr>
           <td>content</td>
           <td>広告内容
-            <div class="vali"><%= $content_ads %></div>
+            <div class="vali"><%= $content %></div>
           </td>
-          <td><textarea name="content_ads" cols="50" rows="10"></textarea></td>
+          <td><textarea name="content" cols="50" rows="10"></textarea></td>
         </tr>
         <tr>
           <td>event_date</td>
           <td>イベント広告日時
-            <div class="vali"><%= $event_date_ads %></div>
+            <div class="vali"><%= $event_date %></div>
           </td>
           <td>
-            <input type="text" name="event_date_ads" value=""><br />
+            <input type="text" name="event_date" value=""><br />
             <br />
             ※「３月１２日午前中のみ」「３月１２日１８時〜１９時」など、柔軟に
           </td>
@@ -112,12 +112,12 @@
         <tr>
           <td>create_on</td>
           <td>登録日</td>
-          <td><input type="text" name="create_on_ads" value="" readonly></td>
+          <td><input type="text" name="create_on" value="" readonly></td>
         </tr>
         <tr>
           <td>modify_on</td>
           <td>修正日</td>
-          <td><input type="text" name="modify_on_ads" value="" readonly></td>
+          <td><input type="text" name="modify_on" value="" readonly></td>
         </tr>
         <tr>
           <td></td>

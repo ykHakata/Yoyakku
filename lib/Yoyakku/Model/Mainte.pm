@@ -59,6 +59,10 @@ sub get_table_columns {
                 general_id admin_id tel status create_on modify_on}
         ],
         acting => [qw{id general_id storeinfo_id status create_on modify_on}],
+        ads    => [
+            qw{id kind storeinfo_id region_id url displaystart_on
+                displayend_on name event_date content create_on modify_on}
+        ],
     };
     return $table_columns->{$table};
 }

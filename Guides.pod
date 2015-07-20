@@ -111,6 +111,8 @@ yoyakku アプリケーションのデータベース構成
 
 =item L<Yoyakku::Controller::Mainte::Admin>
 
+=item L<Yoyakku::Controller::Mainte::Ads>
+
 =item L<Yoyakku::Controller::Mainte::General>
 
 =item L<Yoyakku::Controller::Mainte::Profile>
@@ -140,6 +142,8 @@ yoyakku アプリケーションのデータベース構成
 =item L<Yoyakku::Model::Mainte::Acting>
 
 =item L<Yoyakku::Model::Mainte::Admin>
+
+=item L<Yoyakku::Model::Mainte::Ads>
 
 =item L<Yoyakku::Model::Mainte::General>
 

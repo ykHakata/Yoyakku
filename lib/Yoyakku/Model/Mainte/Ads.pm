@@ -48,10 +48,7 @@ sub search_ads_id_rows {
 sub get_init_valid_params_ads {
     my $self = shift;
     return $self->get_init_valid_params(
-        [   qw{url_ads displaystart_on_ads displayend_on_ads name_ads
-                content_ads event_date_ads}
-        ]
-    );
+        [qw{url displaystart_on displayend_on name content event_date}] );
 }
 
 =head2 get_storeinfo_rows_all
@@ -88,6 +85,19 @@ sub get_region_rows_pref {
     return \@region_rows;
 }
 
+=head2 get_update_form_params_ads
+
+    修正用入力フォーム表示の際に利用
+
+=cut
+
+sub get_update_form_params_ads {
+    my $self = shift;
+
+    $self->get_update_form_params('ads');
+    return $self;
+}
+
 =head2 check_ads_validator
 
     入力値バリデートチェックに利用
@@ -98,29 +108,28 @@ sub check_ads_validator {
     my $self = shift;
 
     my $check_params = [
-        url_ads             => [ 'NOT_NULL', 'HTTP_URL', ],
-        displaystart_on_ads => [ 'NOT_NULL', 'DATE', ],
-        displayend_on_ads   => [ 'NOT_NULL', 'DATE', ],
-        name_ads       => [ 'NOT_NULL', [ 'LENGTH', 0, 30, ], ],
-        content_ads    => [ 'NOT_NULL', [ 'LENGTH', 0, 140, ], ],
-        event_date_ads => [ 'NOT_NULL', [ 'LENGTH', 0, 30, ], ],
+        url             => [ 'NOT_NULL', 'HTTP_URL', ],
+        displaystart_on => [ 'NOT_NULL', 'DATE', ],
+        displayend_on   => [ 'NOT_NULL', 'DATE', ],
+        name       => [ 'NOT_NULL', [ 'LENGTH', 0, 30, ], ],
+        content    => [ 'NOT_NULL', [ 'LENGTH', 0, 140, ], ],
+        event_date => [ 'NOT_NULL', [ 'LENGTH', 0, 30, ], ],
     ];
 
     my $msg_params = [
-        'url_ads.not_null'             => '必須入力',
-        'displaystart_on_ads.not_null' => '必須入力',
-        'displayend_on_ads.not_null'   => '必須入力',
-        'name_ads.not_null'            => '必須入力',
-        'content_ads.not_null'         => '必須入力',
-        'event_date_ads.not_null'      => '必須入力',
-        'url_ads.http_url' => '指定の形式で入力してください',
-        'displaystart_on_ads.date' =>
+        'url.not_null'             => '必須入力',
+        'displaystart_on.not_null' => '必須入力',
+        'displayend_on.not_null'   => '必須入力',
+        'name.not_null'            => '必須入力',
+        'content.not_null'         => '必須入力',
+        'event_date.not_null'      => '必須入力',
+        'url.http_url' => '指定の形式で入力してください',
+        'displaystart_on.date' =>
             '日付の形式で入力してください',
-        'displayend_on_ads.date' =>
-            '日付の形式で入力してください',
-        'name_ads.length'       => '文字数!!',
-        'content_ads.length'    => '文字数!!',
-        'event_date_ads.length' => '文字数!!',
+        'displayend_on.date' => '日付の形式で入力してください',
+        'name.length'        => '文字数!!',
+        'content.length'     => '文字数!!',
+        'event_date.length'  => '文字数!!',
     ];
 
     my $msg = $self->get_msg_validator( $check_params, $msg_params, );
@@ -128,12 +137,12 @@ sub check_ads_validator {
     return if !$msg;
 
     return +{
-        url_ads             => $msg->{url_ads},
-        displaystart_on_ads => $msg->{displaystart_on_ads},
-        displayend_on_ads   => $msg->{displayend_on_ads},
-        name_ads            => $msg->{name_ads},
-        content_ads         => $msg->{content_ads},
-        event_date_ads      => $msg->{event_date_ads},
+        url             => $msg->{url},
+        displaystart_on => $msg->{displaystart_on},
+        displayend_on   => $msg->{displayend_on},
+        name            => $msg->{name},
+        content         => $msg->{content},
+        event_date      => $msg->{event_date},
     };
 }
 
@@ -159,8 +168,7 @@ sub writing_ads {
         create_on       => now_datetime(),
         modify_on       => now_datetime(),
     };
-    return $self->writing_db( 'ads', $create_data,
-        $self->params()->{id} );
+    return $self->writing_db( 'ads', $create_data, $self->params()->{id} );
 }
 
 =head2 get_fill_in_ads
@@ -178,3 +186,29 @@ sub get_fill_in_ads {
 }
 
 1;
+
+__END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<strict>
+
+=item * L<warnings>
+
+=item * L<utf8>
+
+=item * L<parent>
+
+=item * L<Yoyakku::Model::Mainte>
+
+=item * L<Yoyakku::Util>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut
