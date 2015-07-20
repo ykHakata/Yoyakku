@@ -58,6 +58,7 @@ sub get_table_columns {
             qw{id roominfo_id getstarted_on enduse_on useform message
                 general_id admin_id tel status create_on modify_on}
         ],
+        acting => [qw{id general_id storeinfo_id status create_on modify_on}],
     };
     return $table_columns->{$table};
 }

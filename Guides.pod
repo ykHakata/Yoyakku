@@ -107,6 +107,8 @@ yoyakku アプリケーションのデータベース構成
 
 =over 4
 
+=item L<Yoyakku::Controller::Mainte::Acting>
+
 =item L<Yoyakku::Controller::Mainte::Admin>
 
 =item L<Yoyakku::Controller::Mainte::General>
@@ -134,6 +136,8 @@ yoyakku アプリケーションのデータベース構成
 =item Mainte
 
 =over 4
+
+=item L<Yoyakku::Model::Mainte::Acting>
 
 =item L<Yoyakku::Model::Mainte::Admin>
 
