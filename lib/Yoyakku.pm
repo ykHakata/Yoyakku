@@ -94,6 +94,14 @@ sub startup {
     $r->route('/mainte_acting_new')
         ->to( controller => 'Mainte::Acting', action => 'mainte_acting_new' );
 
+    # システム管理者(ads)
+    $r->route('/mainte_ads_serch')
+        ->to( controller => 'Mainte::Ads', action => 'mainte_ads_serch' );
+
+    # システム管理者(ads) 新規 編集
+    $r->route('/mainte_ads_new')
+        ->to( controller => 'Mainte::Ads', action => 'mainte_ads_new' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

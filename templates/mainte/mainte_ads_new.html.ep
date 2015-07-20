@@ -1,0 +1,135 @@
+% layout 'default';
+% title 'yoyakku広告データ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">イベント広告入力フォーム／テーブル[ads]</h1>
+    <div class="input_ads_n">
+      <a href="mainte_ads_serch">検索画面にもどる</a>
+    </div>
+    <form action="mainte_ads_new" method="post">
+      <table id="input_ads_t" border="1">
+        <tr>
+          <th>カラム名</th>
+          <th>項目名</th>
+          <th>入力フォーム</th>
+        </tr>
+        <tr>
+          <td>id</td>
+          <td>広告ID</td>
+          <td><input type="text" name="id" value="" readonly></td>
+        </tr>
+        <tr>
+          <td>kind</td>
+          <td>広告種別</td>
+          <td>
+            <select name="kind_ads">
+              <option value="1" >1　イベント広告</option>
+              <option value="2" >2　一行広告</option>
+              <option value="3" >3　ナビゲーション枠広告</option>
+              <option value="4" >4　おすすめスタジオ広告</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>storeinfo_id</td>
+          <td>店舗ID</td>
+          <td>
+          %# 店舗IDをもってくるスクリプト
+          <select name="storeinfo_id_ads">
+          % for my $storeinfo_row (@{$storeinfo_rows}) {
+              <option value="<%= $storeinfo_row->id %>" >
+                <%= $storeinfo_row->id %>　<%= $storeinfo_row->name %>
+              </option>
+          % }
+          </select>
+          </td>
+        </tr>
+        <tr>
+          <td>region_id</td>
+          <td>地域区分ID</td>
+          <td>
+          %# 地域IDをもってくるスクリプト
+          <select name="region_id_ads">
+          % for my $region_row (@{$region_rows}) {
+              <option value="<%= $region_row->id %>" >
+                <%= $region_row->id %>　<%= $region_row->name %>
+              </option>
+          % }
+          </select>
+          </td>
+        </tr>
+        <tr>
+          <td>url</td>
+          <td>広告リンク先<div class="vali"><%= $url_ads %></div></td>
+          <td><input type="text" name="url_ads" value=""></td>
+        </tr>
+        <tr>
+          <td>displaystart_on</td>
+          <td>表示開始日時
+            <div class="vali"><%= $displaystart_on_ads %></div>
+          </td>
+          <td>
+            <input type="text" class="datepicker" name="displaystart_on_ads" value="">
+          </td>
+        </tr>
+        <tr>
+          <td>displayend_on</td>
+          <td>表示終了日時
+            <div class="vali"><%= $displayend_on_ads %></div>
+          </td>
+          <td>
+            <input type="text" class="datepicker" name="displayend_on_ads" value="">
+          </td>
+        </tr>
+        <tr>
+          <td>name</td>
+          <td>広告名
+            <div class="vali"><%= $name_ads %></div>
+          </td>
+          <td>
+            <input type="text" name="name_ads" value="">
+          </td>
+        </tr>
+        <tr>
+          <td>content</td>
+          <td>広告内容
+            <div class="vali"><%= $content_ads %></div>
+          </td>
+          <td><textarea name="content_ads" cols="50" rows="10"></textarea></td>
+        </tr>
+        <tr>
+          <td>event_date</td>
+          <td>イベント広告日時
+            <div class="vali"><%= $event_date_ads %></div>
+          </td>
+          <td>
+            <input type="text" name="event_date_ads" value=""><br />
+            <br />
+            ※「３月１２日午前中のみ」「３月１２日１８時〜１９時」など、柔軟に
+          </td>
+        </tr>
+        <tr>
+          <td>create_on</td>
+          <td>登録日</td>
+          <td><input type="text" name="create_on_ads" value="" readonly></td>
+        </tr>
+        <tr>
+          <td>modify_on</td>
+          <td>修正日</td>
+          <td><input type="text" name="modify_on_ads" value="" readonly></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+            <input type="submit" value="登録する">
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>

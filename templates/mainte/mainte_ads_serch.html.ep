@@ -1,0 +1,76 @@
+% layout 'default';
+% title 'yoyakku広告データ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">イベント広告検索表示画面／テーブル[ads]</h1>
+    <div class="input_ads_n">
+      <p>
+        <form  method="get" action="">
+          <span class="input_f"><%= flash('touroku') %></span>
+          <span class="input_f"><%= flash('henkou') %></span>
+          ID番号<input class="input_ads_b" type="text" name="id">
+          <input class="input_ads_b" type="submit" value="検索する">
+        </form>
+        <div class="input_ads_b">
+          <a href="mainte_ads_new">新規作成画面</a>
+        </div>
+      </p>
+    <!-- /.input_ads_n --></div>
+    <table id="input_ads_t" border="1">
+      <tr>
+        <td>広告ID</td>
+        <td>広告種別</td>
+        <td>店舗ID</td>
+        <td>地域区分ID</td>
+        <td>広告リンク先</td>
+        <td>表示開始日時</td>
+        <td>表示終了日時</td>
+        <td>広告名</td>
+        <td>イベント広告日時</td>
+        <td>広告内容</td>
+        <td>登録日</td>
+        <td>修正日</td>
+      </tr>
+      <tr>
+        <td>id</td>
+        <td>kind</td>
+        <td>storeinfo_id</td>
+        <td>region_id</td>
+        <td>url</td>
+        <td>displaystart_on</td>
+        <td>displayend_on</td>
+        <td>name</td>
+        <td>event_date</td>
+        <td>content</td>
+        <td>create_on</td>
+        <td>modify_on</td>
+      </tr>
+      % for my $ads_row (@{$ads_rows}) {
+      <tr>
+        <td><%= $ads_row->id %>
+        <form action="mainte_ads_new" method="get">
+        <input type="hidden" name="id" value="<%= $ads_row->id %>">
+        <input type="submit" value="修正">
+        </form>
+        </td>
+        <td><%= $ads_row->kind %></td>
+        <td><%= $ads_row->storeinfo_id %></td>
+        <td><%= $ads_row->region_id %></td>
+        <td><%= $ads_row->url %></td>
+        <td><%= $ads_row->displaystart_on %></td>
+        <td><%= $ads_row->displayend_on %></td>
+        <td><%= $ads_row->name %></td>
+        <td><%= $ads_row->event_date %></td>
+        <td><%= $ads_row->content %></td>
+        <td><%= $ads_row->create_on %></td>
+        <td><%= $ads_row->modify_on %></td>
+      </tr>
+      % }
+    <!-- /#input_ads_t --></table>
+  <!-- /#index_contents --></div>
+  <!-- !ライトボックス -->
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>
