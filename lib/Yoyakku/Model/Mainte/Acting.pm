@@ -139,9 +139,11 @@ sub check_acting_validator_db {
         },
     );
 
-    return               if !$check_acting_row;
-    return $valid_msg_db if !$params->{id};                           # 新規
-    return $valid_msg_db if $params->{id} ne $check_acting_row->id;   # 更新
+    return if !$check_acting_row;
+    return $valid_msg_db if !$params->{id};    # 新規
+    return $valid_msg_db
+        if ( $params->{id} ne $check_acting_row->id )
+        && ( $params->{status} eq 1 );    # 更新
     return;
 }
 
