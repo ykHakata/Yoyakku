@@ -102,6 +102,14 @@ sub startup {
     $r->route('/mainte_ads_new')
         ->to( controller => 'Mainte::Ads', action => 'mainte_ads_new' );
 
+    # システム管理者(region)
+    $r->route('/mainte_region_serch')
+        ->to( controller => 'Mainte::Region', action => 'mainte_region_serch' );
+
+    # システム管理者(region) 新規 編集
+    $r->route('/mainte_region_new')
+        ->to( controller => 'Mainte::Region', action => 'mainte_region_new' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 
