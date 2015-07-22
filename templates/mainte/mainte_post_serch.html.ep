@@ -1,0 +1,73 @@
+% layout 'default';
+% title 'yoyakku登録者データ管理';
+<div id="wrapper">
+  <%= include './temp/header_navi_new' %>
+  <div id="index_contents">
+    <h1 class="input_ads">郵便番号マスター／テーブル[post]</h1>
+    <div class="input_ads_n">
+      <p>
+        <form  method="get" action="">
+          <span class="input_f"><%= flash('touroku') %></span>
+          <span class="input_f"><%= flash('henkou') %></span>
+          ID番号<input class="input_ads_b" type="text" name="id">
+          <input class="input_ads_b" type="submit" value="検索する">
+        </form>
+        <div class="input_ads_b">
+          <a href="mainte_post_new">新規作成画面</a>
+        </div>
+      </p>
+    </div>
+    <table id="input_ads_t" border="1">
+      <tr>
+        <td>郵便番号</td>
+        <td>地域区分ID</td>
+        <td>(旧)郵便番号</td>
+        <td>都道府県名(よみ)</td>
+        <td>市区町村名(よみ)</td>
+        <td>町域名(よみ)</td>
+        <td>都道府県名</td>
+        <td>市区町村名ID</td>
+        <td>町域名</td>
+        <td>登録日</td>
+        <td>修正日</td>
+      </tr>
+      <tr>
+        <td>post_id</td>
+        <td>region_id</td>
+        <td>post_id_old</td>
+        <td>state_re</td>
+        <td>cities_re</td>
+        <td>town_re</td>
+        <td>state</td>
+        <td>cities</td>
+        <td>town</td>
+        <td>create_on</td>
+        <td>modify_on</td>
+      </tr>
+      % for my $post_row (@{$post_rows}) {
+      <tr>
+        <td><%= $post_row->post_id %>
+        <form action="mainte_post_new" method="get">
+        <input type="hidden" name="id" value="<%= $post_row->post_id %>">
+        <input type="submit" value="修正">
+        </form>
+        </td>
+        <td><%= $post_row->region_id %></td>
+        <td><%= $post_row->post_id_old %></td>
+        <td><%= $post_row->state_re %></td>
+        <td><%= $post_row->cities_re %></td>
+        <td><%= $post_row->town_re %></td>
+        <td><%= $post_row->state %></td>
+        <td><%= $post_row->cities %></td>
+        <td><%= $post_row->town %></td>
+        <td><%= $post_row->create_on %></td>
+        <td><%= $post_row->modify_on %></td>
+      </tr>
+      % }
+    </table>
+  </div>
+  <!-- !ライトボックス -->
+  <div id='glayLayer'></div>
+  <div id='overLayer'></div>
+  <%= include './temp/footer' %>
+<!-- /#wrapper --></div>

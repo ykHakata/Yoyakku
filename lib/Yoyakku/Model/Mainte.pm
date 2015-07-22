@@ -240,6 +240,10 @@ sub search_id_single_or_all_rows {
         $search_column = 'storeinfo_id';
     }
 
+    if ( $table eq 'post' ) {
+        $search_column = 'post_id';
+    }
+
     my @rows;
 
     if ( defined $search_id ) {
