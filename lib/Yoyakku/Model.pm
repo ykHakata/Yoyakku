@@ -6,6 +6,22 @@ use Teng;
 use Teng::Schema::Loader;
 use FormValidator::Lite qw{Email URL DATE TIME};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+Yoyakku::Model - データベース関連 API
+
+=head1 VERSION (改定番号)
+
+This documentation referes to Yoyakku::Model version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    データベース接続関連の API を提供
+
+=cut
+
 sub new {
     my $class  = shift;
     my $params = +{};
@@ -49,7 +65,79 @@ sub html {
     return $self->{html};
 }
 
-# バリデート用パラメータ初期値
+sub login_row {
+    my $self      = shift;
+    my $login_row = shift;
+    if ($login_row) {
+        $self->{login_row} = $login_row;
+    }
+    return $self->{login_row};
+}
+
+sub login_table {
+    my $self        = shift;
+    my $login_table = shift;
+    if ($login_table) {
+        $self->{login_table} = $login_table;
+    }
+    return $self->{login_table};
+}
+
+sub login_name {
+    my $self       = shift;
+    my $login_name = shift;
+    if ($login_name) {
+        $self->{login_name} = $login_name;
+    }
+    return $self->{login_name};
+}
+
+sub profile_row {
+    my $self        = shift;
+    my $profile_row = shift;
+    if ($profile_row) {
+        $self->{profile_row} = $profile_row;
+    }
+    return $self->{profile_row};
+}
+
+sub storeinfo_row {
+    my $self          = shift;
+    my $storeinfo_row = shift;
+    if ($storeinfo_row) {
+        $self->{storeinfo_row} = $storeinfo_row;
+    }
+    return $self->{storeinfo_row};
+}
+
+sub template {
+    my $self     = shift;
+    my $template = shift;
+    if ($template) {
+        $self->{template} = $template;
+    }
+    return $self->{template};
+}
+
+=head2 get_storeinfo_rows_all
+
+    店舗情報の全てを row オブジェクトで取得
+
+=cut
+
+sub get_storeinfo_rows_all {
+    my $self           = shift;
+    my $teng           = $self->teng();
+    my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
+    return \@storeinfo_rows;
+}
+
+=head2 get_init_valid_params
+
+    バリデート用パラメータ初期値
+
+=cut
+
 sub get_init_valid_params {
     my $self         = shift;
     my $valid_params = shift;
@@ -95,6 +183,45 @@ sub check_auth_db {
     return;
 }
 
+sub check_auth_db_yoyakku {
+    my $self = shift;
+
+    my $teng       = $self->teng();
+    my $admin_id   = $self->session->{session_admin_id};
+    my $general_id = $self->session->{session_general_id};
+
+    return if !$admin_id && !$general_id;
+
+    my $table  = 'admin';
+    my $id     = $admin_id;
+    my $column = 'admin_id';
+
+    if ($general_id) {
+        $table  = 'general';
+        $id     = $general_id;
+        $column = 'general_id';
+    }
+
+    my $login_row = $teng->single( $table, +{ id => $id } );
+    return if !$login_row;
+
+    $self->login_row($login_row);
+    $self->profile_row( $teng->single( 'profile', +{ $column => $id } ) );
+    $self->login_table($table);
+
+    my $login_name
+        = $self->profile_row() ? $self->profile_row()->nick_name : undef;
+
+    if ($admin_id) {
+        $login_name = q{(admin)} . $login_name;
+        $self->storeinfo_row(
+            $teng->single( 'storeinfo', +{ admin_id => $id } ) );
+    }
+    $self->login_name($login_name);
+
+    return 1;
+}
+
 sub teng {
     my $self = shift;
 
@@ -121,27 +248,6 @@ sub teng {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model - データベース関連 API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-    use Yoyakku::Model qw{$teng};
-
-    # 指定のテーブルから該当のレコードを１件取得 row オブジェクト変換
-    my $row = $teng->single( $table, +{ login => $params->{login} } );
-
-    # teng 関連のメソッドは teng ドキュメント参照
-
-データベース接続関連の API を提供
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -156,7 +262,7 @@ This documentation referes to Yoyakku::Model version 0.0.1
 
 =item * L<Teng::Schema::Loader>
 
-=item * L<Exporter>
+=item * L<FormValidator::Lite>
 
 =back
 

@@ -63,19 +63,6 @@ sub get_general_rows_all {
     return \@general_rows;
 }
 
-=head2 get_storeinfo_rows_all
-
-    店舗情報の全てを row オブジェクトで取得
-
-=cut
-
-sub get_storeinfo_rows_all {
-    my $self           = shift;
-    my $teng           = $self->teng();
-    my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
-    return \@storeinfo_rows;
-}
-
 =head2 get_update_form_params_acting
 
     修正用入力フォーム表示の際に利用

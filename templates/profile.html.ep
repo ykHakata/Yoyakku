@@ -103,9 +103,9 @@
     <td>
     <select name="acting_1">
     <option value="0">選択しない</option>
-    % for my $storeinfo_ref (@$storeinfos_ref) {
-      <option value="<%= $storeinfo_ref->id %>">
-      <%= $storeinfo_ref->name %>
+    % for my $storeinfo_row (@{$storeinfo_rows}) {
+      <option value="<%= $storeinfo_row->id %>">
+      <%= $storeinfo_row->name %>
       </option>
     % }
     </select>
@@ -116,9 +116,9 @@
     <td>
     <select name="acting_2">
     <option value="0">選択しない</option>
-    % for my $storeinfo_ref (@$storeinfos_ref) {
-      <option value="<%= $storeinfo_ref->id %>">
-      <%= $storeinfo_ref->name %>
+    % for my $storeinfo_row (@{$storeinfo_rows}) {
+      <option value="<%= $storeinfo_row->id %>">
+      <%= $storeinfo_row->name %>
       </option>
     % }
     </select>
@@ -129,9 +129,9 @@
     <td>
       <select name="acting_3">
       <option value="0">選択しない</option>
-      % for my $storeinfo_ref (@$storeinfos_ref) {
-        <option value="<%= $storeinfo_ref->id %>">
-        <%= $storeinfo_ref->name %>
+      % for my $storeinfo_row (@{$storeinfo_rows}) {
+        <option value="<%= $storeinfo_row->id %>">
+        <%= $storeinfo_row->name %>
         </option>
       % }
       </select>

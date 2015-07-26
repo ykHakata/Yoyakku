@@ -34,6 +34,10 @@ sub startup {
     $r->route('/profile')
         ->to( controller => 'profile', action => 'profile' );
 
+    # 個人情報(確認画面)
+    $r->route('/profile_comp')
+        ->to( controller => 'profile', action => 'profile_comp' );
+
     # システム管理者のオープニング画面
     $r->route('/mainte_list')
         ->to( controller => 'mainte', action => 'mainte_list' );

@@ -5,33 +5,6 @@ use utf8;
 use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{get_fill_in_params};
 
-sub template {
-    my $self     = shift;
-    my $template = shift;
-    if ($template) {
-        $self->{template} = $template;
-    }
-    return $self->{template};
-}
-
-sub login_id {
-    my $self     = shift;
-    my $login_id = shift;
-    if ($login_id) {
-        $self->{login_id} = $login_id;
-    }
-    return $self->{login_id};
-}
-
-sub login_profile_row {
-    my $self              = shift;
-    my $login_profile_row = shift;
-    if ($login_profile_row) {
-        $self->{login_profile_row} = $login_profile_row;
-    }
-    return $self->{login_profile_row};
-}
-
 sub check_login {
     my $self = shift;
 
@@ -136,32 +109,25 @@ sub check_auth_validator_db {
         : $table eq 'admin'   ? 'admin_id'
         :                       '';
 
-    # 指定されたログイン情報に profile 情報が存在しない
     my $profile_row
         = $teng->single( 'profile', +{ $search_column => $row->id } );
 
-    if ( !$profile_row ) {
-        $valid_msg_db->{login} = '管理者へ連絡ください';
-        return $valid_msg_db;
-    }
-
-    $self->login_id( $row->id );
-    $self->login_profile_row($profile_row);
+    $self->login_row($row);
+    $self->profile_row($profile_row);
     return;
 }
 
 sub get_session_id_with_routing {
     my $self        = shift;
-    my $profile_row = $self->login_profile_row();
+    my $profile_row = $self->profile_row();
 
-    # 指定されたログイン情報に profile 情報が有効になっているか確認
     my $redirect_to = 'profile';
-    if ( $profile_row->status ) {
+    if ( $profile_row && $profile_row->status ) {
         $redirect_to = 'index';
     }
 
     my $session_id_with_routing = +{
-        session_id  => $self->login_id(),
+        session_id  => $self->login_row()->id,
         redirect_to => $redirect_to,
     };
 

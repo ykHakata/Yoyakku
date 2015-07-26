@@ -1,126 +1,114 @@
 package Yoyakku::Controller::Profile;
 use Mojo::Base 'Mojolicious::Controller';
-use HTML::FillInForm;
-use Yoyakku::Model::Profile qw{switch_stash_profile};
+use Yoyakku::Model::Profile;
 
-# ログイン成功時に作成する初期値
-sub _switch_stash {
+sub _init {
     my $self  = shift;
-    my $id    = shift;
-    my $table = shift;
+    my $model = Yoyakku::Model::Profile->new();
 
-    my $stash_profile = switch_stash_profile( $id, $table, );
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session );
 
-    $self->stash($stash_profile);
+    my $header_stash = $model->get_header_stash_auth_profile();
 
-    return;
+    return $self->redirect_to('/index') if !$header_stash;
+
+    $self->stash($header_stash);
+
+    return $model;
 }
 
-# ログインチェック
-sub _check_login_profile {
-    my $self = shift;
+sub profile_comp {
+    my $self  = shift;
+    my $model = $self->_init();
 
-    my $admin_id   = $self->session->{session_admin_id};
-    my $general_id = $self->session->{session_general_id};
+    my $profile_row = $model->profile_row();
+    my $login_row   = $model->login_row();
+    my $acting_name = $model->get_acting_name();
 
-    # セッションないときは終了
-    return 1 if !$admin_id && !$general_id;
-
-    return $self->_switch_stash( $admin_id,   'admin' )   if $admin_id;
-    return $self->_switch_stash( $general_id, 'general' ) if $general_id;
-}
-
-# profile.html.ep 個人情報(入力画面)
-sub profile {
-    my $self = shift;
-
-    # ログイン確認する
-    return $self->redirect_to('/index') if $self->_check_login_profile();
-
-    # テンプレート用bodyのクラス名
-    my $class = 'profile';
-    $self->stash( class => $class );
-
-    # ログイン確認時に取得したデータ取り出し
-    my $login_data = $self->stash->{login_data};
-
-    # お気に入りリスト admin 非表示 general 表示
-    my $switch_acting
-        = $login_data->{login} eq 'admin'   ? undef
-        : $login_data->{login} eq 'general' ? 1
-        :                                     undef;
-
-    # 入力フォーム以外の値
     $self->stash(
-        login         => $login_data->{login_name},    # プロフィール名
-        switch_header => $login_data->{switch_header}, # 画面移動ボタン
-        switch_acting => $switch_acting,    # お気に入りリスト表示
+        class         => 'profile_comp',
+        login         => $model->login_name(),
+        switch_acting => $model->get_switch_acting(),
     );
 
-    # バリデート用
-    $self->stash(
-        password       => '',
-        password_2     => '',
-        nick_name      => '',
-        full_name      => '',
-        phonetic_name  => '',
-        tel            => '',
-        mail           => '',
-        acting_1       => '',
-    );
-
-    # お気に入り店舗のための選択データ取り出し 店舗情報 storeinfo
-    # my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
-    my @storeinfo_rows;
-    $self->stash( storeinfos_ref => \@storeinfo_rows, );
-
-    # my $login_data = +{
-    #     login => 'admin' or 'general',
-    #     login_row => 'admin_row' or 'general_row',
-    #     profile_row => $profile_row,
-    # };
-
-    my $acting_1;
-    my $acting_2;
-    my $acting_3;
-
-    # generel の場合は acting テーブル 代行リスト
-    if ( $login_data->{login} eq 'general' ) {
-        # my @actings
-        #     = $teng->search( 'acting',
-        #     +{ general_id => $login, status => 1, } );
-
-        # $acting_1 = $actings[0]->id;
-        # $acting_2 = $actings[1]->id;
-        # $acting_3 = $actings[2]->id;
-    }
-
-    # 入力フォームフィルイン用
     my $params = +{
-        id             => $login_data->{login_row}->id,
-        login          => $login_data->{login_row}->login,
-        password       => $login_data->{login_row}->password,
-        password_2     => $login_data->{login_row}->password,
-        profile_id     => $login_data->{profile_row}->id,
-        nick_name      => $login_data->{profile_row}->nick_name,
-        full_name      => $login_data->{profile_row}->full_name,
-        phonetic_name  => $login_data->{profile_row}->phonetic_name,
-        tel            => $login_data->{profile_row}->tel,
-        mail           => $login_data->{profile_row}->mail,
-        acting_1       => $acting_1,
-        acting_2       => $acting_2,
-        acting_3       => $acting_3,
+        id            => $login_row->id,
+        login         => $login_row->login,
+        password      => $login_row->password,
+        profile_id    => $profile_row ? $profile_row->id : undef,
+        nick_name     => $profile_row ? $profile_row->nick_name : undef,
+        full_name     => $profile_row ? $profile_row->full_name : undef,
+        phonetic_name => $profile_row ? $profile_row->phonetic_name : undef,
+        tel           => $profile_row ? $profile_row->tel : undef,
+        mail          => $profile_row ? $profile_row->mail : undef,
+        acting_1      => $acting_name->{acting_1},
+        acting_2      => $acting_name->{acting_2},
+        acting_3      => $acting_name->{acting_3},
     };
 
-    my $html
-        = $self->render_to_string( template => 'profile', format => 'html', )
-        ->to_string;
+    $model->params($params);
+    $model->template('profile_comp');
 
-    my $output = HTML::FillInForm->fill( \$html, $params );
-
-    return $self->render( text => $output );
+    return $self->_render_profile($model);
 }
 
+sub profile {
+    my $self  = shift;
+    my $model = $self->_init();
+    my $teng  = $model->teng();
+
+    my $profile_row = $model->profile_row();
+    my $login_row   = $model->login_row();
+
+    my $init_valid_params_profile = $model->get_init_valid_params_profile();
+
+    $self->stash(
+        class          => 'profile',
+        login          => $model->login_name(),
+        storeinfo_rows => $model->get_storeinfo_rows_all(),
+        switch_acting  => $model->get_switch_acting(),
+        %{$init_valid_params_profile},
+    );
+
+    my $acting_params = $model->get_acting_params();
+
+    my $params = +{
+        id            => $login_row->id,
+        login         => $login_row->login,
+        password      => $login_row->password,
+        password_2    => $login_row->password,
+        profile_id    => $profile_row ? $profile_row->id : undef,
+        nick_name     => $profile_row ? $profile_row->nick_name : undef,
+        full_name     => $profile_row ? $profile_row->full_name : undef,
+        phonetic_name => $profile_row ? $profile_row->phonetic_name : undef,
+        tel           => $profile_row ? $profile_row->tel : undef,
+        mail          => $profile_row ? $profile_row->mail : undef,
+        acting_1      => $acting_params->{acting_1},
+        acting_2      => $acting_params->{acting_2},
+        acting_3      => $acting_params->{acting_3},
+    };
+
+    $model->params($params);
+    $model->template('profile');
+
+    return $self->_render_profile($model);
+}
+
+sub _render_profile {
+    my $self  = shift;
+    my $model = shift;
+
+    my $html = $self->render_to_string(
+        template => $model->template(),
+        format   => 'html',
+    )->to_string;
+
+    $model->html( \$html );
+    my $output = $model->get_fill_in_profile();
+    return $self->render( text => $output );
+}
 
 # #========
 # #--------
@@ -469,10 +457,184 @@ sub profile {
 #     #リターンなのでここでおしまい。
 # }
 
-
 1;
 
 __END__
+
+# profile_comp.html.ep
+# 個人情報、画面========================================
+get '/profile_comp' => sub {
+my $self = shift;
+# テンプレート用bodyのクラス名
+my $class = "profile_comp";
+$self->stash(class => $class);
+
+
+#ログイン機能==========================================
+my $login_id;
+my $login;
+my $switch_header;
+
+my $admin_id   = $self->session('session_admin_id'  );
+my $general_id = $self->session('session_general_id');
+
+if ($admin_id) {
+    my $admin_ref   = $teng->single('admin', +{id => $admin_id});
+    my $profile_ref = $teng->single('profile', +{admin_id => $admin_id});
+       $login       = q{(admin)}.$profile_ref->nick_name;
+
+    my $status = $admin_ref->status;
+    if ($status) {
+        my $storeinfo_ref = $teng->single('storeinfo', +{admin_id => $admin_id});
+        if ($storeinfo_ref->status eq 0) {
+            $switch_header = 9;
+        }
+            $switch_header = 7;
+    }
+    else {
+        $switch_header = 8;
+    }
+    #お気に入りリスト表示
+    my $switch_acting;
+    $self->stash(switch_acting => $switch_acting);
+}
+elsif ($general_id) {
+    my $general_ref  = $teng->single('general', +{id => $general_id});
+    #$login         = $general_ref->login;
+    my $profile_ref = $teng->single('profile', +{general_id => $general_id});
+    $login          = $profile_ref->nick_name;
+
+    my $status = $general_ref->status;
+    if ($status) {
+        $switch_header = 6;
+    }
+    else {
+        $switch_header = 8;
+    }
+    #お気に入りリスト表示
+    my $switch_acting = 1;
+    $self->stash(switch_acting => $switch_acting);
+}
+else {
+    #$switch_header = 2;
+    return $self->redirect_to('index');
+}
+
+$self->stash(login => $login);# #ログイン名をヘッダーの右に表示させる
+# headerの切替
+$self->stash(switch_header => $switch_header);
+#====================================================
+#====================================================
+#日付変更線を６時に変更
+my $now_date    = localtime;
+
+my $chang_date_ref = chang_date_6($now_date);
+
+my $now_date    = $chang_date_ref->{now_date};
+my $next1m_date = $chang_date_ref->{next1m_date};
+my $next2m_date = $chang_date_ref->{next2m_date};
+my $next3m_date = $chang_date_ref->{next3m_date};
+#====================================================
+##新しい日付情報取得のスクリプト======================
+## 時刻(日付)取得、現在、1,2,3ヶ月後
+#my $now_date    = localtime;
+#
+##翌月の計算をやり直す
+#my $first_day   = localtime->strptime($now_date->strftime(   '%Y-%m-01'                             ),'%Y-%m-%d');
+#my $last_day    = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d');
+#my $next1m_date = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d') + 86400;
+#my $next2m_date = localtime->strptime($next1m_date->strftime('%Y-%m-' . $next1m_date->month_last_day),'%Y-%m-%d') + 86400;
+#my $next3m_date = localtime->strptime($next2m_date->strftime('%Y-%m-' . $next2m_date->month_last_day),'%Y-%m-%d') + 86400;
+# 時刻(日付)取得、現在、1,2,3ヶ月後(ヘッダー用)
+$self->stash(
+    now_data    => $now_date,
+    next1m_data => $next1m_date,
+    next2m_data => $next2m_date,
+    next3m_data => $next3m_date
+);
+#--------
+# データの表示,ログイン情報とprofile
+my $id;
+my $login;
+my $password;
+my $profile_ref;
+my @actings_ref;
+
+if ($admin_id) {
+    my $admin_ref   = $teng->single('admin', +{id => $admin_id});
+    $id             = $admin_ref->id;
+    $login          = $admin_ref->login;
+    $password       = $admin_ref->password;
+    $profile_ref    = $teng->single('profile', +{admin_id => $admin_id});
+}
+elsif ($general_id) {
+    my $general_ref = $teng->single('general', +{id => $general_id});
+    $id             = $general_ref->id;
+    $login          = $general_ref->login;
+    $password       = $general_ref->password;
+    $profile_ref    = $teng->single('profile', +{general_id => $general_id});
+    @actings_ref    = $teng->search('acting',  +{general_id => $general_id , status => 1 });
+}
+else {
+    die "stop!!予期せぬエラー";
+}
+#値作成==profile
+my $profile_id    = $profile_ref->id ;
+my $nick_name     = $profile_ref->nick_name;
+my $full_name     = $profile_ref->full_name;
+my $phonetic_name = $profile_ref->phonetic_name;
+my $tel           = $profile_ref->tel;
+my $mail          = $profile_ref->mail;
+my @acting;
+
+for my $acting_ref (@actings_ref) {
+    push (@acting , $acting_ref->storeinfo_id);
+}
+my $acting_1_ref    = $teng->single('storeinfo', +{id => $acting[0]});
+my $acting_2_ref    = $teng->single('storeinfo', +{id => $acting[1]});
+my $acting_3_ref    = $teng->single('storeinfo', +{id => $acting[2]});
+
+my $acting_1;
+my $acting_2;
+my $acting_3;
+
+if ($acting_1_ref) {
+    $acting_1      = $acting_1_ref->name;
+}
+if ($acting_2_ref) {
+    $acting_2      = $acting_2_ref->name;
+}
+if ($acting_3_ref) {
+    $acting_3      = $acting_3_ref->name;
+}
+
+
+#修正用フォーム、Fillinつかって表示 値はsqlより該当idのデータをつかう
+my $html = $self->render_partial()->to_string;
+$html = HTML::FillInForm->fill(
+    \$html,{
+        id            => $id ,
+        login         => $login ,
+        password      => $password ,
+        #password_2    => $password ,
+        profile_id    => $profile_id ,
+        nick_name     => $nick_name,
+        full_name     => $full_name,
+        phonetic_name => $phonetic_name,
+        tel           => $tel,
+        mail          => $mail,
+        acting_1      => $acting_1,
+        acting_2      => $acting_2,
+        acting_3      => $acting_3,
+    },
+);
+#Fillin画面表示実行returnなのでここでおしまい。
+return $self->render_text($html, format => 'html');
+
+
+#$self->render('profile_comp');
+};
+
 
 # profile.html.ep
 # 個人情報、画面========================================
