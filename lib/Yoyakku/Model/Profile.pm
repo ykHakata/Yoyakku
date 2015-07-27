@@ -75,7 +75,6 @@ sub switch_stash_profile {
         }
     }
 
-    # die '$self',Dumper($self);
     my $header_params = switch_header_params( $switch_header, $login_name );
 
     my $header_params_hash_ref = +{
@@ -93,6 +92,49 @@ sub switch_stash_profile {
     };
 
     return $stash_profile;
+}
+
+
+=head2 set_form_params_profile
+
+    入力フォーム表示の際に利用
+
+=cut
+
+sub set_form_params_profile {
+    my $self   = shift;
+    my $action = shift;
+
+    my $profile_row = $self->profile_row();
+    my $login_row   = $self->login_row();
+    my $acting_name = $self->get_acting_name();
+
+    my $params = +{
+        id            => $login_row->id,
+        login         => $login_row->login,
+        password      => $login_row->password,
+        profile_id    => $profile_row ? $profile_row->id : undef,
+        nick_name     => $profile_row ? $profile_row->nick_name : undef,
+        full_name     => $profile_row ? $profile_row->full_name : undef,
+        phonetic_name => $profile_row ? $profile_row->phonetic_name : undef,
+        tel           => $profile_row ? $profile_row->tel : undef,
+        mail          => $profile_row ? $profile_row->mail : undef,
+        acting_1      => $acting_name->{acting_1},
+        acting_2      => $acting_name->{acting_2},
+        acting_3      => $acting_name->{acting_3},
+    };
+
+    if ( $action eq 'profile' ) {
+        my $acting_params = $self->get_acting_params();
+
+        $params->{password_2} = $login_row->password;
+        $params->{acting_1}   = $acting_params->{acting_1};
+        $params->{acting_2}   = $acting_params->{acting_2};
+        $params->{acting_3}   = $acting_params->{acting_3};
+    }
+
+    $self->params($params);
+    return;
 }
 
 =head2 get_init_valid_params_profile

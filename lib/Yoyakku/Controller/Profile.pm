@@ -23,44 +23,20 @@ sub profile_comp {
     my $self  = shift;
     my $model = $self->_init();
 
-    my $profile_row = $model->profile_row();
-    my $login_row   = $model->login_row();
-    my $acting_name = $model->get_acting_name();
-
     $self->stash(
         class         => 'profile_comp',
         login         => $model->login_name(),
         switch_acting => $model->get_switch_acting(),
     );
 
-    my $params = +{
-        id            => $login_row->id,
-        login         => $login_row->login,
-        password      => $login_row->password,
-        profile_id    => $profile_row ? $profile_row->id : undef,
-        nick_name     => $profile_row ? $profile_row->nick_name : undef,
-        full_name     => $profile_row ? $profile_row->full_name : undef,
-        phonetic_name => $profile_row ? $profile_row->phonetic_name : undef,
-        tel           => $profile_row ? $profile_row->tel : undef,
-        mail          => $profile_row ? $profile_row->mail : undef,
-        acting_1      => $acting_name->{acting_1},
-        acting_2      => $acting_name->{acting_2},
-        acting_3      => $acting_name->{acting_3},
-    };
-
-    $model->params($params);
+    $model->set_form_params_profile('profile_comp');
     $model->template('profile_comp');
-
     return $self->_render_profile($model);
 }
-
+use Data::Dumper;
 sub profile {
     my $self  = shift;
     my $model = $self->_init();
-    my $teng  = $model->teng();
-
-    my $profile_row = $model->profile_row();
-    my $login_row   = $model->login_row();
 
     my $init_valid_params_profile = $model->get_init_valid_params_profile();
 
@@ -72,28 +48,12 @@ sub profile {
         %{$init_valid_params_profile},
     );
 
-    my $acting_params = $model->get_acting_params();
-
-    my $params = +{
-        id            => $login_row->id,
-        login         => $login_row->login,
-        password      => $login_row->password,
-        password_2    => $login_row->password,
-        profile_id    => $profile_row ? $profile_row->id : undef,
-        nick_name     => $profile_row ? $profile_row->nick_name : undef,
-        full_name     => $profile_row ? $profile_row->full_name : undef,
-        phonetic_name => $profile_row ? $profile_row->phonetic_name : undef,
-        tel           => $profile_row ? $profile_row->tel : undef,
-        mail          => $profile_row ? $profile_row->mail : undef,
-        acting_1      => $acting_params->{acting_1},
-        acting_2      => $acting_params->{acting_2},
-        acting_3      => $acting_params->{acting_3},
-    };
-
-    $model->params($params);
+    $model->set_form_params_profile('profile');
     $model->template('profile');
-
     return $self->_render_profile($model);
+
+    # return $self->_insert($model) if !$model->profile_row();
+    # return $self->_update($model);
 }
 
 sub _render_profile {
