@@ -15,24 +15,6 @@ use Yoyakku::Util qw{
 };
 use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
 
-sub type {
-    my $self = shift;
-    my $type = shift;
-    if ($type) {
-        $self->{type} = $type;
-    }
-    return $self->{type};
-}
-
-sub flash_msg {
-    my $self      = shift;
-    my $flash_msg = shift;
-    if ($flash_msg) {
-        $self->{flash_msg} = $flash_msg;
-    }
-    return $self->{flash_msg};
-}
-
 # 各テーブルカラム取得
 sub get_table_columns {
     my $table = shift;

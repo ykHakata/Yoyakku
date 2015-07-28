@@ -33,7 +33,7 @@ sub profile_comp {
     $model->template('profile_comp');
     return $self->_render_profile($model);
 }
-use Data::Dumper;
+
 sub profile {
     my $self  = shift;
     my $model = $self->_init();
@@ -48,12 +48,57 @@ sub profile {
         %{$init_valid_params_profile},
     );
 
-    $model->set_form_params_profile('profile');
     $model->template('profile');
-    return $self->_render_profile($model);
 
-    # return $self->_insert($model) if !$model->profile_row();
-    # return $self->_update($model);
+    return $self->_insert($model) if !$model->profile_row();
+    return $self->_update($model);
+}
+
+sub _insert {
+    my $self  = shift;
+    # my $model = shift;
+
+    # return $self->_render_acting($model) if 'GET' eq $model->method();
+
+    # $model->type('insert');
+    # $model->flash_msg( +{ touroku => '登録完了' } );
+
+    # return $self->_common($model);
+}
+
+sub _update {
+    my $self  = shift;
+    my $model = shift;
+
+    if ( 'GET' eq $model->method() ) {
+        $model->set_form_params_profile('profile');
+        return $self->_render_profile($model);
+    }
+
+    $model->type('update');
+    $model->flash_msg( +{ henkou => '修正完了' } );
+
+    return $self->_common($model);
+}
+
+sub _common {
+    my $self  = shift;
+    my $model = shift;
+
+    my $valid_msg = $model->check_profile_with_auth_validator();
+
+    return $self->stash($valid_msg), $self->_render_profile($model)
+        if $valid_msg;
+
+    # my $valid_msg_db = $model->check_acting_validator_db();
+
+    # return $self->stash($valid_msg_db), $self->_render_acting($model)
+    #     if $valid_msg_db;
+
+    # $model->writing_acting();
+    # $self->flash( $model->flash_msg() );
+
+    # return $self->redirect_to('mainte_acting_serch');
 }
 
 sub _render_profile {
@@ -72,55 +117,6 @@ sub _render_profile {
 
 # #========
 # #--------
-# if (uc $self->req->method eq 'POST') {#post判定する
-#     #新規入力も修正もボタン押すとpostで入ってくる、両方バリデード実行
-#     my $validator = $self->create_validator;# バリデーション()
-#     $validator->field('nick_name')->required(1)->length(1,30);
-
-#     $validator->field('password')->regexp(qr/[a-zA-Z0-9]{4,}/);
-#     $validator->field('password_2')->required(1)->callback(sub {
-#         my $password_2 = shift;
-#         my $password   = $self->param('password');
-
-#         if ($password ne $password_2) {
-#             return (0, '入力したパスワードが違います');
-#         }
-#         else {
-#             return 1;
-#         }
-#     });
-#     $validator->field('full_name')->required(0)->length(1,30);
-#     $validator->field('phonetic_name')->required(0)->length(1,30);
-#     $validator->field('tel')->required(1)->length(1,30);
-#     $validator->field('mail')->required(0)->email;
-
-
-#     #actingのバリでを考えてみる
-#     #選択しなくてもよいが、同じstoreinfo_idが重複はng!
-#     $validator->field('acting_1')->required(0)->callback(sub {
-#         my $acting_1    = shift;
-#         my $acting_2    = $self->param('acting_2');
-#         my $acting_3    = $self->param('acting_3');
-
-#         my $judg_id;
-
-#         if ($acting_1) {
-#             if ($acting_1 eq $acting_2) {$judg_id = 1;}
-#             if ($acting_1 eq $acting_3) {$judg_id = 1;}
-#         }
-#         if ($acting_2) {
-#             if ($acting_2 eq $acting_1) {$judg_id = 1;}
-#             if ($acting_2 eq $acting_3) {$judg_id = 1;}
-#         }
-#         if ($acting_3) {
-#             if ($acting_3 eq $acting_1) {$judg_id = 1;}
-#             if ($acting_3 eq $acting_2) {$judg_id = 1;}
-#         }
-
-#         return   ($judg_id == 1) ? (0, '同じものは入力不可'  )
-#                :                    1
-#                ;
-#     });
 
 #     #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、
 #     my $param_hash = $self->req->params->to_hash;

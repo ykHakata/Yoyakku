@@ -8,8 +8,8 @@ use FormValidator::Lite qw{Email URL DATE TIME};
 use base qw{Class::Accessor::Fast};
 
 __PACKAGE__->mk_accessors(
-    qw{params session method html login_row login_table
-        login_name profile_row storeinfo_row template}
+    qw{params session method html login_row login_table login_name
+        profile_row storeinfo_row template type flash_msg}
 );
 
 =encoding utf8
