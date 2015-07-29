@@ -107,6 +107,8 @@ sub set_form_params_profile {
     my $profile_row = $self->profile_row();
     my $login_row   = $self->login_row();
     my $acting_name = $self->get_acting_name();
+    my $acting_ids  = $self->get_acting_ids();
+
 
     my $params = +{
         id            => $login_row->id,
@@ -118,18 +120,23 @@ sub set_form_params_profile {
         phonetic_name => $profile_row ? $profile_row->phonetic_name : undef,
         tel           => $profile_row ? $profile_row->tel : undef,
         mail          => $profile_row ? $profile_row->mail : undef,
-        acting_1      => $acting_name->{acting_1},
-        acting_2      => $acting_name->{acting_2},
-        acting_3      => $acting_name->{acting_3},
     };
 
-    if ( $action eq 'profile' ) {
-        my $acting_params = $self->get_acting_params();
+    # general ログインの場合のみ acting の値を生成
+    if ( $self->get_switch_acting() ) {
+        $params->{acting_1} = $acting_name->{acting_1};
+        $params->{acting_2} = $acting_name->{acting_2};
+        $params->{acting_3} = $acting_name->{acting_3};
+    }
 
+    if ( $self->get_switch_acting() && $action eq 'profile' ) {
+        $params->{acting_1} = $acting_ids->[0]->{storeinfo_id};
+        $params->{acting_2} = $acting_ids->[1]->{storeinfo_id};
+        $params->{acting_3} = $acting_ids->[2]->{storeinfo_id};
+    }
+
+    if ( $action eq 'profile' ) {
         $params->{password_2} = $login_row->password;
-        $params->{acting_1}   = $acting_params->{acting_1};
-        $params->{acting_2}   = $acting_params->{acting_2};
-        $params->{acting_3}   = $acting_params->{acting_3};
     }
 
     $self->params($params);
@@ -175,67 +182,53 @@ sub get_switch_acting {
 =cut
 
 sub get_acting_name {
-    my $self        = shift;
-    my $teng        = $self->teng();
-    my $login_table = $self->login_table();
-    my $login_row   = $self->login_row();
+    my $self       = shift;
+    my $teng       = $self->teng();
+    my $acting_ids = $self->get_acting_ids();
 
-    my $get_acting_name;
+    my $storeinfo_id_1 = $acting_ids->[0]->{storeinfo_id};
+    my $storeinfo_id_2 = $acting_ids->[1]->{storeinfo_id};
+    my $storeinfo_id_3 = $acting_ids->[2]->{storeinfo_id};
 
-    if ( $login_table && $login_table eq 'general' ) {
-        my @actings
-            = $teng->search( 'acting',
-            +{ general_id => $login_row->id, status => 1, } );
+    my $acting_1 = $teng->single( 'storeinfo',
+        +{ id => $storeinfo_id_1, status => 1, } );
+    my $acting_2 = $teng->single( 'storeinfo',
+        +{ id => $storeinfo_id_2, status => 1, } );
+    my $acting_3 = $teng->single( 'storeinfo',
+        +{ id => $storeinfo_id_3, status => 1, } );
 
-        if ( scalar @actings ) {
+    my $acting_1_name = $acting_1 ? $acting_1->name : undef;
+    my $acting_2_name = $acting_2 ? $acting_2->name : undef;
+    my $acting_3_name = $acting_3 ? $acting_3->name : undef;
 
-            my $acting_1 = $teng->single( 'storeinfo',
-                +{ id => $actings[0]->storeinfo_id, status => 1, } );
-            my $acting_2 = $teng->single( 'storeinfo',
-                +{ id => $actings[1]->storeinfo_id, status => 1, } );
-            my $acting_3 = $teng->single( 'storeinfo',
-                +{ id => $actings[2]->storeinfo_id, status => 1, } );
-
-            $get_acting_name = +{
-                acting_1 => $acting_1->name,
-                acting_2 => $acting_2->name,
-                acting_3 => $acting_3->name,
-            };
-        }
-    }
+    my $get_acting_name = +{
+        acting_1 => $acting_1_name,
+        acting_2 => $acting_2_name,
+        acting_3 => $acting_3_name,
+    };
 
     return $get_acting_name;
 }
 
-=head2 get_acting_params
+=head2 get_acting_ids
 
-    generel の場合は acting テーブル 代行リスト
+    generel の場合は該当の acting テーブル ids
 
 =cut
 
-sub get_acting_params {
-    my $self        = shift;
-    my $teng        = $self->teng();
-    my $login_table = $self->login_table();
-    my $login_row   = $self->login_row();
+sub get_acting_ids {
+    my $self = shift;
 
-    my $get_acting_params;
-
-    if ( $login_table && $login_table eq 'general' ) {
-        my @actings
-            = $teng->search( 'acting',
-            +{ general_id => $login_row->id, status => 1, } );
-
-        if ( scalar @actings ) {
-            $get_acting_params = +{
-                acting_1 => $actings[0]->storeinfo_id,
-                acting_2 => $actings[1]->storeinfo_id,
-                acting_3 => $actings[2]->storeinfo_id,
+    my $get_acting_ids;
+    for my $acting_row ( @{$self->acting_rows()} ) {
+        push @{$get_acting_ids},
+            +{
+            id           => $acting_row->id,
+            storeinfo_id => $acting_row->storeinfo_id,
             };
-        }
     }
 
-    return $get_acting_params;
+    return $get_acting_ids;
 }
 
 =head2 check_profile_with_auth_validator

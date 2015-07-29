@@ -9,7 +9,7 @@ use base qw{Class::Accessor::Fast};
 
 __PACKAGE__->mk_accessors(
     qw{params session method html login_row login_table login_name
-        profile_row storeinfo_row template type flash_msg}
+        profile_row storeinfo_row template type flash_msg acting_rows}
 );
 
 =encoding utf8
@@ -127,6 +127,13 @@ sub check_auth_db_yoyakku {
             $teng->single( 'storeinfo', +{ admin_id => $id } ) );
     }
     $self->login_name($login_name);
+
+    if ($general_id) {
+        my @actings = $teng->search( 'acting',
+            +{ general_id => $login_row->id, status => 1, } );
+
+        $self->acting_rows( \@actings );
+    }
 
     return 1;
 }
