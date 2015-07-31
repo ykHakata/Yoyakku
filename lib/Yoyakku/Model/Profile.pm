@@ -2,7 +2,7 @@ package Yoyakku::Model::Profile;
 use strict;
 use warnings;
 use utf8;
-use Yoyakku::Util qw{switch_header_params get_fill_in_params};
+use Yoyakku::Util qw{now_datetime switch_header_params get_fill_in_params};
 use parent 'Yoyakku::Model';
 
 =encoding utf8
@@ -250,7 +250,7 @@ sub check_profile_with_auth_validator {
         +{ passwords => [qw/password password_2/] } => ['DUPLICATION'],
 
         # profile
-        profile_id    => [ 'NOT_NULL', ],
+        profile_id    => [ 'INT', ],
         nick_name     => [ 'NOT_NULL', [ 'LENGTH', 0, 20, ], ],
         full_name     => [ [ 'LENGTH', 0, 20, ], ],
         phonetic_name => [ [ 'LENGTH', 0, 20, ], ],
@@ -270,16 +270,16 @@ sub check_profile_with_auth_validator {
         'password_2.not_null' => '必須入力',
         'passwords.duplication' =>
             '入力したパスワードが違います',
-        'profile_id.not_null'  => '必須入力',
-        'nick_name.length'     => '文字数!!',
-        'nick_name.not_null'     => '必須入力',
-        'full_name.length'     => '文字数!!',
+        'profile_id.int'     => '指定の形式で入力してください',
+        'nick_name.length'   => '文字数!!',
+        'nick_name.not_null' => '必須入力',
+        'full_name.length'   => '文字数!!',
         'phonetic_name.length' => '文字数!!',
         'tel.length'           => '文字数!!',
         'mail.email_loose'     => 'Eメールを入力してください',
-        'acting_1.int'      => '指定の形式で入力してください',
-        'acting_2.int'      => '指定の形式で入力してください',
-        'acting_3.int'      => '指定の形式で入力してください',
+        'acting_1.int' => '指定の形式で入力してください',
+        'acting_2.int' => '指定の形式で入力してください',
+        'acting_3.int' => '指定の形式で入力してください',
     ];
 
     my $msg = $self->get_msg_validator( $check_params, $msg_params, );
@@ -314,6 +314,89 @@ sub check_profile_with_auth_validator {
         mail          => $msg->{mail},
         acting_1      => $msg->{acting_1},
     };
+}
+
+=head2 writing_profile
+
+    テーブル書込み、新規、修正、両方に対応
+
+=cut
+
+sub writing_profile {
+    my $self = shift;
+    my $teng = $self->teng();
+
+    # 認証 admin or general
+    my $auth_data = +{
+        password  => $self->params()->{password},
+        modify_on => now_datetime(),
+    };
+    $self->login_row()->update($auth_data);
+
+    # profile
+    my $profile_data = +{
+        nick_name  => $self->params()->{nick_name},
+        full_name  => $self->params()->{full_name},
+        phonetic_name => $self->params()->{phonetic_name},
+        tel           => $self->params()->{tel},
+        mail          => $self->params()->{mail},
+        status        => 1,
+        modify_on     => now_datetime(),
+    };
+
+    if ( $self->type() eq 'insert' && $self->login_table() eq 'admin' ) {
+        $profile_data->{admin_id}  = $self->params()->{id};
+        $profile_data->{create_on} = now_datetime();
+        $teng->insert( 'profile', $profile_data, );
+    }
+    elsif ( $self->type() eq 'insert' && $self->login_table() eq 'general' ) {
+        $profile_data->{general_id} = $self->params()->{id};
+        $profile_data->{create_on}  = now_datetime();
+        $teng->insert( 'profile', $profile_data, );
+    }
+    else {
+        $self->profile_row()->update($profile_data);
+    }
+
+    return if $self->login_table() eq 'admin';
+
+    # acting
+    my $acting_common = +{
+        general_id => $self->params()->{id} || undef,
+        status     => 1,
+        modify_on  => now_datetime(),
+    };
+
+    my $acting_1 = +{
+        %{$acting_common},
+        storeinfo_id => $self->params()->{acting_1} || undef,
+    };
+
+    my $acting_2 = +{
+        %{$acting_common},
+        storeinfo_id => $self->params()->{acting_2} || undef,
+    };
+
+    my $acting_3 = +{
+        %{$acting_common},
+        storeinfo_id => $self->params()->{acting_3} || undef,
+    };
+
+    my $acting_data = [ $acting_1, $acting_2, $acting_3, ];
+    my $acting_rows = $self->acting_rows();
+
+    ACTING_UPDATE:
+    for my $acting ( @{$acting_data} ) {
+        my $acting_row = shift @{$acting_rows};
+        if ($acting_row) {
+            $acting_row->update($acting);
+            next ACTING_UPDATE;
+        }
+        $acting->{create_on} = now_datetime();
+        $teng->insert( 'acting', $acting, );
+    }
+
+    return;
 }
 
 =head2 get_fill_in_profile

@@ -56,14 +56,17 @@ sub profile {
 
 sub _insert {
     my $self  = shift;
-    # my $model = shift;
+    my $model = shift;
 
-    # return $self->_render_acting($model) if 'GET' eq $model->method();
+    if ( 'GET' eq $model->method() ) {
+        $model->set_form_params_profile('profile');
+        return $self->_render_profile($model);
+    }
 
-    # $model->type('insert');
-    # $model->flash_msg( +{ touroku => '登録完了' } );
+    $model->type('insert');
+    $model->flash_msg( +{ touroku => '登録完了' } );
 
-    # return $self->_common($model);
+    return $self->_common($model);
 }
 
 sub _update {
@@ -90,15 +93,9 @@ sub _common {
     return $self->stash($valid_msg), $self->_render_profile($model)
         if $valid_msg;
 
-    # my $valid_msg_db = $model->check_acting_validator_db();
-
-    # return $self->stash($valid_msg_db), $self->_render_acting($model)
-    #     if $valid_msg_db;
-
-    # $model->writing_acting();
-    # $self->flash( $model->flash_msg() );
-
-    # return $self->redirect_to('mainte_acting_serch');
+    $model->writing_profile();
+    $self->flash( $model->flash_msg() );
+    return $self->redirect_to('profile_comp');
 }
 
 sub _render_profile {
@@ -114,204 +111,6 @@ sub _render_profile {
     my $output = $model->get_fill_in_profile();
     return $self->render( text => $output );
 }
-
-# #========
-# #--------
-
-#     #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、
-#     my $param_hash = $self->req->params->to_hash;
-#     $self->stash(param_hash => $param_hash);
-#     #入力検査合格、の時、値を新規もしくは修正アップロード実行
-#     if ( $self->validate($validator,$param_hash) ) {
-#         #入力値を全部受け取っておく念のために時刻取得
-#         my $today = localtime;
-#         # 入力フォームから受ける値変数
-#         # admin or general
-#         my $id             = $self->param('id');
-#         my $password       = $self->param('password');
-#         # profile
-#         my $profile_id     = $self->param('profile_id');
-#         my $nick_name      = $self->param('nick_name');
-#         my $full_name      = $self->param('full_name');
-#         my $phonetic_name  = $self->param('phonetic_name');
-#         my $tel            = $self->param('tel');
-#         my $mail           = $self->param('mail');
-#         my $status         = 1 ; # 承認させる
-#         my $create_on      = $today->datetime(date => '-', T => ' ');
-#         my $modify_on      = $today->datetime(date => '-', T => ' ');
-
-#         #先にお気に入りの登録をする
-#         my $acting_1       = $self->param('acting_1');
-#         my $acting_2       = $self->param('acting_2');
-#         my $acting_3       = $self->param('acting_3');
-#         #ステータスが1のactingをすべて0にしておく
-#         my @actings_ref    = $teng->search('acting',  +{general_id => $general_id , status => 1});
-#         if (@actings_ref) {
-#             my @acting_status;
-#             for my $acting_ref (@actings_ref) {
-#                 push (@acting_status,$acting_ref->id);
-#             }
-
-#             for my $acting_id (@acting_status) {
-#                 my $count = $teng->update('acting' => {
-#                     'status'        => 0,
-#                     'modify_on'     => $modify_on,
-#                 },{
-#                     'id'            => $acting_id,
-#                 });
-#             }
-#         }
-#         #すべてのactingを取り出し
-#         if ($acting_1) {
-#             my $acting1_ref    = $teng->single('acting',  +{general_id => $general_id , storeinfo_id => $acting_1});
-#             if ($acting1_ref) {
-#                 my $acting_id = $acting1_ref->id;
-#                 my $count = $teng->update('acting' => {
-#                     'status'        => $status,
-#                     'modify_on'     => $modify_on,
-#                 },{
-#                     'id'            => $acting_id,
-#                 });
-#             }
-#             else {
-#                 my $row = $teng->insert('acting' => {
-#                     'general_id'    => $general_id,
-#                     'storeinfo_id'  => $acting_1,
-#                     'status'        => $status,
-#                     'create_on'     => $create_on,
-#                 });
-#             }
-#         }
-
-
-#         if ($acting_2) {
-#             my $acting2_ref    = $teng->single('acting',  +{general_id => $general_id , storeinfo_id => $acting_2});
-#             if ($acting2_ref) {
-#                 my $acting_id = $acting2_ref->id;
-#                 my $count = $teng->update('acting' => {
-#                     'status'        => $status,
-#                     'modify_on'     => $modify_on,
-#                 },{
-#                     'id'            => $acting_id,
-#                 });
-#             }
-#             else {
-#                 my $row = $teng->insert('acting' => {
-#                     'general_id'    => $general_id,
-#                     'storeinfo_id'  => $acting_2,
-#                     'status'        => $status,
-#                     'create_on'     => $create_on,
-#                 });
-#             }
-#         }
-
-
-
-#         if ($acting_3) {
-#             my $acting3_ref    = $teng->single('acting',  +{general_id => $general_id , storeinfo_id => $acting_3});
-#             if ($acting3_ref) {
-#                 my $acting_id = $acting3_ref->id;
-#                 my $count = $teng->update('acting' => {
-#                     'status'        => $status,
-#                     'modify_on'     => $modify_on,
-#                 },{
-#                     'id'            => $acting_id,
-#                 });
-#             }
-#             else {
-#                 my $row = $teng->insert('acting' => {
-#                     'general_id'    => $general_id,
-#                     'storeinfo_id'  => $acting_3,
-#                     'status'        => $status,
-#                     'create_on'     => $create_on,
-#                 });
-#             }
-#         }
-
-#         ##if# (@actings_ref) {
-#         ##  #  for my $acting_ref (@actings_ref) {
-#         ##  #      if ($acting_1) {
-#         ##  #          if ($acting_ref->storeinfo_id eq $acting_1) {
-#         ##  #              my $acting_id = $acting_ref->id;
-#         ##  #              my $count = $teng->update('acting' => {
-#         ##  #                  'status'        => $status,
-#         ##  #                  'modify_on'     => $modify_on,
-#         ##  #              },{
-#         ##  #                  'id'            => $acting_id,
-#         ##  #              });
-#         ##  #          }
-#         ##  #          else {
-#         ##  #              my $row = $teng->insert('acting' => {
-#         ##  #                  'general_id'    => $general_id,
-#         ##  #                  'storeinfo_id'  => $acting_1,
-#         ##  #                  'status'        => $status,
-#         ##  #                  'create_on'     => $create_on,
-#         ##  #              });
-#         ##  #          }
-#         ##  #      }
-
-#                     #if ($acting_ref->storeinfo_id eq $acting_2) {
-#                     #    my $acting_id = $acting_ref->id;
-#                     #    my $count = $teng->update('acting' => {
-#                     #        'status'        => $status,
-#                     #        'modify_on'     => $modify_on,
-#                     #    },{
-#                     #        'id'            => $acting_id,
-#                     #    });
-#                     #}
-#                     #if ($acting_ref->storeinfo_id eq $acting_3) {
-#                     #    my $acting_id = $acting_ref->id;
-#                     #    my $count = $teng->update('acting' => {
-#                     #        'status'        => $status,
-#                     #        'modify_on'     => $modify_on,
-#                     #    },{
-#                     #        'id'            => $acting_id,
-#                     #    });
-#                     #}
-
-
-
-#         #   #     my $acting_id = $acting_ref->id;
-#         #   #     my $count = $teng->update('acting' => {
-#         #   #         'status'        => 0,
-#         #   #         'modify_on'     => $modify_on,
-#         #   #     },{
-#         #   #         'id'            => $acting_id,
-#         #   #     });
-
-
-
-
-
-
-#         #    }
-#         #}
-#         #else {
-#         #    if ($acting_1) {
-#         #        my $row = $teng->insert('acting' => {
-#         #            'general_id'    => $general_id,
-#         #            'storeinfo_id'  => $acting_1,
-#         #            'status'        => $status,
-#         #            'create_on'     => $create_on,
-#         #        });
-#         #    }
-#         #    if ($acting_2) {
-#         #        my $row = $teng->insert('acting' => {
-#         #            'general_id'    => $general_id,
-#         #            'storeinfo_id'  => $acting_2,
-#         #            'status'        => $status,
-#         #            'create_on'     => $create_on,
-#         #        });
-#         #    }
-#         #    if ($acting_3) {
-#         #        my $row = $teng->insert('acting' => {
-#         #            'general_id'    => $general_id,
-#         #            'storeinfo_id'  => $acting_3,
-#         #            'status'        => $status,
-#         #            'create_on'     => $create_on,
-#         #        });
-#         #    }
-#         #}
 
 #         if ($id) {
 #         #idがある時、修正データの場合sql実行profile and admin or general

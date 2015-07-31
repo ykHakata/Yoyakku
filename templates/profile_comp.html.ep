@@ -5,7 +5,7 @@
   <div id="index_contents">
     <h1 class="input_ads">プロフィールの確認／<%= $login %></h1>
     <div class="input_ads_n">
-      <span id="profile_flash"><%= flash('henkou') %></span>
+      <span id="profile_flash"><%= flash('touroku') %><%= flash('henkou') %></span>
       <div class="input_ads_b">
         <a href="profile">編集</a>
       </div>

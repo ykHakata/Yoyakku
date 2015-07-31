@@ -169,30 +169,6 @@ sub get_startend_day_and_time {
     return $startend_day_time;
 }
 
-# データベースへの書き込み
-sub writing_db {
-    my $self        = shift;
-    my $table       = shift;
-    my $create_data = shift;
-    my $update_id   = shift;
-    my $type        = $self->type();
-
-    my $teng = $self->teng();
-
-    my $insert_row;
-    if ( $type eq 'insert' ) {
-        $insert_row = $teng->insert( $table, $create_data, );
-    }
-    elsif ( $type eq 'update' ) {
-        delete $create_data->{create_on};
-        $insert_row = $teng->single( $table, +{ id => $update_id }, );
-        $insert_row->update($create_data);
-    }
-    die 'not $insert_row' if !$insert_row;
-
-    return $insert_row;
-}
-
 # レコード更新の為の情報取得
 sub get_single_row_search_id {
     my $self      = shift;
