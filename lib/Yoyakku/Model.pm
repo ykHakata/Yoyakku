@@ -6,6 +6,7 @@ use Teng;
 use Teng::Schema::Loader;
 use FormValidator::Lite qw{Email URL DATE TIME};
 use base qw{Class::Accessor::Fast};
+use Yoyakku::Util qw{now_datetime};
 
 __PACKAGE__->mk_accessors(
     qw{params session method html login_row login_table login_name
@@ -85,6 +86,62 @@ sub writing_db {
     die 'not $insert_row' if !$insert_row;
 
     return $insert_row;
+}
+
+=head2 insert_admin_relation
+
+    admin 有効の際の関連データ作成
+
+=cut
+
+sub insert_admin_relation {
+    my $self         = shift;
+    my $new_admin_id = shift;
+
+    my $teng = $self->teng();
+
+    my $storeinfo_row
+        = $teng->single( 'storeinfo', +{ admin_id => $new_admin_id, }, );
+
+    # storeinfo 見つからないときは新規にレコード作成
+    if ( !$storeinfo_row ) {
+
+        my $create_data_storeinfo = +{
+            admin_id  => $new_admin_id,
+            status    => 1,
+            create_on => now_datetime(),
+            modify_on => now_datetime(),
+        };
+
+        my $insert_storeinfo_row
+            = $teng->insert( 'storeinfo', $create_data_storeinfo, );
+
+        # roominfo を 10 件作成
+        my $create_data_roominfo = +{
+            storeinfo_id      => $insert_storeinfo_row->id,
+            name              => undef,
+            starttime_on      => '10:00:00',
+            endingtime_on     => '22:00:00',
+            time_change       => 0,
+            rentalunit        => 1,
+            pricescomments    => '例）１時間２０００円より',
+            privatepermit     => 0,
+            privatepeople     => 2,
+            privateconditions => 0,
+            bookinglimit      => 0,
+            cancellimit       => 8,
+            remarks => '例）スタジオ内の飲食は禁止です。',
+            webpublishing => 1,
+            webreserve    => 3,
+            status        => 0,
+            create_on     => now_datetime(),
+            modify_on     => now_datetime(),
+        };
+
+        for my $i ( 1 .. 10 ) {
+            $teng->fast_insert( 'roominfo', $create_data_roominfo, );
+        }
+    }
 }
 
 # 入力値バリデート処理

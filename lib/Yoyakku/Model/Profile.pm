@@ -69,7 +69,7 @@ sub switch_stash_profile {
             my $storeinfo_row = $self->storeinfo_row();
 
             # 店舗ステータスなし(9)
-            if ( $storeinfo_row->status eq 0 ) {
+            if ( $storeinfo_row && $storeinfo_row->status eq 0 ) {
                 $switch_header = 9;
             }
         }
@@ -220,6 +220,9 @@ sub get_acting_ids {
     my $self = shift;
 
     my $get_acting_ids;
+
+    return if !$self->acting_rows();
+
     for my $acting_row ( @{$self->acting_rows()} ) {
         push @{$get_acting_ids},
             +{
@@ -329,9 +332,16 @@ sub writing_profile {
     # 認証 admin or general
     my $auth_data = +{
         password  => $self->params()->{password},
+        status    => 1,
         modify_on => now_datetime(),
     };
     $self->login_row()->update($auth_data);
+
+    # admin の場合は storeinfo, roominfo 作成
+    if ( $self->login_table eq 'admin' ) {
+        my $admin_id = $self->login_row()->id;
+        $self->insert_admin_relation($admin_id);
+    }
 
     # profile
     my $profile_data = +{
