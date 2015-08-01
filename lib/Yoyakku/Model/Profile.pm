@@ -437,13 +437,11 @@ __END__
 
 =item * L<utf8>
 
-=item * L<Time::Piece>
+=item * L<Yoyakku::Util>
 
-=item * L<Time::Seconds>
+=item * L<parent>
 
 =item * L<Yoyakku::Model>
-
-=item * L<Yoyakku::Util>
 
 =back
 
