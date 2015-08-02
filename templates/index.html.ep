@@ -4,7 +4,7 @@
 <%= include './temp/header_navi_new' %>
 <div id="index_contents">
 <div id="contentsHeader">
-<h2 id="month"><%= $now_data->year %>年<%= $now_data->mon %>月</h2>
+<h2 id="month"><%= $now_date->year %>年<%= $now_date->mon %>月</h2>
 <p id="oneliner_ads">
 <a href="http://www.yoyakku.com/tutorial" target="_blank">yoyakku(ヨヤック)β版のご案内</a>
 </p>
@@ -28,11 +28,11 @@
             %# 第一週目の時だけの
             % if ($i==0) {
               %# 取り出した日付が今日より未来の場合予約リンク、日付、曜日を挿入
-              % if ($day >= $now_data->mday) {
+              % if ($day >= $now_date->mday) {
               <a href="javascript:void(0)" onclick="document.cal_name<%= $iii %>.submit();return false;"><%= $day %>(<%= $caps->[$j] %>)</a>
               <form name="cal_name<%= $iii %>" method="get" action="region_state">
               % my $result = sprintf("%02d", $day );
-              <input type="hidden" name="select_date" size="10" value="<%= $now_data->strftime('%Y-%m') %>-<%= $result %>">
+              <input type="hidden" name="select_date" size="10" value="<%= $now_date->strftime('%Y-%m') %>-<%= $result %>">
               </form>
               <% } else { %>
                 %# 今日より過去の場合は日付、曜日だけを入れる
@@ -41,11 +41,11 @@
             %# 第一週目以外のばあい
             % } else {
               %# 取り出した日付が今日より未来の場合予約リンク、日付を挿入
-              % if ($day >= $now_data->mday) {
+              % if ($day >= $now_date->mday) {
                 <a href="javascript:void(0)" onclick="document.cal_name<%= $iii %>.submit();return false;"><%= $day %></a>
                 <form name="cal_name<%= $iii %>" method="get" action="region_state">
                 % my $result = sprintf("%02d", $day );
-                <input type="hidden" name="select_date" size="10" value="<%= $now_data->strftime('%Y-%m') %>-<%= $result %>">
+                <input type="hidden" name="select_date" size="10" value="<%= $now_date->strftime('%Y-%m') %>-<%= $result %>">
                 </form>
               <% } else { %>
                 %# 今日より過去の場合は日付だけを入れる
@@ -67,7 +67,7 @@
                 % $id_d_date = $id_d_date+0;
                 %# 今見ている日付と取り出した日付が同じか比較同じの場合はイベント広告入れる
                 %# 入れた日付が今日以降の場合はイベント広告のリンク入れをliタグで囲む
-                % if ($day == $id_d_date and $day >= $now_data->mday) {
+                % if ($day == $id_d_date and $day >= $now_date->mday) {
                   % $id_d_date = $2.$3;
                   % $id_d_date = $id_d_date+0;
                   % if ($ul_tag == 0) {
@@ -90,7 +90,7 @@
                   % $ul_tag++;
                 % }
                 %# 入れた日付が今日以前の場合はイベント広告のリンク入れをpタグで囲む
-                % if ($day == $id_d_date and $day <= $now_data->mday) {
+                % if ($day == $id_d_date and $day <= $now_date->mday) {
                   % $id_d_date = $2.$3;
                   % $id_d_date = $id_d_date+0;
                   %# 今回取り出した日付とmy $id_md_data_oldを比較

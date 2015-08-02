@@ -68,6 +68,16 @@ DISTRIBUTIONS
       strict 0
       version 0.88
       warnings 0
+  Calendar-Simple-1.21
+    pathname: D/DA/DAVECROSS/Calendar-Simple-1.21.tar.gz
+    provides:
+      Calendar::Simple 1.21
+    requirements:
+      Carp 0
+      Config 0
+      Test::More 0
+      Time::Local 0
+      perl v5.6.0
   Class-Accessor-0.34
     pathname: K/KA/KASEI/Class-Accessor-0.34.tar.gz
     provides:

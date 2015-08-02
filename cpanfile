@@ -6,3 +6,4 @@ requires 'HTML::FillInForm', '== 2.21';
 requires 'Teng', '== 0.28';
 requires 'DBD::SQLite', '1.46';
 requires 'Class::Accessor::Fast', '== 0.34';
+requires 'Calendar::Simple', '== 1.21';

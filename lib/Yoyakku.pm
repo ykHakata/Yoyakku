@@ -122,6 +122,10 @@ sub startup {
     $r->route('/mainte_post_new')
         ->to( controller => 'Mainte::Post', action => 'mainte_post_new' );
 
+    # オープニングカレンダー(index)
+    $r->route('/index')
+        ->to( controller => 'Calendar', action => 'index' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 
