@@ -12,6 +12,8 @@ sub _init {
     $model->method( uc $self->req->method );
     $model->session( $self->session );
 
+    return if !$model->get_header_stash_index();
+
     my $header_stash = $model->get_header_stash_index();
     $self->stash($header_stash);
 
@@ -19,8 +21,11 @@ sub _init {
 }
 
 sub index {
-    my $self   = shift;
-    my $model  = $self->_init();
+    my $self  = shift;
+    my $model = $self->_init();
+
+    return $self->redirect_to('/profile') if !$model;
+
     my $teng   = $model->teng();
     my $date_6 = chang_date_6();
 

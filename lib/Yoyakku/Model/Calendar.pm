@@ -31,6 +31,8 @@ sub get_header_stash_index {
     my $self  = shift;
     my $login = $self->check_auth_db_yoyakku();
     # return if !$login;
+
+    return if !$self->switch_stash_index();
     return $self->switch_stash_index();
 }
 
@@ -43,87 +45,23 @@ sub get_header_stash_index {
 sub switch_stash_index {
     my $self = shift;
 
-    # my $table      = $self->login_table();
-    # my $id         = $self->login_row()->id;
-    # my $login_row  = $self->login_row();
-    # my $login_name = $self->login_name();
+    my $table      = $self->login_table();
+    my $login_row  = $self->login_row();
+    my $login_name = $self->login_name();
 
-    my $login_name;
+    return if $login_row && !$login_row->status;
+
     my $switch_header = 2;
 
-
-# if ($admin_id) {
-#     my $admin_ref   = $teng->single('admin', +{id => $admin_id});
-#     my $profile_ref = $teng->single('profile', +{admin_id => $admin_id});
-#        $login       = q{(admin)}.$profile_ref->nick_name;
-
-#     my $status = $admin_ref->status;
-#     if ($status) {
-#         my $storeinfo_ref = $teng->single('storeinfo', +{admin_id => $admin_id});
-#         if ($storeinfo_ref->status eq 0) {
-#             $switch_header = 9;
-#         }
-#         else {
-#             $switch_header = 4;
-#         }
-#     }
-#     else {
-#         #$switch_header = 8;
-#         return $self->redirect_to('profile');
-#     }
-# }
-# elsif ($general_id) {
-#     my $general_ref  = $teng->single('general', +{id => $general_id});
-#     #$login         = $general_ref->login;
-#     my $profile_ref = $teng->single('profile', +{general_id => $general_id});
-#     $login          = $profile_ref->nick_name;
-
-#     my $status = $general_ref->status;
-#     if ($status) {
-#         $switch_header = 3;
-#     }
-#     else {
-#         #$switch_header = 8;
-#         return $self->redirect_to('profile');
-#     }
-# }
-# else {
-
-#     #return $self->redirect_to('index');
-# }
-
-# $self->stash(login => $login);# #ログイン名をヘッダーの右に表示させる
-# # headerの切替
-# $self->stash(switch_header => $switch_header);
-
-
-
-    # # ヘッダーの切替(初期値 8 ステータスなし、承認されてない)
-    # my $switch_header = 8;
-
-    # # ステータスあり(admin 7, general 6)
-    # if ( $login_row->status ) {
-
-    #     $switch_header
-    #         = $table eq 'admin'   ? 7
-    #         : $table eq 'general' ? 6
-    #         :                       8;
-
-    #     if ( $table eq 'admin' ) {
-    #         my $storeinfo_row = $self->storeinfo_row();
-
-    #         # 店舗ステータスなし(9)
-    #         if ( $storeinfo_row && $storeinfo_row->status eq 0 ) {
-    #             $switch_header = 9;
-    #         }
-    #     }
-    # }
-
-
-
-
-
-
+    if ( $table eq 'admin' ) {
+        $switch_header = 4;
+        if ( $self->storeinfo_row()->status eq 0 ) {
+            $switch_header = 9;
+        }
+    }
+    elsif ( $table eq 'general' ) {
+        $switch_header = 3;
+    }
 
     my $header_params = switch_header_params( $switch_header, $login_name );
 
