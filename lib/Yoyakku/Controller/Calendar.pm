@@ -1,10 +1,7 @@
 package Yoyakku::Controller::Calendar;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Calendar;
-use Yoyakku::Util qw{chang_date_6};
-use Calendar::Simple;
 
-use Data::Dumper;
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Calendar->new();
@@ -26,43 +23,21 @@ sub index {
 
     return $self->redirect_to('/profile') if !$model;
 
-    my $teng   = $model->teng();
-    my $date_6 = chang_date_6();
+    my $now_date = $model->get_date_info('now_date');
+    my $caps     = $model->get_calender_caps();
+    my $cal_now  = $model->get_calendar_info($now_date);
+    my $ads_rows = $model->get_cal_info_ads_rows($now_date);
 
-    $self->stash( class => 'index_this_m', now_date => $date_6->{now_date}, );
-
-    #曜日の配列を作る
-    my @caps = ( '日', '月', '火', '水', '木', '金', '土' );
-    #カレンダー情報、今月、1,2,3ヶ月後
-    my @cal_now
-        = calendar( $date_6->{now_date}->mon, $date_6->{now_date}->year );
-
-    #今月のカレンダーと曜日の配列
     $self->stash(
-        cal_now => \@cal_now,
-        caps    => \@caps
+        class    => 'index_this_m',
+        now_date => $now_date,
+        cal_now  => $cal_now,
+        caps     => $caps,
+        ads_rows => $ads_rows,
     );
 
-    #条件検索のため、今月の情報取得
-    my $like_now_data = $date_6->{now_date}->strftime('%Y-%m');
-
-    # 今月のイベント広告データ取得 # 3/14修正後
-    my $sql = q{
-        SELECT * FROM ads
-        WHERE kind=1 AND displaystart_on
-        like :like_now_data
-        ORDER BY displaystart_on ASC;
-    };
-
-    my $bind_values = +{ like_now_data => $like_now_data . "%", };
-
-    my @ads_rows = $teng->search_named( $sql, $bind_values );
-
-    $self->stash( ads_rows => \@ads_rows );   # テンプレートへ送り、
-
-    return $self->render(template => 'index', format => 'html');
+    return $self->render( template => 'index', format => 'html' );
 }
-
 
 1;
 
