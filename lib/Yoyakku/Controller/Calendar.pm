@@ -8,20 +8,15 @@ sub _init {
     $model->params( $self->req->params->to_hash );
     $model->method( uc $self->req->method );
     $model->session( $self->session );
-
-    return if !$model->get_header_stash_index();
-
+    $model->check_auth_db_yoyakku();
     my $header_stash = $model->get_header_stash_index();
     $self->stash($header_stash);
-
     return $model;
 }
 
 sub index {
     my $self  = shift;
     my $model = $self->_init();
-
-    return $self->redirect_to('/profile') if !$model;
 
     my $now_date = $model->get_date_info('now_date');
     my $caps     = $model->get_calender_caps();
@@ -36,7 +31,7 @@ sub index {
         ads_rows => $ads_rows,
     );
 
-    return $self->render( template => 'index', format => 'html' );
+    return $self->render( template => 'index', format => 'html', );
 }
 
 1;

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
-use Yoyakku::Util qw{switch_header_params get_fill_in_params chang_date_6};
+use Yoyakku::Util qw{chang_date_6};
 use Calendar::Simple;
 
 =encoding utf8
@@ -93,21 +93,6 @@ sub get_date_info {
 =cut
 
 sub get_header_stash_index {
-    my $self  = shift;
-    my $login = $self->check_auth_db_yoyakku();
-    # return if !$login;
-
-    return if !$self->switch_stash_index();
-    return $self->switch_stash_index();
-}
-
-=head2 switch_stash_index
-
-    index アクションログイン時の初期値作成
-
-=cut
-
-sub switch_stash_index {
     my $self = shift;
 
     my $table      = $self->login_table();
@@ -128,26 +113,8 @@ sub switch_stash_index {
         $switch_header = 3;
     }
 
-    my $header_params = switch_header_params( $switch_header, $login_name );
-
-    my $header_params_hash_ref = +{
-        site_title_link        => $header_params->{site_title_link},
-        header_heading_link    => $header_params->{header_heading_link},
-        header_heading_name    => $header_params->{header_heading_name},
-        header_navi_class_name => $header_params->{header_navi_class_name},
-        header_navi_link_name  => $header_params->{header_navi_link_name},
-        header_navi_row_name   => $header_params->{header_navi_row_name},
-    };
-
-    my $stash_profile = +{
-        switch_header => $switch_header,    # 切替
-        %{$header_params_hash_ref},         # ヘッダー各値
-    };
-
-    return $stash_profile;
+    return $self->get_header_stash_params( $switch_header, $login_name );
 }
-
-
 
 1;
 

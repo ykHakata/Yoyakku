@@ -6,7 +6,7 @@ use Teng;
 use Teng::Schema::Loader;
 use FormValidator::Lite qw{Email URL DATE TIME};
 use base qw{Class::Accessor::Fast};
-use Yoyakku::Util qw{now_datetime};
+use Yoyakku::Util qw{now_datetime switch_header_params};
 
 __PACKAGE__->mk_accessors(
     qw{params session method html login_row login_table login_name
@@ -28,6 +28,36 @@ This documentation referes to Yoyakku::Model version 0.0.1
     データベース接続関連の API を提供
 
 =cut
+
+=head2 get_header_stash_params
+
+    header の stash の値を取得
+
+=cut
+
+sub get_header_stash_params {
+    my $self          = shift;
+    my $switch_header = shift;
+    my $login_name    = shift;
+
+    my $header_params = switch_header_params( $switch_header, $login_name );
+
+    my $header_params_hash_ref = +{
+        site_title_link        => $header_params->{site_title_link},
+        header_heading_link    => $header_params->{header_heading_link},
+        header_heading_name    => $header_params->{header_heading_name},
+        header_navi_class_name => $header_params->{header_navi_class_name},
+        header_navi_link_name  => $header_params->{header_navi_link_name},
+        header_navi_row_name   => $header_params->{header_navi_row_name},
+    };
+
+    my $stash = +{
+        switch_header => $switch_header,    # 切替
+        %{$header_params_hash_ref},         # ヘッダー各値
+    };
+
+    return $stash;
+}
 
 =head2 get_storeinfo_rows_all
 

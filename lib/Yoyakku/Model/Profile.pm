@@ -2,7 +2,7 @@ package Yoyakku::Model::Profile;
 use strict;
 use warnings;
 use utf8;
-use Yoyakku::Util qw{now_datetime switch_header_params get_fill_in_params};
+use Yoyakku::Util qw{now_datetime get_fill_in_params};
 use parent 'Yoyakku::Model';
 
 =encoding utf8
@@ -21,26 +21,13 @@ profile コントローラーのロジック API
 
 =cut
 
-=head2 get_header_stash_auth_profile
+=head2 get_header_stash_profile
 
-    ログイン確認、ヘッダー初期値取得
-
-=cut
-
-sub get_header_stash_auth_profile {
-    my $self  = shift;
-    my $login = $self->check_auth_db_yoyakku();
-    return if !$login;
-    return $self->switch_stash_profile();
-}
-
-=head2 switch_stash_profile
-
-    profile アクションログイン時の初期値作成
+    ヘッダー初期値取得
 
 =cut
 
-sub switch_stash_profile {
+sub get_header_stash_profile {
     my $self = shift;
 
     my $table      = $self->login_table();
@@ -75,23 +62,7 @@ sub switch_stash_profile {
         }
     }
 
-    my $header_params = switch_header_params( $switch_header, $login_name );
-
-    my $header_params_hash_ref = +{
-        site_title_link        => $header_params->{site_title_link},
-        header_heading_link    => $header_params->{header_heading_link},
-        header_heading_name    => $header_params->{header_heading_name},
-        header_navi_class_name => $header_params->{header_navi_class_name},
-        header_navi_link_name  => $header_params->{header_navi_link_name},
-        header_navi_row_name   => $header_params->{header_navi_row_name},
-    };
-
-    my $stash_profile = +{
-        switch_header => $switch_header,    # 切替
-        %{$header_params_hash_ref},         # ヘッダー各値
-    };
-
-    return $stash_profile;
+    return $self->get_header_stash_params( $switch_header, $login_name );
 }
 
 =head2 set_form_params_profile

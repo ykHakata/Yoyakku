@@ -10,10 +10,9 @@ sub _init {
     $model->method( uc $self->req->method );
     $model->session( $self->session );
 
-    my $header_stash = $model->get_header_stash_auth_profile();
+    return if !$model->check_auth_db_yoyakku();
 
-    return $self->redirect_to('/index') if !$header_stash;
-
+    my $header_stash = $model->get_header_stash_profile();
     $self->stash($header_stash);
 
     return $model;
@@ -22,6 +21,8 @@ sub _init {
 sub profile_comp {
     my $self  = shift;
     my $model = $self->_init();
+
+    return $self->redirect_to('/index') if !$model;
 
     $self->stash(
         class         => 'profile_comp',
@@ -37,6 +38,8 @@ sub profile_comp {
 sub profile {
     my $self  = shift;
     my $model = $self->_init();
+
+    return $self->redirect_to('/index') if !$model;
 
     my $init_valid_params_profile = $model->get_init_valid_params_profile();
 
