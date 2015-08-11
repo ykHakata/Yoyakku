@@ -1,7 +1,7 @@
 package Yoyakku::Controller::Calendar;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Calendar;
-
+use Data::Dumper;
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Calendar->new();
@@ -34,18 +34,35 @@ sub index {
     return $self->render( template => 'index', format => 'html', );
 }
 
+sub index_next_m {
+    my $self  = shift;
+    my $model = $self->_init();
+
+    my $cal_next1m = $model->get_date_info('cal_next1m');
+    my $caps       = $model->get_calender_caps();
+    my $cal_next1m = $model->get_calendar_info($cal_next1m);
+    my $ads_rows   = $model->get_cal_info_ads_rows($cal_next1m);
+
+    $self->stash(
+        class      => 'index_next_m',
+        cal_next1m => $cal_next1m,
+        caps       => $caps,
+        ads_rows   => $ads_rows,
+    );
+
+    return $self->render( template => 'index_next_m', format => 'html', );
+}
+
 1;
 
 __END__
 
-
-#今月トップのコントロール-----------------------------
-get '/index' => sub {
+#1ヶ月後トップのコントロール-----------------------------
+get '/index_next_m' => sub {
 my $self = shift;
-# テンプレート用bodyのクラス名
-my $class = "index_this_m";
+# テンプレートbodyのクラス名を定義
+my $class = "index_next_m";
 $self->stash(class => $class);
-#die "test!!stop!!";
 #ログイン機能==========================================
 my $login_id;
 my $login;
@@ -98,6 +115,7 @@ $self->stash(login => $login);# #ログイン名をヘッダーの右に表示�
 # headerの切替
 $self->stash(switch_header => $switch_header);
 #====================================================
+#====================================================
 #日付変更線を６時に変更
 my $now_date    = localtime;
 
@@ -108,7 +126,8 @@ my $next1m_date = $chang_date_ref->{next1m_date};
 my $next2m_date = $chang_date_ref->{next2m_date};
 my $next3m_date = $chang_date_ref->{next3m_date};
 #====================================================
-#新しい日付情報取得のスクリプト======================
+
+##新しい日付情報取得のスクリプト======================
 ## 時刻(日付)取得、現在、1,2,3ヶ月後
 #my $now_date    = localtime;
 #
@@ -122,8 +141,8 @@ my $next3m_date = $chang_date_ref->{next3m_date};
 #曜日の配列を作る
 my @caps = ("日","月","火","水","木","金","土");
 #カレンダー情報、今月、1,2,3ヶ月後
-my @cal_now    = calendar($now_date->mon,$now_date->year);
-#my @cal_next1m = calendar($next1m_date->mon,$next1m_date->year);
+#my @cal_now    = calendar($now_date->mon,$now_date->year);
+my @cal_next1m = calendar($next1m_date->mon,$next1m_date->year);
 #my @cal_next2m = calendar($next2m_date->mon,$next2m_date->year);
 #my @cal_next3m = calendar($next3m_date->mon,$next3m_date->year);
 # 時刻(日付)取得、現在、1,2,3ヶ月後(ヘッダー用)
@@ -136,20 +155,20 @@ $self->stash(
 
 #今月のカレンダーと曜日の配列
 $self->stash(
-    cal_now => \@cal_now,
-    caps    => \@caps
+    cal_next1m => \@cal_next1m,
+    caps       => \@caps
 );
 
 #====================================================
-#条件検索のため、今月の情報取得
-my $like_now_data = $now_date->strftime('%Y-%m');
-# 今月のイベント広告データ取得 # 3/14修正後
+#条件検索のため、一ヶ月後の情報取得
+my $like_next1m_data = $next1m_date->strftime('%Y-%m');
+# 一ヶ月後のイベント広告データ取得
 my @ads_rows = $teng->search_named(q{
     select * from ads where
-    kind=1 and displaystart_on
-    like :like_now_data order by displaystart_on asc;
-}, { like_now_data => $like_now_data."%" });
+    displaystart_on
+    like :like_next1m_data order by displaystart_on asc;
+}, { like_next1m_data => $like_next1m_data."%" });
 $self->stash(ads_rows => \@ads_rows);# テンプレートへ送り、
-$self->render('index');
-};
 
+$self->render('index_next_m');
+};
