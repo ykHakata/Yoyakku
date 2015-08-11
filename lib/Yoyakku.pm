@@ -130,6 +130,10 @@ sub startup {
     $r->route('/index_next_m')
         ->to( controller => 'Calendar', action => 'index_next_m' );
 
+    # オープニングカレンダー2ヶ月後(index_next_two_m)
+    $r->route('/index_next_two_m')
+        ->to( controller => 'Calendar', action => 'index_next_two_m' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 
