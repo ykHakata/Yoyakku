@@ -32,17 +32,17 @@ sub get_cal_info_ads_rows {
     my $self      = shift;
     my $date_info = shift;
 
-    my $teng          = $self->teng();
-    my $like_now_data = $date_info->strftime('%Y-%m');
+    my $teng      = $self->teng();
+    my $like_date = $date_info->strftime('%Y-%m');
 
     # 今月のイベント広告データ取得
     my $sql = q{
         SELECT * FROM ads
         WHERE kind=1 AND displaystart_on
-        like :like_now_data
+        like :like_date
         ORDER BY displaystart_on ASC;
     };
-    my $bind_values = +{ like_now_data => $like_now_data . "%", };
+    my $bind_values = +{ like_date => $like_date . "%", };
     my @ads_rows = $teng->search_named( $sql, $bind_values );
     return \@ads_rows;
 }
