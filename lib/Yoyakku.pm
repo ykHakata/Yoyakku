@@ -122,6 +122,10 @@ sub startup {
     $r->route('/mainte_post_new')
         ->to( controller => 'Mainte::Post', action => 'mainte_post_new' );
 
+    # トップページ遷移(/)
+    $r->route('/')
+        ->to( controller => 'Calendar', action => 'index' );
+
     # オープニングカレンダー(index)
     $r->route('/index')
         ->to( controller => 'Calendar', action => 'index' );
