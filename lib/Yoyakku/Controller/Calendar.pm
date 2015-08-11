@@ -74,6 +74,26 @@ sub index_next_two_m {
     return $self->render( template => 'index_next_two_m', format => 'html', );
 }
 
+sub index_next_three_m {
+    my $self  = shift;
+    my $model = $self->_init();
+
+    my $next3m_date = $model->get_date_info('next3m_date');
+    my $caps        = $model->get_calender_caps();
+    my $cal_next3m  = $model->get_calendar_info($next3m_date);
+    my $ads_rows    = $model->get_cal_info_ads_rows($next3m_date);
+
+    $self->stash(
+        class       => 'index_next_three_m',
+        next3m_date => $next3m_date,
+        cal_next3m  => $cal_next3m,
+        caps        => $caps,
+        ads_rows    => $ads_rows,
+    );
+
+    return $self->render( template => 'index_next_three_m', format => 'html', );
+}
+
 1;
 
 __END__

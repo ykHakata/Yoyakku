@@ -1,0 +1,107 @@
+% layout 'default';
+% title 'yoyakkuオープニング';
+<div id="wrapper">
+<%= include './temp/header_navi_new' %>
+<div id="index_contents">
+<div id="contentsHeader">
+<h2 id="month"><%= $next3m_date->year %>年<%= $next3m_date->mon %>月</h2>
+<p id="oneliner_ads">
+<a href="http://www.yoyakku.com/tutorial" target="_blank">yoyakku(ヨヤック)β版のご案内</a>
+</p>
+<div id="cleafix"></div>
+</div>
+<table id="index_navi">
+<tbody>
+%# fromの名前識別用
+% my $iii = 0;
+%# 今月カレンダーのスクリプト
+%# カレンダー一週間づつ取り出しなくなるまで
+% for (my $i=0;$i<scalar @$cal_next3m;$i++) {
+    %# 一週間分を$rowに代入
+    % my $row = $cal_next3m->[$i];
+    <tr>
+        %# 一日分づつ取り出しなくなるまで、$dayに代入
+        % for(my $j=0;$j<scalar @$row;$j++) {
+            % my $day = $row->[$j];
+            <td>
+            % ++$iii;
+            %# 第一週目の時だけの
+            % if ($i==0) {
+                    %# 取り出した日付がある場合予約リンク、日付、曜日を挿入
+                    % if ($day) {
+                        <a href="javascript:void(0)" onclick="document.cal_name<%= $iii %>.submit();return false;"><%= $day %>(<%= $caps->[$j] %>)</a>
+                        <form name="cal_name<%= $iii %>" method="get" action="region_state">
+                        % my $result = sprintf("%02d", $day );
+                        <input type="hidden" name="select_date" size="10" value="<%= $next3m_date->strftime('%Y-%m') %>-<%= $result %>">
+                        </form>
+                    <% } else { %>
+                        %# 日付が無い場合曜日だけ
+                        (<%= $caps->[$j] %>)
+                    <% } %>
+            %# 第一週目以外のばあい
+            % } else {
+                    %# 取り出した日付がある場合予約リンク、日付を挿入
+                    % if ($day) {
+                        <a href="javascript:void(0)" onclick="document.cal_name<%= $iii %>.submit();return false;"><%= $day %></a>
+                        <form name="cal_name<%= $iii %>" method="get" action="region_state">
+                        % my $result = sprintf("%02d", $day );
+                        <input type="hidden" name="select_date" size="10" value="<%= $next3m_date->strftime('%Y-%m') %>-<%= $result %>">
+                        </form>
+                    % }
+            % }
+            %# 今見ている日付dayがイベント広告のデータの中にあるかチェックあれば取出し表示
+            %# イベント広告のデーターを一件づつ取出す
+            %# ulタグの為の変数
+            % my $ul_tag = 0;
+            %# ここから書き換え3/14
+            % my $siri_c = 0;
+            % my $id_d_data_old = 0;
+            % for my $ads_row (@{$ads_rows}) {
+                %# イベント日付のデータを正規表現で変換
+                % if ($ads_row->displaystart_on =~ /(\d{4})-(\d{1,2})-(\d{1,2})/) {
+                    %# 日付だけ取り出し数字にする
+                    % my $id_d_date = $3;
+                    % $id_d_date = $id_d_date+0;
+                    %# 今見ている日付と取り出した日付が同じか比較同じの場合はイベント広告入れる
+                    %# 入れた日付はすべて今日以降のはずなのでliタグで囲む
+                    % if ($day == $id_d_date) {
+                        % $id_d_date = $2.$3;
+                        % $id_d_date = $id_d_date+0;
+                        % if ($ul_tag == 0) {
+                        <ul>
+                        % }
+                        %# 今回取り出した日付とmy $id_md_data_oldを比較
+                        % if ($id_d_date == $id_d_data_old) {
+                        %# おなじであれば$siri ++ して、１にする
+                        % ++$siri_c;
+                        % } else {
+                        %# 同じでなければ$siri = 0;にしておく
+                        % $siri_c = 0;
+                        % }
+                        %# 今回取り出した日付を$id_d_data_oldに入れておく、次のループで使う
+                        % $id_d_data_old = $id_d_date ;
+                        %# 日付が重複しなければ$siri = 0;だが、重複する時$siri = 1,2,3繰り上がった状態になる
+                        <li id="L_B_open_<%= $id_d_date %>_<%= $siri_c %>">
+                        <%= $ads_row->name %>
+                        </li>
+                        % $ul_tag++;
+                    % }
+                % }
+            % }
+            %# ここまで書き換え3/14
+            % if ($ul_tag > 0) {
+                </ul>
+            % }
+            </td>
+        % }
+    </tr>
+% }
+</tbody>
+</table>
+<!-- /#index_contents --></div>
+<!-- !ライトボックス -->
+<div id='glayLayer'></div>
+<div id='overLayer'></div>
+<%= include './temp/lightbox_eventAds' %>
+<%= include './temp/footer' %>
+<!-- /#wrapper --></div>
