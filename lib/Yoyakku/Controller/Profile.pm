@@ -31,7 +31,7 @@ sub profile_comp {
     );
 
     $model->set_form_params_profile('profile_comp');
-    $model->template('profile_comp');
+    $model->template('profile/profile_comp');
     return $self->_render_profile($model);
 }
 
@@ -51,7 +51,7 @@ sub profile {
         %{$init_valid_params_profile},
     );
 
-    $model->template('profile');
+    $model->template('profile/profile');
 
     return $self->_insert($model) if !$model->profile_row();
     return $self->_update($model);
