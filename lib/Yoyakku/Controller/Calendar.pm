@@ -2,6 +2,22 @@ package Yoyakku::Controller::Calendar;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Calendar;
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+Yoyakku::Controller::Calendar - オープニングカレンダーのコントローラー
+
+=head1 VERSION (改定番号)
+
+This documentation referes to Yoyakku::Controller::Calendar version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    オープニングカレンダー関連機能のリクエストをコントロール
+
+=cut
+
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Calendar->new();
@@ -13,6 +29,12 @@ sub _init {
     $self->stash($header_stash);
     return $model;
 }
+
+=head2 index
+
+    オープニングカレンダー確認画面(今月)
+
+=cut
 
 sub index {
     my $self  = shift;
@@ -34,6 +56,12 @@ sub index {
     return $self->render( template => 'index', format => 'html', );
 }
 
+=head2 index_next_m
+
+    オープニングカレンダー確認画面(1ヶ月後)
+
+=cut
+
 sub index_next_m {
     my $self  = shift;
     my $model = $self->_init();
@@ -54,6 +82,12 @@ sub index_next_m {
     return $self->render( template => 'index_next_m', format => 'html', );
 }
 
+=head2 index_next_two_m
+
+    オープニングカレンダー確認画面(2ヶ月後)
+
+=cut
+
 sub index_next_two_m {
     my $self  = shift;
     my $model = $self->_init();
@@ -73,6 +107,12 @@ sub index_next_two_m {
 
     return $self->render( template => 'index_next_two_m', format => 'html', );
 }
+
+=head2 index_next_three_m
+
+    オープニングカレンダー確認画面(3ヶ月後)
+
+=cut
 
 sub index_next_three_m {
     my $self  = shift;
@@ -97,3 +137,21 @@ sub index_next_three_m {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojo::Base>
+
+=item * L<Mojolicious::Controller>
+
+=item * L<Yoyakku::Model::Calendar>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut

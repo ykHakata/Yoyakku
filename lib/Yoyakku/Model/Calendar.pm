@@ -119,3 +119,29 @@ sub get_header_stash_index {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<strict>
+
+=item * L<warnings>
+
+=item * L<utf8>
+
+=item * L<Yoyakku::Util>
+
+=item * L<parent>
+
+=item * L<Yoyakku::Model>
+
+=item * L<Calendar::Simple>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut
