@@ -6,8 +6,8 @@
 @import "structure.css";
 @import "header.css";
 @import "footer.css";
-/*@import "base/navigation.css";*/
-/*@import "base/textdecorations.css";*/
+@import "navigation.css";
+@import "textdecorations.css";
 
 /* Parts
 ========================================== */

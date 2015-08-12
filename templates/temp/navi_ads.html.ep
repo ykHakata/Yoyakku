@@ -1,0 +1,8 @@
+<ul id="banners">
+%# ナビ広告表示
+% foreach my $adsNavi_row (@$adsNavi_rows) {
+<li>
+<a href="<%= $adsNavi_row->url %>" target="_blank"><%= $adsNavi_row->name %></a>
+</li>
+% }
+</ul>

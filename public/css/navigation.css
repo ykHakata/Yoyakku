@@ -1,0 +1,614 @@
+@charset "utf-8";
+
+/* =======================================
+
+    Navigation CSS
+
+ -----------------------------------------
+    INDEX
+ -----------------------------------------
+    1.navigation(枠組み)
+    2.navigationテキスト
+========================================== */
+
+#navigation {}
+
+/* 1.navigation(枠組み)
+========================================== */
+
+    /* 1-1.localnavi
+    ----------------------------------- */
+    #navigation #localnavi {
+    }
+
+    #navigation #localnavi h2 {
+        border-top: 1px solid black;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        height: 29px;
+    }
+
+    #navigation #localnavi .section {
+        height: 150px;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        overflow: auto;
+    }
+
+    #navigation #localnavi .section_admin {
+        height: ;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+    }
+    #navigation #localnavi .section_reserv_list {
+
+    }
+    #navigation #localnavi .section li {
+        float: left;
+        display: inline;
+    }
+
+    #navigation #clearfix {
+        clear: both;
+    }
+
+    #admin_res {
+        background: ;
+        height: 210px;
+        overflow: auto;
+        padding: 5px;
+    }
+    /* 1-2.calnavi
+    ----------------------------------- */
+    #navigation table#calnavi ,
+    #navigation table#calnavi_0,
+    #navigation table#calnavi_1 ,
+    #navigation table#calnavi_2 ,
+    #navigation table#calnavi_3
+     {
+        width: 100%;
+        height: 250px;
+        border: 1px solid black;
+    }
+
+    .button_cal {
+        background: ;
+        width: 100%;
+        height: 100%;
+        padding: 5px;
+    }
+
+    #calnavi td {
+        width: 14%;
+    }
+
+    /* 1-3.banners
+    ----------------------------------- */
+    #navigation ul#banners {
+        border-top: 0px solid black;
+        height: 119px;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        overflow: auto;
+    }
+    /* 1-4.entry_navi
+    ----------------------------------- */
+    #navigation #entry_navi {
+        border-top: 0px solid black;
+        height: 399px;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+    }
+    /* 1-5.history
+    ----------------------------------- */
+    .historynavi {
+        height: 399px;
+        border: solid black;
+        border-width: 0px 1px 1px 1px ;
+    }
+
+    /* 1-6 .admin_store_edit
+       1-7 .admin_store_comp
+       1-8 .admin_reserv_edit
+       1-9 .admin_reserv_comp
+       1-10.admin_pub_edit
+    ----------------------------------- */
+    /*外枠の設定*/
+    body.admin_store_edit  #navigation #localnavi .section,
+    body.admin_store_comp  #navigation #localnavi .section,
+    body.admin_reserv_edit #navigation #localnavi .section,
+    body.admin_reserv_comp #navigation #localnavi .section,
+    body.admin_pub_edit    #navigation #localnavi .section,
+    body.admin_pub_comp    #navigation #localnavi .section {
+        height: 519px;
+        border: 1px solid black;
+        border-width: 0 1px 1px 1px;
+    }
+    /*テーブル枠基本設定*/
+    body.admin_store_edit  #navigation table th,
+    body.admin_store_edit  #navigation table td,
+    body.admin_store_comp  #navigation table th,
+    body.admin_store_comp  #navigation table td,
+    body.admin_reserv_edit #navigation table th,
+    body.admin_reserv_edit #navigation table td,
+    body.admin_reserv_comp #navigation table th,
+    body.admin_reserv_comp #navigation table td,
+    body.admin_pub_edit    #navigation table th,
+    body.admin_pub_edit    #navigation table td,
+    body.admin_pub_comp    #navigation table th,
+    body.admin_pub_comp    #navigation table td {
+        vertical-align: middle;
+        font-size: 138.5%;
+        line-height: 1.112;
+        height: 130px;
+    }
+    body.admin_store_edit  #navigation table th,
+    body.admin_store_comp  #navigation table th,
+    body.admin_reserv_edit #navigation table th,
+    body.admin_reserv_comp #navigation table th,
+    body.admin_pub_edit    #navigation table th,
+    body.admin_pub_comp    #navigation table th {
+        width: 250px;
+        text-align: left;
+    }
+    body.admin_store_edit  #navigation table td,
+    body.admin_store_comp  #navigation table td,
+    body.admin_reserv_edit #navigation table td,
+    body.admin_reserv_comp #navigation table td,
+    body.admin_pub_edit    #navigation table td,
+    body.admin_pub_comp    #navigation table td {
+        /*width: 80px;*/
+        width: 80px;
+        text-align: center;
+    }
+    /*強調*/
+    body.admin_store_edit  #navigation table #store,
+    body.admin_store_comp  #navigation table #store,
+    body.admin_reserv_edit #navigation table #store,
+    body.admin_reserv_comp #navigation table #store,
+    body.admin_pub_edit    #navigation table #store,
+    body.admin_pub_comp    #navigation table #store,
+    body.admin_reserv_edit #navigation table #reserv,
+    body.admin_reserv_comp #navigation table #reserv,
+    body.admin_pub_edit    #navigation table #reserv,
+    body.admin_pub_comp    #navigation table #reserv,
+    body.admin_pub_edit    #navigation table #publi,
+    body.admin_pub_comp    #navigation table #publi {
+        background: #ffbf80;
+    }
+
+    /* 1-7.admin_store_comp(取り消し線)
+    1-8 .admin_reserv_edit
+    1-9 .admin_reserv_comp
+    1-10.admin_pub_edit
+    ----------------------------------- */
+    body.admin_store_comp  #navigation table #store  th,
+    body.admin_reserv_comp #navigation table #store  th,
+    body.admin_reserv_edit #navigation table #store  th,
+    body.admin_pub_edit    #navigation table #store  th,
+    body.admin_pub_comp    #navigation table #store  th,
+    body.admin_reserv_comp #navigation table #reserv th,
+    body.admin_pub_edit    #navigation table #reserv th,
+    body.admin_pub_comp    #navigation table #reserv th,
+    body.admin_pub_comp    #navigation table #publi  th {
+        text-decoration: line-through;
+    }
+    /* 1-11.admin_pub_comp()
+    ----------------------------------- */
+    body.admin_pub_comp    table#s_guide #reserv_l th {
+        text-align: center;
+    }
+    /* 1-12.admin_reserv_list()
+       1-13.admin_reserv_update()
+       1-14.admin_reserv_input()
+       1-15.admin_reserv_provi()
+    ----------------------------------- */
+    /*外枠の設定*/
+    body.admin_reserv_list   #navigation #localnavi .section,
+    body.admin_reserv_update #navigation #localnavi .section,
+    body.admin_reserv_input #navigation #localnavi .section,
+    body.admin_reserv_provi #navigation #localnavi .section,
+    body.admin_reserv_update_kari #navigation #localnavi .section,
+    body.admin_reserv_conf #navigation #localnavi .section,
+    body.admin_reserv_update_cansel #navigation #localnavi .section,
+    body.admin_reserv_stop #navigation #localnavi .section,
+    body.admin_reserv_provi_stop #navigation #localnavi .section,
+    body.admin_reserv_update_stop #navigation #localnavi .section {
+        height: 519px;
+        border: 1px solid black;
+        border-width: 0 0px 0px 0px;
+    }
+    /*予約ナビの外枠*/
+    #r_navi_out {
+        border: 1px solid black;
+        border-width: 0 1px 1px 1px;
+        background: ;
+        width: 328px;
+        height: 250px;
+        padding: 20px 0 0 0;
+    }
+    body.admin_reserv_provi #r_navi_out,
+    body.admin_reserv_provi_stop #r_navi_out {
+        padding: 5px 0 0 0;
+        height: 265px;
+        }
+
+    body.admin_reserv_update #r_navi_out,
+    body.admin_reserv_input  #r_navi_out,
+    body.admin_reserv_update_kari #r_navi_out,
+    body.admin_reserv_update_cansel #r_navi_out,
+    body.up_admin_r_u_c_conf #r_navi_out,
+    body.admin_reserv_stop #r_navi_out,
+    body.admin_reserv_update_stop #r_navi_out {
+        border: 4px solid red;
+        background: #ffaaaa;
+        width: 322px;
+        height: 242px;
+    }
+    body.up_admin_r_u_c_conf #r_navi_out {
+        margin: 0 auto;
+        margin-top: 90px;
+    }
+    /*予約ナビの設定*/
+    /*枠組みの設定*/
+    #r_navi_t {}
+
+    #r_navi_t   tr,
+    #r_navi_b_t tr {
+        border-top: 1px solid black;
+        height: 30px;
+    }
+    #r_navi_b_t tr#botton {height: 55px;}
+
+    #r_navi_t   th,
+    #r_navi_t   td,
+    #r_navi_b_t td {
+        width: 110px;
+        text-align: center;
+        vertical-align: middle;
+     }
+
+    body.up_admin_r_u_c_conf #r_navi_b_t td {
+        width: 170px;
+     }
+
+     /*入力部品の設定*/
+    #r_navi_t   input,
+    #r_navi_t   select,
+    #r_navi_b_t input {
+        background: #c78d8d;
+        width: 100px;
+        height: 25px;
+    }
+    }
+    #r_navi_t #start_t .col2 select,
+    #r_navi_t #end_t   .col2 select {
+        font-size: 88%;
+    }
+
+    #r_navi_t #name_r input,
+    #r_navi_t #tel    input {width: 200px;}
+
+    #r_navi_b_t #botton input {
+        height: 40px;
+        border: 2px solid red;
+        background: #ff5555;
+        font-size: 120%;
+    }
+    body.admin_reserv_input #r_navi_b_t #botton input,
+    body.admin_reserv_stop #r_navi_b_t #botton input {
+        width: 50px;
+    }
+    body.up_admin_r_u_c_conf #r_navi_b_t #botton input {
+        width: 130px;
+    }
+    body.admin_reserv_input #r_navi_t #room_n input {
+        border: 2px solid red;
+        background: #ff5555;
+    }
+/*     admin_modify(修正入力)やりなおし */
+
+
+    #admin_input_modify {
+        width: 100%;
+/*         border: 1px solid black; */
+    }
+    #admin_input_modify th,
+    #admin_input_modify td {
+        border-top: 1px solid black;
+        text-align: center;
+        vertical-align: middle;
+/*          border-right: 1px solid black;  */
+        height: 25px;
+    }
+    #admin_input_modify .col2,
+    #admin_input_modify .col2_3 {
+        padding-right: 7px;
+    }
+    #admin_input_modify .col1 {
+        width: 20%;
+
+    }
+
+    .admin_modify_name {
+        width: 100%;
+        height: 100%;
+    }
+
+    .admin_modify_select {
+        width: 100%;
+        height: 100%;
+        background: white;
+    }
+    #admin_modify_botton {
+    border-top: 1px solid black;
+    width: 100%;
+
+    }
+    #admin_modify_botton td {
+    background: white;
+    height: 100%;
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    }
+    .h_modify_botton {
+    border: 2px solid red;
+    width: 80%;
+    background: #ff5555;
+    }
+
+
+/*     admin_input(新規入力)やりなおし */
+    #admin_input_from {
+    width: 100%;
+
+    }
+    #admin_input_from th,
+    #admin_input_from td {
+        border-top: 1px solid black;
+        text-align: center;
+        vertical-align: middle;
+/*         border-right: 1px solid black; */
+        height: 25px;
+    }
+    .admin_input_name {
+        width: 100%;
+        height: 100%;
+    }
+    #admin_input_from .col2,
+    #admin_input_from .col2_3 {
+        padding-right: 7px;
+    }
+    #admin_input_from .col1 {
+        width: 20%;
+
+    }
+    .admin_input_select {
+        width: 100%;
+        height: 100%;
+        background: white;
+    }
+
+
+
+/*     予約ナビボタン設定やりなおし */
+    #admin_input_botton {
+    border-top: 1px solid black;
+    width: 100%;
+
+    }
+    #admin_input_botton td {
+    background: white;
+    height: 100%;
+    text-align: center;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    }
+    .h_botton {
+    border: 2px solid red;
+    width: 80%;
+    background: #ff5555;
+    }
+/*     戻る、保存ボタン設定やりなおし */
+     .admin_input_sub {
+    background: #ff5555;
+
+     }
+    /*特殊予約リスト*/
+    #s_reserve li{    }
+/* 2.navigationテキスト
+========================================== */
+
+    /* 1-1.localnavi(テキスト)
+    ----------------------------------- */
+    #navigation #localnavi h2 {
+        font-size: 138.5%;
+        line-height: 1.112;
+        text-align: center;
+        background: #ff9900;
+        padding: 10px 0px 0px 0px;
+    }
+
+    #navigation #localnavi .topicpath {
+        font-size: 92.4%;
+        line-height: 1.335;
+        padding: 10px 10px 10px 10px;
+        color: #ff0000;
+    }
+
+    #navigation #localnavi li {
+        font-size: 92.4%;
+        line-height: 1.335;
+        padding: 5px 10px 5px 10px;
+        color: #ff0000;
+    }
+    /* 1-2.calnavi(テキスト)
+    ----------------------------------- */
+    #navigation table#calnavi,
+    #navigation table#calnavi_0,
+    #navigation table#calnavi_1,
+    #navigation table#calnavi_2,
+    #navigation table#calnavi_3
+    {
+        font-size: 92.4%;
+    }
+
+    #navigation table#calnavi th,
+    #navigation table#calnavi_0 th,
+    #navigation table#calnavi_1 th,
+    #navigation table#calnavi_2 th,
+    #navigation table#calnavi_3 th
+    {
+        background: #ff9900;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    #navigation table#calnavi td,
+    #navigation table#calnavi_0 td,
+    #navigation table#calnavi_1 td,
+    #navigation table#calnavi_2 td,
+    #navigation table#calnavi_3 td
+    {
+        border: 1px solid black;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    #navigation table#calnavi td#select_day {
+        background: #ffead5;
+    }
+
+    /* 1-3.banners(テキスト)
+    ----------------------------------- */
+    #navigation ul#banners li {
+        font-size: 92.4%;
+        line-height: 1.335;
+        padding: 10px 10px 0px 10px;
+        list-style-type: disc;
+        list-style-position: inside;
+    }
+
+    /* 1-4.link(テキスト)
+    ----------------------------------- */
+    #navigation strong {font-weight: bold;}
+
+    #navigation em {font-style: italic;}
+
+
+    /* 1-4-1.Default(リンク部初期)
+    ----------------------------------- */
+    /*ナビゲーションの枠*/
+    #navigation a {color: #000000;text-decoration:;}
+    /*パンくずリストの枠*/
+    body.province        #navigation #localnavi .topicpath a,
+    body.shoplist        #navigation #localnavi .topicpath a,
+    body.situation       #navigation #localnavi .topicpath a,
+    body.store_info      #navigation #localnavi .topicpath a,
+    body.situation_login #navigation #localnavi .topicpath a,
+    body.history_pick    #navigation .pick a
+    {color:#ff0000;text-decoration:;}
+    /*特殊予約リストの枠*/
+    body.admin_reserv_provi #s_reserve li a
+    {color: red;}
+    body.admin_reserv_provi_stop #s_reserve li a
+    {color: #b89572;}
+
+
+    /* 1-4-2.When Mouse Over
+    ----------------------------------- */
+
+    #navigation a:hover {color: #ff0000;text-decoration:;}
+
+
+
+    /* 1-5.entry_navi
+    ----------------------------------- */
+    #navigation #entry_navi #inputs {
+        padding: 40px 0 0 0;
+    }
+
+    #navigation #entry_navi input.example1 {
+        width: 288px;
+        height: 38px;
+        border: 1px solid black;
+        margin: 0 0 30px 20px;
+        background: #d4d4d4;
+    }
+    p.error {
+        color: red;
+        border: 0px solid black;
+        margin: -20px 0 7px 20px ;
+        }
+    p.errorterms{
+        color: red;
+        border: 0px solid black;
+        margin: 0px 0 0px 20px ;
+        }
+    #navigation #entry_navi #check {
+        float: left;
+        padding: 10px 0 0 20px;
+    }
+    #L_B_open_terms {
+        cursor: pointer;
+    }
+    #navigation #entry_navi #sub {
+        float: right;
+        padding: 0 20px 0 0px;
+    }
+
+    #navigation #entry_navi #sub input {
+        background: #d4d4d4;
+        width: 60px;
+        height: 40px;
+    }
+
+    #navigation #entry_navi #clearfix{
+        clear: both;
+    }
+/*     修正したentry入力フォーム */
+/*     登録ユーザー切り替えボタン */
+    #entry_select_usr {
+    text-align: center;
+    margin-bottom: 30px;
+    }
+
+
+    #entry_flash {
+        font-size: x-large;
+        color: red;
+        text-align: center;
+
+    }
+    #entry_load {
+        text-align: right;
+        background-color: ;
+        padding-right: 20px;
+        padding-top: 5px;
+    }
+
+
+
+
+    /* 1-6.history
+    ----------------------------------- */
+    .historynavi dt {
+        background: #ffbf80;
+        text-align: center;
+        font-size: 92.4%;
+        line-height: 1.335;
+    }
+
+    .historynavi dd {
+        text-align: right;
+        font-size: 92.4%;
+        line-height: 1.335;
+        padding: 0 5px 0 5px;
+    }
+
+
+

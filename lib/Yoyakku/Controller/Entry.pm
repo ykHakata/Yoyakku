@@ -63,6 +63,12 @@ sub entry {
     my $class = "entry"; # テンプレートbodyのクラス名を定義
     $self->stash(class => $class);
 
+    # ナビ広告データ取得
+    # my @adsNavi_rows = $teng->search_named(q{
+    # select * from ads where kind=3 order by displaystart_on asc;
+    # });
+    my @adsNavi_rows;
+    $self->stash(adsNavi_rows => \@adsNavi_rows);# テンプレートへ送り、
 
     return $self->render( template => 'entry/entry', format => 'html', );
 }
