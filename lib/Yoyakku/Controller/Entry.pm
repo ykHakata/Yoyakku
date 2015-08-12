@@ -24,7 +24,7 @@ sub _init {
     $model->params( $self->req->params->to_hash );
     $model->method( uc $self->req->method );
     $model->session( $self->session );
-    $model->check_auth_db_yoyakku();
+    return if $model->check_auth_db_yoyakku();
     my $header_stash = $model->get_header_stash_entry();
     $self->stash($header_stash);
     return $model;
@@ -40,35 +40,18 @@ sub entry {
     my $self  = shift;
     my $model = $self->_init();
 
-    # my $now_date = $model->get_date_info('now_date');
-    # my $caps     = $model->get_calender_caps();
-    # my $cal_now  = $model->get_calendar_info($now_date);
-    # my $ads_rows = $model->get_cal_info_ads_rows($now_date);
+    return $self->redirect_to('/index') if !$model;
 
-    # $self->stash(
-    #     class    => 'entry_this_m',
-    #     now_date => $now_date,
-    #     cal_now  => $cal_now,
-    #     caps     => $caps,
-    #     ads_rows => $ads_rows,
-    # );
-
-    # アイコン?
-    my $switch_load = 0;
-    $self->stash(switch_load => $switch_load);
-
+    my $switch_load;
     my $mail_j;
-    $self->stash(mail_j => $mail_j);
+    my $get_ads_navi_rows = $model->get_ads_navi_rows();
 
-    my $class = "entry"; # テンプレートbodyのクラス名を定義
-    $self->stash(class => $class);
-
-    # ナビ広告データ取得
-    # my @adsNavi_rows = $teng->search_named(q{
-    # select * from ads where kind=3 order by displaystart_on asc;
-    # });
-    my @adsNavi_rows;
-    $self->stash(adsNavi_rows => \@adsNavi_rows);# テンプレートへ送り、
+    $self->stash(
+        class        => 'entry',
+        switch_load  => $switch_load,
+        mail_j       => $mail_j,
+        adsNavi_rows => $get_ads_navi_rows,
+    );
 
     return $self->render( template => 'entry/entry', format => 'html', );
 }
@@ -76,89 +59,7 @@ sub entry {
 1;
 
 __END__
-#entry.html.ep
-#ログイン登録希望、画面コントロール-----------------------------
-any '/entry' => sub {
-    my $self = shift;
-    my $class = "entry"; # テンプレートbodyのクラス名を定義
-    $self->stash(class => $class);
-    #my $today = localtime;
-    #$self->stash(today => $today);
-#ログイン機能==========================================
-my $login_id;
-my $login;
-my $switch_header;
 
-my $admin_id   = $self->session('session_admin_id'  );
-my $general_id = $self->session('session_general_id');
-
-if ($admin_id) {
-    #my $admin_ref   = $teng->single('admin', +{id => $admin_id});
-    #my $profile_ref = $teng->single('profile', +{admin_id => $admin_id});
-    #   $login       = q{(admin)}.$profile_ref->nick_name;
-    #
-    #my $status = $admin_ref->status;
-    #if ($status) {
-    #    my $storeinfo_ref = $teng->single('storeinfo', +{admin_id => $admin_id});
-    #    if ($storeinfo_ref->status eq 0) {
-    #        $switch_header = 9;
-    #    }
-    #        $switch_header = 4;
-    #}
-    #else {
-    #    #$switch_header = 8;
-    #    return $self->redirect_to('profile');
-    #}
-    return $self->redirect_to('index');
-}
-elsif ($general_id) {
-    #my $general_ref  = $teng->single('general', +{id => $general_id});
-    ##$login         = $general_ref->login;
-    #my $profile_ref = $teng->single('profile', +{general_id => $general_id});
-    #$login          = $profile_ref->nick_name;
-    #
-    #my $status = $general_ref->status;
-    #if ($status) {
-    #    $switch_header = 3;
-    #}
-    #else {
-    #    #$switch_header = 8;
-    #    return $self->redirect_to('profile');
-    #}
-    return $self->redirect_to('index');
-}
-else {
-    $switch_header = 2;
-    #return $self->redirect_to('index');
-}
-
-$self->stash(login => $login);# #ログイン名をヘッダーの右に表示させる
-# headerの切替
-$self->stash(switch_header => $switch_header);
-#====================================================
-#新しい日付情報取得のスクリプト======================
-# 時刻(日付)取得、現在、1,2,3ヶ月後
-my $now_date    = localtime;
-
-#翌月の計算をやり直す
-my $first_day   = localtime->strptime($now_date->strftime(   '%Y-%m-01'                             ),'%Y-%m-%d');
-my $last_day    = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d');
-my $next1m_date = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d') + 86400;
-my $next2m_date = localtime->strptime($next1m_date->strftime('%Y-%m-' . $next1m_date->month_last_day),'%Y-%m-%d') + 86400;
-my $next3m_date = localtime->strptime($next2m_date->strftime('%Y-%m-' . $next2m_date->month_last_day),'%Y-%m-%d') + 86400;
-# 時刻(日付)取得、現在、1,2,3ヶ月後(ヘッダー用)
-$self->stash(
-    now_data    => $now_date,
-    next1m_data => $next1m_date,
-    next2m_data => $next2m_date,
-    next3m_data => $next3m_date
-);
-
-# ナビ広告データ取得
-my @adsNavi_rows = $teng->search_named(q{
-select * from ads where kind=3 order by displaystart_on asc;
-});
-$self->stash(adsNavi_rows => \@adsNavi_rows);# テンプレートへ送り、
 
 # 店舗登録フォームからの入力で管理者idを登録する
 # 基本的なバリデートはjqueryでおこなっているので、
