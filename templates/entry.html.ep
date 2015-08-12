@@ -1,0 +1,75 @@
+% layout 'default';
+% title 'yoyakkuオープニング';
+<div id="wrapper">
+<%= include './temp/header_navi_new' %>
+<div id="navigation">
+<div id="localnavi">
+<h2 id="">yoyakkuログイン登録</h2>
+<div id="entry_navi">
+<form method="post" action="">
+<div id="inputs">
+<div class="vali"><%= $mail_j %></div>
+<p><input type="text" name="mail_j" placeholder="メールアドレス" class="example1"></p>
+<p id="entry_select_usr"><input type="radio" name="select_usr" value="general" checked> 一般ユーザー
+<input type="radio" name="select_usr" value="admin"> 店舗登録
+</p>
+%# <p><input type="password" name="pass" placeholder="パスワード 半角英数文字4文字〜8文字" class="example1"></p>
+%# <p><input type="password" name="pass_check" placeholder="パスワード確認" class="example1"></p>
+</div>
+%# <p id="check"><input type="checkbox" name="terms" value="1"><span id="L_B_open_terms">利用規約同意</span></p>
+<p id="sub"> <span id="L_B_open_signup_comp"><input type="submit" value="登録"></span></p>
+<div id="clearfix"></div>
+% if ($switch_load) {
+<div id="entry_load"><img src="./images/base/loading.gif" width="60" height="60" ait="" /></div>
+% }
+<div id="entry_flash"><%= flash('touroku') %></div>
+</form>
+</div>
+</div>
+<%= include './temp/navi_ads' %>
+<!-- /#navigation --></div>
+<div id="contents">
+<div id="entry_head">
+<p id="month"></p>
+<p id="oneliner_ads">
+%# <a href="https://www.google.co.jp/" target="_blank">ネズミ商会、半額セール1/7〜1/21</a>
+</p>
+<div id="clearfix"></div>
+</div>
+<div id="contensNavi">
+<div id="entry_ads">
+<h2 class="sectionTitle">ログイン登録/yoyakkuベーター版について</h2>
+<div class="section">
+<p>
+『yoyakku』(β版)ログイン登録は極めてシンプル<br /><br />
+１、左のメールアドレス入力フォームにEメールを入力。<br />
+２、一般ユーザー登録、もしくは、店舗登録いずれかをチェック。<br />
+３、登録ボタンをクリック。<br />
+で完了します。<br />
+ログインの際には初期パスワードに『yoyakku』と入力してください。<br />
+すぐにご利用がスタートできます。<br />
+</p>
+</div>
+</div>
+<div id="qa">
+<h2 class="sectionTitle">Q&A</h2>
+<div class="section">
+<dl>
+<dt>Q 店舗登録は無料ですか？</dt>
+<dd>登録、利用ともに無料です、予約管理の基本機能、WEB上での公開、非公開、部屋数の設定など高品質な予約システムで顧客への予約管理ができるようになります。</dd>
+<dt>Q 一般ユーザーと店舗登録は何がちがうのですか？</dt>
+<dd>一般ユーザーはスタジオを利用するお客様の予約入力、予約履歴の管理、店舗登録はご自身の運営している店舗の予約管理のみの機能となります</dd>
+<dt>Q 広告の掲載はできますか？</dt>
+<dd>β版においては広告希望は直接メールでの問い合わせのみ対応しております。問い合わせください。</dd>
+<dt>Q 個人でも広告を利用できますか？</dt>
+<dd>β版においては広告希望は直接メールでの問い合わせのみ対応しております。問い合わせください。</dd>
+<dt>Q 広告内容に制限はありますか</dt>
+<dd>アダルト系は不可とさせていただいています。</dd>
+</dl>
+</div>
+</div>
+<!-- /#contensNavi --></div>
+<!-- /#contents --></div>
+<%= include './temp/footer' %>
+<!-- /#wrapper --></div>
+<%= include './temp/lightbox_terms_of_use' %>
