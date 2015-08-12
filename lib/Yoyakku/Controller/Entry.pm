@@ -64,7 +64,7 @@ sub entry {
     $self->stash(class => $class);
 
 
-    return $self->render( template => 'entry', format => 'html', );
+    return $self->render( template => 'entry/entry', format => 'html', );
 }
 
 1;
