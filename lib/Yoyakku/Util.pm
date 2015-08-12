@@ -5,7 +5,7 @@ use utf8;
 use Time::Piece;
 use Time::Seconds;
 use HTML::FillInForm;
-use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06 $SPACE};
+use Yoyakku::Master qw{$HOUR_00 $HOUR_06 $SPACE};
 use Exporter 'import';
 our @EXPORT_OK = qw{
     chang_date_6
@@ -510,7 +510,7 @@ Yoyakku アプリケーションのユーティリティー
 
 =item * L<Time::Seconds>
 
-=item * L<Yoyakku::Model::Master>
+=item * L<Yoyakku::Master>
 
 =back
 

@@ -1,4 +1,4 @@
-package Yoyakku::Model::Master;
+package Yoyakku::Master;
 
 use strict;
 use warnings;

@@ -13,7 +13,7 @@ use Yoyakku::Util qw{
     previous_day_ymd
     split_date_time
 };
-use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
+use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
 # 各テーブルカラム取得
 sub get_table_columns {

@@ -163,11 +163,11 @@ yoyakku アプリケーションのデータベース構成
 
 =item L<Yoyakku::Model::Mainte>
 
-=item L<Yoyakku::Model::Master>
-
 =item L<Yoyakku::Model::Profile>
 
 =back
+
+=item L<Yoyakku::Master>
 
 =item L<Yoyakku::Model>
 

@@ -13,7 +13,7 @@ use Yoyakku::Util qw{
     get_start_end_tp
     get_fill_in_params
 };
-use Yoyakku::Model::Master qw{$HOUR_00 $HOUR_06};
+use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
 sub search_reserve_id_rows {
     my $self = shift;
