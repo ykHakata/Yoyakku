@@ -53,7 +53,7 @@ sub index {
         ads_rows => $ads_rows,
     );
 
-    return $self->render( template => 'index', format => 'html', );
+    return $self->render( template => 'calendar/index', format => 'html', );
 }
 
 =head2 index_next_m
@@ -79,7 +79,7 @@ sub index_next_m {
         ads_rows    => $ads_rows,
     );
 
-    return $self->render( template => 'index_next_m', format => 'html', );
+    return $self->render( template => 'calendar/index_next_m', format => 'html', );
 }
 
 =head2 index_next_two_m
@@ -105,7 +105,7 @@ sub index_next_two_m {
         ads_rows    => $ads_rows,
     );
 
-    return $self->render( template => 'index_next_two_m', format => 'html', );
+    return $self->render( template => 'calendar/index_next_two_m', format => 'html', );
 }
 
 =head2 index_next_three_m
@@ -131,7 +131,7 @@ sub index_next_three_m {
         ads_rows    => $ads_rows,
     );
 
-    return $self->render( template => 'index_next_three_m', format => 'html', );
+    return $self->render( template => 'calendar/index_next_three_m', format => 'html', );
 }
 
 1;
