@@ -29,6 +29,35 @@ This documentation referes to Yoyakku::Model version 0.0.1
 
 =cut
 
+=head2 check_table_column
+
+    指定パラメーターの存在確認
+
+=cut
+
+sub check_table_column {
+    my $self         = shift;
+    my $check_params = shift;
+
+    my $teng = $self->teng();
+
+    my $column = $check_params->{column};
+    my $param  = $check_params->{param};
+    my $table  = $check_params->{table};
+    my $id     = $check_params->{id};
+
+    my $row = $teng->single( $table, +{ $column => $param, }, );
+
+    # 新規
+    return '既に利用されています' if $row && !$id;
+
+    # 更新
+    return '既に利用されています'
+        if $row && $id && ( $id ne $row->id );
+
+    return;
+}
+
 =head2 get_header_stash_params
 
     header の stash の値を取得

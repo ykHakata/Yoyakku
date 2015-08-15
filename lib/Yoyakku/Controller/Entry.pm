@@ -42,6 +42,9 @@ sub entry {
 
     return $self->redirect_to('/index') if !$model;
 
+    return $self->redirect_to('/index')
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+
     my $switch_load;
     my $mail_j;
     my $get_ads_navi_rows = $model->get_ads_navi_rows();
@@ -53,7 +56,53 @@ sub entry {
         adsNavi_rows => $get_ads_navi_rows,
     );
 
+    return $self->_insert($model) if $model->method() eq 'POST';
+
     return $self->render( template => 'entry/entry', format => 'html', );
+}
+
+sub _insert {
+    my $self  = shift;
+    my $model = shift;
+
+    $model->type('insert');
+    $model->flash_msg( +{ touroku => '登録完了' } );
+
+    return $self->_common($model);
+}
+
+sub _common {
+    my $self  = shift;
+    my $model = shift;
+
+    my $valid_msg = $model->check_entry_validator();
+
+    return $self->stash($valid_msg), $self->_render_entry($model)
+        if $valid_msg;
+
+    my $valid_msg_db = $model->check_entry_validator_db();
+
+    return $self->stash($valid_msg_db), $self->_render_entry($model)
+        if $valid_msg_db;
+
+    $model->writing_entry();
+    $self->flash( $model->flash_msg() );
+
+    return $self->redirect_to('entry');
+}
+
+sub _render_entry {
+    my $self  = shift;
+    my $model = shift;
+
+    my $html = $self->render_to_string(
+        template => 'entry/entry',
+        format   => 'html',
+    )->to_string;
+
+    $model->html( \$html );
+    my $output = $model->get_fill_in_entry();
+    return $self->render( text => $output );
 }
 
 1;
