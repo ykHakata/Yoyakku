@@ -7,3 +7,6 @@ requires 'Teng', '== 0.28';
 requires 'DBD::SQLite', '1.46';
 requires 'Class::Accessor::Fast', '== 0.34';
 requires 'Calendar::Simple', '== 1.21';
+requires 'Email::Sender', '== 1.300018';
+requires 'Email::MIME', '== 1.934';
+requires 'Email::Sender::Transport::SMTPS', '== 0.03';

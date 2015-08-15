@@ -7,10 +7,17 @@ use Teng::Schema::Loader;
 use FormValidator::Lite qw{Email URL DATE TIME};
 use base qw{Class::Accessor::Fast};
 use Yoyakku::Util qw{now_datetime switch_header_params};
+use Encode qw{encode};
+use Email::Sender::Simple 'sendmail';
+use Email::MIME;
+use Email::Sender::Transport::SMTPS;
+use Try::Tiny;
+use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 
 __PACKAGE__->mk_accessors(
     qw{params session method html login_row login_table login_name
-        profile_row storeinfo_row template type flash_msg acting_rows}
+        profile_row storeinfo_row template type flash_msg acting_rows
+        mail_temp mail_header mail_body}
 );
 
 =encoding utf8
@@ -28,6 +35,48 @@ This documentation referes to Yoyakku::Model version 0.0.1
     データベース接続関連の API を提供
 
 =cut
+
+=head2 send_gmail
+
+    メール送信(gmail)
+
+=cut
+
+sub send_gmail {
+    my $self = shift;
+
+    my $email = Email::MIME->create(
+        header => [
+            From    => encode( 'UTF-8', $self->mail_header()->{from} ),
+            To      => encode( 'UTF-8', $self->mail_header()->{to} ),
+            Subject => encode( 'UTF-8', $self->mail_header()->{subject} ),
+        ],
+        body       => encode( 'UTF-8', $self->mail_body() ),
+        attributes => +{
+            content_type => 'text/plain',
+            charset      => 'UTF-8',
+            encoding     => '7bit',
+        },
+    );
+
+    my $transport = Email::Sender::Transport::SMTPS->new(
+        +{  host          => 'smtp.gmail.com',
+            ssl           => 'starttls',
+            sasl_username => $MAIL_USER,
+            sasl_password => $MAIL_PASS,
+        }
+    );
+
+    try {
+        sendmail( $email, +{ transport => $transport } );
+    }
+    catch {
+        my $e = shift;
+        warn "Error: $e";
+    };
+
+    return;
+}
 
 =head2 check_table_column
 

@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
+use Yoyakku::Master qw{$MAIL_SYSTEM};
 
 =head2 get_header_stash_entry
 
@@ -117,18 +118,38 @@ sub writing_entry {
         modify_on     => now_datetime(),
     };
 
+    # 登録完了メール
+    my $mail_temp_entry = +{
+        admin_nick_name   => '',
+        general_nick_name => '',
+        general_mail      => '',
+        admin_mail        => '',
+    };
+
     if ( $auth_table eq 'admin' ) {
-        $create_profile_data->{admin_id} = $insert_row->id;
+        $create_profile_data->{admin_id}    = $insert_row->id;
+        $mail_temp_entry->{admin_nick_name} = $self->params()->{mail_j};
+        $mail_temp_entry->{admin_mail}      = $self->params()->{mail_j};
     }
     elsif ( $auth_table eq 'general' ) {
-        $create_profile_data->{general_id} = $insert_row->id;
+        $create_profile_data->{general_id}    = $insert_row->id;
+        $mail_temp_entry->{general_nick_name} = $self->params()->{mail_j};
+        $mail_temp_entry->{general_mail}      = $self->params()->{mail_j};
     }
     else {
         die 'not insert_id!';
     }
 
     $self->writing_db( 'profile', $create_profile_data, );
+    $self->mail_temp($mail_temp_entry);
 
+    my $mail_header_entry = +{
+        from    => $MAIL_SYSTEM,
+        to      => $self->params()->{mail_j},
+        subject => '[yoyakku]ID登録完了のお知らせ【' . now_datetime() . '】',
+    };
+
+    $self->mail_header($mail_header_entry);
     return;
 }
 

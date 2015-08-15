@@ -88,6 +88,16 @@ sub _common {
     $model->writing_entry();
     $self->flash( $model->flash_msg() );
 
+    $self->stash( $model->mail_temp() );
+
+    my $mail_body = $self->render_to_string(
+        template => 'mail/entry',
+        format   => 'mail',
+    )->to_string;
+
+    $model->mail_body($mail_body);
+    $model->send_gmail();
+
     return $self->redirect_to('entry');
 }
 
@@ -109,46 +119,6 @@ sub _render_entry {
 
 __END__
 
-
-# 店舗登録フォームからの入力で管理者idを登録する
-# 基本的なバリデートはjqueryでおこなっているので、
-# すでに登録のあるメルアドなのかのバリデをsqlに接続して
-# 行ってみる。
-# バリデ実行後、新規入力、メール認証機能は後回しにして、
-# データ新規登録、リダイレクト
-# loadアイコンの切替
-my $switch_load;
-$self->stash(switch_load => $switch_load);
-
-if (uc $self->req->method eq 'POST') {
-    #新規入力も修正もボタン押すとpostで入ってくる、両方バリデード実行
-    my $validator = $self->create_validator;
-    $validator->field('mail_j')->required(1)->length(1,30)->callback(sub {
-        my $login    = shift;
-        # adminとgeneral両方チェックする
-        my $select_usr = $self->param('select_usr');
-        my $judg_login = 0;
-
-        if ($select_usr eq "general") {
-            my $general_ref  = $teng->single('general', +{login => $login});
-            #my $login_name    ;
-            $judg_login = ($general_ref) ? 1
-                        :                  0
-                        ;
-        }
-        elsif ($select_usr eq "admin") {
-            my $admin_ref  = $teng->single('admin', +{login => $login});
-            #my $login_name    ;
-            $judg_login = ($admin_ref) ? 1
-                        :                0
-                        ;
-        }
-
-
-        return   ($judg_login == 1) ? (0, '既に使用されてます'  )
-               :                       1
-               ;
-    });
 
     #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、
     my $param_hash = $self->req->params->to_hash;
@@ -243,52 +213,7 @@ if (uc $self->req->method eq 'POST') {
             # loadアイコン出現
             $switch_load = 1;
             $self->stash(switch_load => $switch_load);
-#my $login_message = <<EOD;
-#
-#ログインＩＤ：$mail
-#パスワード　：yoyakku
-#EOD
-#my $general_entry = $entry_message_1 . $login_message . $entry_message_2 . $footer_message;
-#            my $utf8 = find_encoding('utf8');
-#            # メール作成
-#            my $subject = $utf8->encode('[yoyakku]ID登録完了のお知らせ');
-#            my $body    = $utf8->encode($general_entry);
-#
-#            use Email::MIME;
-#            my $email = Email::MIME->create(
-#                header => [
-#                    From    => 'yoyakku@gmail.com', # 送信元
-#                    To      => $mail,    # 送信先
-#                    Subject => $subject,           # 件名
-#                ],
-#                body => $body,                     # 本文
-#                attributes => {
-#                    content_type => 'text/plain',
-#                    charset      => 'UTF-8',
-#                    encoding     => '7bit',
-#                },
-#            );
-#
-#            # SMTP接続設定
-#            #gmail
-#            use Email::Sender::Transport::SMTP::TLS;
-#            my $transport = Email::Sender::Transport::SMTP::TLS->new(
-#                {
-#                    host     => 'smtp.gmail.com',
-#                    port     => 587,
-#                    username => 'yoyakku@gmail.com',
-#                    password => 'googleyoyakku',
-#                }
-#            );
-#            # メール送信
-#            use Try::Tiny;
-#            use Email::Sender::Simple 'sendmail';
-#            try {
-#                sendmail($email, {'transport' => $transport});
-#            } catch {
-#                my $e = shift;
-#                die "Error: $e";
-#            };
+
         }
         elsif ($select_usr eq "admin") {
             my $row = $teng->insert('admin' => {
@@ -357,78 +282,3 @@ if (uc $self->req->method eq 'POST') {
                 'create_on'                        => $create_on,
                 #'modify_on'                        =>,
             });
-
-
-
-
-            # 最後に登録完了メール送信
-            # メッセージ作成
-            # loadアイコン出現
-            $switch_load = 1;
-            $self->stash(switch_load => $switch_load);
-#my $login_message = <<EOD;
-#
-#ログインＩＤ：$mail
-#パスワード　：yoyakku
-#EOD
-#my $admin_entry = $entry_message_1 . $login_message . $entry_message_2 . $footer_message;
-#            my $utf8 = find_encoding('utf8');
-#            # メール作成
-#            my $subject = $utf8->encode('[yoyakku]ID登録完了のお知らせ');
-#            my $body    = $utf8->encode($admin_entry);
-#
-#            use Email::MIME;
-#            my $email = Email::MIME->create(
-#                header => [
-#                    From    => 'yoyakku@gmail.com', # 送信元
-#                    To      => $mail,    # 送信先
-#                    Subject => $subject,           # 件名
-#                ],
-#                body => $body,                     # 本文
-#                attributes => {
-#                    content_type => 'text/plain',
-#                    charset      => 'UTF-8',
-#                    encoding     => '7bit',
-#                },
-#            );
-#
-#            # SMTP接続設定
-#            #gmail
-#            use Email::Sender::Transport::SMTP::TLS;
-#            my $transport = Email::Sender::Transport::SMTP::TLS->new(
-#                {
-#                    host     => 'smtp.gmail.com',
-#                    port     => 587,
-#                    username => 'yoyakku@gmail.com',
-#                    password => 'googleyoyakku',
-#                }
-#            );
-#            # メール送信
-#            use Try::Tiny;
-#            use Email::Sender::Simple 'sendmail';
-#            try {
-#                sendmail($email, {'transport' => $transport});
-#            } catch {
-#                my $e = shift;
-#                die "Error: $e";
-#            };
-        }
-        # loadアイコン消える
-        $switch_load = 0;
-        $self->stash(switch_load => $switch_load);
-        $self->flash(touroku => '登録完了');
-        #sqlにデータ入力したのでlist画面にリダイレクト
-        return $self->redirect_to('entry');
-        #リターンなのでここでおしまい。
-
-    }
-    #入力検査合格しなかった場合、もう一度入力フォーム表示Fillinにて
-    my $html = $self->render_partial()->to_string;
-    $html = HTML::FillInForm->fill(\$html, $self->req->params,);
-    return $self->render_text($html, format => 'html');
-    #リターンなのでここでおしまい。
-
-}
-
-    $self->render('entry');
-};

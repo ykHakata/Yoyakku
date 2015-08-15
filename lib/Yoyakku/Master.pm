@@ -19,6 +19,7 @@ our @EXPORT_OK = qw{
     $HOUR_06 $HOUR_07 $HOUR_08 $HOUR_09 $HOUR_10 $HOUR_11
     $HOUR_12 $HOUR_13 $HOUR_14 $HOUR_15 $HOUR_16 $HOUR_17
     $HOUR_18 $HOUR_19 $HOUR_20 $HOUR_21 $HOUR_22 $HOUR_23
+    $MAIL_SYSTEM $MAIL_USER $MAIL_PASS
 };
 
 Readonly our $SPACE             => q{ };
@@ -71,6 +72,11 @@ Readonly our $HOUR_20 => 20;
 Readonly our $HOUR_21 => 21;
 Readonly our $HOUR_22 => 22;
 Readonly our $HOUR_23 => 23;
+
+# メール
+Readonly our $MAIL_SYSTEM => 'yoyakku@gmail.com';
+Readonly our $MAIL_USER   => 'yoyakku@gmail.com';
+Readonly our $MAIL_PASS   => 'googleyoyakku';
 
 1;
 
