@@ -21,6 +21,8 @@ This documentation referes to Yoyakku::Controller::Region version 0.0.1
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Region->new();
+    my $header_stash = $model->get_header_stash_region();
+    $self->stash($header_stash);
     return $model;
 }
 
@@ -31,10 +33,23 @@ sub _init {
 =cut
 
 sub region_state {
-    my $self = shift;
+    my $self  = shift;
+    my $model = $self->_init();
 
+    my $get_ads_navi_rows = $model->get_ads_navi_rows();
 
-    return $self->render( template => 'region/region_state', format => 'html', );
+    # 表示させる為のダミーの値
+    $self->stash(
+        class        => 'state',
+        select_date  => '',
+        adsReco_rows => [],
+        adsOne_rows  => [],
+        ads_rows     => [],
+        adsNavi_rows => $get_ads_navi_rows,
+    );
+
+    return $self->render( template => 'region/region_state',
+        format => 'html', );
 }
 
 1;
@@ -410,3 +425,58 @@ $self->stash(ads_rows => \@ads_rows);# テンプレートへ送り、
 
 $self->render('region_state');
 };
+
+----------
+
+%# 道州名添付用のインデックス定義
+% my ($hk_i,$th_i,$kt_i,$tb_i,$kk_i,$tg_i,$ks_i);
+% my $S_Dis_id_used = "";
+% my $C_Dis_id_used = "";
+
+% foreach my $storeinfo_row_ref (@$storeinfo_rows_ref) {
+    %# 店舗テーブルの地域idの上２桁切取り道州名を表示する
+    % my $r_idCut = substr ($storeinfo_row_ref->region_id,0,2);
+    <% if ($r_idCut =~ /^[0][1]/            and $hk_i == 0 ) { %> <p>北海道</p> <% ++$hk_i; } %>
+    <% if ($r_idCut =~ /^[0][2-7]/          and $th_i == 0 ) { %> <p>東北</p>   <% ++$th_i; } %>
+    <% if ($r_idCut =~ /^[0][8-9]|[1][0-4]/ and $kt_i == 0 ) { %> <p>関東</p>   <% ++$kt_i; } %>
+    <% if ($r_idCut =~ /^[1][5-9]|[2][0-3]/ and $tb_i == 0 ) { %> <p>中部</p>   <% ++$tb_i; } %>
+    <% if ($r_idCut =~ /^[2][4-9]|[3][0]/   and $kk_i == 0 ) { %> <p>近畿</p>   <% ++$kk_i; } %>
+    <% if ($r_idCut =~ /^[3][1-9]/          and $tg_i == 0 ) { %> <p>中国</p>   <% ++$tg_i; } %>
+    <% if ($r_idCut =~ /^[4][0-7]/          and $ks_i == 0 ) { %> <p>九州</p>   <% ++$ks_i; } %>
+    %# 表示用の都道府県idを作成する
+    % my $S_Dis_id = $r_idCut . "000";
+    %# 地域名別に店舗名を表示させる
+    % if ($S_Dis_id eq $S_Dis_id_used) {
+        % if ($storeinfo_row_ref->region_id eq $C_Dis_id_used) {
+            <a href="javascript:void(0)" onclick="document.store_<%= $storeinfo_row_ref->id %>.submit();return false;">　　　<%= $storeinfo_row_ref->name %></a>
+            <form name="store_<%= $storeinfo_row_ref->id %>" method="get" action="region_situation">
+            <input type="hidden"  name="store_id" value="<%= $storeinfo_row_ref->id %>">
+            <input type="hidden"  name="select_date" value="<%= $select_date %>">
+            </p>
+            </form>
+        % } else {
+            <p>　　<%= $storeinfo_row_ref->cities %></p>
+            <a href="javascript:void(0)" onclick="document.store_<%= $storeinfo_row_ref->id %>.submit();return false;">　　　<%= $storeinfo_row_ref->name %></a>
+            <form name="store_<%= $storeinfo_row_ref->id %>" method="get" action="region_situation">
+            <input type="hidden"  name="store_id" value="<%= $storeinfo_row_ref->id %>">
+            <input type="hidden"  name="select_date" value="<%= $select_date %>">
+            </p>
+            </form>
+        % }
+        % $C_Dis_id_used = $storeinfo_row_ref->region_id;
+    % } else {
+        % foreach my $region_row_ref (@$region_rows_ref) {
+            % if ($region_row_ref->id eq $S_Dis_id) {
+                <p>　<%= $region_row_ref->name %></p>
+            % }
+        % }
+        % $S_Dis_id_used = $S_Dis_id;
+        <p>　　<%= $storeinfo_row_ref->cities %></p>
+            <a href="javascript:void(0)" onclick="document.store_<%= $storeinfo_row_ref->id %>.submit();return false;">　　　<%= $storeinfo_row_ref->name %></a>
+            <form name="store_<%= $storeinfo_row_ref->id %>" method="get" action="region_situation">
+            <input type="hidden"  name="store_id" value="<%= $storeinfo_row_ref->id %>">
+            <input type="hidden"  name="select_date" value="<%= $select_date %>">
+            </p>
+            </form>
+    % }
+% }

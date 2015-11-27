@@ -36,6 +36,24 @@ This documentation referes to Yoyakku::Model version 0.0.1
 
 =cut
 
+=head2 get_ads_navi_rows
+
+    ナビ広告データ取得
+
+=cut
+
+sub get_ads_navi_rows {
+    my $self = shift;
+    my $teng = $self->teng();
+
+    my @ads_navi_rows = $teng->search(
+        'ads',
+        +{ kind     => 3, },
+        +{ order_by => 'displaystart_on' },
+    );
+    return \@ads_navi_rows;
+}
+
 =head2 send_gmail
 
     メール送信(gmail)

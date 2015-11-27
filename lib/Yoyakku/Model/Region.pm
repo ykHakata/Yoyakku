@@ -21,6 +21,18 @@ Region コントローラーのロジック API
 
 =cut
 
+=head2 get_header_stash_region
+
+    ヘッダー初期値取得
+
+=cut
+
+sub get_header_stash_region {
+    my $self = shift;
+    my $switch_header = 5;
+    return $self->get_header_stash_params( $switch_header );
+}
+
 
 1;
 

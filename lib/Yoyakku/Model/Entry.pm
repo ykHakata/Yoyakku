@@ -18,24 +18,6 @@ sub get_header_stash_entry {
     return $self->get_header_stash_params( $switch_header );
 }
 
-=head2 get_ads_navi_rows
-
-    ナビ広告データ取得
-
-=cut
-
-sub get_ads_navi_rows {
-    my $self = shift;
-    my $teng = $self->teng();
-
-    my @ads_navi_rows = $teng->search(
-        'ads',
-        +{ kind     => 3, },
-        +{ order_by => 'displaystart_on' },
-    );
-    return \@ads_navi_rows;
-}
-
 =head2 check_entry_validator
 
     入力値バリデートチェックに利用
