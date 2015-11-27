@@ -145,6 +145,10 @@ sub startup {
     # 登録(entry)
     $r->route('/entry')->to( controller => 'Entry', action => 'entry' );
 
+    # 予約(region)
+    $r->route('/region_state')
+        ->to( controller => 'Region', action => 'region_state' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 
