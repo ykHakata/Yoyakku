@@ -21,7 +21,12 @@ This documentation referes to Yoyakku::Controller::Region version 0.0.1
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Region->new();
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session );
+    $model->check_auth_db_yoyakku();
     my $header_stash = $model->get_header_stash_region();
+    return $self->redirect_to('profile') if !$header_stash;
     $self->stash($header_stash);
     return $model;
 }
@@ -31,25 +36,30 @@ sub _init {
     予約の為のスタジオ検索(地域)
 
 =cut
-
+use Data::Dumper;
 sub region_state {
     my $self  = shift;
     my $model = $self->_init();
 
-    my $get_ads_navi_rows = $model->get_ads_navi_rows();
+    my $ads_navi_rows = $model->get_ads_navi_rows();
+    my $ads_one_rows  = $model->get_ads_one_rows();
+    my $ads_reco_rows = $model->get_ads_reco_rows();
+    my $select_date   = $model->get_select_date();
 
     # 表示させる為のダミーの値
     $self->stash(
         class        => 'state',
-        select_date  => '',
-        adsReco_rows => [],
-        adsOne_rows  => [],
+        select_date  => $select_date,
+        adsReco_rows => $ads_reco_rows,
+        adsOne_rows  => $ads_one_rows,
         ads_rows     => [],
-        adsNavi_rows => $get_ads_navi_rows,
+        adsNavi_rows => $ads_navi_rows,
     );
 
-    return $self->render( template => 'region/region_state',
-        format => 'html', );
+    return $self->render(
+        template => 'region/region_state',
+        format   => 'html',
+    );
 }
 
 1;
@@ -78,62 +88,9 @@ __END__
 get '/region_state' => sub {
 my $self = shift;
 
-# テンプレートbodyのクラス名を定義
-my $class = "state";
-$self->stash(class => $class);
 #ログイン機能==========================================
-my $login_id;
-my $login;
-my $switch_header;
 
-my $admin_id   = $self->session('session_admin_id'  );
-my $general_id = $self->session('session_general_id');
 
-if ($admin_id) {
-    my $admin_ref   = $teng->single('admin', +{id => $admin_id});
-    my $profile_ref = $teng->single('profile', +{admin_id => $admin_id});
-       $login       = q{(admin)}.$profile_ref->nick_name;
-
-    my $status = $admin_ref->status;
-    if ($status) {
-        my $storeinfo_ref = $teng->single('storeinfo', +{admin_id => $admin_id});
-        if ($storeinfo_ref->status eq 0) {
-            $switch_header = 10;
-        }
-        else {
-            $switch_header = 7;
-        }
-    }
-    else {
-        #$switch_header = 8;
-        return $self->redirect_to('profile');
-    }
-    #return $self->redirect_to('index');
-}
-elsif ($general_id) {
-    my $general_ref  = $teng->single('general', +{id => $general_id});
-    my $profile_ref  = $teng->single('profile', +{general_id => $general_id});
-    $login           = $profile_ref->nick_name;
-
-    my $status = $general_ref->status;
-    if ($status) {
-        $switch_header = 6;
-    }
-    else {
-        #$switch_header = 8;
-        return $self->redirect_to('profile');
-    }
-    #return $self->redirect_to('index');
-}
-else {
-    $switch_header = 5;
-    #return $self->redirect_to('index');
-}
-
-$self->stash(login => $login);# #ログイン名をヘッダーの右に表示させる
-# headerの切替
-$self->stash(switch_header => $switch_header);
-#====================================================
 
 #=======================================================
 #====================================================
@@ -147,17 +104,7 @@ my $next1m_date = $chang_date_ref->{next1m_date};
 my $next2m_date = $chang_date_ref->{next2m_date};
 my $next3m_date = $chang_date_ref->{next3m_date};
 #====================================================
-##新しい日付情報取得のスクリプト======================
-## 時刻(日付)取得、現在、1,2,3ヶ月後
-#my $now_date    = localtime;
-#
-##翌月の計算をやり直す
-#my $first_day   = localtime->strptime($now_date->strftime(   '%Y-%m-01'                             ),'%Y-%m-%d');
-#my $last_day    = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d');
-#my $next1m_date = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d') + 86400;
-#my $next2m_date = localtime->strptime($next1m_date->strftime('%Y-%m-' . $next1m_date->month_last_day),'%Y-%m-%d') + 86400;
-#my $next3m_date = localtime->strptime($next2m_date->strftime('%Y-%m-' . $next2m_date->month_last_day),'%Y-%m-%d') + 86400;
-# 時刻(日付)取得、現在、1,2,3ヶ月後(ヘッダー用)
+
 $self->stash(
     now_data    => $now_date,
     next1m_data => $next1m_date,
@@ -203,26 +150,6 @@ my $next1m_date = $chang_date_ref->{next1m_date};
 my $next2m_date = $chang_date_ref->{next2m_date};
 my $next3m_date = $chang_date_ref->{next3m_date};
 #====================================================
-
-#my $now_date = localtime;
-##翌月の計算をやり直す
-#my $next1m_date = localtime->strptime(
-#    $now_date->strftime(
-#        '%Y-%m-' . $now_date->month_last_day
-#        ),'%Y-%m-%d'
-#    ) + 86400;
-#
-#my $next2m_date = localtime->strptime(
-#    $next1m_date->strftime(
-#        '%Y-%m-' . $next1m_date->month_last_day
-#    ),'%Y-%m-%d'
-#) + 86400;
-#
-#my $next3m_date = localtime->strptime(
-#    $next2m_date->strftime(
-#        '%Y-%m-' . $next2m_date->month_last_day
-#    ),'%Y-%m-%d'
-#) + 86400;
 
 
 my @cal;
@@ -376,29 +303,8 @@ $self->stash(
 #カレンダ日付取得
 my $sub_date = $self->param('sub_date');
 #$self->stash(sub_date => $sub_date);
-$self->stash(select_date => $select_date->date);
 
 
-# ナビ広告データ取得
-my @adsNavi_rows = $teng->search_named(q{
-select * from ads where kind=3 order by displaystart_on asc;
-});
-$self->stash(adsNavi_rows => \@adsNavi_rows);# テンプレートへ送り、
-
-# おすすめスタジオ広告データ取得
-my @adsReco_rows = $teng->search_named(q{
-    select ads.id , ads.kind , ads.region_id,
-    ads.name, ads.url,ads.content,region.name
-    as region_name from ads left join region on
-    ads.region_id = region.id where kind=4;
-});
-$self->stash(adsReco_rows => \@adsReco_rows);# テンプレートへ送り、
-
-# 一行広告データ取得
-my @adsOne_rows = $teng->search_named(q{
-select * from ads where kind=2 order by displaystart_on asc;
-});
-$self->stash(adsOne_rows => \@adsOne_rows);# テンプレートへ送り、
 
 #イベントスケジュールの為sqlより情報取得、本日以降、1,2,3ヶ月後末まで登録分抽出
 #３ヶ月後末日の変数の作成
