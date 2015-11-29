@@ -26,7 +26,7 @@ sub _init {
     $model->session( $self->session );
     $model->check_auth_db_yoyakku();
     my $header_stash = $model->get_header_stash_region();
-    return $self->redirect_to('profile') if !$header_stash;
+    return if !$header_stash;
     $self->stash($header_stash);
     return $model;
 }
@@ -40,11 +40,12 @@ use Data::Dumper;
 sub region_state {
     my $self  = shift;
     my $model = $self->_init();
-
+    return $self->redirect_to('profile') if !$model;
     my $ads_navi_rows = $model->get_ads_navi_rows();
     my $ads_one_rows  = $model->get_ads_one_rows();
     my $ads_reco_rows = $model->get_ads_reco_rows();
     my $select_date   = $model->get_select_date();
+    my $ads_rows      = $model->get_ads_rows();
 
     # 表示させる為のダミーの値
     $self->stash(
@@ -52,8 +53,26 @@ sub region_state {
         select_date  => $select_date,
         adsReco_rows => $ads_reco_rows,
         adsOne_rows  => $ads_one_rows,
-        ads_rows     => [],
+        ads_rows     => $ads_rows,
         adsNavi_rows => $ads_navi_rows,
+    );
+
+    my $switch_calnavi = $model->get_switch_calnavi();
+    my $back_mon_val   = $model->get_back_mon_val();
+    my $next_mon_val   = $model->get_next_mon_val();
+    my $select_date_ym = $model->get_select_date_ym();
+
+    # navi_calnavi_new の為のダミーの値
+    $self->stash(
+        back_mon_val    => $back_mon_val,
+        select_date_ym  => $select_date_ym,
+        next_mon_val    => $next_mon_val,
+        switch_calnavi  => $switch_calnavi,
+        store_id        => '',
+        caps            => [],
+        cal             => [],
+        select_date_day => '',
+        border_date_day => '',
     );
 
     return $self->render(
@@ -113,9 +132,6 @@ $self->stash(
 );
 
 
-# カレンダーナビにstoreidを埋め込む為の切替
-my $switch_calnavi = 0;
-$self->stash(switch_calnavi => $switch_calnavi);
 
 
 # 地域ナビため、店舗登録をすべて抽出(web公開許可分だけ)
@@ -304,30 +320,12 @@ $self->stash(
 my $sub_date = $self->param('sub_date');
 #$self->stash(sub_date => $sub_date);
 
-
-
-#イベントスケジュールの為sqlより情報取得、本日以降、1,2,3ヶ月後末まで登録分抽出
-#３ヶ月後末日の変数の作成
-#3ヶ月後の日
-my $next3m_last_day = $next3m_date->month_last_day;
-my $next3Y_date = $next3m_date->year;
-my $next3M_date = $next3m_date->mon;
-#0000-00-00で表示
-#my $next3m_last_ymd = $next3Y_data . "-" . $next3M_data . "-" . $next3m_last_day ;
-my $next3m_last_ymd = $next3Y_date . "-" . $next3M_date . "-" . $next3m_last_day ;
 #sql値取得
 #今日の日付取得
 my $now_data_ymd = $now_date->ymd;
-#my $now_data_ymd = $now_data->ymd;
+
 #$self->stash(now_data_ymd => $now_data_ymd);
 
-my @ads_rows = $teng->search_named(q{
-    select * from ads where
-    kind=1 and displaystart_on >= :now_data_ymd and
-    displaystart_on <= :next3m_last_ymd
-    order by displaystart_on asc;
-}, { now_data_ymd => $now_data_ymd , next3m_last_ymd => $next3m_last_ymd });
-$self->stash(ads_rows => \@ads_rows);# テンプレートへ送り、
 
 $self->render('region_state');
 };

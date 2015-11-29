@@ -1,0 +1,58 @@
+<table id="calnavi">
+<tr>
+<th colspan="7">
+<form method="get" action="">
+<input type="hidden" name="back_mon_val" size="" value="<%= $back_mon_val %>">
+<input type="submit" name="back_mon" value="＜ー">
+　<%= $select_date_ym %>　
+<input type="hidden" name="next_mon_val" size="" value="<%= $next_mon_val %>">
+<input type="submit" name="next_mon" value="ー＞">
+% if ($switch_calnavi) {
+    <input type="hidden" name="store_id" size="" value="<%= $store_id %>">
+% }
+</form>
+</th>
+</tr>
+<tr>
+% for my $cap (@$caps) {
+    <td><%= $cap %></td>
+% }
+</tr>
+
+% for my $week_cal_ref (@$cal) {
+    <tr>
+    % for my $day_cal (@$week_cal_ref) {
+        % $day_cal += 0;
+        % if ($day_cal == $select_date_day) {
+            <td id="select_day">
+            <form method="get" action="">
+            <input type="submit" name="" class="button_cal" value="<%= $day_cal %>">
+            <input type="hidden" name="select_date" size="" value="<%= $select_date_ym %>-<%= $day_cal %>">
+            % if ($switch_calnavi) {
+                <input type="hidden" name="store_id" size="" value="<%= $store_id %>">
+            % }
+            </form>
+            </td>
+        % }
+        % elsif ($day_cal >= $border_date_day) {
+            <td>
+            <form method="get" action="">
+            <input type="submit" name="" class="button_cal" value="<%= $day_cal %>">
+            <input type="hidden" name="select_date" size="" value="<%= $select_date_ym %>-<%= $day_cal %>">
+            % if ($switch_calnavi) {
+                <input type="hidden" name="store_id" size="" value="<%= $store_id %>">
+            % }
+            </form>
+            </td>
+        % }
+        % elsif ($day_cal == 0) {
+            % $day_cal = undef;
+            <td><%= $day_cal %></td>
+        % }
+        % else {
+            <td><%= $day_cal %></td>
+        % }
+    % }
+    </tr>
+% }
+</table>

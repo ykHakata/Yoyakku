@@ -20,6 +20,7 @@ our @EXPORT_OK = qw{
     join_date_time
     get_start_end_tp
     get_fill_in_params
+    get_month_last_date
 };
 
 # フィルインする値を作成
@@ -226,6 +227,16 @@ sub chang_date_6 {
         next2m_date => $next2,
         next3m_date => $next3,
     };
+}
+
+# 月末の date 形式の日付の取得
+sub get_month_last_date {
+    my $tp_obj = shift;
+    my $year   = $tp_obj->year;
+    my $mon    = $tp_obj->mon;
+    my $day    = $tp_obj->month_last_day;
+    my $date   = $year . '-' . $mon . '-' . $day;
+    return $date;
 }
 
 sub switch_header_params {

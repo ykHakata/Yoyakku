@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
-use Yoyakku::Util qw{chang_date_6};
+use Yoyakku::Util qw{chang_date_6 get_month_last_date};
 
 =encoding utf8
 
@@ -112,6 +112,99 @@ sub get_select_date {
     return $date if $date;
     return chang_date_6()->{now_date}->date();
 }
+
+=head2 get_ads_rows
+
+    イベントスケジュール取得
+
+    my @ads_rows = $teng->search_named(q{
+        select * from ads where
+        kind=1 and displaystart_on >= :now_data_ymd and
+        displaystart_on <= :next3m_last_ymd
+        order by displaystart_on asc;
+    }, { now_data_ymd => $now_data_ymd , next3m_last_ymd => $next3m_last_ymd });
+
+=cut
+
+sub get_ads_rows {
+    my $self         = shift;
+    my $teng         = $self->teng();
+    my $now_data_ymd = chang_date_6()->{now_date}->date();
+    my $next3m_last_ymd
+        = get_month_last_date( chang_date_6()->{next3m_date} );
+    my $sql  = q{
+        SELECT * FROM ads
+        WHERE kind = :kind
+        AND displaystart_on >= :now_data_ymd
+        AND displaystart_on <= :next3m_last_ymd
+        ORDER BY displaystart_on ASC;
+    };
+    my $bind_values = +{
+        kind            => 1,
+        now_data_ymd    => $now_data_ymd,
+        next3m_last_ymd => $next3m_last_ymd,
+    };
+    my @rows = $teng->search_named( $sql, $bind_values );
+    return \@rows;
+}
+
+=head2 get_switch_calnavi
+
+    カレンダーナビに store_id を埋め込む為の切替
+
+=cut
+
+sub get_switch_calnavi {
+    my $self = shift;
+    return 0;
+}
+
+
+=head2 get_back_mon_val
+
+    カレンダーナビ戻るボタンの値を取得
+
+=cut
+
+sub get_back_mon_val {
+    my $self         = shift;
+    my $back_mon_val = $self->params->{back_mon_val};
+    my $next_mon_val = $self->params->{next_mon_val};
+    return 0 if !$back_mon_val && !$next_mon_val;
+    return 0;
+}
+
+=head2 get_next_mon_val
+
+    カレンダーナビすすむボタンの値を取得
+
+=cut
+
+sub get_next_mon_val {
+    my $self = shift;
+    my $back_mon_val = $self->params->{back_mon_val};
+    my $next_mon_val = $self->params->{next_mon_val};
+    return 1 if !$back_mon_val && !$next_mon_val;
+    return 1;
+}
+
+=head2 get_select_date_ym
+
+    カレンダーナビ選択されている年、月を取得
+
+=cut
+
+sub get_select_date_ym {
+    my $self    = shift;
+    my $date_ym = chang_date_6()->{now_date}->strftime('%Y-%m');
+    return $date_ym;
+}
+
+# 0 2000-01 1
+# 0 2000-02 2
+# 1 2000-03 3
+# 2 2000-04 3
+
 
 1;
 
