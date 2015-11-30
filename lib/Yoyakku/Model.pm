@@ -36,6 +36,18 @@ This documentation referes to Yoyakku::Model version 0.0.1
 
 =cut
 
+=head2 get_calender_caps
+
+    カレンダー表示用の曜日
+
+=cut
+
+sub get_calender_caps {
+    my $self = shift;
+    my $caps = [qw{日 月 火 水 木 金 土}];
+    return $caps;
+}
+
 =head2 get_ads_navi_rows
 
     ナビ広告データ取得

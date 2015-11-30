@@ -60,18 +60,6 @@ sub get_calendar_info {
     return $calendar_info;
 }
 
-=head2 get_calender_caps
-
-    カレンダー表示用の曜日
-
-=cut
-
-sub get_calender_caps {
-    my $self = shift;
-    my $caps = [qw{日 月 火 水 木 金 土}];
-    return $caps;
-}
-
 =head2 get_date_info
 
     カレンダー表示用の日付情報取得

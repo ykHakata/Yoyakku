@@ -4,6 +4,9 @@ use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{chang_date_6 get_month_last_date};
+use Calendar::Simple;
+use Time::Piece;
+use Time::Seconds;
 
 =encoding utf8
 
@@ -132,7 +135,7 @@ sub get_ads_rows {
     my $now_data_ymd = chang_date_6()->{now_date}->date();
     my $next3m_last_ymd
         = get_month_last_date( chang_date_6()->{next3m_date} );
-    my $sql  = q{
+    my $sql = q{
         SELECT * FROM ads
         WHERE kind = :kind
         AND displaystart_on >= :now_data_ymd
@@ -159,52 +162,139 @@ sub get_switch_calnavi {
     return 0;
 }
 
-
-=head2 get_back_mon_val
-
-    カレンダーナビ戻るボタンの値を取得
-
-=cut
-
-sub get_back_mon_val {
-    my $self         = shift;
-    my $back_mon_val = $self->params->{back_mon_val};
-    my $next_mon_val = $self->params->{next_mon_val};
-    return 0 if !$back_mon_val && !$next_mon_val;
-    return 0;
-}
-
-=head2 get_next_mon_val
-
-    カレンダーナビすすむボタンの値を取得
-
-=cut
-
-sub get_next_mon_val {
-    my $self = shift;
-    my $back_mon_val = $self->params->{back_mon_val};
-    my $next_mon_val = $self->params->{next_mon_val};
-    return 1 if !$back_mon_val && !$next_mon_val;
-    return 1;
-}
-
-=head2 get_select_date_ym
-
-    カレンダーナビ選択されている年、月を取得
-
-=cut
-
-sub get_select_date_ym {
-    my $self    = shift;
-    my $date_ym = chang_date_6()->{now_date}->strftime('%Y-%m');
-    return $date_ym;
-}
-
 # 0 2000-01 1
 # 0 2000-02 2
 # 1 2000-03 3
 # 2 2000-04 3
 
+=head2 get_cal_params
+
+    選択したカレンダー情報一式を取得
+
+=cut
+use Data::Dumper;
+sub get_cal_params {
+    my $self = shift;
+
+    my $params = +{};
+
+    my $back_mon     = $self->params->{back_mon};
+    my $back_mon_val = $self->params->{back_mon_val};
+    my $next_mon     = $self->params->{next_mon};
+    my $next_mon_val = $self->params->{next_mon_val};
+    my $select_date  = $self->params->{select_date};
+
+    my $now_date    = chang_date_6()->{now_date};
+    my $next1m_date = chang_date_6()->{next1m_date};
+    my $next2m_date = chang_date_6()->{next2m_date};
+    my $next3m_date = chang_date_6()->{next3m_date};
+
+    my $select_cal = 0;
+
+    if ($back_mon) {
+        $select_cal
+            = ( $back_mon_val == 0 ) ? 0
+            : ( $back_mon_val == 1 ) ? 1
+            : ( $back_mon_val == 2 ) ? 2
+            :                          0;
+        if ( $select_cal == 0 ) {
+            $params->{select_date_day} = ( $now_date->mday ) + 0;
+        }
+        else {
+            $params->{select_date_day} = 1;
+        }
+
+        # select_dateの値を作る（文字列で）
+        $select_date
+            = ( $back_mon_val == 0 ) ? $now_date->date
+            : ( $back_mon_val == 1 ) ? $next1m_date->date
+            : ( $back_mon_val == 2 ) ? $next2m_date->date
+            :                          $now_date->date;
+    }
+
+    if ($next_mon) {
+        $select_cal
+            = ( $next_mon_val == 0 ) ? 0
+            : ( $next_mon_val == 1 ) ? 1
+            : ( $next_mon_val == 2 ) ? 2
+            : ( $next_mon_val == 3 ) ? 3
+            :                          0;
+        if ( $select_cal == 0 ) {
+            $params->{select_date_day} = ( $now_date->mday ) + 0;
+        }
+        else {
+            $params->{select_date_day} = 1;
+        }
+
+        # select_dateの値を作る（文字列で）
+        $select_date
+            = ( $next_mon_val == 0 ) ? $now_date->date
+            : ( $next_mon_val == 1 ) ? $next1m_date->date
+            : ( $next_mon_val == 2 ) ? $next2m_date->date
+            : ( $next_mon_val == 3 ) ? $next3m_date->date
+            :                          $now_date->date;
+    }
+
+    # 受け取った日付文字列から、出力するカレンダーを選択
+    if ( $select_date ) {
+        $select_date
+            = localtime->strptime( $select_date, '%Y-%m-%d' );
+
+        $select_cal
+            = ( $select_date->strftime('%Y-%m') eq
+                $now_date->strftime('%Y-%m') ) ? 0
+            : ( $select_date->strftime('%Y-%m') eq
+                $next1m_date->strftime('%Y-%m') ) ? 1
+            : ( $select_date->strftime('%Y-%m') eq
+                $next2m_date->strftime('%Y-%m') ) ? 2
+            : ( $select_date->strftime('%Y-%m') eq
+                $next3m_date->strftime('%Y-%m') ) ? 3
+            : 0;
+
+        $params->{select_date_day} = ( $select_date->mday ) + 0;
+    }
+    else {
+        $select_date
+            = localtime->strptime( $now_date->date, '%Y-%m-%d' );
+        if ( $select_cal == 0 ) {
+            $params->{select_date_day} = ( $now_date->mday ) + 0;
+        }
+        else {
+            $params->{select_date_day} = 1;
+        }
+    }
+
+    if ( $select_cal == 0 ) {
+        $params->{cal} = calendar( $now_date->mon, $now_date->year );
+        $params->{select_date_ym}  = $now_date->strftime('%Y-%m');
+        $params->{border_date_day} = ( $now_date->mday ) + 0;
+        $params->{back_mon_val}    = 0;
+        $params->{next_mon_val}    = 1;
+    }
+    elsif ( $select_cal == 1 ) {
+        $params->{cal} = calendar( $next1m_date->mon, $next1m_date->year );
+        $params->{select_date_ym}  = $next1m_date->strftime('%Y-%m');
+        $params->{border_date_day} = 1;
+        $params->{back_mon_val}    = 0;
+        $params->{next_mon_val}    = 2;
+    }
+    elsif ( $select_cal == 2 ) {
+        $params->{cal} = calendar( $next2m_date->mon, $next2m_date->year );
+        $params->{select_date_ym}  = $next2m_date->strftime('%Y-%m');
+        $params->{border_date_day} = 1;
+        $params->{back_mon_val}    = 1;
+        $params->{next_mon_val}    = 3;
+    }
+    else {
+        $params->{cal} = calendar( $next3m_date->mon, $next3m_date->year );
+        $params->{select_date_ym}  = $next3m_date->strftime('%Y-%m');
+        $params->{border_date_day} = 1;
+        $params->{back_mon_val}    = 2;
+        $params->{next_mon_val}    = 3;
+    }
+
+    return $params;
+}
 
 1;
 

@@ -58,9 +58,16 @@ sub region_state {
     );
 
     my $switch_calnavi = $model->get_switch_calnavi();
-    my $back_mon_val   = $model->get_back_mon_val();
-    my $next_mon_val   = $model->get_next_mon_val();
-    my $select_date_ym = $model->get_select_date_ym();
+    my $caps           = $model->get_calender_caps();
+    my $params         = $model->get_cal_params();
+
+    my $cal             = $params->{cal};
+    my $select_date_ym  = $params->{select_date_ym};
+    my $border_date_day = $params->{border_date_day};
+    my $back_mon_val    = $params->{back_mon_val};
+    my $next_mon_val    = $params->{next_mon_val};
+    my $select_date_day = $params->{select_date_day};
+
 
     # navi_calnavi_new の為のダミーの値
     $self->stash(
@@ -69,10 +76,10 @@ sub region_state {
         next_mon_val    => $next_mon_val,
         switch_calnavi  => $switch_calnavi,
         store_id        => '',
-        caps            => [],
-        cal             => [],
-        select_date_day => '',
-        border_date_day => '',
+        caps            => $caps,
+        cal             => $cal,
+        select_date_day => $select_date_day,
+        border_date_day => $border_date_day,
     );
 
     return $self->render(
@@ -153,153 +160,13 @@ $self->stash(region_rows_ref => \@region_rows); # テンプレートへ送り、
 
 
 
-#=======================================================
-#カレンダーナビスクリプト
-#====================================================
-#日付変更線を６時に変更
-my $now_date    = localtime;
-
-my $chang_date_ref = chang_date_6($now_date);
-
-my $now_date    = $chang_date_ref->{now_date};
-my $next1m_date = $chang_date_ref->{next1m_date};
-my $next2m_date = $chang_date_ref->{next2m_date};
-my $next3m_date = $chang_date_ref->{next3m_date};
-#====================================================
 
 
-my @cal;
-my $select_date_ym;
-my $border_date_day;
-my $select_date_day;
 
-my $select_cal = 0;
 
-# 選択した日付の文字列を受け取る
-my $select_date = $self->param('select_date');
-
-# 進むのボタンを押した時の値をつくる
-my $back_mon = $self->param('back_mon');
-my $back_mon_val;
-if ($back_mon) {
-    $back_mon_val = $self->param('back_mon_val');
-
-    $select_cal = ($back_mon_val == 0) ? 0
-                : ($back_mon_val == 1) ? 1
-                : ($back_mon_val == 2) ? 2
-                :                        0
-                ;
-
-    if ($select_cal == 0) {
-        $select_date_day = ($now_date->mday) + 0 ;
-    }
-    else {
-        $select_date_day = 1 ;
-    }
-    # select_dateの値を作る（文字列で）
-    $select_date = ($back_mon_val == 0) ? $now_date->date
-                 : ($back_mon_val == 1) ? $next1m_date->date
-                 : ($back_mon_val == 2) ? $next2m_date->date
-                 :                        $now_date->date
-                 ;
-
-}
-# 戻るのボタンを押した時の値をつくる
-my $next_mon = $self->param('next_mon');
-my $next_mon_val;
-if ($next_mon) {
-    $next_mon_val = $self->param('next_mon_val');
-
-        $select_cal = ($next_mon_val == 0) ? 0
-                    : ($next_mon_val == 1) ? 1
-                    : ($next_mon_val == 2) ? 2
-                    : ($next_mon_val == 3) ? 3
-                    :                        0
-                    ;
-    if ($select_cal == 0) {
-        $select_date_day = ($now_date->mday) + 0 ;
-    }
-    else {
-        $select_date_day = 1 ;
-    }
-    # select_dateの値を作る（文字列で）
-    $select_date = ($next_mon_val == 0) ? $now_date->date
-                 : ($next_mon_val == 1) ? $next1m_date->date
-                 : ($next_mon_val == 2) ? $next2m_date->date
-                 : ($next_mon_val == 3) ? $next3m_date->date
-                 :                        $now_date->date
-                 ;
-}
-
-# 受け取った日付文字列から、出力するカレンダーを選択
-if ($select_date) {
-    $select_date = localtime->strptime($select_date,'%Y-%m-%d');
-
-    $select_cal = ( $select_date->strftime('%Y-%m') eq $now_date->strftime('%Y-%m'   ) ) ? 0
-                : ( $select_date->strftime('%Y-%m') eq $next1m_date->strftime('%Y-%m') ) ? 1
-                : ( $select_date->strftime('%Y-%m') eq $next2m_date->strftime('%Y-%m') ) ? 2
-                : ( $select_date->strftime('%Y-%m') eq $next3m_date->strftime('%Y-%m') ) ? 3
-                :                                                                          0
-                ;
-
-    $select_date_day = ($select_date->mday) + 0 ;
-}
-else {
-    $select_date = localtime->strptime($now_date->date,'%Y-%m-%d');
-    if ($select_cal == 0) {
-        $select_date_day = ($now_date->mday) + 0 ;
-    }
-    else {
-        $select_date_day = 1 ;
-    }
-}
 
 my $select_date_res = $select_date->date;
-if ($select_cal == 0) {
-#今月のカレンダー情報==================================================
-#border_dateは今日の日付（日だけ）指定なし
-@cal             = calendar($now_date->mon,$now_date->year);
-$select_date_ym  = $now_date->strftime('%Y-%m');
-$border_date_day = ($now_date->mday) + 0;
-$back_mon_val    = 0;
-$next_mon_val    = 1;
-#０−５時までは前の日付に変換する処理をしておく事
-#=====================================================================
-}
-elsif ($select_cal == 1) {
-#１ヶ月後のカレンダー情報==================================================
-#border_dateは今日の日付（日だけ）指定なし
-@cal             = calendar($next1m_date->mon,$next1m_date->year);
-$select_date_ym  = $next1m_date->strftime('%Y-%m');
-$border_date_day = 1;
-$back_mon_val    = 0;
-$next_mon_val    = 2;
-#$select_date = $next1m_date;
-#０−５時までは前の日付に変換する処理をしておく事
-#=====================================================================
-}
-elsif ($select_cal == 2) {
-#２ヶ月後のカレンダー情報==================================================
-#border_dateは今日の日付（日だけ）指定なし
-@cal             = calendar($next2m_date->mon,$next2m_date->year);
-$select_date_ym  = $next2m_date->strftime('%Y-%m');
-$border_date_day = 1;
-$back_mon_val    = 1;
-$next_mon_val    = 3;
-#０−５時までは前の日付に変換する処理をしておく事
-#=====================================================================
-}
-else {
-#３ヶ月後のカレンダー情報==================================================
-#border_dateは今日の日付（日だけ）指定なし
-@cal             = calendar($next3m_date->mon,$next3m_date->year);
-$select_date_ym  = $next3m_date->strftime('%Y-%m');
-$border_date_day = 1;
-$back_mon_val    = 2;
-$next_mon_val    = 3;
-#０−５時までは前の日付に変換する処理をしておく事
-#=====================================================================
-}
+
 #送り込む値
 $self->stash(
     border_date_day => $border_date_day,
