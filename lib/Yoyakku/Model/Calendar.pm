@@ -91,6 +91,9 @@ sub get_header_stash_index {
 
     my $switch_header = 2;
 
+    return $self->get_header_stash_params( $switch_header, $login_name )
+        if !$table;
+
     if ( $table eq 'admin' ) {
         $switch_header = 4;
         if ( $self->storeinfo_row()->status eq 0 ) {
