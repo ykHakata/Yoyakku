@@ -41,6 +41,9 @@ sub get_header_stash_region {
 
     my $switch_header = 5;
 
+    return $self->get_header_stash_params( $switch_header, $login_name )
+        if !$table;
+
     if ( $table eq 'admin' ) {
         $switch_header = $self->storeinfo_row()->status() eq 0 ? 10 : 7;
     }
