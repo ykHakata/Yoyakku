@@ -103,19 +103,6 @@ sub get_ads_reco_rows {
     return \@rows;
 }
 
-=head2 get_select_date
-
-    選択された日付を取得
-
-=cut
-
-sub get_select_date {
-    my $self = shift;
-    my $date = $self->params()->{select_date};
-    return $date if $date;
-    return chang_date_6()->{now_date}->date();
-}
-
 =head2 get_ads_rows
 
     イベントスケジュール取得
@@ -292,7 +279,7 @@ sub get_cal_params {
         $params->{back_mon_val}    = 2;
         $params->{next_mon_val}    = 3;
     }
-
+    $params->{select_date} = $select_date->date;
     return $params;
 }
 

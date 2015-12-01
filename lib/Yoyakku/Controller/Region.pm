@@ -44,13 +44,11 @@ sub region_state {
     my $ads_navi_rows = $model->get_ads_navi_rows();
     my $ads_one_rows  = $model->get_ads_one_rows();
     my $ads_reco_rows = $model->get_ads_reco_rows();
-    my $select_date   = $model->get_select_date();
     my $ads_rows      = $model->get_ads_rows();
 
     # 表示させる為のダミーの値
     $self->stash(
         class        => 'state',
-        select_date  => $select_date,
         adsReco_rows => $ads_reco_rows,
         adsOne_rows  => $ads_one_rows,
         ads_rows     => $ads_rows,
@@ -67,6 +65,7 @@ sub region_state {
     my $back_mon_val    = $params->{back_mon_val};
     my $next_mon_val    = $params->{next_mon_val};
     my $select_date_day = $params->{select_date_day};
+    my $select_date     = $params->{select_date};
 
 
     # navi_calnavi_new の為のダミーの値
@@ -80,6 +79,7 @@ sub region_state {
         cal             => $cal,
         select_date_day => $select_date_day,
         border_date_day => $border_date_day,
+        select_date     => $select_date,
     );
 
     return $self->render(
@@ -112,33 +112,6 @@ __END__
 
 #予約の為のスタジオ検索コントロール-----------------------------
 get '/region_state' => sub {
-my $self = shift;
-
-#ログイン機能==========================================
-
-
-
-#=======================================================
-#====================================================
-#日付変更線を６時に変更
-my $now_date    = localtime;
-
-my $chang_date_ref = chang_date_6($now_date);
-
-my $now_date    = $chang_date_ref->{now_date};
-my $next1m_date = $chang_date_ref->{next1m_date};
-my $next2m_date = $chang_date_ref->{next2m_date};
-my $next3m_date = $chang_date_ref->{next3m_date};
-#====================================================
-
-$self->stash(
-    now_data    => $now_date,
-    next1m_data => $next1m_date,
-    next2m_data => $next2m_date,
-    next3m_data => $next3m_date
-);
-
-
 
 
 # 地域ナビため、店舗登録をすべて抽出(web公開許可分だけ)
@@ -158,40 +131,6 @@ select * from region order by id asc;
 });
 $self->stash(region_rows_ref => \@region_rows); # テンプレートへ送り、
 
-
-
-
-
-
-
-
-my $select_date_res = $select_date->date;
-
-#送り込む値
-$self->stash(
-    border_date_day => $border_date_day,
-    select_date_ym  => $select_date_ym,
-    select_date_day => $select_date_day,
-    select_cal      => $select_cal,
-    cal             => \@cal,
-    caps            => \@caps,
-    back_mon_val    => $back_mon_val,
-    next_mon_val    => $next_mon_val,
-    #select_date     => $select_date,
-    select_date_res    => $select_date_res,
-);
-#=======================================================
-
-#パンくずリスト用日付データ
-#カレンダ日付取得
-my $sub_date = $self->param('sub_date');
-#$self->stash(sub_date => $sub_date);
-
-#sql値取得
-#今日の日付取得
-my $now_data_ymd = $now_date->ymd;
-
-#$self->stash(now_data_ymd => $now_data_ymd);
 
 
 $self->render('region_state');
