@@ -3,10 +3,8 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
-use Yoyakku::Util qw{chang_date_6 get_month_last_date};
-use Calendar::Simple;
-use Time::Piece;
-use Time::Seconds;
+use Yoyakku::Util
+    qw{chang_date_6 get_month_last_date get_calendar get_tp_obj_strptime};
 
 =encoding utf8
 
@@ -152,17 +150,54 @@ sub get_switch_calnavi {
     return 0;
 }
 
-# 0 2000-01 1
-# 0 2000-02 2
-# 1 2000-03 3
-# 2 2000-04 3
+=head2 get_storeinfo_rows_region_navi
+
+    地域ナビため、店舗登録をすべて抽出(web公開許可分だけ)
+
+=cut
+
+sub get_storeinfo_rows_region_navi {
+    my $self = shift;
+    my $teng = $self->teng();
+    my @rows = $teng->search(
+        'storeinfo',
+        +{ status   => 0, },
+        +{ order_by => 'region_id', },
+    );
+    return \@rows;
+}
+
+=head2 get_region_rows_region_navi
+
+    地域ナビため、地域IDをすべて抽出
+
+=cut
+
+sub get_region_rows_region_navi {
+    my $self = shift;
+    my $teng = $self->teng();
+    my @rows = $teng->search( 'region', +{}, +{ order_by => 'id', }, );
+    return \@rows;
+}
+
+=head2 get_store_id_region_navi
+
+    地域ナビため、検索結果店舗id受け取り
+
+=cut
+
+sub get_store_id_region_navi {
+    my $self     = shift;
+    my $store_id = $self->params->{store_id};
+    return $store_id;
+}
 
 =head2 get_cal_params
 
     選択したカレンダー情報一式を取得
 
 =cut
-use Data::Dumper;
+
 sub get_cal_params {
     my $self = shift;
 
@@ -226,13 +261,13 @@ sub get_cal_params {
     }
 
     # 受け取った日付文字列から、出力するカレンダーを選択
-    if ( $select_date ) {
-        $select_date
-            = localtime->strptime( $select_date, '%Y-%m-%d' );
+    if ($select_date) {
+        $select_date = get_tp_obj_strptime( $select_date, '%Y-%m-%d' );
 
         $select_cal
-            = ( $select_date->strftime('%Y-%m') eq
-                $now_date->strftime('%Y-%m') ) ? 0
+            = (
+            $select_date->strftime('%Y-%m') eq $now_date->strftime('%Y-%m') )
+            ? 0
             : ( $select_date->strftime('%Y-%m') eq
                 $next1m_date->strftime('%Y-%m') ) ? 1
             : ( $select_date->strftime('%Y-%m') eq
@@ -244,8 +279,7 @@ sub get_cal_params {
         $params->{select_date_day} = ( $select_date->mday ) + 0;
     }
     else {
-        $select_date
-            = localtime->strptime( $now_date->date, '%Y-%m-%d' );
+        $select_date = get_tp_obj_strptime( $now_date->date, '%Y-%m-%d' );
         if ( $select_cal == 0 ) {
             $params->{select_date_day} = ( $now_date->mday ) + 0;
         }
@@ -255,28 +289,28 @@ sub get_cal_params {
     }
 
     if ( $select_cal == 0 ) {
-        $params->{cal} = calendar( $now_date->mon, $now_date->year );
+        $params->{cal} = get_calendar( $now_date->mon, $now_date->year );
         $params->{select_date_ym}  = $now_date->strftime('%Y-%m');
         $params->{border_date_day} = ( $now_date->mday ) + 0;
         $params->{back_mon_val}    = 0;
         $params->{next_mon_val}    = 1;
     }
     elsif ( $select_cal == 1 ) {
-        $params->{cal} = calendar( $next1m_date->mon, $next1m_date->year );
+        $params->{cal} = get_calendar( $next1m_date->mon, $next1m_date->year );
         $params->{select_date_ym}  = $next1m_date->strftime('%Y-%m');
         $params->{border_date_day} = 1;
         $params->{back_mon_val}    = 0;
         $params->{next_mon_val}    = 2;
     }
     elsif ( $select_cal == 2 ) {
-        $params->{cal} = calendar( $next2m_date->mon, $next2m_date->year );
+        $params->{cal} = get_calendar( $next2m_date->mon, $next2m_date->year );
         $params->{select_date_ym}  = $next2m_date->strftime('%Y-%m');
         $params->{border_date_day} = 1;
         $params->{back_mon_val}    = 1;
         $params->{next_mon_val}    = 3;
     }
     else {
-        $params->{cal} = calendar( $next3m_date->mon, $next3m_date->year );
+        $params->{cal} = get_calendar( $next3m_date->mon, $next3m_date->year );
         $params->{select_date_ym}  = $next3m_date->strftime('%Y-%m');
         $params->{border_date_day} = 1;
         $params->{back_mon_val}    = 2;

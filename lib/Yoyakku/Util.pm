@@ -5,6 +5,7 @@ use utf8;
 use Time::Piece;
 use Time::Seconds;
 use HTML::FillInForm;
+use Calendar::Simple;
 use Yoyakku::Master qw{$HOUR_00 $HOUR_06 $SPACE};
 use Exporter 'import';
 our @EXPORT_OK = qw{
@@ -21,7 +22,32 @@ our @EXPORT_OK = qw{
     get_start_end_tp
     get_fill_in_params
     get_month_last_date
+    get_calendar
+    get_tp_obj_strptime
+    get_tp_obj
 };
+
+# Time Piece オブジェクト取得
+sub get_tp_obj {
+    my $tp_obj = localtime;
+    return $tp_obj;
+}
+
+# Time Piece オブジェクト取得(フォーマット指定)
+sub get_tp_obj_strptime {
+    my $string = shift;
+    my $format = shift;
+    my $tp_obj = localtime->strptime( $string, $format, );
+    return $tp_obj;
+}
+
+# カレンダー情報を取得
+sub get_calendar {
+    my $month = shift;
+    my $year  = shift;
+    my $cal   = calendar( $month, $year, );
+    return $cal;
+}
 
 # フィルインする値を作成
 sub get_fill_in_params {
@@ -522,6 +548,10 @@ Yoyakku アプリケーションのユーティリティー
 =item * L<Time::Seconds>
 
 =item * L<Yoyakku::Master>
+
+=item * L<HTML::FillInForm>
+
+=item * L<Calendar::Simple>
 
 =back
 

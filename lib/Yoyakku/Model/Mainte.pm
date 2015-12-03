@@ -2,8 +2,6 @@ package Yoyakku::Model::Mainte;
 use strict;
 use warnings;
 use utf8;
-use Time::Piece;
-use Time::Seconds;
 use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{
     switch_header_params
@@ -12,6 +10,7 @@ use Yoyakku::Util qw{
     chenge_time_over
     previous_day_ymd
     split_date_time
+    get_tp_obj
 };
 use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
@@ -241,7 +240,7 @@ sub switch_stash_mainte_list {
     };
 
     # Time::Piece オブジェクト
-    my $today = localtime;
+    my $today = get_tp_obj();
 
     my $stash_mainte = +{
         login_data => +{    # 初期値表示のため

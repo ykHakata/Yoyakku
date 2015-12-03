@@ -3,8 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
-use Yoyakku::Util qw{chang_date_6};
-use Calendar::Simple;
+use Yoyakku::Util qw{chang_date_6 get_calendar};
 
 =encoding utf8
 
@@ -56,7 +55,7 @@ sub get_cal_info_ads_rows {
 sub get_calendar_info {
     my $self          = shift;
     my $date_info     = shift;
-    my $calendar_info = calendar( $date_info->mon, $date_info->year );
+    my $calendar_info = get_calendar( $date_info->mon, $date_info->year );
     return $calendar_info;
 }
 
