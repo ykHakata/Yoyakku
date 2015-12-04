@@ -149,6 +149,10 @@ sub startup {
     $r->route('/region_state')
         ->to( controller => 'Region', action => 'region_state' );
 
+    # 店舗管理(Admin)
+    $r->route('/admin_store_edit')
+        ->to( controller => 'Admin', action => 'admin_store_edit' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

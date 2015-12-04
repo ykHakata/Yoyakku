@@ -1,0 +1,169 @@
+% layout 'default';
+% title 'yoyakku管理モード';
+
+<div id="wrapper">
+
+<%= include './temp/header_navi_new' %>
+
+<%= include './temp/admin_navi' %>
+
+
+<div id="contents">
+<div id="bgTop">
+<ul class="topicpath">
+    <li id="tpp1">スタート&nbsp;-&gt;</li>
+    <li id="tpp2">店舗情報&nbsp;-&gt;</li>
+    <li id="tpp3"></li>
+    <li id="tpp4"></li>
+    <li id="tpp5"></li>
+</ul>
+</div>
+
+%# <form method="get" action="">
+%# <p id="post_submit"><input type="text" name="post" value="">
+%# <input type="submit" value="検索"></p>
+%# </form>
+
+<div id="contensNavi">
+<div id="store_deta">
+<form method="post" action="" enctype="multipart/form-data">
+<h2>
+<table id="botton_t">
+    <tr>
+        <td id="botton_l">
+        <input type="submit" name="cancel" value="キャンセル">
+        </td>
+        <td id="botton_r">
+        <input type="hidden" name="id" value="">
+        <input type="submit" name="" value="完了">
+        </td>
+        <td id="com_r">
+        店舗
+        </td>
+    </tr>
+</table>
+</h2>
+
+
+<table id="store_t_in">
+
+<tr id="name">
+<td class="col1">
+%# <p><input type="text" name="#" value="写真"></p>
+</td>
+<input type="hidden" name="region_id" value="">
+
+<td class="col2" colspan="2">
+<p id="tenpo">店舗名</p>
+<input type="text" name="name" value="">
+
+<div class="vali"><%=  $name %></div>
+</td>
+</tr>
+
+<tr id="icon">
+<td class="col3" colspan="3">
+%# <p id="icon_p"><input type="file" name="icon" value=""></p>
+</td>
+</tr>
+
+
+<tr id="post">
+<td class="col1">
+(〒,-なし)<br /><input type="submit" name="post_search" value="検索">
+</td>
+<td class="col2" colspan="2">
+<input type="text" name="post" value="">
+<div class="vali"><%=  $post %></div>
+</td>
+</tr>
+
+
+
+<tr id="address1">
+<td class="col1">
+※〜県<br />
+※〜市<br />
+
+</td>
+<td class="col2">
+<input type="text" name="state" value="">
+<div class="vali"><%=  $state %></div>
+</td>
+<td class="col3">
+<input type="text" name="cities" value="">
+<div class="vali"><%=  $cities %></div>
+</td>
+</tr>
+<tr id="address2">
+<td class="col1">
+※以下〜<br />
+</td>
+<td class="col2" colspan="2">
+<input type="text" name="addressbelow" value="">
+<div class="vali"><%=  $addressbelow %></div>
+</td>
+</tr>
+
+<tr id="tel">
+<td class="col1">電話</td>
+<td class="col2" colspan="2">
+
+<input type="text" name="tel" value="">
+<div class="vali"><%=  $tel %></div>
+
+</td>
+</tr>
+
+<tr id="mail">
+<td class="col1">メール</td>
+<td class="col2" colspan="2">
+
+<input type="text" name="mail" value="">
+<div class="vali"><%=  $mail %></div>
+
+</td>
+</tr>
+
+<tr id="url">
+<td class="col1">サイト<br />
+※http〜</td>
+<td class="col2" colspan="2">
+
+<input type="text" name="url" value="">
+<div class="vali"><%=  $url %></div>
+
+</td>
+</tr>
+
+<tr id="remarks">
+<td class="col1">コメント<br /><br />※200文字以内</td>
+<td class="col2" colspan="2">
+
+<textarea name="remarks" cols="30" rows="10"></textarea>
+<div class="vali"><%=  $remarks %></div>
+
+
+</td>
+</tr>
+</table>
+</div>
+</form>
+
+<div id="store_map">
+<h2>地図</h2>
+<div id="map_frame">
+<p id="map">
+調整中
+</p>
+</div>
+</div>
+
+<div id="clearfix"></div>
+<!-- /#contensNavi --></div>
+<!-- /#contents --></div>
+
+
+<%= include './temp/footer' %>
+
+<!-- /#wrapper --></div>
