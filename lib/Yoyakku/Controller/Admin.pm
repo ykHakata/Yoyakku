@@ -18,6 +18,20 @@ This documentation referes to Yoyakku::Controller::Admin version 0.0.1
 
 =cut
 
+sub _init {
+    my $self  = shift;
+    my $model = Yoyakku::Model::Admin->new();
+    $model->params( $self->req->params->to_hash );
+    $model->method( uc $self->req->method );
+    $model->session( $self->session );
+    $model->check_auth_db_yoyakku();
+    my $header_stash = $model->get_header_stash_admin();
+    return $header_stash if $header_stash eq 'index';
+    return $header_stash if $header_stash eq 'profile';
+    $self->stash($header_stash);
+    return $model;
+}
+
 =head2 admin_store_edit
 
     選択店舗情報確認コントロール
@@ -26,6 +40,10 @@ This documentation referes to Yoyakku::Controller::Admin version 0.0.1
 
 sub admin_store_edit {
     my $self = shift;
+
+    my $model = $self->_init();
+    return $self->redirect_to($model) if $model eq 'index';
+    return $self->redirect_to($model) if $model eq 'profile';
 
     # バリデートの値のダミー
     $self->stash(
@@ -40,15 +58,10 @@ sub admin_store_edit {
         url          => '',
     );
 
-    # ヘッダーのダミー
+    my $switch_com = $model->get_switch_com();
     $self->stash(
-        class                  => 'admin_store_edit',
-        site_title_link        => '',
-        header_heading_link    => '',
-        header_heading_name    => '',
-        header_navi_class_name => [],
-        header_navi_link_name  => [],
-        header_navi_row_name   => [],
+        class      => 'admin_store_edit',
+        switch_com => $switch_com,
     );
 
     return $self->render(
@@ -88,63 +101,7 @@ L<Guides>
 any '/admin_store_edit' => sub {
 my $self = shift;
 # テンプレートbodyのクラス名を定義
-my $class = "admin_store_edit";
-$self->stash(class => $class);
-#ログイン機能==========================================
-my $login_id;
-my $login;
-my $switch_header;
 
-my $admin_id   = $self->session('session_admin_id'  );
-my $general_id = $self->session('session_general_id');
-
-if ($admin_id) {
-    my $admin_ref   = $teng->single('admin', +{id => $admin_id});
-    my $profile_ref = $teng->single('profile', +{admin_id => $admin_id});
-       $login       = q{(admin)}.$profile_ref->nick_name;
-       $login_id    = $admin_id;
-    my $status = $admin_ref->status;
-    if ($status) {
-        my $storeinfo_ref = $teng->single('storeinfo', +{admin_id => $admin_id});
-        if ($storeinfo_ref->status eq 0) {
-            $switch_header = 10;
-        }
-        else {
-            $switch_header = 7;
-        }
-    }
-    else {
-        #$switch_header = 8;
-        return $self->redirect_to('profile');
-    }
-    #return $self->redirect_to('index');
-}
-elsif ($general_id) {
-    #my $general_ref  = $teng->single('general', +{id => $general_id});
-    #my $profile_ref  = $teng->single('profile', +{general_id => $general_id});
-    #$login           = $profile_ref->nick_name;
-    #
-    #my $status = $general_ref->status;
-    #if ($status) {
-    #    $switch_header = 6;
-    #}
-    #else {
-    #    #$switch_header = 8;
-    #    return $self->redirect_to('profile');
-    #}
-    return $self->redirect_to('index');
-}
-else {
-    #$switch_header = 5;
-    return $self->redirect_to('index');
-}
-
-$self->stash(login => $login);# #ログイン名をヘッダーの右に表示させる
-# headerの切替
-$self->stash(switch_header => $switch_header);
-#====================================================
-#=======================================================
-#====================================================
 #日付変更線を６時に変更
 my $now_date    = localtime;
 
@@ -173,9 +130,6 @@ $self->stash(
     next2m_data => $next2m_date,
     next3m_data => $next3m_date
 );
-# 左naviのコメント切替の為の変数
-my $switch_com = 1;
-$self->stash(switch_com => $switch_com);
 
 #ログインidからstoreinfoのテーブルより該当テーブル抽出
 my @storeinfo = $teng->single('storeinfo', {'admin_id' => $login_id });

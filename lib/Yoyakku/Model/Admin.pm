@@ -21,6 +21,37 @@ Admin コントローラーのロジック API
 
 =cut
 
+=head2 get_header_stash_admin
+
+    ヘッダー初期値取得
+
+=cut
+
+sub get_header_stash_admin {
+    my $self       = shift;
+    my $table      = $self->login_table();
+    my $login_row  = $self->login_row();
+    my $login_name = $self->login_name();
+    return 'index'   if !$login_row;
+    return 'index'   if !$table;
+    return 'index'   if $table ne 'admin';
+    return 'profile' if !$login_row->status;
+    my $switch_header = $self->storeinfo_row()->status() eq 0 ? 10 : 7;
+    return $self->get_header_stash_params( $switch_header, $login_name );
+}
+
+=head2 get_switch_com
+
+    左naviのコメント切替の為の変数
+
+=cut
+
+sub get_switch_com {
+    my $self       = shift;
+    my $switch_com = 1;
+    return $switch_com;
+}
+
 1;
 
 __END__

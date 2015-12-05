@@ -1,0 +1,80 @@
+<div id="navigation">
+<div id="localnavi">
+<h2 id="">スタートガイド</h2>
+<div class="section_admin">
+
+<table id="s_guide">
+
+<tr id="store">
+<th>１、店舗情報設定</th>
+
+% if ($switch_com >= 2) {
+<td>完了！</td>
+% }
+% else {
+<td>まだ</td>
+% }
+
+
+</tr>
+
+<tr id="reserv">
+
+% if ($switch_com == 2) {
+<th>２、<a href='admin_reserv_edit'>予約情報設定</a></th>
+% }
+% else {
+<th>２、予約情報設定</th>
+% }
+
+% if ($switch_com >= 5) {
+<td>完了！</td>
+% }
+% else {
+<td>まだ</td>
+% }
+
+</tr>
+
+<tr id="publi">
+
+% if ($switch_com == 5) {
+<th>３、<a href="admin_pub_edit">公開、非公開設定</a></th>
+% }
+% else {
+<th>３、公開、非公開設定</th>
+% }
+
+% if ($switch_com >= 7) {
+<td>完了！</td>
+% }
+% else {
+<td>まだ</td>
+% }
+
+</tr>
+
+% if ($switch_com == 7) {
+<tr id="reserv_l">
+<th colspan="2">
+<a href="admin_reserv_list">
+管理者予約が<br />
+利用できるようになりました。
+</a>
+</th>
+</tr>
+% }
+% else {
+<tr id="reserv_l">
+<th colspan="2">
+</th>
+</tr>
+% }
+
+</table>
+
+</div>
+</div>
+
+<div id="clearfix"></div>
+<!-- /#navigation --></div>
