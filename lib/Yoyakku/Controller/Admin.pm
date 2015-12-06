@@ -61,14 +61,22 @@ sub admin_store_edit {
         $model->get_login_storeinfo_params();
         return $self->_render_admin_store_edit($model);
     }
-
-    return $self->_cancel($model) if $model->params('cancel');
+    my $params = $model->params();
+    return $self->_cancel($model)      if $params->{cancel};
+    return $self->_post_search($model) if $params->{post_search};
 }
 
 sub _cancel {
     my $self  = shift;
     my $model = shift;
     $model->get_login_storeinfo_id();
+    return $self->_render_admin_store_edit($model);
+}
+
+sub _post_search {
+    my $self  = shift;
+    my $model = shift;
+    $model->get_post_search();
     return $self->_render_admin_store_edit($model);
 }
 
@@ -127,121 +135,7 @@ my $self = shift;
 #----------
 #sql入力にはpost、判定のif文
 if (uc $self->req->method eq 'POST') {
-#submitボタンによる選別
-my $cancel      = $self->param('cancel');
-my $post_search = $self->param('post_search');
-#キャンセルボタンの場合
-if ($cancel) {
-        #値をすべて空にする
-        my $id            = $self->param('id');#idだけ残す
-        my $region_id     ;
-        #my $admin_id     ;
-        my $name          ;
-        my $icon          ;
-        my $post          ;
-        my $state         ;
-        my $cities        ;
-        my $addressbelow  ;
-        my $tel           ;
-        my $mail          ;
-        my $remarks       ;
-        my $url           ;
-        #my $locationinfor;
-        #my $status       ;
-        #my $create_on    ;
-        #my $modify_on    ;
-        #修正用フォーム、Fillinつかって表示 値はsqlより該当idのデータをつかう
-        my $html = $self->render_partial()->to_string;
-        $html = HTML::FillInForm->fill(
-            \$html,{
-            id            => $id ,
-            region_id     => $region_id ,
-            #admin_id      => $admin_id ,
-            name          => $name ,
-            icon          => $icon ,
-            post          => $post ,
-            state         => $state ,
-            cities        => $cities ,
-            addressbelow  => $addressbelow ,
-            tel           => $tel ,
-            mail          => $mail ,
-            remarks       => $remarks ,
-            url           => $url ,
-            #locationinfor => $locationinfor ,
-            #status        => $status ,
-            #create_on     => $create_on ,
-            #modify_on     => $modify_on
-        },
-        );
-        #Fillin画面表示実行returnなのでここでおしまい。
-        return $self->render_text($html, format => 'html');
-}
-#検索(郵便)の場合
-elsif ($post_search) {
-        my $id            = $self->param('id');
-        my $region_id     = $self->param('region_id');
-        #my $admin_id      = $self->param('admin_id');
-        my $name          = $self->param('name');
-        my $icon          = $self->param('icon');
-        my $post          = $self->param('post');
-        my $state         = $self->param('state');
-        my $cities        = $self->param('cities');
-        my $addressbelow  = $self->param('addressbelow');
-        my $tel           = $self->param('tel');
-        my $mail          = $self->param('mail');
-        my $remarks       = $self->param('remarks');
-        my $url           = $self->param('url');
-        #my $locationinfor = $self->param('locationinfor');
-        #my $status        = $self->param('status');
-        #my $create_on     = $self->param('create_on');
-        #my $modify_on     = $self->param('modify_on');
-        my $mark = 0;
-        #郵便データ検索
-        if ($post) {
-            my @post_rows = $teng->search_named(q{select * from post;});
-            #該当データ取り出し
-            foreach my $post_row_ref (@post_rows) {
-                if ($post_row_ref->post_id == $post) {
-                    $post      = $post_row_ref->post_id;
-                    $region_id = $post_row_ref->region_id;
-                    $state     = $post_row_ref->state;
-                    $cities    = $post_row_ref->cities;
-                    $mark      = 1;
-                }
-            }
-            #該当する郵便番号見つからない時のメッセージ
-            if (! $mark) {
-                    $region_id = 0;
-                    $state     = "登録なし";
-                    $cities    = "登録なし";
-            }
-        }
-        #修正用フォーム、Fillinつかって表示 値はsqlより該当idのデータをつかう
-        my $html = $self->render_partial()->to_string;
-        $html = HTML::FillInForm->fill(
-            \$html,{
-            id            => $id ,
-            region_id     => $region_id ,
-            #admin_id      => $admin_id ,
-            name          => $name ,
-            icon          => $icon ,
-            post          => $post ,
-            state         => $state ,
-            cities        => $cities ,
-            addressbelow  => $addressbelow ,
-            tel           => $tel ,
-            mail          => $mail ,
-            remarks       => $remarks ,
-            url           => $url ,
-            #locationinfor => $locationinfor ,
-            #status        => $status ,
-            #create_on     => $create_on ,
-            #modify_on     => $modify_on
-        },
-        );
-        #Fillin画面表示実行returnなのでここでおしまい。
-        return $self->render_text($html, format => 'html');
-}
+
 #完了の場合
 else {
     #完了の場合バリデート実行

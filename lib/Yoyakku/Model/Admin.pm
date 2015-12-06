@@ -92,6 +92,32 @@ sub get_login_storeinfo_id {
     return $id;
 }
 
+=head2 get_post_search
+
+    郵便番号から住所検索
+
+=cut
+
+sub get_post_search {
+    my $self   = shift;
+    my $teng   = $self->teng();
+    my $params = $self->params();
+    my $row    = $teng->single( 'post', +{ post_id => $params->{post}, }, );
+    if ($row) {
+        $params->{post}      = $row->post_id;
+        $params->{region_id} = $row->region_id;
+        $params->{state}     = $row->state;
+        $params->{cities}    = $row->cities;
+    }
+    else {
+        $params->{region_id} = 0;
+        $params->{state}     = '登録なし';
+        $params->{cities}    = '登録なし';
+    }
+    $self->params($params);
+    return;
+}
+
 =head2 get_init_valid_params_admin_store_edit
 
     バリデート用パラメータ初期値(admin_store_edit)
