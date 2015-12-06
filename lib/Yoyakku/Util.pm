@@ -27,13 +27,39 @@ our @EXPORT_OK = qw{
     get_tp_obj
 };
 
-# Time Piece オブジェクト取得
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Util - ユーティリティー API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Util version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Yoyakku アプリケーションのユーティリティー
+
+=cut
+
+=head2 get_tp_obj
+
+    Time Piece オブジェクト取得
+
+=cut
+
 sub get_tp_obj {
     my $tp_obj = localtime;
     return $tp_obj;
 }
 
-# Time Piece オブジェクト取得(フォーマット指定)
+=head2 get_tp_obj_strptime
+
+    Time Piece オブジェクト取得(フォーマット指定)
+
+=cut
+
 sub get_tp_obj_strptime {
     my $string = shift;
     my $format = shift;
@@ -41,7 +67,12 @@ sub get_tp_obj_strptime {
     return $tp_obj;
 }
 
-# カレンダー情報を取得
+=head2 get_calendar
+
+    カレンダー情報を取得
+
+=cut
+
 sub get_calendar {
     my $month = shift;
     my $year  = shift;
@@ -49,7 +80,12 @@ sub get_calendar {
     return $cal;
 }
 
-# フィルインする値を作成
+=head2 get_fill_in_params
+
+    フィルインする値を作成
+
+=cut
+
 sub get_fill_in_params {
     my $html   = shift;
     my $params = shift;
@@ -57,7 +93,12 @@ sub get_fill_in_params {
     return $output;
 }
 
-# 開始、終了日付を time::Piece オブジェクト変換
+=head2 get_start_end_tp
+
+    開始、終了日付を time::Piece オブジェクト変換
+
+=cut
+
 sub get_start_end_tp {
     my $start_date_time = shift;
     my $end_date_time   = shift;
@@ -68,7 +109,12 @@ sub get_start_end_tp {
     return ( $start_tp, $end_tp, );
 }
 
-# datetime 形式を組み立て
+=head2 join_date_time
+
+    datetime 形式を組み立て
+
+=cut
+
 sub join_date_time {
     my $split_dt = shift;
 
@@ -86,7 +132,12 @@ sub join_date_time {
     return ( $start_date_time, $end_date_time, );
 }
 
-# 日付と時間をわける
+=head2 split_date_time
+
+    日付と時間をわける
+
+=cut
+
 sub split_date_time {
     my $start_date_time = shift;
     my $end_date_time   = shift;
@@ -107,7 +158,12 @@ sub split_date_time {
     };
 }
 
-# 日付を一日進める
+=head2 next_day_ymd
+
+    日付を一日進める
+
+=cut
+
 sub next_day_ymd {
     my $date = shift;
     my $date_tp = localtime->strptime( $date, '%Y-%m-%d' );
@@ -116,7 +172,12 @@ sub next_day_ymd {
     return $date;
 }
 
-# 日付を一日もどす
+=head2 previous_day_ymd
+
+    日付を一日もどす
+
+=cut
+
 sub previous_day_ymd {
     my $date = shift;
     my $date_tp = localtime->strptime( $date, '%Y-%m-%d' );
@@ -125,7 +186,12 @@ sub previous_day_ymd {
     return $date;
 }
 
-# 24:00 表記と 30:00 表記を切り替え normal, over,
+=head2 chenge_time_over
+
+    24:00 表記と 30:00 表記を切り替え normal, over,
+
+=cut
+
 sub chenge_time_over {
     my $times = shift;
     my $type  = shift;
@@ -165,7 +231,12 @@ sub chenge_time_over {
     return $split_t;
 }
 
-# time 形式を組み立て none 時間の頭の0つけない
+=head2 join_time
+
+    time 形式を組み立て none 時間の頭の0つけない
+
+=cut
+
 sub join_time {
     my $split_t = shift;
     my $type    = shift;
@@ -190,7 +261,12 @@ sub join_time {
     return ( $start_time, $end_time, );
 }
 
-# time 形式を分解
+=head2 split_time
+
+    time 形式を分解
+
+=cut
+
 sub split_time {
     my $start_time = shift;
     my $end_time   = shift;
@@ -214,11 +290,32 @@ sub split_time {
     };
 }
 
+=head2 now_datetime
+
+    use Yoyakku::Util qw{now_datetime};
+
+    now_datetime(), # 2015-06-01 23:55:30
+
+    今の日時を datatime 形式の文字列で取得
+
+=cut
+
 sub now_datetime {
     my $now = localtime;
 
     return $now->datetime( T => $SPACE );
 }
+
+=head2 chang_date_6
+
+    use Yoyakku::Util qw{chang_date_6};
+
+    # 日付変更線を６時に変更 (日付のオブジェクトで変換される)
+    my $chang_date = chang_date_6();
+
+    日付の始まりを午前６時にした日付のオブジェクトを提供
+
+=cut
 
 sub chang_date_6 {
 
@@ -255,7 +352,12 @@ sub chang_date_6 {
     };
 }
 
-# 月末の date 形式の日付の取得
+=head2 get_month_last_date
+
+    月末の date 形式の日付の取得
+
+=cut
+
 sub get_month_last_date {
     my $tp_obj = shift;
     my $year   = $tp_obj->year;
@@ -264,6 +366,28 @@ sub get_month_last_date {
     my $date   = $year . '-' . $mon . '-' . $day;
     return $date;
 }
+
+=head2 switch_header_params
+
+    use Yoyakku::Util qw{switch_header_params};
+
+    # ヘッダーナビ、各パラメーターを取得
+    my $header_params = switch_header_params( $switch_header, $login_name );
+
+    my $header_params_hash_ref = +{
+        site_title_link        => $header_params->{site_title_link},
+        header_heading_link    => $header_params->{header_heading_link},
+        header_heading_name    => $header_params->{header_heading_name},
+        header_navi_class_name => $header_params->{header_navi_class_name},
+        header_navi_link_name  => $header_params->{header_navi_link_name},
+        header_navi_row_name   => $header_params->{header_navi_row_name},
+    };
+
+    # ヘッダーを識別するステータスとログイン名を引き渡し、ハッシュリファレンス返却
+
+    ヘッダーナビ、各パラメーターを取得
+
+=cut
 
 sub switch_header_params {
     my $switch_header = shift;
@@ -480,57 +604,6 @@ sub switch_header_params {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Util - ユーティリティー API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Util version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-Yoyakku アプリケーションのユーティリティー
-
-=head2 now_datetime
-
-    use Yoyakku::Util qw{now_datetime};
-
-    now_datetime(), # 2015-06-01 23:55:30
-
-今の日時を datatime 形式の文字列で取得
-
-=head2 chang_date_6
-
-    use Yoyakku::Util qw{chang_date_6};
-
-    # 日付変更線を６時に変更 (日付のオブジェクトで変換される)
-    my $chang_date = chang_date_6();
-
-日付の始まりを午前６時にした日付のオブジェクトを提供
-
-=head2 switch_header_params
-
-    use Yoyakku::Util qw{switch_header_params};
-
-    # ヘッダーナビ、各パラメーターを取得
-    my $header_params = switch_header_params( $switch_header, $login_name );
-
-    my $header_params_hash_ref = +{
-        site_title_link        => $header_params->{site_title_link},
-        header_heading_link    => $header_params->{header_heading_link},
-        header_heading_name    => $header_params->{header_heading_name},
-        header_navi_class_name => $header_params->{header_navi_class_name},
-        header_navi_link_name  => $header_params->{header_navi_link_name},
-        header_navi_row_name   => $header_params->{header_navi_row_name},
-    };
-
-    # ヘッダーを識別するステータスとログイン名を引き渡し、ハッシュリファレンス返却
-
-ヘッダーナビ、各パラメーターを取得
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -541,17 +614,17 @@ Yoyakku アプリケーションのユーティリティー
 
 =item * L<utf8>
 
-=item * L<Exporter>
-
 =item * L<Time::Piece>
 
 =item * L<Time::Seconds>
 
-=item * L<Yoyakku::Master>
-
 =item * L<HTML::FillInForm>
 
 =item * L<Calendar::Simple>
+
+=item * L<Yoyakku::Master>
+
+=item * L<Exporter>
 
 =back
 

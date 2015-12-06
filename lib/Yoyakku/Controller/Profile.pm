@@ -2,6 +2,22 @@ package Yoyakku::Controller::Profile;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Profile;
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Controller::Profile - ユーザー個人情報のコントローラー
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Controller::Profile version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    プロフィール関連機能のリクエストをコントロール
+
+=cut
+
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Profile->new();
@@ -17,6 +33,12 @@ sub _init {
 
     return $model;
 }
+
+=head2 profile_comp
+
+    プロフィール情報確認画面
+
+=cut
 
 sub profile_comp {
     my $self  = shift;
@@ -34,6 +56,18 @@ sub profile_comp {
     $model->template('profile/profile_comp');
     return $self->_render_profile($model);
 }
+
+=head2 profile
+
+    リクエスト
+    URL: http:// ... /profile
+    METHOD: GET
+
+    他詳細は調査、実装中
+
+    プロフィール登録画面
+
+=cut
 
 sub profile {
     my $self  = shift;
@@ -118,34 +152,6 @@ sub _render_profile {
 1;
 
 __END__
-
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Controller::Profile - ユーザー個人情報のコントローラー
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Controller::Profile version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-プロフィール関連機能のリクエストをコントロール
-
-=head2 profile_comp
-
-    プロフィール情報確認画面
-
-=head2 profile
-
-    リクエスト
-    URL: http:// ... /profile
-    METHOD: GET
-
-    他詳細は調査、実装中
-
-    プロフィール登録画面
 
 =head1 DEPENDENCIES (依存モジュール)
 

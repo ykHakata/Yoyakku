@@ -5,6 +5,28 @@ use utf8;
 use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Mainte::Roominfo - storeinfo テーブル管理用 API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Mainte::Roominfo version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Roominfo コントローラーのロジック API
+
+=cut
+
+=head2 search_storeinfo_id_for_roominfo_rows
+
+    roominfo テーブル一覧作成時に利用
+
+=cut
+
 sub search_storeinfo_id_for_roominfo_rows {
     my $self = shift;
     return $self->search_id_single_or_all_rows( 'roominfo',
@@ -102,6 +124,12 @@ sub check_roominfo_validator {
     return;
 }
 
+=head2 _check_start_and_end_on
+
+    starttime_on, endingtime_on, 営業時間の時間指定の確認
+
+=cut
+
 sub _check_start_and_end_on {
     my $self   = shift;
     my $params = $self->params();
@@ -115,6 +143,12 @@ sub _check_start_and_end_on {
 
     return;
 }
+
+=head2 _check_rentalunit
+
+    rentalunit, 貸出単位の指定バリデート
+
+=cut
 
 sub _check_rentalunit {
     my $self   = shift;
@@ -133,6 +167,12 @@ sub _check_rentalunit {
 
     return;
 }
+
+=head2 writing_roominfo
+
+    roominfo テーブル書込み、修正に対応
+
+=cut
 
 sub writing_roominfo {
     my $self   = shift;
@@ -209,100 +249,6 @@ sub get_fill_in_roominfo {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model::Mainte::Roominfo - storeinfo テーブル管理用 API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model::Mainte::Roominfo version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-Roominfo コントローラーのロジック API
-
-=head2 search_storeinfo_id_for_roominfo_rows
-
-    use Yoyakku::Model::Mainte::Roominfo
-        qw{search_storeinfo_id_for_roominfo_rows};
-
-    # id検索時のアクション (該当の店舗を検索)
-    my $storeinfo_id = $self->param('storeinfo_id');
-
-    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $roominfo_rows
-        = $self->search_storeinfo_id_for_roominfo_rows($storeinfo_id);
-
-    # storeinfo ごとに該当する roominfo レコードを検索
-    # 指定の id に該当するレコードなき場合 roominfo 全てのレコード返却
-
-roominfo テーブル一覧作成時に利用
-
-=head2 search_roominfo_id_row
-
-    use Yoyakku::Model::Mainte::Roominfo qw{search_roominfo_id_row};
-
-    # 指定の id に該当するレコードを row オブジェクト単体で返却
-    my $roominfo_row = $self->search_roominfo_id_row( $params->{id} );
-
-    # 指定の id に該当するレコードなき場合エラー発生
-
-roominfo テーブル修正フォーム表示などに利用
-
-=head2 writing_roominfo
-
-    use Yoyakku::Model::Mainte::Roominfo qw{writing_roominfo};
-
-    # roominfo テーブルレコード修正時
-    $self->writing_roominfo( 'update', $params );
-    $self->flash( henkou => '修正完了' );
-
-roominfo テーブル書込み、修正に対応
-
-=head2 check_start_and_end_on
-
-    use Yoyakku::Model::Mainte::Roominfo qw{check_start_and_end_on};
-
-    # starttime_on, endingtime_on, 営業時間のバリデート
-    my $check_start_and_end_msg = $self->check_start_and_end_on(
-        $params->{starttime_on},
-        $params->{endingtime_on},
-    );
-
-    # 入力値が不適切な場合はメッセージ出力
-    # 合格時は undef を返却
-
-    if ($check_start_and_end_msg) { # '開始時刻より遅くしてください'
-
-        $self->stash->{endingtime_on} = $check_start_and_end_msg;
-        return $self->_render_roominfo($params);
-    }
-
-starttime_on, endingtime_on, 営業時間の時間指定の確認
-
-=head2 check_rentalunit
-
-    use Yoyakku::Model::Mainte::Roominfo qw{check_rentalunit};
-
-    # starttime_on, endingtime_on, rentalunit, 貸出単位のバリデート
-    my $check_rentalunit_msg = $self->check_rentalunit(
-        $params->{starttime_on},
-        $params->{endingtime_on},
-        $params->{rentalunit},
-    );
-
-    # 入力値が不適切な場合はメッセージ出力
-    # 合格時は undef を返却
-
-    if ($check_rentalunit_msg) { # '営業時間が割り切れません'
-        $self->stash->{rentalunit} = $check_rentalunit_msg;
-        return $self->_render_roominfo($params);
-    }
-
-rentalunit, 貸出単位の指定バリデート
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -313,13 +259,11 @@ rentalunit, 貸出単位の指定バリデート
 
 =item * L<utf8>
 
-=item * L<Yoyakku::Model>
+=item * L<parent>
 
 =item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
-
-=item * L<Exporter>
 
 =back
 

@@ -2,6 +2,22 @@ package Yoyakku::Controller::Mainte;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Mainte;
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Controller::Mainte - システム管理者機能のコントローラー
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Controller::Mainte version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    システム管理者関連機能のリクエストをコントロール
+
+=cut
+
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Mainte->new();
@@ -18,6 +34,18 @@ sub _init {
 
     return $model;
 }
+
+=head2 mainte_list
+
+    リクエスト
+    URL: http:// ... /mainte_list
+    METHOD: GET
+
+    他詳細は調査、実装中
+
+    システム管理のオープニング画面
+
+=cut
 
 sub mainte_list {
     my $self  = shift;
@@ -40,30 +68,6 @@ sub mainte_list {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Controller::Mainte - システム管理者機能のコントローラー
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Controller::Mainte version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-システム管理者関連機能のリクエストをコントロール
-
-=head2 mainte_list
-
-    リクエスト
-    URL: http:// ... /mainte_list
-    METHOD: GET
-
-    他詳細は調査、実装中
-
-システム管理のオープニング画面
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -73,8 +77,6 @@ This documentation referes to Yoyakku::Controller::Mainte version 0.0.1
 =item * L<Mojolicious::Controller>
 
 =item * L<Yoyakku::Model::Mainte>
-
-=item * L<Exporter>
 
 =back
 

@@ -5,6 +5,21 @@ use utf8;
 use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Mainte::Post - post テーブル管理用 API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Mainte::Post version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Post コントローラーのロジック API
+
+=cut
 
 =head2 search_post_id_rows
 
@@ -27,3 +42,27 @@ sub search_post_id_rows {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<strict>
+
+=item * L<warnings>
+
+=item * L<utf8>
+
+=item * L<parent>
+
+=item * L<Yoyakku::Model::Mainte>
+
+=item * L<Yoyakku::Util>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut

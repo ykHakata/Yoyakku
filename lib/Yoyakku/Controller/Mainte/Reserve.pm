@@ -2,6 +2,22 @@ package Yoyakku::Controller::Mainte::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Mainte::Reserve;
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Controller::Mainte::Reserve - reserve テーブルのコントローラー
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Controller::Mainte::Reserve version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    システム管理者 reserve 関連機能のリクエストをコントロール
+
+=cut
+
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Mainte::Reserve->new();
@@ -18,6 +34,12 @@ sub _init {
 
     return $model;
 }
+
+=head2 mainte_reserve_serch
+
+    reserve テーブル登録情報の一覧、検索
+
+=cut
 
 sub mainte_reserve_serch {
     my $self  = shift;
@@ -37,6 +59,12 @@ sub mainte_reserve_serch {
         format   => 'html',
     );
 }
+
+=head2 mainte_reserve_new
+
+    reserve テーブルに新規レコード追加、既存レコード修正
+
+=cut
 
 sub mainte_reserve_new {
     my $self  = shift;
@@ -128,3 +156,21 @@ sub _render_reserve {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojo::Base>
+
+=item * L<Mojolicious::Controller>
+
+=item * L<Yoyakku::Model::Mainte::Reserve>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut

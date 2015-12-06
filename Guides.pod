@@ -95,18 +95,6 @@ yoyakku アプリケーションのデータベース構成
 
 =over 1
 
-=item Yoyakku
-
-=over 2
-
-=item Controller
-
-=over 3
-
-=item Mainte
-
-=over 4
-
 =item L<Yoyakku::Controller::Mainte::Acting>
 
 =item L<Yoyakku::Controller::Mainte::Admin>
@@ -115,31 +103,31 @@ yoyakku アプリケーションのデータベース構成
 
 =item L<Yoyakku::Controller::Mainte::General>
 
+=item L<Yoyakku::Controller::Mainte::Post>
+
 =item L<Yoyakku::Controller::Mainte::Profile>
+
+=item L<Yoyakku::Controller::Mainte::Region>
+
+=item L<Yoyakku::Controller::Mainte::Reserve>
 
 =item L<Yoyakku::Controller::Mainte::Roominfo>
 
 =item L<Yoyakku::Controller::Mainte::Storeinfo>
 
-=back
+=item L<Yoyakku::Controller::Admin>
 
 =item L<Yoyakku::Controller::Auth>
 
 =item L<Yoyakku::Controller::Calendar>
 
+=item L<Yoyakku::Controller::Entry>
+
 =item L<Yoyakku::Controller::Mainte>
 
 =item L<Yoyakku::Controller::Profile>
 
-=back
-
-=item Model
-
-=over 3
-
-=item Mainte
-
-=over 4
+=item L<Yoyakku::Controller::Region>
 
 =item L<Yoyakku::Model::Mainte::Acting>
 
@@ -149,31 +137,37 @@ yoyakku アプリケーションのデータベース構成
 
 =item L<Yoyakku::Model::Mainte::General>
 
+=item L<Yoyakku::Model::Mainte::Post>
+
 =item L<Yoyakku::Model::Mainte::Profile>
+
+=item L<Yoyakku::Model::Mainte::Region>
+
+=item L<Yoyakku::Model::Mainte::Reserve>
 
 =item L<Yoyakku::Model::Mainte::Roominfo>
 
 =item L<Yoyakku::Model::Mainte::Storeinfo>
 
-=back
+=item L<Yoyakku::Model::Admin>
 
 =item L<Yoyakku::Model::Auth>
 
 =item L<Yoyakku::Model::Calendar>
 
+=item L<Yoyakku::Model::Entry>
+
 =item L<Yoyakku::Model::Mainte>
 
 =item L<Yoyakku::Model::Profile>
 
-=back
+=item L<Yoyakku::Model::Region>
 
 =item L<Yoyakku::Master>
 
 =item L<Yoyakku::Model>
 
 =item L<Yoyakku::Util>
-
-=back
 
 =item L<Yoyakku>
 

@@ -6,11 +6,11 @@ use Yoyakku::Model::Admin;
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Controller::Admin - 店舗管理のコントローラー
+    Yoyakku::Controller::Admin - 店舗管理のコントローラー
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Controller::Admin version 0.0.1
+    This documentation referes to Yoyakku::Controller::Admin version 0.0.1
 
 =head1 SYNOPSIS (概要)
 

@@ -6,11 +6,11 @@ use Yoyakku::Model::Calendar;
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Controller::Calendar - オープニングカレンダーのコントローラー
+    Yoyakku::Controller::Calendar - オープニングカレンダーのコントローラー
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Controller::Calendar version 0.0.1
+    This documentation referes to Yoyakku::Controller::Calendar version 0.0.1
 
 =head1 SYNOPSIS (概要)
 

@@ -14,7 +14,28 @@ use Yoyakku::Util qw{
 };
 use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
-# 各テーブルカラム取得
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Mainte - システム管理者用 API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Mainte version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Mainte コントローラーのロジック API
+
+=cut
+
+=head2 get_table_columns
+
+    各テーブルカラム取得
+
+=cut
+
 sub get_table_columns {
     my $table = shift;
 
@@ -48,7 +69,12 @@ sub get_table_columns {
     return $table_columns->{$table};
 }
 
-# ログイン名の重複確認
+=head2 check_login_name
+
+    ログイン名の重複確認
+
+=cut
+
 sub check_login_name {
     my $self   = shift;
     my $table  = shift;
@@ -67,7 +93,12 @@ sub check_login_name {
     return $self->check_table_column($check_params);
 }
 
-# update 用フィルインパラメーター作成
+=head2 get_update_form_params
+
+    update 用フィルインパラメーター作成
+
+=cut
+
 sub get_update_form_params {
     my $self   = shift;
     my $table  = shift;
@@ -106,7 +137,12 @@ sub get_update_form_params {
     return $self;
 }
 
-# roominfo の開始時刻を入力フォーム用に変換
+=head2 get_startend_day_and_time
+
+    roominfo の開始時刻を入力フォーム用に変換
+
+=cut
+
 sub get_startend_day_and_time {
     my $reserve_row = shift;
 
@@ -144,7 +180,12 @@ sub get_startend_day_and_time {
     return $startend_day_time;
 }
 
-# レコード更新の為の情報取得
+=head2 get_single_row_search_id
+
+    レコード更新の為の情報取得
+
+=cut
+
 sub get_single_row_search_id {
     my $self      = shift;
     my $table     = shift;
@@ -159,7 +200,12 @@ sub get_single_row_search_id {
     return $row;
 }
 
-# テーブル一覧表示の為の検索
+=head2 search_id_single_or_all_rows
+
+    テーブル一覧表示の為の検索
+
+=cut
+
 sub search_id_single_or_all_rows {
     my $self      = shift;
     my $table     = shift;
@@ -195,7 +241,12 @@ sub search_id_single_or_all_rows {
     return \@rows;
 }
 
-# ログイン確認、ヘッダー初期値取得
+=head2 get_header_stash_auth_mainte
+
+    ログイン確認、ヘッダー初期値取得
+
+=cut
+
 sub get_header_stash_auth_mainte {
     my $self    = shift;
     my $session = $self->session();
@@ -205,7 +256,12 @@ sub get_header_stash_auth_mainte {
     return switch_stash_mainte_list( $id, 'root', );
 }
 
-# 管理者画面用のログイン確認
+=head2 auth_mainte
+
+    管理者画面用のログイン確認
+
+=cut
+
 sub auth_mainte {
     my $self    = shift;
     my $session = shift;
@@ -214,7 +270,12 @@ sub auth_mainte {
     return $session;
 }
 
-# ログイン成功時に作成する初期値
+=head2 switch_stash_mainte_list
+
+    Mainte アクションログイン時の初期値作成
+
+=cut
+
 sub switch_stash_mainte_list {
     my $id    = shift;
     my $table = shift;
@@ -254,30 +315,7 @@ sub switch_stash_mainte_list {
 
 1;
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model::Mainte - システム管理者用 API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model::Mainte version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-Mainte コントローラーのロジック API
-
-=head2 switch_stash_mainte_list
-
-    use Yoyakku::Model::Mainte qw{switch_stash_mainte_list};
-
-    # スタッシュに引き渡す値を作成
-    my $stash_mainte = switch_stash_mainte_list( $id, $table, );
-
-    $self->stash($stash_mainte);
-
-Mainte アクションログイン時の初期値作成
+__END__
 
 =head1 DEPENDENCIES (依存モジュール)
 
@@ -289,9 +327,13 @@ Mainte アクションログイン時の初期値作成
 
 =item * L<utf8>
 
-=item * L<Time::Piece>
+=item * L<parent>
 
-=item * L<Exporter>
+=item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Util>
+
+=item * L<Yoyakku::Master>
 
 =back
 

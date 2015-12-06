@@ -5,11 +5,39 @@ use utf8;
 use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Mainte::Profile - Profile テーブル管理用 API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Mainte::Profile version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Profile コントローラーのロジック API
+
+=cut
+
+=head2 search_profile_id_rows
+
+    profile テーブル一覧作成時に利用
+
+=cut
+
 sub search_profile_id_rows {
     my $self = shift;
     return $self->search_id_single_or_all_rows( 'profile',
         $self->params()->{profile_id} );
 }
+
+=head2 get_init_valid_params_profile
+
+    profile 入力フォーム表示の際に利用
+
+=cut
 
 sub get_init_valid_params_profile {
     my $self = shift;
@@ -18,11 +46,23 @@ sub get_init_valid_params_profile {
     );
 }
 
+=head2 get_update_form_params_profile
+
+    profile 修正用入力フォーム表示の際に利用
+
+=cut
+
 sub get_update_form_params_profile {
     my $self = shift;
     $self->get_update_form_params('profile');
     return $self;
 }
+
+=head2 get_general_rows_all
+
+    profile 入力画面セレクト用のログイン名表示
+
+=cut
 
 sub get_general_rows_all {
     my $self = shift;
@@ -31,12 +71,24 @@ sub get_general_rows_all {
     return \@general_rows;
 }
 
+=head2 get_admin_rows_all
+
+    profile 入力画面セレクト用のログイン名表示
+
+=cut
+
 sub get_admin_rows_all {
     my $self = shift;
     my $teng = $self->teng();
     my @admin_rows = $teng->search( 'admin', +{}, );
     return \@admin_rows;
 }
+
+=head2 check_profile_validator
+
+    profile 入力値バリデートチェックに利用
+
+=cut
 
 sub check_profile_validator {
     my $self = shift;
@@ -77,6 +129,12 @@ sub check_profile_validator {
 
     return $valid_msg_profile;
 }
+
+=head2 check_profile_validator_db
+
+    profile 入力値データベースとのバリデートチェックに利用
+
+=cut
 
 sub check_profile_validator_db {
     my $self = shift;
@@ -125,6 +183,12 @@ sub _check_admin_and_general_id {
     return $self->check_table_column($check_params) if $general_id;
 }
 
+=head2 writing_profile
+
+    profile テーブル書込み、新規、修正、両方に対応
+
+=cut
+
 sub writing_profile {
     my $self = shift;
 
@@ -144,6 +208,12 @@ sub writing_profile {
         $self->params()->{id} );
 }
 
+=head2 get_fill_in_profile
+
+    表示用 html を生成
+
+=cut
+
 sub get_fill_in_profile {
     my $self   = shift;
     my $html   = $self->html();
@@ -156,134 +226,6 @@ sub get_fill_in_profile {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model::Mainte::Profile - Profile テーブル管理用 API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model::Mainte::Profile version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-Profile コントローラーのロジック API
-
-=head2 check_auth_profile
-
-    use Yoyakku::Model::Mainte::profile qw{check_auth_profile};
-
-    # session からログインチェック、ヘッダー用の値を取得
-    my $header_stash = check_auth_profile( $self->session->{root_id} );
-
-    # session が不正な場合は undef を返却
-
-ログイン確認
-
-=head2 search_profile_id_rows
-
-    use Yoyakku::Model::Mainte::Profile qw{search_profile_id_rows};
-
-    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $profile_rows = search_profile_id_rows($profile_id);
-
-    # 指定の id に該当するレコードなき場合 profile 全てのレコード返却
-
-profile テーブル一覧作成時に利用
-
-=head2 get_init_valid_params_profile
-
-    use Yoyakku::Model::Mainte::Profile qw{get_init_valid_params_profile};
-
-    # バリデートエラーメッセージ用パラメーター初期値
-    my $init_valid_params_profile = get_init_valid_params_profile();
-    $self->stash($init_valid_params_profile);
-
-profile 入力フォーム表示の際に利用
-
-=head2 get_update_form_params_profile
-
-    use Yoyakku::Model::Mainte::Profile qw{get_update_form_params_profile};
-
-    # 修正画面表示用のパラメーターを取得
-    return $self->_render_profile( get_update_form_params_profile($params) )
-        if 'GET' eq $method;
-
-profile 修正用入力フォーム表示の際に利用
-
-=head2 get_general_rows_all
-
-    use Yoyakku::Model::Mainte::Profile qw{get_general_rows_all};
-
-    # 入力画面セレクト用の general admin ログイン名表示
-    $self->stash(
-        general_rows => get_general_rows_all(),
-    );
-
-profile 入力画面セレクト用のログイン名表示
-
-=head2 get_admin_rows_all
-
-    use Yoyakku::Model::Mainte::Profile qw{get_admin_rows_all};
-
-    # 入力画面セレクト用の general admin ログイン名表示
-    $self->stash(
-        admin_rows   => get_admin_rows_all(),
-    );
-
-profile 入力画面セレクト用のログイン名表示
-
-=head2 check_profile_validator
-
-    use Yoyakku::Model::Mainte::Profile qw{check_profile_validator};
-
-    # バリデート不合格時はエラーメッセージ
-    my $valid_msg = check_profile_validator($params);
-
-    # バリデート合格時は undef を返却
-    return $self->stash($valid_msg), $self->_render_profile($params)
-        if $valid_msg;
-
-profile 入力値バリデートチェックに利用
-
-=head2 check_profile_validator_db
-
-    use Yoyakku::Model::Mainte::Profile qw{check_profile_validator_db};
-
-    # バリデート不合格時はエラーメッセージ
-    my $valid_msg_db = check_profile_validator_db( $type, $params, );
-
-    # バリデート合格時は undef を返却
-    return $self->stash($valid_msg_db), $self->_render_profile($params)
-        if $valid_msg_db;
-
-profile 入力値データベースとのバリデートチェックに利用
-
-=head2 writing_profile
-
-    use Yoyakku::Model::Mainte::Profile qw{writing_profile};
-
-    # profile レコード新規
-    writing_profile( 'insert', $params );
-    $self->flash( touroku => '登録完了' );
-
-    # profile レコード修正
-    writing_profile( 'update', $params );
-    $self->flash( henkou => '修正完了' );
-
-profile テーブル書込み、新規、修正、両方に対応
-
-=head2 get_fill_in_profile
-
-    use Yoyakku::Model::Mainte::Profile qw{get_fill_in_profile};
-
-    # テンプレートの html と出力の params から表示用の html を生成
-    my $output = get_fill_in_profile( \$html, $params );
-    return $self->render( text => $output );
-
-表示用 html を生成
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -294,13 +236,11 @@ profile テーブル書込み、新規、修正、両方に対応
 
 =item * L<utf8>
 
-=item * L<Yoyakku::Model>
+=item * L<parent>
 
 =item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
-
-=item * L<Exporter>
 
 =back
 

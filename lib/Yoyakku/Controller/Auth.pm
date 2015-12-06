@@ -2,6 +2,22 @@ package Yoyakku::Controller::Auth;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Auth;
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Controller::Auth - ログイン機能のコントローラー
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Controller::Auth version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    ログイン関連機能のリクエストをコントロール
+
+=cut
+
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Auth->new();
@@ -11,6 +27,20 @@ sub _init {
     return $model;
 }
 
+=head2 up_login
+
+    リクエスト
+    URL: http:// ... /up_login
+    METHOD: GET
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_login
+
+    ログインフォーム入口画面の描写
+
+=cut
+
 sub up_login {
     my $self  = shift;
     my $model = $self->_init();
@@ -18,6 +48,22 @@ sub up_login {
     $self->stash( class => 'up_login' );
     return $self->render( template => 'auth/up_login', format => 'html' );
 }
+
+=head2 up_logout
+
+    リクエスト
+    URL: http:// ... /up_logout
+    METHOD: GET
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_logout
+
+    レスポンス時に session データを消去
+
+    ログアウト機能
+
+=cut
 
 sub up_logout {
     my $self = shift;
@@ -27,6 +73,37 @@ sub up_logout {
     $self->session( expires => 1 );
     return $self->render( template => 'auth/up_logout', format => 'html' );
 }
+
+=head2 up_login_general
+
+    リクエスト
+    URL: http:// ... /up_login_general
+    METHOD: GET
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_login_general
+
+    リクエスト
+    URL: http:// ... /up_login_general
+    METHOD: POST
+    PARAMETERS:
+        login: (指定の ASCII 文字)
+        password: (指定の ASCII 文字)
+
+    レスポンス (ログイン成功、profile 設定が終了している)
+    URL: http:// ... /index
+
+    レスポンス (ログイン成功、profile 設定が終了していない)
+    URL: http:// ... /profile
+
+    レスポンス (ログイン失敗)
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_login_general
+
+    一般ログイン
+
+=cut
 
 sub up_login_general {
     my $self  = shift;
@@ -52,6 +129,37 @@ sub up_login_general {
     return $self->_render_input_form( $model, 'general', );
 };
 
+=head2 up_login_admin
+
+    リクエスト
+    URL: http:// ... /up_login_admin
+    METHOD: GET
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_login_admin
+
+    リクエスト
+    URL: http:// ... /up_login_admin
+    METHOD: POST
+    PARAMETERS:
+        login: (指定の ASCII 文字)
+        password: (指定の ASCII 文字)
+
+    レスポンス (ログイン成功、profile 設定が終了している)
+    URL: http:// ... /index
+
+    レスポンス (ログイン成功、profile 設定が終了していない)
+    URL: http:// ... /profile
+
+    レスポンス (ログイン失敗)
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/up_login_admin
+
+    店舗管理者用ログイン
+
+=cut
+
 sub up_login_admin {
     my $self  = shift;
     my $model = $self->_init();
@@ -75,6 +183,34 @@ sub up_login_admin {
 
     return $self->_render_input_form( $model, 'admin', );
 };
+
+=head2 root_login
+
+    リクエスト
+    URL: http:// ... /root_login
+    METHOD: GET
+
+    レスポンス
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/root_login
+
+    リクエスト
+    URL: http:// ... /root_login
+    METHOD: POST
+    PARAMETERS:
+        login: (指定の ASCII 文字)
+        password: (指定の ASCII 文字)
+
+    レスポンス (ログイン成功)
+    URL: http:// ... /mainte_list
+
+    レスポンス (ログイン失敗)
+    CONTENT-TYPE: text/html;charset=UTF-8
+    FILE: templates/auth/root_login
+
+    スーパーユーザー用ログイン
+
+=cut
 
 sub root_login {
     my $self  = shift;
@@ -154,130 +290,6 @@ sub _render_auth {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Controller::Auth - ログイン機能のコントローラー
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Controller::Auth version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-ログイン関連機能のリクエストをコントロール
-
-=head2 up_login
-
-    リクエスト
-    URL: http:// ... /up_login
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login
-
-ログインフォーム入口画面の描写
-
-=head2 up_login_general
-
-    リクエスト
-    URL: http:// ... /up_login_general
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login_general
-
-    リクエスト
-    URL: http:// ... /up_login_general
-    METHOD: POST
-    PARAMETERS:
-        login: (指定の ASCII 文字)
-        password: (指定の ASCII 文字)
-
-    レスポンス (ログイン成功、profile 設定が終了している)
-    URL: http:// ... /index
-
-    レスポンス (ログイン成功、profile 設定が終了していない)
-    URL: http:// ... /profile
-
-    レスポンス (ログイン失敗)
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login_general
-
-一般ログイン
-
-=head2 up_login_admin
-
-    リクエスト
-    URL: http:// ... /up_login_admin
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login_admin
-
-    リクエスト
-    URL: http:// ... /up_login_admin
-    METHOD: POST
-    PARAMETERS:
-        login: (指定の ASCII 文字)
-        password: (指定の ASCII 文字)
-
-    レスポンス (ログイン成功、profile 設定が終了している)
-    URL: http:// ... /index
-
-    レスポンス (ログイン成功、profile 設定が終了していない)
-    URL: http:// ... /profile
-
-    レスポンス (ログイン失敗)
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login_admin
-
-店舗管理者用ログイン
-
-=head2 root_login
-
-    リクエスト
-    URL: http:// ... /root_login
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/root_login
-
-    リクエスト
-    URL: http:// ... /root_login
-    METHOD: POST
-    PARAMETERS:
-        login: (指定の ASCII 文字)
-        password: (指定の ASCII 文字)
-
-    レスポンス (ログイン成功)
-    URL: http:// ... /mainte_list
-
-    レスポンス (ログイン失敗)
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/root_login
-
-スーパーユーザー用ログイン
-
-=head2 up_logout
-
-    リクエスト
-    URL: http:// ... /up_logout
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_logout
-
-    レスポンス時に session データを消去
-
-ログアウト機能
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -286,9 +298,7 @@ This documentation referes to Yoyakku::Controller::Auth version 0.0.1
 
 =item * L<Mojolicious::Controller>
 
-=item * L<FormValidator::Lite>
-
-=item * L<HTML::FillInForm>
+=item * L<Yoyakku::Model::Auth>
 
 =back
 

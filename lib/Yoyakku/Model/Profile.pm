@@ -2,22 +2,22 @@ package Yoyakku::Model::Profile;
 use strict;
 use warnings;
 use utf8;
-use Yoyakku::Util qw{now_datetime get_fill_in_params};
 use parent 'Yoyakku::Model';
+use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Model::Profile - プロフィール用 API
+    Yoyakku::Model::Profile - プロフィール用 API
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Model::Profile version 0.0.1
+    This documentation referes to Yoyakku::Model::Profile version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-profile コントローラーのロジック API
+    profile コントローラーのロジック API
 
 =cut
 
@@ -408,11 +408,11 @@ __END__
 
 =item * L<utf8>
 
-=item * L<Yoyakku::Util>
-
 =item * L<parent>
 
 =item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Util>
 
 =back
 

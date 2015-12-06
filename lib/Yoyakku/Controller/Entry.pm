@@ -6,11 +6,11 @@ use Yoyakku::Model::Entry;
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Controller::Entry - オープニングカレンダーのコントローラー
+    Yoyakku::Controller::Entry - 登録のコントローラー
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Controller::Entry version 0.0.1
+    This documentation referes to Yoyakku::Controller::Entry version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
@@ -118,6 +118,24 @@ sub _render_entry {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojo::Base>
+
+=item * L<Mojolicious::Controller>
+
+=item * L<Yoyakku::Model::Entry>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut
 
 
     #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、

@@ -2,6 +2,22 @@ package Yoyakku::Controller::Mainte::Post;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Mainte::Post;
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Controller::Mainte::Post - post テーブルのコントローラー
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Controller::Mainte::Post version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    システム管理者 post 関連機能のリクエストをコントロール
+
+=cut
+
 sub _init {
     my $self  = shift;
     my $model = Yoyakku::Model::Mainte::Post->new();
@@ -18,6 +34,12 @@ sub _init {
 
     return $model;
 }
+
+=head2 mainte_post_serch
+
+    post テーブル登録情報の一覧、検索
+
+=cut
 
 sub mainte_post_serch {
     my $self  = shift;
@@ -41,3 +63,21 @@ sub mainte_post_serch {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojo::Base>
+
+=item * L<Mojolicious::Controller>
+
+=item * L<Yoyakku::Model::Mainte::Post>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut

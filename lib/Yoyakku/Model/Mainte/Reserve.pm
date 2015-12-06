@@ -15,6 +15,35 @@ use Yoyakku::Util qw{
 };
 use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Mainte::Reserve - reserve テーブル管理用 API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Mainte::Reserve version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Reserve コントローラーのロジック API
+
+=cut
+
+=head2 search_reserve_id_rows
+
+    use Yoyakku::Model::Mainte::Reserve qw{search_reserve_id_rows};
+
+    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
+    my $reserve_rows = $self->search_reserve_id_rows($reserve_id);
+
+    # 指定の id に該当するレコードなき場合 reserve 全てのレコード返却
+
+    reserve テーブル一覧作成時に利用
+
+=cut
+
 sub search_reserve_id_rows {
     my $self = shift;
     return $self->search_id_single_or_all_rows( 'reserve',
@@ -98,7 +127,12 @@ sub _get_reserve_fillIn_row {
     return $reserve_fillIn_rows[0];
 }
 
-# 日付と時刻に分かれたものを datetime 形式にもどす
+=head2 change_format_datetime
+
+    日付と時刻に分かれたものを datetime 形式にもどす
+
+=cut
+
 sub change_format_datetime {
     my $self   = shift;
     my $params = $self->params();
@@ -210,7 +244,12 @@ sub check_reserve_validator {
     return;
 }
 
-# 入力された利用希望時間の適正をチェック
+=head2 _check_reserve_use_time
+
+    入力された利用希望時間の適正をチェック
+
+=cut
+
 sub _check_reserve_use_time {
     my $params = shift;
 
@@ -228,7 +267,12 @@ sub _check_reserve_use_time {
     return;
 }
 
-# DB 問い合わせバリデート
+=head2 check_reserve_validator_db
+
+    DB 問い合わせバリデート
+
+=cut
+
 sub check_reserve_validator_db {
     my $self   = shift;
     my $type   = $self->type();
@@ -276,7 +320,12 @@ sub check_reserve_validator_db {
     return;
 }
 
-# 予約の重複確認
+=head2 _check_reserve_dupli
+
+    予約の重複確認
+
+=cut
+
 sub _check_reserve_dupli {
     my $self   = shift;
     my $type   = shift;
@@ -307,7 +356,12 @@ sub _check_reserve_dupli {
     return;
 }
 
-# 部屋の利用開始と終了時刻の範囲内かを調べる
+=head2 _check_roominfo_open_time
+
+    部屋の利用開始と終了時刻の範囲内かを調べる
+
+=cut
+
 sub _check_roominfo_open_time {
     my $self   = shift;
     my $params = shift;
@@ -344,7 +398,12 @@ sub _check_roominfo_open_time {
     return;
 }
 
-# 入力された利用希望時間が貸出単位に適合しているか
+=head2 _check_lend_unit
+
+    入力された利用希望時間が貸出単位に適合しているか
+
+=cut
+
 sub _check_lend_unit {
     my $self   = shift;
     my $params = shift;
@@ -374,7 +433,12 @@ sub _check_lend_unit {
     return;
 }
 
-# 利用形態名 useform->バンド、個人練習、利用停止、いずれも許可が必要
+=head2 _check_useform
+
+    利用形態名 useform->バンド、個人練習、利用停止、いずれも許可が必要
+
+=cut
+
 sub _check_useform {
     my $self   = shift;
     my $params = shift;
@@ -404,6 +468,18 @@ sub _check_useform {
 
     return;
 }
+
+=head2 writing_reserve
+
+    use Yoyakku::Model::Mainte::Reserve qw{writing_reserve};
+
+    # reserve テーブルレコード修正時
+    $self->writing_reserve( 'update', $params );
+    $self->flash( henkou => '修正完了' );
+
+    reserve テーブル書込み、修正に対応
+
+=cut
 
 sub writing_reserve {
     my $self = shift;
@@ -437,74 +513,6 @@ sub get_fill_in_reserve {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model::Mainte::Reserve - reserve テーブル管理用 API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model::Mainte::Reserve version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-Reserve コントローラーのロジック API
-
-=head2 search_zipcode_for_address
-
-    use Yoyakku::Model::Mainte::Reserve qw{search_zipcode_for_address};
-
-    # 郵便番号から住所検索のアクション時
-    if ( $params->{kensaku} && $params->{kensaku} eq '検索する' ) {
-
-        my $address_params
-            = $self->search_zipcode_for_address( $params->{post} );
-
-        $params->{region_id} = $address_params->{region_id};
-        $params->{post}      = $address_params->{post};
-        $params->{state}     = $address_params->{state};
-        $params->{cities}    = $address_params->{cities};
-
-        return $self->_render_reserve($params);
-    }
-
-    # 該当の住所なき場合、各項目は undef を返却
-
-郵便番号から住所を検索、値を返却
-
-=head2 search_reserve_id_rows
-
-    use Yoyakku::Model::Mainte::Reserve qw{search_reserve_id_rows};
-
-    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $reserve_rows = $self->search_reserve_id_rows($reserve_id);
-
-    # 指定の id に該当するレコードなき場合 reserve 全てのレコード返却
-
-reserve テーブル一覧作成時に利用
-
-=head2 search_reserve_id_row
-
-    use Yoyakku::Model::Mainte::Reserve qw{search_reserve_id_row};
-
-    # 指定の id に該当するレコードを row オブジェクト単体で返却
-    my $reserve_row = $self->search_reserve_id_row( $params->{id} );
-
-    # 指定の id に該当するレコードなき場合エラー発生
-
-reserve テーブル修正フォーム表示などに利用
-
-=head2 writing_reserve
-
-    use Yoyakku::Model::Mainte::Reserve qw{writing_reserve};
-
-    # reserve テーブルレコード修正時
-    $self->writing_reserve( 'update', $params );
-    $self->flash( henkou => '修正完了' );
-
-reserve テーブル書込み、修正に対応
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -515,11 +523,13 @@ reserve テーブル書込み、修正に対応
 
 =item * L<utf8>
 
-=item * L<Yoyakku::Model>
+=item * L<parent>
+
+=item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
 
-=item * L<Exporter>
+=item * L<Yoyakku::Master>
 
 =back
 

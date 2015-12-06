@@ -6,6 +6,22 @@ use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 use Yoyakku::Master qw{$MAIL_SYSTEM};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Entry - 登録 API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Entry version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Entry コントローラーのロジック API
+
+=cut
+
 =head2 get_header_stash_entry
 
     ヘッダー初期値取得
@@ -152,3 +168,29 @@ sub get_fill_in_entry {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<strict>
+
+=item * L<warnings>
+
+=item * L<utf8>
+
+=item * L<parent>
+
+=item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Util>
+
+=item * L<Yoyakku::Master>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut

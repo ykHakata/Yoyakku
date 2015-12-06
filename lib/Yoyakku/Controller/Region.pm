@@ -6,11 +6,11 @@ use Yoyakku::Model::Region;
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Controller::Region - 予約のコントローラー
+    Yoyakku::Controller::Region - 予約のコントローラー
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Controller::Region version 0.0.1
+    This documentation referes to Yoyakku::Controller::Region version 0.0.1
 
 =head1 SYNOPSIS (概要)
 

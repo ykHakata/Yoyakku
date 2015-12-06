@@ -1,5 +1,4 @@
 package Yoyakku::Master;
-
 use strict;
 use warnings;
 use utf8;
@@ -21,6 +20,24 @@ our @EXPORT_OK = qw{
     $HOUR_18 $HOUR_19 $HOUR_20 $HOUR_21 $HOUR_22 $HOUR_23
     $MAIL_SYSTEM $MAIL_USER $MAIL_PASS
 };
+
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+Yoyakku::Model::Master - 定数表まとめ
+
+=head1 VERSION (改定番号)
+
+This documentation referes to Yoyakku::Model::Master version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    use Yoyakku::Model::Master qw{$PRIVATE_COND_0 $USEFORM_0};
+
+    warn $PRIVATE_COND_0 # 当日予約
+
+=cut
 
 Readonly our $SPACE             => q{ };
 Readonly our $NUMBER_CONVERSION => 0;
@@ -81,22 +98,6 @@ Readonly our $MAIL_PASS   => 'googleyoyakku';
 1;
 
 __END__
-
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model::Master - 定数表まとめ
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model::Master version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-    use Yoyakku::Model::Master qw{$PRIVATE_COND_0 $USEFORM_0};
-
-    warn $PRIVATE_COND_0 # 当日予約
 
 =head1 DEPENDENCIES (依存モジュール)
 

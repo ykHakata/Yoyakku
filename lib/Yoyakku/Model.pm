@@ -6,12 +6,12 @@ use Teng;
 use Teng::Schema::Loader;
 use FormValidator::Lite qw{Email URL DATE TIME};
 use base qw{Class::Accessor::Fast};
-use Yoyakku::Util qw{now_datetime switch_header_params};
 use Encode qw{encode};
 use Email::Sender::Simple 'sendmail';
 use Email::MIME;
 use Email::Sender::Transport::SMTPS;
 use Try::Tiny;
+use Yoyakku::Util qw{now_datetime switch_header_params};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 
 __PACKAGE__->mk_accessors(
@@ -24,11 +24,11 @@ __PACKAGE__->mk_accessors(
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Model - データベース関連 API
+    Yoyakku::Model - データベース関連 API
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Model version 0.0.1
+    This documentation referes to Yoyakku::Model version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
@@ -282,7 +282,12 @@ sub insert_admin_relation {
     }
 }
 
-# 入力値バリデート処理
+=head2 get_msg_validator
+
+    入力値バリデート処理
+
+=cut
+
 sub get_msg_validator {
     my $self         = shift;
     my $check_params = shift;
@@ -307,6 +312,12 @@ sub get_msg_validator {
     return;
 }
 
+=head2 check_auth_db
+
+    ログイン検証(yoyakku 管理画面側)
+
+=cut
+
 sub check_auth_db {
     my $self         = shift;
     my $session      = shift;
@@ -315,6 +326,12 @@ sub check_auth_db {
     return $session if $session eq 'yoyakku' && $session_type eq 'mainte';
     return;
 }
+
+=head2 check_auth_db_yoyakku
+
+    ログイン検証(yoyakku サイト)
+
+=cut
 
 sub check_auth_db_yoyakku {
     my $self = shift;
@@ -365,6 +382,12 @@ sub check_auth_db_yoyakku {
     return 1;
 }
 
+=head2 teng
+
+    teng モジュールセットアップ
+
+=cut
+
 sub teng {
     my $self = shift;
 
@@ -410,6 +433,20 @@ __END__
 =item * L<base>
 
 =item * L<Class::Accessor::Fast>
+
+=item * L<Encode>
+
+=item * L<Email::Sender::Simple>
+
+=item * L<Email::MIME>
+
+=item * L<Email::Sender::Transport::SMTPS>
+
+=item * L<Try::Tiny>
+
+=item * L<Yoyakku::Util>
+
+=item * L<Yoyakku::Master>
 
 =back
 

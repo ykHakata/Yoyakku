@@ -5,6 +5,22 @@ use utf8;
 use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{get_fill_in_params};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Auth - ログイン API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Auth version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    認証関連の API を提供
+
+=cut
+
 sub check_login {
     my $self = shift;
 
@@ -146,39 +162,6 @@ sub get_fill_in_auth {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model::Auth - ログイン API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model::Auth version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-    use Yoyakku::Model::Auth qw{check_valid_login};
-
-    my $check_valid = $self->check_valid_login($table, $params);
-
-    # エラーメッセージ作成
-    $self->stash->{login}    = $check_valid->{msg}->{login};
-    $self->stash->{password} = $check_valid->{msg}->{password};
-
-    # DB 検索のバリデーションエラー確認
-    $check_valid->{error}; # undef or '1'
-
-    # セッション書き込み用 id 提供
-    $self->session( $session_name => $check_valid->{session_id} );
-
-    # 検索結果の id の profile 情報の有無を確認、遷移先を指示
-    $check_valid_login_routing->{redirect_to} = $check_valid->{check_profile};
-
-    $check_valid->{check_profile}; # 'index' or 'profile'
-
-認証関連の API を提供
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -189,7 +172,11 @@ This documentation referes to Yoyakku::Model::Auth version 0.0.1
 
 =item * L<utf8>
 
-=item * L<Exporter>
+=item * L<parent>
+
+=item * L<Yoyakku::Model>
+
+=item * L<Yoyakku::Util>
 
 =back
 

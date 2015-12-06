@@ -9,15 +9,15 @@ use Yoyakku::Util qw{chang_date_6 get_calendar};
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Model::Calendar - オープニングカレンダー用 API
+    Yoyakku::Model::Calendar - オープニングカレンダー用 API
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Model::Calendar version 0.0.1
+    This documentation referes to Yoyakku::Model::Calendar version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-Calendar コントローラーのロジック API
+    Calendar コントローラーのロジック API
 
 =cut
 
@@ -120,13 +120,11 @@ __END__
 
 =item * L<utf8>
 
-=item * L<Yoyakku::Util>
-
 =item * L<parent>
 
 =item * L<Yoyakku::Model>
 
-=item * L<Calendar::Simple>
+=item * L<Yoyakku::Util>
 
 =back
 

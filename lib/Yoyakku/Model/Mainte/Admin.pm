@@ -5,22 +5,62 @@ use utf8;
 use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Mainte::Admin - admin テーブル管理用 API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Mainte::Admin version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Admin コントローラーのロジック API
+
+=cut
+
+=head2 search_admin_id_rows
+
+    admin テーブル一覧作成時に利用
+
+=cut
+
 sub search_admin_id_rows {
     my $self = shift;
     return $self->search_id_single_or_all_rows( 'admin',
         $self->params()->{admin_id} );
 }
 
+=head2 get_init_valid_params_admin
+
+    admin 入力フォーム表示の際に利用
+
+=cut
+
 sub get_init_valid_params_admin {
     my $self = shift;
     return $self->get_init_valid_params( [qw{login password}] );
 }
+
+=head2 get_update_form_params_admin
+
+    admin 修正用入力フォーム表示の際に利用
+
+=cut
 
 sub get_update_form_params_admin {
     my $self = shift;
     $self->get_update_form_params('admin');
     return $self;
 }
+
+=head2 check_admin_validator
+
+    admin 入力値バリデートチェックに利用
+
+=cut
 
 sub check_admin_validator {
     my $self = shift;
@@ -47,6 +87,12 @@ sub check_admin_validator {
     return $valid_msg_admin;
 }
 
+=head2 check_admin_validator_db
+
+    admin 入力値データベースとのバリデートチェックに利用
+
+=cut
+
 sub check_admin_validator_db {
     my $self = shift;
 
@@ -59,6 +105,12 @@ sub check_admin_validator_db {
     return $valid_msg_admin_db if $check_admin_msg;
     return;
 }
+
+=head2 writing_admin
+
+    admin テーブル書込み、新規、修正、両方に対応
+
+=cut
 
 sub writing_admin {
     my $self = shift;
@@ -95,6 +147,12 @@ sub writing_admin {
     return;
 }
 
+=head2 get_fill_in_registrant
+
+    表示用 html を生成
+
+=cut
+
 sub get_fill_in_registrant {
     my $self   = shift;
     my $html   = $self->html();
@@ -107,112 +165,6 @@ sub get_fill_in_registrant {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model::Mainte::Admin - admin テーブル管理用 API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model::Mainte::Admin version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-Admin コントローラーのロジック API
-
-=head2 check_auth_admin
-
-    use Yoyakku::Model::Mainte::Admin qw{check_auth_admin};
-
-    # session からログインチェック、ヘッダー用の値を取得
-    my $header_stash = check_auth_admin( $self->session->{root_id} );
-
-    # session が不正な場合は undef を返却
-
-ログイン確認
-
-=head2 search_admin_id_rows
-
-    use Yoyakku::Model::Mainte::Admin qw{search_admin_id_rows};
-
-    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $admin_rows = search_admin_id_rows($admin_id);
-
-    # 指定の id に該当するレコードなき場合 admin 全てのレコード返却
-
-admin テーブル一覧作成時に利用
-
-=head2 get_init_valid_params_admin
-
-    use Yoyakku::Model::Mainte::Admin qw{get_init_valid_params_admin};
-
-    # バリデートエラーメッセージ用パラメーター初期値
-    my $init_valid_params_admin = get_init_valid_params_admin();
-    $self->stash($init_valid_params_admin);
-
-admin 入力フォーム表示の際に利用
-
-=head2 get_update_form_params_admin
-
-    use Yoyakku::Model::Mainte::Admin qw{get_update_form_params_admin};
-
-    # 修正画面表示用のパラメーターを取得
-    return $self->_render_registrant( get_update_form_params_admin($params) )
-        if 'GET' eq $method;
-
-admin 修正用入力フォーム表示の際に利用
-
-=head2 check_admin_validator
-
-    use Yoyakku::Model::Mainte::Admin qw{check_admin_validator};
-
-    # バリデート不合格時はエラーメッセージ
-    my $valid_msg = check_admin_validator($params);
-
-    # バリデート合格時は undef を返却
-    return $self->stash($valid_msg), $self->_render_registrant($params)
-        if $valid_msg;
-
-admin 入力値バリデートチェックに利用
-
-=head2 check_admin_validator_db
-
-    use Yoyakku::Model::Mainte::Admin qw{check_admin_validator_db};
-
-    # バリデート不合格時はエラーメッセージ
-    my $valid_msg_db = check_admin_validator_db( $type, $params, );
-
-    # バリデート合格時は undef を返却
-    return $self->stash($valid_msg_db), $self->_render_registrant($params)
-        if $valid_msg_db;
-
-admin 入力値データベースとのバリデートチェックに利用
-
-=head2 writing_admin
-
-    use Yoyakku::Model::Mainte::Admin qw{writing_admin};
-
-    # admin レコード新規
-    writing_admin( 'insert', $params );
-    $self->flash( touroku => '登録完了' );
-
-    # admin レコード修正
-    writing_admin( 'update', $params );
-    $self->flash( henkou => '修正完了' );
-
-admin テーブル書込み、新規、修正、両方に対応
-
-=head2 get_fill_in_registrant
-
-    use Yoyakku::Model::Mainte::Admin qw{get_fill_in_registrant};
-
-    # テンプレートの html と出力の params から表示用の html を生成
-    my $output = get_fill_in_registrant( \$html, $params );
-    return $self->render( text => $output );
-
-表示用 html を生成
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -223,13 +175,11 @@ admin テーブル書込み、新規、修正、両方に対応
 
 =item * L<utf8>
 
-=item * L<Yoyakku::Model>
+=item * L<parent>
 
 =item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
-
-=item * L<Exporter>
 
 =back
 

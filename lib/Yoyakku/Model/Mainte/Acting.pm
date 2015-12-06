@@ -9,15 +9,15 @@ use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =head1 NAME (モジュール名)
 
-Yoyakku::Model::Mainte::Acting - acting テーブル管理用 API
+    Yoyakku::Model::Mainte::Acting - acting テーブル管理用 API
 
 =head1 VERSION (改定番号)
 
-This documentation referes to Yoyakku::Model::Mainte::Acting version 0.0.1
+    This documentation referes to Yoyakku::Model::Mainte::Acting version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-Acting コントローラーのロジック API
+    Acting コントローラーのロジック API
 
 =cut
 

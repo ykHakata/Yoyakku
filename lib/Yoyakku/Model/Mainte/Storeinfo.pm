@@ -5,6 +5,28 @@ use utf8;
 use parent 'Yoyakku::Model::Mainte';
 use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model::Mainte::Storeinfo - storeinfo テーブル管理用 API
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model::Mainte::Storeinfo version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    Storeinfo コントローラーのロジック API
+
+=cut
+
+=head2 search_storeinfo_id_rows
+
+    storeinfo テーブル一覧作成時に利用
+
+=cut
+
 sub search_storeinfo_id_rows {
     my $self = shift;
     return $self->search_id_single_or_all_rows( 'storeinfo',
@@ -25,6 +47,12 @@ sub get_update_form_params_storeinfo {
     $self->get_update_form_params('storeinfo');
     return $self;
 }
+
+=head2 search_zipcode_for_address
+
+    郵便番号から住所を検索、値を返却
+
+=cut
 
 sub search_zipcode_for_address {
     my $self   = shift;
@@ -95,6 +123,12 @@ sub check_storeinfo_validator {
     return $valid_msg_storeinfo;
 }
 
+=head2 writing_storeinfo
+
+    storeinfo テーブル書込み、修正に対応
+
+=cut
+
 sub writing_storeinfo {
     my $self = shift;
 
@@ -137,74 +171,6 @@ sub get_fill_in_storeinfo {
 
 __END__
 
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-Yoyakku::Model::Mainte::Storeinfo - storeinfo テーブル管理用 API
-
-=head1 VERSION (改定番号)
-
-This documentation referes to Yoyakku::Model::Mainte::Storeinfo version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-Storeinfo コントローラーのロジック API
-
-=head2 search_zipcode_for_address
-
-    use Yoyakku::Model::Mainte::Storeinfo qw{search_zipcode_for_address};
-
-    # 郵便番号から住所検索のアクション時
-    if ( $params->{kensaku} && $params->{kensaku} eq '検索する' ) {
-
-        my $address_params
-            = $self->search_zipcode_for_address( $params->{post} );
-
-        $params->{region_id} = $address_params->{region_id};
-        $params->{post}      = $address_params->{post};
-        $params->{state}     = $address_params->{state};
-        $params->{cities}    = $address_params->{cities};
-
-        return $self->_render_storeinfo($params);
-    }
-
-    # 該当の住所なき場合、各項目は undef を返却
-
-郵便番号から住所を検索、値を返却
-
-=head2 search_storeinfo_id_rows
-
-    use Yoyakku::Model::Mainte::Storeinfo qw{search_storeinfo_id_rows};
-
-    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $storeinfo_rows = $self->search_storeinfo_id_rows($storeinfo_id);
-
-    # 指定の id に該当するレコードなき場合 storeinfo 全てのレコード返却
-
-storeinfo テーブル一覧作成時に利用
-
-=head2 search_storeinfo_id_row
-
-    use Yoyakku::Model::Mainte::Storeinfo qw{search_storeinfo_id_row};
-
-    # 指定の id に該当するレコードを row オブジェクト単体で返却
-    my $storeinfo_row = $self->search_storeinfo_id_row( $params->{id} );
-
-    # 指定の id に該当するレコードなき場合エラー発生
-
-storeinfo テーブル修正フォーム表示などに利用
-
-=head2 writing_storeinfo
-
-    use Yoyakku::Model::Mainte::Storeinfo qw{writing_storeinfo};
-
-    # storeinfo テーブルレコード修正時
-    $self->writing_storeinfo( 'update', $params );
-    $self->flash( henkou => '修正完了' );
-
-storeinfo テーブル書込み、修正に対応
-
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -215,13 +181,11 @@ storeinfo テーブル書込み、修正に対応
 
 =item * L<utf8>
 
-=item * L<Yoyakku::Model>
+=item * L<parent>
 
 =item * L<Yoyakku::Model::Mainte>
 
 =item * L<Yoyakku::Util>
-
-=item * L<Exporter>
 
 =back
 
