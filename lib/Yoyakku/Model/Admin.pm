@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
-use Yoyakku::Util qw{};
+use Yoyakku::Util qw{get_fill_in_params};
 
 =encoding utf8
 
@@ -50,6 +50,58 @@ sub get_switch_com {
     my $self       = shift;
     my $switch_com = 1;
     return $switch_com;
+}
+
+=head2 get_fill_in_admin
+
+    html パラメーターフィルイン
+
+=cut
+
+sub get_fill_in_admin {
+    my $self   = shift;
+    my $html   = $self->html();
+    my $params = $self->params();
+    my $output = get_fill_in_params( $html, $params );
+    return $output;
+}
+
+=head2 get_login_storeinfo_params
+
+    ログイン id から storeinfo のテーブルより該当レコード抽出
+
+=cut
+
+sub get_login_storeinfo_params {
+    my $self   = shift;
+    my $params = $self->login_storeinfo_row()->get_columns();
+    $self->params($params);
+    return $params;
+}
+
+=head2 get_login_storeinfo_id
+
+    ログイン id から storeinfo の id 取得
+
+=cut
+
+sub get_login_storeinfo_id {
+    my $self = shift;
+    my $id   = $self->login_storeinfo_row()->id;
+    $self->params( +{ id => $id } );
+    return $id;
+}
+
+=head2 get_init_valid_params_admin_store_edit
+
+    バリデート用パラメータ初期値(admin_store_edit)
+
+=cut
+
+sub get_init_valid_params_admin_store_edit {
+    my $self = shift;
+    return $self->get_init_valid_params(
+        [qw{name post state cities addressbelow tel mail remarks url }] );
 }
 
 1;

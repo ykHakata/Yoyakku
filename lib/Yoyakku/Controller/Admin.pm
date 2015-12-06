@@ -44,33 +44,55 @@ sub admin_store_edit {
     my $model = $self->_init();
     return $self->redirect_to($model) if $model eq 'index';
     return $self->redirect_to($model) if $model eq 'profile';
+    return $self->redirect_to('index')
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
 
-    # バリデートの値のダミー
-    $self->stash(
-        name         => '',
-        post         => '',
-        state        => '',
-        cities       => '',
-        addressbelow => '',
-        tel          => '',
-        mail         => '',
-        remarks      => '',
-        url          => '',
-    );
+    my $init_valid_params_admin_store_edit
+        = $model->get_init_valid_params_admin_store_edit();
 
     my $switch_com = $model->get_switch_com();
     $self->stash(
         class      => 'admin_store_edit',
         switch_com => $switch_com,
+        %{$init_valid_params_admin_store_edit},
     );
 
-    return $self->render(
-        template => 'admin/admin_store_edit',
-        format   => 'html',
-    );
+    if ( 'GET' eq $model->method() ) {
+        $model->get_login_storeinfo_params();
+        return $self->_render_admin_store_edit($model);
+    }
+
+    return $self->_cancel($model) if $model->params('cancel');
 }
 
+sub _cancel {
+    my $self  = shift;
+    my $model = shift;
+    $model->get_login_storeinfo_id();
+    return $self->_render_admin_store_edit($model);
+}
 
+sub _update {
+
+}
+
+sub _common {
+
+}
+
+sub _render_admin_store_edit {
+    my $self  = shift;
+    my $model = shift;
+
+    my $html = $self->render_to_string(
+        template => 'admin/admin_store_edit',
+        format   => 'html',
+    )->to_string;
+
+    $model->html( \$html );
+    my $output = $model->get_fill_in_admin();
+    return $self->render( text => $output );
+}
 
 1;
 
@@ -102,77 +124,6 @@ any '/admin_store_edit' => sub {
 my $self = shift;
 # テンプレートbodyのクラス名を定義
 
-#日付変更線を６時に変更
-my $now_date    = localtime;
-
-my $chang_date_ref = chang_date_6($now_date);
-
-my $now_date    = $chang_date_ref->{now_date};
-my $next1m_date = $chang_date_ref->{next1m_date};
-my $next2m_date = $chang_date_ref->{next2m_date};
-my $next3m_date = $chang_date_ref->{next3m_date};
-#====================================================
-
-##新しい日付情報取得のスクリプト======================
-## 時刻(日付)取得、現在、1,2,3ヶ月後
-#my $now_date    = localtime;
-#
-##翌月の計算をやり直す
-#my $first_day   = localtime->strptime($now_date->strftime(   '%Y-%m-01'                             ),'%Y-%m-%d');
-#my $last_day    = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d');
-#my $next1m_date = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d') + 86400;
-#my $next2m_date = localtime->strptime($next1m_date->strftime('%Y-%m-' . $next1m_date->month_last_day),'%Y-%m-%d') + 86400;
-#my $next3m_date = localtime->strptime($next2m_date->strftime('%Y-%m-' . $next2m_date->month_last_day),'%Y-%m-%d') + 86400;
-# 時刻(日付)取得、現在、1,2,3ヶ月後(ヘッダー用)
-$self->stash(
-    now_data    => $now_date,
-    next1m_data => $next1m_date,
-    next2m_data => $next2m_date,
-    next3m_data => $next3m_date
-);
-
-#ログインidからstoreinfoのテーブルより該当テーブル抽出
-my @storeinfo = $teng->single('storeinfo', {'admin_id' => $login_id });
-#店舗入力フォームには抽出情報を入れておく
-my ($id,$region_id,$admin_id,$name,$icon,$post,$state,$cities,$addressbelow,
-    $tel,$mail,$remarks,$url,$locationinfor,$status,$create_on,$modify_on
-);
-foreach my $storeinfo (@storeinfo) {# id検索、sql実行
-    $id            = $storeinfo->id ;
-    $region_id     = $storeinfo->region_id ;
-    $admin_id      = $storeinfo->admin_id ;
-    $name          = $storeinfo->name ;
-    $icon          = $storeinfo->icon ;
-    $post          = $storeinfo->post ;
-    $state         = $storeinfo->state ;
-    $cities        = $storeinfo->cities ;
-    $addressbelow  = $storeinfo->addressbelow ;
-    $tel           = $storeinfo->tel ;
-    $mail          = $storeinfo->mail ;
-    $remarks       = $storeinfo->remarks ;
-    $url           = $storeinfo->url ;
-}
-#修正用フォーム、Fillinつかって表示
-#---------
-#---------
-#値はsqlより該当idのデータをつかう
-my $html = $self->render_partial()->to_string;
-$html = HTML::FillInForm->fill(
-    \$html,{
-        id           => $id ,
-        region_id    => $region_id ,
-        name         => $name ,
-        icon         => $icon ,
-        post         => $post ,
-        state        => $state ,
-        cities       => $cities ,
-        addressbelow => $addressbelow ,
-        tel          => $tel ,
-        mail         => $mail ,
-        remarks      => $remarks ,
-        url          => $url ,
-    },
-);
 #----------
 #sql入力にはpost、判定のif文
 if (uc $self->req->method eq 'POST') {
