@@ -71,56 +71,20 @@ sub search_zipcode_for_address {
     return $self;
 }
 
+=head2 check_storeinfo_validator
+
+    バリデート処理(storeinfo)
+
+=cut
+
 sub check_storeinfo_validator {
-    my $self = shift;
-
-    my $check_params = [
-        name          => [ [ 'LENGTH', 0, 20, ], ],
-        post          => [ 'INT', ],
-        state         => [ [ 'LENGTH', 0, 20, ], ],
-        cities        => [ [ 'LENGTH', 0, 20, ], ],
-        addressbelow  => [ [ 'LENGTH', 0, 20, ], ],
-        tel           => [ [ 'LENGTH', 0, 20, ], ],
-        mail          => [ 'EMAIL_LOOSE', ],
-        remarks       => [ [ 'LENGTH', 0, 200, ], ],
-        url           => [ 'HTTP_URL', ],
-        locationinfor => [ [ 'LENGTH', 0, 20, ], ],
-        status        => [ 'INT', ],
-    ];
-
-    my $msg_params = [
-        'name.length'         => '文字数!!',
-        'post.int'            => '指定の形式で入力してください',
-        'state.length'        => '文字数!!',
-        'cities.length'       => '文字数!!',
-        'addressbelow.length' => '文字数!!',
-        'tel.length'          => '文字数!!',
-        'mail.email_loose'    => 'Eメールを入力してください',
-        'remarks.length'      => '文字数!!',
-        'url.http_url'        => '指定の形式で入力してください',
-        'locationinfor.length' => '文字数!!',
-        'status.int' => '指定の形式で入力してください',
-    ];
-
+    my $self         = shift;
+    my $check_params = $self->get_check_params('storeinfo');
+    my $msg_params   = $self->get_msg_params('storeinfo');
     my $msg = $self->get_msg_validator( $check_params, $msg_params, );
-
     return if !$msg;
-
-    my $valid_msg_storeinfo = +{
-        name          => $msg->{name},
-        post          => $msg->{post},
-        state         => $msg->{state},
-        cities        => $msg->{cities},
-        addressbelow  => $msg->{addressbelow},
-        tel           => $msg->{tel},
-        mail          => $msg->{mail},
-        remarks       => $msg->{remarks},
-        url           => $msg->{url},
-        locationinfor => $msg->{locationinfor},
-        status        => $msg->{status},
-    };
-
-    return $valid_msg_storeinfo;
+    my $valid_msg = $self->get_valid_msg( $msg, 'storeinfo' );
+    return $valid_msg;
 }
 
 =head2 writing_storeinfo

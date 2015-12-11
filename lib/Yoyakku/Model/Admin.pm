@@ -130,6 +130,22 @@ sub get_init_valid_params_admin_store_edit {
         [qw{name post state cities addressbelow tel mail remarks url }] );
 }
 
+=head2 check_admin_store_validator
+
+    バリデート処理(admin_store)
+
+=cut
+
+sub check_admin_store_validator {
+    my $self         = shift;
+    my $check_params = $self->get_check_params('storeinfo');
+    my $msg_params   = $self->get_msg_params('storeinfo');
+    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
+    return if !$msg;
+    my $valid_msg = $self->get_valid_msg( $msg, 'storeinfo' );
+    return $valid_msg;
+}
+
 1;
 
 __END__

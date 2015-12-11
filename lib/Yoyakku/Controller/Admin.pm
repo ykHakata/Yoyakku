@@ -64,6 +64,7 @@ sub admin_store_edit {
     my $params = $model->params();
     return $self->_cancel($model)      if $params->{cancel};
     return $self->_post_search($model) if $params->{post_search};
+    return $self->_update($model);
 }
 
 sub _cancel {
@@ -81,11 +82,20 @@ sub _post_search {
 }
 
 sub _update {
-
+    my $self  = shift;
+    my $model = shift;
+    return $self->_common($model);
 }
 
 sub _common {
+    my $self  = shift;
+    my $model = shift;
 
+    my $valid_msg = $model->check_admin_store_validator();
+
+    return $self->stash($valid_msg), $self->_render_admin_store_edit($model)
+        if $valid_msg;
+    return;
 }
 
 sub _render_admin_store_edit {
@@ -138,22 +148,7 @@ if (uc $self->req->method eq 'POST') {
 
 #完了の場合
 else {
-    #完了の場合バリデート実行
-    my $validator = $self->create_validator;# バリデーション()
-    $validator->field('name'         )->required(1)->length(1,20);
-    $validator->field('post'         )->required(1)->regexp(qr/^\d{3}\d{4}$/);
-    $validator->field('state'        )->required(1)->length(1,20);
-    $validator->field('cities'       )->required(1)->length(1,20);
-    $validator->field('addressbelow' )->required(1)->length(1,20);
-    $validator->field('tel'          )->required(1)->length(1,20);
-    $validator->field('mail'         )->required(0)->email;
-    $validator->field('remarks'      )->required(0)->length(1,200);
-    $validator->field('url'          )->required(1)->regexp(qr/^https?:\/\/.+/);
-    #$validator->field('locationinfor')->required(1)->length(1,20);
-    #$validator->field('status'       )->required(1)->length(1,20);
-    #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、
-    my $param_hash = $self->req->params->to_hash;
-    $self->stash(param_hash => $param_hash);
+
     #入力検査合格、の時、修正アップロード実行
     if ( $self->validate($validator,$param_hash) ) {
     #念のためにここで改めて時刻取得
