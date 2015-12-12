@@ -197,6 +197,39 @@ sub get_init_valid_params {
     return $valid_params_stash;
 }
 
+=head2 get_create_data
+
+    データベースへの書き込み用データ作成
+
+=cut
+
+sub get_create_data {
+    my $self       = shift;
+    my $table_name = shift;
+
+    my $create_data = +{
+        storeinfo => +{
+            region_id => $self->params()->{region_id} || undef,
+            admin_id  => $self->params()->{admin_id}  || undef,
+            name      => $self->params()->{name},
+            icon      => $self->params()->{icon},
+            post      => $self->params()->{post},
+            state     => $self->params()->{state},
+            cities    => $self->params()->{cities},
+            addressbelow  => $self->params()->{addressbelow},
+            tel           => $self->params()->{tel},
+            mail          => $self->params()->{mail},
+            remarks       => $self->params()->{remarks},
+            url           => $self->params()->{url},
+            locationinfor => $self->params()->{locationinfor},
+            status        => $self->params()->{status},
+            create_on     => now_datetime(),
+            modify_on     => now_datetime(),
+        },
+    };
+    return $create_data->{$table_name};
+}
+
 =head2 writing_db
 
     データベースへの書き込み

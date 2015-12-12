@@ -84,6 +84,7 @@ sub _post_search {
 sub _update {
     my $self  = shift;
     my $model = shift;
+    $model->type('update');
     return $self->_common($model);
 }
 
@@ -95,7 +96,10 @@ sub _common {
 
     return $self->stash($valid_msg), $self->_render_admin_store_edit($model)
         if $valid_msg;
-    return;
+
+    $model->writing_admin_store();
+
+    return $self->redirect_to('admin_store_comp');
 }
 
 sub _render_admin_store_edit {
@@ -133,82 +137,3 @@ __END__
 L<Guides>
 
 =cut
-
-
-
-#admin_store_edit.html.ep
-#選択店舗情報確認コントロール-----------------------------
-any '/admin_store_edit' => sub {
-my $self = shift;
-# テンプレートbodyのクラス名を定義
-
-#----------
-#sql入力にはpost、判定のif文
-if (uc $self->req->method eq 'POST') {
-
-#完了の場合
-else {
-
-    #入力検査合格、の時、修正アップロード実行
-    if ( $self->validate($validator,$param_hash) ) {
-    #念のためにここで改めて時刻取得
-    my $today = localtime;
-    #入力用パラメータ受け取り
-    my $id           = $self->param('id');
-    my $region_id    = $self->param('region_id');
-    my $name         = $self->param('name');
-    my $icon         = $self->param('icon');
-    my $post         = $self->param('post');
-    my $state        = $self->param('state');
-    my $cities       = $self->param('cities');
-    my $addressbelow = $self->param('addressbelow');
-    my $tel          = $self->param('tel');
-    my $mail         = $self->param('mail');
-    my $url          = $self->param('url');
-    my $remarks      = $self->param('remarks');
-    my $modify_on    = $today->datetime(date => '-', T => ' ');   #修正日
-    #修正データの場合sql実行
-    if ($id) {
-        my $count = $teng->update(
-            'storeinfo' => {
-                'region_id'     => $region_id,      #地域区分ID
-                #'admin_id'      => $admin_id,       #管理ユーザーID ログインしたときに出来るはず
-                'name'          => $name,           #店舗名
-                'icon'          => $icon,           #店舗アイコン
-                'post'          => $post,           #住所郵便
-                'state'         => $state,          #住所都道府県
-                'cities'        => $cities,         #住所市町村
-                'addressbelow'  => $addressbelow,   #住所以下
-                'tel'           => $tel,            #電話番号
-                'mail'          => $mail,           #メールアドレス
-                'remarks'       => $remarks,        #店舗備考欄
-                'url'           => $url,            #店舗リンク先
-                #    'locationinfor' => $locationinfor,  #地図位置情報 どうやってつくる？
-                #    'status'        => $status,         #ステータス 定義がきまってない。
-                'modify_on'     => $modify_on,      #修正日 新規はないので、
-            }, {
-                'id' => $id,
-            }
-        );
-
-    #sqlにデータ入力したのでリダイレクト
-    return $self->redirect_to('admin_store_comp');
-    #リターンなのでここでおしまい。
-    }
-    #idが無い場合、は正常に働いていないので、deiを出しておく
-    else { die "idganai!!"; }
-    }
-    #入力検査合格しなかった場合、もう一度入力フォーム表示Fillinにて
-    my $html = $self->render_partial()->to_string;
-    $html = HTML::FillInForm->fill(\$html, $self->req->params,);
-    return $self->render_text($html, format => 'html');
-    #リターンなのでここでおしまい。
-}
-
-}
-
-#Fillin画面表示実行returnなのでここでおしまい。
-return $self->render_text($html, format => 'html');
-
-#$self->render('admin_store_edit');
-};

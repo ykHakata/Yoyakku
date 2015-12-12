@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Util qw{now_datetime get_fill_in_params};
+use Yoyakku::Util qw{get_fill_in_params};
 
 =encoding utf8
 
@@ -96,24 +96,7 @@ sub check_storeinfo_validator {
 sub writing_storeinfo {
     my $self = shift;
 
-    my $create_data = +{
-        region_id     => $self->params()->{region_id} || undef,
-        admin_id      => $self->params()->{admin_id} || undef,
-        name          => $self->params()->{name},
-        icon          => $self->params()->{icon},
-        post          => $self->params()->{post},
-        state         => $self->params()->{state},
-        cities        => $self->params()->{cities},
-        addressbelow  => $self->params()->{addressbelow},
-        tel           => $self->params()->{tel},
-        mail          => $self->params()->{mail},
-        remarks       => $self->params()->{remarks},
-        url           => $self->params()->{url},
-        locationinfor => $self->params()->{locationinfor},
-        status        => $self->params()->{status},
-        create_on     => now_datetime(),
-        modify_on     => now_datetime(),
-    };
+    my $create_data = $self->get_create_data('storeinfo');
 
     # update 以外は禁止
     die 'update only'

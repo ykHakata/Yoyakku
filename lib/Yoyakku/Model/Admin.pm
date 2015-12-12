@@ -146,6 +146,30 @@ sub check_admin_store_validator {
     return $valid_msg;
 }
 
+=head2 writing_admin_store
+
+    storeinfo テーブル書込み、修正に対応
+
+=cut
+
+sub writing_admin_store {
+    my $self = shift;
+
+    my $create_data = $self->get_create_data('storeinfo');
+
+    # 不要なカラムを削除
+    delete $create_data->{admin_id};
+    delete $create_data->{locationinfor};
+    delete $create_data->{status};
+
+    # update 以外は禁止
+    die 'update only'
+        if !$self->type() || ( $self->type() && $self->type() ne 'update' );
+
+    return $self->writing_db( 'storeinfo', $create_data,
+        $self->params()->{id} );
+}
+
 1;
 
 __END__
