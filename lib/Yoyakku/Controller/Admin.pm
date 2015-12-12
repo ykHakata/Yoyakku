@@ -50,7 +50,7 @@ sub admin_store_edit {
     my $init_valid_params_admin_store_edit
         = $model->get_init_valid_params_admin_store_edit();
 
-    my $switch_com = $model->get_switch_com();
+    my $switch_com = $model->get_switch_com('admin_store_edit');
     $self->stash(
         class      => 'admin_store_edit',
         switch_com => $switch_com,
@@ -114,6 +114,25 @@ sub _render_admin_store_edit {
     $model->html( \$html );
     my $output = $model->get_fill_in_admin();
     return $self->render( text => $output );
+}
+
+sub admin_store_comp {
+    my $self = shift;
+
+    my $model = $self->_init();
+    return $self->redirect_to($model) if $model eq 'index';
+    return $self->redirect_to($model) if $model eq 'profile';
+    return $self->redirect_to('index')
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+
+    my $switch_com = $model->get_switch_com('admin_store_comp');
+    $self->stash(
+        class         => 'admin_store_comp',
+        switch_com    => $switch_com,
+        storeinfo_row => $model->login_storeinfo_row,
+    );
+    $self->render( template => 'admin/admin_store_comp', format => 'html' );
+    return;
 }
 
 1;

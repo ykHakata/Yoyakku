@@ -153,6 +153,10 @@ sub startup {
     $r->route('/admin_store_edit')
         ->to( controller => 'Admin', action => 'admin_store_edit' );
 
+    # 店舗管理(Admin) 選択店舗情報確認
+    $r->route('/admin_store_comp')
+        ->to( controller => 'Admin', action => 'admin_store_comp' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

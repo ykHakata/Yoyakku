@@ -1,0 +1,92 @@
+% layout 'default';
+% title 'yoyakku管理モード';
+<div id="wrapper">
+<%= include './temp/header_navi_new' %>
+<%= include './temp/admin_navi' %>
+<div id="contents">
+    <div id="bgTop">
+    <ul class="topicpath">
+        <li id="tpp1">スタート&nbsp;-&gt;</li>
+        <li id="tpp2">店舗情報&nbsp;-&gt;</li>
+        <li id="tpp3"></li>
+        <li id="tpp4"></li>
+        <li id="tpp5"></li>
+    </ul>
+    </div>
+
+<div id="contensNavi">
+    <div id="store_deta">
+
+    <form method="get" action="admin_store_edit">
+    <h2>
+    <table id="botton_t">
+        <tr>
+            <td id="botton_l">
+            <input type="hidden" name="id" value="<%= $storeinfo_row->id %>">
+            <input type="submit" name="" value="編集">
+            </td>
+            <td id="com_r">
+            <%= $storeinfo_row->name %>
+            </td>
+        </tr>
+    </table>
+    </h2>
+    </form>
+
+    <table id="store_t">
+    <tr id="name">
+    <th class="col1">
+    %# <p><img src="../images/parts/bebop.jpg" alt="店舗写真" width="50" height="50"></p>
+    </th>
+    <th class="col2"><%= $storeinfo_row->name %></th>
+    </tr>
+
+    <tr id="post">
+    <td class="col1">住所</td>
+    <td class="col2"><%= $storeinfo_row->post %></td>
+    </tr>
+
+    <tr id="address1">
+    <td class="col1"></td>
+    <td class="col2"><%= $storeinfo_row->state %><%= $storeinfo_row->cities %></td>
+    </tr>
+
+    <tr id="address2">
+    <td class="col1"></td>
+    <td class="col2"><%= $storeinfo_row->addressbelow %></td>
+    </tr>
+
+    <tr id="tel">
+    <td class="col1">電話</td>
+    <td class="col2"><%= $storeinfo_row->tel %></td>
+    </tr>
+
+    <tr id="mail">
+    <td class="col1">メール</td>
+    <td class="col2"><%= $storeinfo_row->mail %></td>
+    </tr>
+
+    <tr id="url">
+    <td class="col1">サイト</td>
+    <td class="col2"><a href="#"><%= $storeinfo_row->url %></a></td>
+    </tr>
+
+    <tr id="remarks">
+    <td class="col1">コメント</td>
+    <td class="col2"><%= $storeinfo_row->remarks %></td>
+    </tr>
+    </table>
+    </div>
+    <div id="store_map">
+    <h2>地図(調整中)</h2>
+        <div id="map_frame">
+        <p id="map">
+        %# <iframe width="365" height="365" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.co.jp/maps?f=q&amp;source=s_q&amp;hl=ja&amp;geocode=&amp;q=%E7%A6%8F%E5%B2%A1%E7%9C%8C%E7%B2%95%E5%B1%8B%E9%83%A1%E6%96%B0%E5%AE%AE%E7%94%BA%E5%A4%A7%E5%AD%97%E4%B8%8A%E5%BA%9C698-1&amp;aq=&amp;sll=33.588661,130.407666&amp;sspn=0.040969,0.084543&amp;brcurrent=3,0x35418866c5f14efb:0x4876dcffbd7ab807,0&amp;ie=UTF8&amp;hq=&amp;hnear=%E7%A6%8F%E5%B2%A1%E7%9C%8C%E7%B3%9F%E5%B1%8B%E9%83%A1%E6%96%B0%E5%AE%AE%E7%94%BA%E4%B8%8A%E5%BA%9C%EF%BC%96%EF%BC%99%EF%BC%98%E2%88%92%EF%BC%91&amp;ll=33.710332,130.455935&amp;spn=0.010228,0.021136&amp;t=m&amp;z=14&amp;iwloc=r1&amp;output=embed"></iframe><br /><small><a href="https://maps.google.co.jp/maps?f=q&amp;source=embed&amp;hl=ja&amp;geocode=&amp;q=%E7%A6%8F%E5%B2%A1%E7%9C%8C%E7%B2%95%E5%B1%8B%E9%83%A1%E6%96%B0%E5%AE%AE%E7%94%BA%E5%A4%A7%E5%AD%97%E4%B8%8A%E5%BA%9C698-1&amp;aq=&amp;sll=33.588661,130.407666&amp;sspn=0.040969,0.084543&amp;brcurrent=3,0x35418866c5f14efb:0x4876dcffbd7ab807,0&amp;ie=UTF8&amp;hq=&amp;hnear=%E7%A6%8F%E5%B2%A1%E7%9C%8C%E7%B3%9F%E5%B1%8B%E9%83%A1%E6%96%B0%E5%AE%AE%E7%94%BA%E4%B8%8A%E5%BA%9C%EF%BC%96%EF%BC%99%EF%BC%98%E2%88%92%EF%BC%91&amp;ll=33.710332,130.455935&amp;spn=0.010228,0.021136&amp;t=m&amp;z=14&amp;iwloc=r1" style="color:#0000FF;text-align:left">大きな地図で見る</a></small>
+        </p>
+        </div>
+    </div>
+    <div id="clearfix"></div>
+<!-- /#contensNavi --></div>
+<!-- /#contents --></div>
+<%= include './temp/footer' %>
+<!-- /#wrapper --></div>

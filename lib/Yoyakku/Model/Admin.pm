@@ -47,8 +47,14 @@ sub get_header_stash_admin {
 =cut
 
 sub get_switch_com {
-    my $self       = shift;
-    my $switch_com = 1;
+    my $self   = shift;
+    my $action = shift;
+
+    my $switch_com
+        = $action eq 'admin_store_edit' ? 1
+        : $action eq 'admin_store_comp' ? 2
+        :                                 1;
+
     return $switch_com;
 }
 
