@@ -17,7 +17,7 @@ use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 __PACKAGE__->mk_accessors(
     qw{params session method html login_row login_table login_name
         profile_row storeinfo_row template type flash_msg acting_rows
-        mail_temp mail_header mail_body login_storeinfo_row}
+        mail_temp mail_header mail_body login_storeinfo_row login_roominfo_rows}
 );
 
 =encoding utf8
@@ -482,11 +482,17 @@ sub check_auth_db_yoyakku {
 
     if ($admin_id) {
         $login_name = q{(admin)} . $login_name;
-        $self->storeinfo_row(
-            $teng->single( 'storeinfo', +{ admin_id => $id } ) );
 
-        $self->login_storeinfo_row(
-            $teng->single( 'storeinfo', +{ admin_id => $id } ) );
+        my $storeinfo_row
+            = $teng->single( 'storeinfo', +{ admin_id => $id } );
+
+        my @roominfo_rows
+            = $teng->search( 'roominfo',
+            +{ storeinfo_id => $storeinfo_row->id } );
+
+        $self->storeinfo_row($storeinfo_row);
+        $self->login_storeinfo_row($storeinfo_row);
+        $self->login_roominfo_rows(\@roominfo_rows);
     }
     $self->login_name($login_name);
 

@@ -157,6 +157,10 @@ sub startup {
     $r->route('/admin_store_comp')
         ->to( controller => 'Admin', action => 'admin_store_comp' );
 
+    # 店舗管理(Admin) 予約部屋情報設定
+    $r->route('/admin_reserv_edit')
+        ->to( controller => 'Admin', action => 'admin_reserv_edit' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

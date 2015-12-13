@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
-use Yoyakku::Util qw{get_fill_in_params};
+use Yoyakku::Util qw{get_fill_in_params chenge_time_over};
 
 =encoding utf8
 
@@ -51,9 +51,10 @@ sub get_switch_com {
     my $action = shift;
 
     my $switch_com
-        = $action eq 'admin_store_edit' ? 1
-        : $action eq 'admin_store_comp' ? 2
-        :                                 1;
+        = $action eq 'admin_store_edit'  ? 1
+        : $action eq 'admin_store_comp'  ? 2
+        : $action eq 'admin_reserv_edit' ? 3
+        :                                  1;
 
     return $switch_com;
 }
@@ -136,6 +137,18 @@ sub get_init_valid_params_admin_store_edit {
         [qw{name post state cities addressbelow tel mail remarks url }] );
 }
 
+=head2 get_init_valid_params_admin_reserv_edit
+
+    バリデート用パラメータ初期値(admin_reserv_edit)
+
+=cut
+
+sub get_init_valid_params_admin_reserv_edit {
+    my $self = shift;
+    return $self->get_init_valid_params(
+        [qw{name endingtime_on rentalunit pricescomments}] );
+}
+
 =head2 check_admin_store_validator
 
     バリデート処理(admin_store)
@@ -174,6 +187,51 @@ sub writing_admin_store {
 
     return $self->writing_db( 'storeinfo', $create_data,
         $self->params()->{id} );
+}
+
+=head2 set_roominfo_params
+
+    予約情報設定のためのパラメーター取得
+
+=cut
+
+sub set_roominfo_params {
+    my $self = shift;
+    my $rows = $self->login_roominfo_rows();
+
+    my $roominfo_ref = +{};
+    for my $row ( @{$rows} ) {
+        my $change_time = chenge_time_over(
+            +{  start_time => $row->starttime_on,
+                end_time   => $row->endingtime_on,
+            },
+        );
+        push @{ $roominfo_ref->{id} },             $row->id;
+        push @{ $roominfo_ref->{name} },           $row->name;
+        push @{ $roominfo_ref->{starttime_on} },   $change_time->{start_hour};
+        push @{ $roominfo_ref->{endingtime_on} },  $change_time->{end_hour};
+        push @{ $roominfo_ref->{time_change} },    $row->time_change;
+        push @{ $roominfo_ref->{rentalunit} },     $row->rentalunit;
+        push @{ $roominfo_ref->{pricescomments} }, $row->pricescomments;
+        push @{ $roominfo_ref->{privatepermit} },  $row->privatepermit;
+        push @{ $roominfo_ref->{privatepeople} },  $row->privatepeople;
+        push @{ $roominfo_ref->{privateconditions} }, $row->privateconditions;
+    }
+
+    $self->params(
+        +{  id                => $roominfo_ref->{id},
+            name              => $roominfo_ref->{name},
+            starttime_on      => $roominfo_ref->{starttime_on},
+            endingtime_on     => $roominfo_ref->{endingtime_on},
+            time_change       => $roominfo_ref->{time_change},
+            rentalunit        => $roominfo_ref->{rentalunit},
+            pricescomments    => $roominfo_ref->{pricescomments},
+            privatepermit     => $roominfo_ref->{privatepermit},
+            privatepeople     => $roominfo_ref->{privatepeople},
+            privateconditions => $roominfo_ref->{privateconditions},
+        },
+    );
+    return;
 }
 
 1;
