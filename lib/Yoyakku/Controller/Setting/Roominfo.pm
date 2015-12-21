@@ -1,16 +1,16 @@
-package Yoyakku::Controller::Admin;
+package Yoyakku::Controller::Setting::Roominfo;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Admin;
+use Yoyakku::Model::Setting::Roominfo;
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::Controller::Admin - 店舗管理のコントローラー
+    Yoyakku::Controller::Setting::Roominfo - 店舗管理のコントローラー
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::Controller::Admin version 0.0.1
+    This documentation referes to Yoyakku::Controller::Setting::Roominfo version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
@@ -20,7 +20,7 @@ use Yoyakku::Model::Admin;
 
 sub _init {
     my $self  = shift;
-    my $model = Yoyakku::Model::Admin->new();
+    my $model = Yoyakku::Model::Setting::Roominfo->new();
     $model->params( $self->req->params->to_hash );
     $model->method( uc $self->req->method );
     $model->session( $self->session );
@@ -30,111 +30,6 @@ sub _init {
     return $header_stash if $header_stash eq 'profile';
     $self->stash($header_stash);
     return $model;
-}
-
-=head2 admin_store_edit
-
-    選択店舗情報確認コントロール
-
-=cut
-
-sub admin_store_edit {
-    my $self = shift;
-
-    my $model = $self->_init();
-    return $self->redirect_to($model) if $model eq 'index';
-    return $self->redirect_to($model) if $model eq 'profile';
-    return $self->redirect_to('index')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
-
-    my $init_valid_params_admin_store_edit
-        = $model->get_init_valid_params_admin_store_edit();
-
-    my $switch_com = $model->get_switch_com('admin_store_edit');
-    $self->stash(
-        class      => 'admin_store_edit',
-        switch_com => $switch_com,
-        %{$init_valid_params_admin_store_edit},
-    );
-
-    $model->template('admin/admin_store_edit');
-
-    if ( 'GET' eq $model->method() ) {
-        $model->get_login_storeinfo_params();
-        return $self->_render_admin_store_edit($model);
-    }
-    my $params = $model->params();
-    return $self->_cancel($model)      if $params->{cancel};
-    return $self->_post_search($model) if $params->{post_search};
-    return $self->_update($model);
-}
-
-sub _cancel {
-    my $self  = shift;
-    my $model = shift;
-    $model->get_login_storeinfo_id();
-    return $self->_render_admin_store_edit($model);
-}
-
-sub _post_search {
-    my $self  = shift;
-    my $model = shift;
-    $model->get_post_search();
-    return $self->_render_admin_store_edit($model);
-}
-
-sub _update {
-    my $self  = shift;
-    my $model = shift;
-    $model->type('update');
-    return $self->_common($model);
-}
-
-sub _common {
-    my $self  = shift;
-    my $model = shift;
-
-    my $valid_msg = $model->check_admin_store_validator();
-
-    return $self->stash($valid_msg), $self->_render_admin_store_edit($model)
-        if $valid_msg;
-
-    $model->writing_admin_store();
-
-    return $self->redirect_to('admin_store_comp');
-}
-
-sub _render_admin_store_edit {
-    my $self  = shift;
-    my $model = shift;
-
-    my $html = $self->render_to_string(
-        template => $model->template(),
-        format   => 'html',
-    )->to_string;
-
-    $model->html( \$html );
-    my $output = $model->get_fill_in_admin();
-    return $self->render( text => $output );
-}
-
-sub admin_store_comp {
-    my $self = shift;
-
-    my $model = $self->_init();
-    return $self->redirect_to($model) if $model eq 'index';
-    return $self->redirect_to($model) if $model eq 'profile';
-    return $self->redirect_to('index')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
-
-    my $switch_com = $model->get_switch_com('admin_store_comp');
-    $self->stash(
-        class         => 'admin_store_comp',
-        switch_com    => $switch_com,
-        storeinfo_row => $model->login_storeinfo_row,
-    );
-    $self->render( template => 'admin/admin_store_comp', format => 'html' );
-    return;
 }
 
 sub admin_reserv_edit {
@@ -156,10 +51,25 @@ sub admin_reserv_edit {
         %{$init_valid_params_admin_reserv_edit},
     );
     $model->set_roominfo_params();
-    $model->template('admin/admin_reserv_edit');
-    $self->_render_admin_store_edit($model);
+    $model->template('setting/admin_reserv_edit');
+    $self->_render_admin_reserv_edit($model);
     return;
 }
+
+sub _render_admin_reserv_edit {
+    my $self  = shift;
+    my $model = shift;
+
+    my $html = $self->render_to_string(
+        template => $model->template(),
+        format   => 'html',
+    )->to_string;
+
+    $model->html( \$html );
+    my $output = $model->get_fill_in_setting_roominfo();
+    return $self->render( text => $output );
+}
+
 
 1;
 
@@ -173,7 +83,7 @@ __END__
 
 =item * L<Mojolicious::Controller>
 
-=item * L<Yoyakku::Model::Admin>
+=item * L<Yoyakku::Model::Setting::Roominfo>
 
 =back
 

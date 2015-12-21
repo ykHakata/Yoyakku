@@ -149,17 +149,17 @@ sub startup {
     $r->route('/region_state')
         ->to( controller => 'Region', action => 'region_state' );
 
-    # 店舗管理(Admin)
+    # 店舗管理(Setting)
     $r->route('/admin_store_edit')
-        ->to( controller => 'Admin', action => 'admin_store_edit' );
+        ->to( controller => 'Setting::Storeinfo', action => 'admin_store_edit' );
 
-    # 店舗管理(Admin) 選択店舗情報確認
+    # 店舗管理(Setting) 選択店舗情報確認
     $r->route('/admin_store_comp')
-        ->to( controller => 'Admin', action => 'admin_store_comp' );
+        ->to( controller => 'Setting::Storeinfo', action => 'admin_store_comp' );
 
-    # 店舗管理(Admin) 予約部屋情報設定
+    # 店舗管理(Setting) 予約部屋情報設定
     $r->route('/admin_reserv_edit')
-        ->to( controller => 'Admin', action => 'admin_reserv_edit' );
+        ->to( controller => 'Setting::Roominfo', action => 'admin_reserv_edit' );
 
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
