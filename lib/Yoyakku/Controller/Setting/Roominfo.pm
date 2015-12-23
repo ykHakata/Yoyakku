@@ -32,6 +32,12 @@ sub _init {
     return $model;
 }
 
+=head2 admin_reserv_edit
+
+    予約部屋情報設定コントロール
+
+=cut
+
 sub admin_reserv_edit {
     my $self = shift;
 
@@ -46,17 +52,30 @@ sub admin_reserv_edit {
 
     my $switch_com = $model->get_switch_com('admin_reserv_edit');
     $self->stash(
-        class         => 'admin_reserv_edit',
-        switch_com    => $switch_com,
+        class      => 'admin_reserv_edit',
+        switch_com => $switch_com,
         %{$init_valid_params_admin_reserv_edit},
     );
-    $model->set_roominfo_params();
+
     $model->template('setting/admin_reserv_edit');
-    $self->_render_admin_reserv_edit($model);
+
+    if ( 'GET' eq $model->method() ) {
+        $model->set_roominfo_params();
+        return $self->_render_fill_in_form($model);
+    }
+    my $params = $model->params();
+    return $self->_cancel($model) if $params->{cancel};
     return;
 }
 
-sub _render_admin_reserv_edit {
+sub _cancel {
+    my $self  = shift;
+    my $model = shift;
+    $model->get_login_roominfo_ids();
+    return $self->_render_fill_in_form($model);
+}
+
+sub _render_fill_in_form {
     my $self  = shift;
     my $model = shift;
 
@@ -66,10 +85,9 @@ sub _render_admin_reserv_edit {
     )->to_string;
 
     $model->html( \$html );
-    my $output = $model->get_fill_in_setting_roominfo();
+    my $output = $model->set_fill_in_params();
     return $self->render( text => $output );
 }
-
 
 1;
 

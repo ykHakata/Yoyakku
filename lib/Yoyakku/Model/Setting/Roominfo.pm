@@ -21,19 +21,18 @@ use Yoyakku::Util qw{get_fill_in_params chenge_time_over};
 
 =cut
 
+=head2 get_login_roominfo_ids
 
-=head2 get_fill_in_setting_roominfo
-
-    html パラメーターフィルイン
+    ログイン id から roominfo の id 取得
 
 =cut
 
-sub get_fill_in_setting_roominfo {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
+sub get_login_roominfo_ids {
+    my $self = shift;
+    my $rows = $self->login_roominfo_rows();
+    my $ids  = [ map { $_->id } @{$rows} ];
+    $self->params( +{ id => $ids }, );
+    return $ids;
 }
 
 =head2 get_init_valid_params_admin_reserv_edit

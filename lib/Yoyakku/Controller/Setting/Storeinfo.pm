@@ -61,7 +61,7 @@ sub admin_store_edit {
 
     if ( 'GET' eq $model->method() ) {
         $model->get_login_storeinfo_params();
-        return $self->_render_admin_store_edit($model);
+        return $self->_render_fill_in_form($model);
     }
     my $params = $model->params();
     return $self->_cancel($model)      if $params->{cancel};
@@ -73,14 +73,14 @@ sub _cancel {
     my $self  = shift;
     my $model = shift;
     $model->get_login_storeinfo_id();
-    return $self->_render_admin_store_edit($model);
+    return $self->_render_fill_in_form($model);
 }
 
 sub _post_search {
     my $self  = shift;
     my $model = shift;
     $model->get_post_search();
-    return $self->_render_admin_store_edit($model);
+    return $self->_render_fill_in_form($model);
 }
 
 sub _update {
@@ -96,7 +96,7 @@ sub _common {
 
     my $valid_msg = $model->check_admin_store_validator();
 
-    return $self->stash($valid_msg), $self->_render_admin_store_edit($model)
+    return $self->stash($valid_msg), $self->_render_fill_in_form($model)
         if $valid_msg;
 
     $model->writing_admin_store();
@@ -104,7 +104,7 @@ sub _common {
     return $self->redirect_to('admin_store_comp');
 }
 
-sub _render_admin_store_edit {
+sub _render_fill_in_form {
     my $self  = shift;
     my $model = shift;
 
@@ -114,7 +114,7 @@ sub _render_admin_store_edit {
     )->to_string;
 
     $model->html( \$html );
-    my $output = $model->get_fill_in_admin();
+    my $output = $model->set_fill_in_params();
     return $self->render( text => $output );
 }
 

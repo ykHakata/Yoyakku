@@ -21,20 +21,6 @@ use Yoyakku::Util qw{get_fill_in_params};
 
 =cut
 
-=head2 get_fill_in_admin
-
-    html パラメーターフィルイン
-
-=cut
-
-sub get_fill_in_admin {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
-}
-
 =head2 get_login_storeinfo_params
 
     ログイン id から storeinfo のテーブルより該当レコード抽出

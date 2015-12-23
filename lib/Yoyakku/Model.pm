@@ -11,6 +11,7 @@ use Email::Sender::Simple 'sendmail';
 use Email::MIME;
 use Email::Sender::Transport::SMTPS;
 use Try::Tiny;
+use HTML::FillInForm;
 use Yoyakku::Util qw{now_datetime switch_header_params};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 
@@ -35,6 +36,17 @@ __PACKAGE__->mk_accessors(
     データベース接続関連の API を提供
 
 =cut
+
+=head2 set_fill_in_params
+
+    html パラメーターフィルインを設定
+
+=cut
+
+sub set_fill_in_params {
+    my $self = shift;
+    return HTML::FillInForm->fill( $self->html(), $self->params() );
+}
 
 =head2 get_calender_caps
 
