@@ -94,7 +94,7 @@ sub _common {
     my $self  = shift;
     my $model = shift;
 
-    my $valid_msg = $model->check_admin_store_validator();
+    my $valid_msg = $model->check_validator('storeinfo');
 
     return $self->stash($valid_msg), $self->_render_fill_in_form($model)
         if $valid_msg;

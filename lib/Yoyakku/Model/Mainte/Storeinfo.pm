@@ -71,22 +71,6 @@ sub search_zipcode_for_address {
     return $self;
 }
 
-=head2 check_storeinfo_validator
-
-    バリデート処理(storeinfo)
-
-=cut
-
-sub check_storeinfo_validator {
-    my $self         = shift;
-    my $check_params = $self->get_check_params('storeinfo');
-    my $msg_params   = $self->get_msg_params('storeinfo');
-    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
-    return if !$msg;
-    my $valid_msg = $self->get_valid_msg( $msg, 'storeinfo' );
-    return $valid_msg;
-}
-
 =head2 writing_storeinfo
 
     storeinfo テーブル書込み、修正に対応

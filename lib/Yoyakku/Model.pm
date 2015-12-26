@@ -14,6 +14,7 @@ use Try::Tiny;
 use HTML::FillInForm;
 use Yoyakku::Util qw{now_datetime switch_header_params};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
+use Yoyakku::Validator;
 
 __PACKAGE__->mk_accessors(
     qw{params session method html login_row login_table login_name
@@ -36,6 +37,21 @@ __PACKAGE__->mk_accessors(
     データベース接続関連の API を提供
 
 =cut
+
+=head2 check_validator
+
+    バリデートチェック
+
+=cut
+
+sub check_validator {
+    my $self      = shift;
+    my $table     = shift;
+    my $params    = $self->params();
+    my $validator = Yoyakku::Validator->new();
+    my $msg       = $validator->$table($params);
+    return $msg;
+}
 
 =head2 set_fill_in_params
 
@@ -325,91 +341,6 @@ sub insert_admin_relation {
             $teng->fast_insert( 'roominfo', $create_data_roominfo, );
         }
     }
-}
-
-=head2 get_check_params
-
-    入力値バリデート処理パラメーター
-
-=cut
-
-sub get_check_params {
-    my $self       = shift;
-    my $table_name = shift;
-
-    my $check_params = +{
-        storeinfo => [
-            name          => [ [ 'LENGTH', 0, 20, ], ],
-            post          => [ 'INT', ],
-            state         => [ [ 'LENGTH', 0, 20, ], ],
-            cities        => [ [ 'LENGTH', 0, 20, ], ],
-            addressbelow  => [ [ 'LENGTH', 0, 20, ], ],
-            tel           => [ [ 'LENGTH', 0, 20, ], ],
-            mail          => [ 'EMAIL_LOOSE', ],
-            remarks       => [ [ 'LENGTH', 0, 200, ], ],
-            url           => [ 'HTTP_URL', ],
-            locationinfor => [ [ 'LENGTH', 0, 20, ], ],
-            status        => [ 'INT', ],
-        ],
-    };
-    return $check_params->{$table_name};
-}
-
-=head2 get_msg_params
-
-    入力値バリデート処理パラメーターメッセージ
-
-=cut
-
-sub get_msg_params {
-    my $self       = shift;
-    my $table_name = shift;
-
-    my $msg_params = +{
-        storeinfo => [
-            'name.length'   => '文字数!!',
-            'post.int'      => '指定の形式で入力してください',
-            'state.length'  => '文字数!!',
-            'cities.length' => '文字数!!',
-            'addressbelow.length' => '文字数!!',
-            'tel.length'          => '文字数!!',
-            'mail.email_loose'    => 'Eメールを入力してください',
-            'remarks.length'      => '文字数!!',
-            'url.http_url' => '指定の形式で入力してください',
-            'locationinfor.length' => '文字数!!',
-            'status.int' => '指定の形式で入力してください',
-        ],
-    };
-    return $msg_params->{$table_name};
-}
-
-=head2 get_valid_msg
-
-    入力値バリデートパラメーターメッセージ、結果
-
-=cut
-
-sub get_valid_msg {
-    my $self       = shift;
-    my $msg        = shift;
-    my $table_name = shift;
-
-    my $valid_msg = +{
-        storeinfo => +{
-            name          => $msg->{name},
-            post          => $msg->{post},
-            state         => $msg->{state},
-            cities        => $msg->{cities},
-            addressbelow  => $msg->{addressbelow},
-            tel           => $msg->{tel},
-            mail          => $msg->{mail},
-            remarks       => $msg->{remarks},
-            url           => $msg->{url},
-            locationinfor => $msg->{locationinfor},
-            status        => $msg->{status},
-        },
-    };
-    return $valid_msg->{$table_name};
 }
 
 =head2 get_msg_validator
