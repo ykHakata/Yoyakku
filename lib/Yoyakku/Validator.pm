@@ -113,6 +113,12 @@ sub storeinfo {
     return $valid_msg;
 }
 
+=head2 roominfo
+
+    バリデート処理(roominfo)
+
+=cut
+
 sub roominfo {
     my $self   = shift;
     my $params = shift;
