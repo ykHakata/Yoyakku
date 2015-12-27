@@ -88,7 +88,7 @@
 <td class="col3">
 <select name="starttime_on">
 % for my $i (6..29) {
-<option value="<%= $i %>"><%= $i %>:00</option>
+<option value="<%= $i %>:00:00"><%= $i %>:00</option>
 % }
 </select>
 </td>
@@ -96,7 +96,7 @@
 <td class="col4">
 <select name="endingtime_on">
 % for my $i (7..30) {
-<option value="<%= $i %>"><%= $i %>:00</option>
+<option value="<%= $i %>:00:00"><%= $i %>:00</option>
 % }
 </select>
 </td>
