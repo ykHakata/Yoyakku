@@ -78,7 +78,7 @@ sub _common {
     my $self  = shift;
     my $model = shift;
 
-    my $valid_msg = $model->check_roominfo_validator();
+    my $valid_msg = $model->check_validator( 'roominfo', $model->params() );
 
     return $self->stash($valid_msg), $self->_render_roominfo($model)
         if $valid_msg;
