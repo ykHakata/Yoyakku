@@ -47,7 +47,7 @@ __PACKAGE__->mk_accessors(
 sub check_validator {
     my $self      = shift;
     my $table     = shift;
-    my $params    = $self->params();
+    my $params    = shift || $self->params();
     my $validator = Yoyakku::Validator->new();
     my $msg       = $validator->$table($params);
     return $msg;

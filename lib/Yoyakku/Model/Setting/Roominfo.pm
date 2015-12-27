@@ -92,6 +92,31 @@ sub set_roominfo_params {
     return;
 }
 
+=head2 get_check_params_list
+
+    roominfo バリデート用パラメータリスト作成
+
+=cut
+
+sub get_check_params_list {
+    my $self = shift;
+
+    my $check_params = [];
+
+    my @keys  = keys $self->params();
+    my $count = scalar @{ $self->params()->{ $keys[0] } };
+    $count -= 1;
+    for my $i ( 0 .. $count ) {
+        my $param_hash = +{};
+        for my $key (@keys) {
+            $param_hash->{$key} = $self->params()->{$key}->[$i];
+        }
+        push @{$check_params}, $param_hash;
+    }
+
+    return $check_params;
+}
+
 1;
 
 __END__

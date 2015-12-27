@@ -65,7 +65,7 @@ sub admin_reserv_edit {
     }
     my $params = $model->params();
     return $self->_cancel($model) if $params->{cancel};
-    return;
+    return $self->_update($model);
 }
 
 sub _cancel {
@@ -73,6 +73,21 @@ sub _cancel {
     my $model = shift;
     $model->get_login_roominfo_ids();
     return $self->_render_fill_in_form($model);
+}
+
+sub _update {
+    my $self  = shift;
+    my $model = shift;
+
+    my $check_params = $model->get_check_params_list();
+
+    for my $check_param ( @{$check_params} ) {
+        my $valid_msg = $model->check_validator( 'roominfo', $check_param );
+        return $self->stash($valid_msg), $self->_render_fill_in_form($model)
+            if $valid_msg;
+    }
+
+    return $self->redirect_to('up_admin_r_d_edit');
 }
 
 sub _render_fill_in_form {
@@ -125,209 +140,11 @@ my $self = shift;
 my $class = "admin_reserv_edit";
 $self->stash(class => $class);
 
-##----------
-#手順を考えてみる
-#管理者ログインidを取得
-##ログインidからstoreinfoのテーブルより該当テーブル抽出
-my @storeinfo = $teng->single('storeinfo', {'admin_id' => $login_id });
-my $storeinfo_id;
-for my $storeinfo (@storeinfo) {# id検索、sql実行店舗id取得
-    $storeinfo_id = $storeinfo->id ;
-}
-#店舗idから部屋idを１０件取得(管理者承認が終わった時点でデータできてる)
-my @rows = $teng->search('roominfo', {'storeinfo_id' => $storeinfo_id },{order_by => 'id'});
-#$self->stash(rows_ref => \@rows);
-#sqlで該当roominfoをid若い順に取り出し、
-    my (@id,@storeinfo_id,@name,@starttime_on,@endingtime_on,@time_change,@rentalunit,
-        @pricescomments,@privatepermit,@privatepeople,@privateconditions,
-        @bookinglimit,@cancellimit,@remarks,@webpublishing,@webreserve,@status,
-        @create_on,@modify_on,);
-#my @pricescomments;
-        foreach my $row (@rows) {
-            push (@id                , $row->id);
-#            push (@storeinfo_id      , $row->storeinfo_id);
-            push (@name              , $row->name);
-            my $starttime_on = $row->starttime_on;
-            #開始、終了時刻はデータを調整する00->24表示にする
-            if ($starttime_on) {
-                $starttime_on = substr($starttime_on,0,2);
-                $starttime_on += 0;
-                if ($starttime_on =~ /^[0-5]$/) {
-                    $starttime_on += 24;
-                }
-            }
-            push (@starttime_on      , $starttime_on);
-
-            my $endingtime_on = $row->endingtime_on;
-            if ($endingtime_on) {
-                $endingtime_on = substr($endingtime_on,0,2);
-                $endingtime_on += 0;
-                if ($endingtime_on =~ /^[0-6]$/) {
-                    $endingtime_on += 24;
-                }
-            }
-            push (@endingtime_on     , $endingtime_on);
-            push (@time_change       , $row->time_change);
-            push (@rentalunit        , $row->rentalunit);
-            push (@pricescomments    , $row->pricescomments);
-            push (@privatepermit     , $row->privatepermit);
-            push (@privatepeople     , $row->privatepeople);
-            push (@privateconditions , $row->privateconditions);
-            push (@bookinglimit      , $row->bookinglimit);
-            push (@cancellimit       , $row->cancellimit);
-            push (@remarks           , $row->remarks);
-#            push (@webpublishing     , $row->webpublishing);
-#            push (@webreserve        , $row->webreserve);
-#            push (@status            , $row->status);
-#            push (@create_on         , $row->create_on);
-#            push (@modify_on         , $row->modify_on);
-        }
 
 
-#    #修正用フォーム、Fillinつかって表示 値はsqlより該当idのデータをつかう
-    my $html = $self->render_partial()->to_string;
-    $html = HTML::FillInForm->fill(
-        \$html,{
-            id                => \@id,
-#            storeinfo_id      => \@storeinfo_id,
-            name              => \@name,
-            starttime_on      => \@starttime_on,
-            endingtime_on     => \@endingtime_on,
-            time_change       => \@time_change,
-            rentalunit        => \@rentalunit,
-            pricescomments    => \@pricescomments,
-            privatepermit     => \@privatepermit,
-            privatepeople     => \@privatepeople,
-            privateconditions => \@privateconditions,
-            bookinglimit      => \@bookinglimit,
-            cancellimit       => \@cancellimit,
-            remarks           => \@remarks,
-#            webpublishing     => \@webpublishing,
-#            webreserve        => \@webreserve,
-#            status            => \@status,
-#            create_on         => \@create_on,
-#            modify_on         => \@modify_on
-        },
-    );
 
-# バリデート、sqlへ入力、次の画面遷移までの手順を考えてみる
-# post判定,getの場合、fillinでrender
 if (uc $self->req->method eq 'POST') {
     #submitボタン判定、キャンセルの時は空の値、完了の時バリデート
-    my $cancel = $self->param('cancel');
-    #キャンセルボタンの場合
-    if ($cancel) {
-        #値をすべて空にする(idだけは残す)
-        my @id = $self->param('id');
-        my @name                  ;
-        my @starttime_on          ;
-        my @endingtime_on         ;
-        my @time_change           ;
-        my @rentalunit            ;
-        my @pricescomments        ;
-        my @privatepermit         ;
-        my @privatepeople         ;
-        my @privateconditions     ;
-        my @bookinglimit          ;
-        my @cancellimit           ;
-        my @remarks               ;
-        #修正用フォーム、Fillinつかって表示 値はsql空を送る
-        my $html = $self->render_partial()->to_string;
-        $html = HTML::FillInForm->fill(
-            \$html,{
-                id                => \@id                ,
-                name              => \@name              ,
-                starttime_on      => \@starttime_on      ,
-                endingtime_on     => \@endingtime_on     ,
-                time_change       => \@time_change       ,
-                rentalunit        => \@rentalunit        ,
-                pricescomments    => \@pricescomments    ,
-                privatepermit     => \@privatepermit     ,
-                privatepeople     => \@privatepeople     ,
-                privateconditions => \@privateconditions ,
-                bookinglimit      => \@bookinglimit      ,
-                cancellimit       => \@cancellimit       ,
-                remarks           => \@remarks           ,
-            },
-        );
-        #Fillin画面表示実行returnなのでここでおしまい。
-        return $self->render_text($html, format => 'html');
-    }
-    #完了ボタンの場合バリデーション実行
-    else {
-    #完了の場合バリデート実行
-    my $validator = $self->create_validator;# バリデーション()
-
-    $validator->field('name'          )->required(1)->callback(sub {
-        my $value = shift;
-        my @name = $self->param('name');
-
-        for my $name (@name) {
-            return (0, '空白文字は不可') if ( $name =~ m{ \s }xm   );
-            return (0, '２文字まで'    ) if ( $name =~ m/.{3,}?/xm );
-        }
-        return 1 ;
-    });
-
-
-    #営業時間バリデート
-    $validator->field('endingtime_on' )->callback(sub {
-        my $value = shift;
-        my @id            = $self->param('id');
-        my @starttime_on  = $self->param('starttime_on');
-        my @endingtime_on = $self->param('endingtime_on');
-
-        for my $id (@id) {
-            my $judg_starttime   = shift @starttime_on ;
-            my $judg_endingtime  = shift @endingtime_on;
-            if ($judg_starttime >= $judg_endingtime) {
-                return (0, '開始時刻より遅くしてください');
-            }
-        }
-        return 1 ;
-    });
-    #貸出単位のバリデート
-    $validator->field('rentalunit'    )->callback(sub {
-        my $value = shift;
-
-        my @id            = $self->param('id');
-        my @starttime_on  = $self->param('starttime_on');
-        my @endingtime_on = $self->param('endingtime_on');
-        my @rentalunit    = $self->param('rentalunit');
-
-        for my $id (@id) {
-            my $judg_starttime   = shift @starttime_on ;
-            my $judg_endingtime  = shift @endingtime_on;
-            my $judg_rentalunit  = shift @rentalunit;
-
-            my $opening_hours      = $judg_endingtime - $judg_starttime;
-            my $judg_opening_hours = $opening_hours % $judg_rentalunit;
-
-            if ( $judg_opening_hours ) {
-                return (0, '営業時間が割り切れません');
-            die "hoge";
-            }
-        }
-        return 1 ;
-    });
-
-    $validator->field('pricescomments')->required(1)->callback(sub {
-        my $value = shift;
-        my @id             = $self->param('id');
-        my @pricescomments = $self->param('pricescomments');
-
-        for my $id (1..4) {
-            my $judg_pricescomments = shift @pricescomments ;
-            return (0, '２０文字まで')
-                if ( $judg_pricescomments =~ m/.{21,}?/xm );
-        }
-        return 1 ;
-    });
-
-    #mojoのコマンドでパラメーターをハッシュで取得入力した値をFIllin時に使うため、
-    my $param_hash = $self->req->params->to_hash;
-    $self->stash(param_hash => $param_hash);
-
 
     #入力検査合格、の時、修正アップロード実行
     if ( $self->validate($validator,$param_hash) ) {
