@@ -47,6 +47,17 @@ sub get_init_valid_params_admin_reserv_edit {
         [qw{name endingtime_on rentalunit pricescomments}] );
 }
 
+=head2 get_init_valid_params_up_admin_r_d_edit
+
+    バリデート用パラメータ初期値(up_admin_r_d_edit)
+
+=cut
+
+sub get_init_valid_params_up_admin_r_d_edit {
+    my $self = shift;
+    return $self->get_init_valid_params( [qw{remarks}] );
+}
+
 =head2 set_roominfo_params
 
     予約情報設定のためのパラメーター取得
@@ -59,40 +70,27 @@ sub set_roominfo_params {
 
     my $roominfo_ref = +{};
     for my $row ( @{$rows} ) {
-        my $params  = +{};
-        my $split_t = chenge_time_over(
+        my $row_hash = $row->get_columns();
+        my $split_t  = chenge_time_over(
             +{  start_time => $row->starttime_on,
                 end_time   => $row->endingtime_on,
             },
         );
-        ( $params->{starttime_on}, $params->{endingtime_on}, )
+        ( $row_hash->{starttime_on}, $row_hash->{endingtime_on}, )
             = join_time( $split_t, 'none' );
 
-        push @{ $roominfo_ref->{id} },             $row->id;
-        push @{ $roominfo_ref->{name} },           $row->name;
-        push @{ $roominfo_ref->{starttime_on} },   $params->{starttime_on};
-        push @{ $roominfo_ref->{endingtime_on} },  $params->{endingtime_on};
-        push @{ $roominfo_ref->{time_change} },    $row->time_change;
-        push @{ $roominfo_ref->{rentalunit} },     $row->rentalunit;
-        push @{ $roominfo_ref->{pricescomments} }, $row->pricescomments;
-        push @{ $roominfo_ref->{privatepermit} },  $row->privatepermit;
-        push @{ $roominfo_ref->{privatepeople} },  $row->privatepeople;
-        push @{ $roominfo_ref->{privateconditions} }, $row->privateconditions;
+        while ( my ( $key, $value ) = each %{$row_hash} ) {
+            push @{ $roominfo_ref->{$key} }, $value;
+        }
     }
 
-    $self->params(
-        +{  id                => $roominfo_ref->{id},
-            name              => $roominfo_ref->{name},
-            starttime_on      => $roominfo_ref->{starttime_on},
-            endingtime_on     => $roominfo_ref->{endingtime_on},
-            time_change       => $roominfo_ref->{time_change},
-            rentalunit        => $roominfo_ref->{rentalunit},
-            pricescomments    => $roominfo_ref->{pricescomments},
-            privatepermit     => $roominfo_ref->{privatepermit},
-            privatepeople     => $roominfo_ref->{privatepeople},
-            privateconditions => $roominfo_ref->{privateconditions},
-        },
-    );
+    my @keys = keys %{$roominfo_ref};
+
+    my $params = +{};
+    for my $key (@keys) {
+        $params->{$key} = $roominfo_ref->{$key};
+    }
+    $self->params($params);
     return;
 }
 
@@ -107,7 +105,7 @@ sub get_check_params_list {
 
     my $check_params = [];
 
-    my @keys  = keys $self->params();
+    my @keys  = keys %{ $self->params() };
     my $count = scalar @{ $self->params()->{ $keys[0] } };
     $count -= 1;
     for my $i ( 0 .. $count ) {

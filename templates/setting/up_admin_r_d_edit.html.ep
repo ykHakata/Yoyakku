@@ -1,0 +1,116 @@
+% layout 'default';
+% title 'yoyakku管理モード';
+
+<div id="wrapper">
+
+<%= include './temp/header_navi_new' %>
+
+<%= include './temp/admin_navi' %>
+
+<div id="contents">
+<div id="bgTop">
+<ul class="topicpath">
+<li id="tpp1">スタート&nbsp;-&gt;</li>
+<li id="tpp2"><a href="admin_store_comp">店舗情報&nbsp;-&gt;</a></li>
+<li id="tpp3">予約情報設定&nbsp;-&gt;</li>
+<li id="tpp4"></li>
+<li id="tpp5"></li>
+</ul>
+</div>
+
+<div id="contensNavi">
+
+<div id="reserv_out">
+
+<form method="post" action="">
+
+<table id="botton_t">
+<tr>
+<td id="botton_l">
+<input type="submit" name="cancel" value="戻る">
+</td>
+<td id="botton_r">
+<input type="submit" name="" value="完了">
+</td>
+<td id="com_r">
+</td>
+</tr>
+</table>
+
+<table id="reserv_t_Detail">
+<tr id="name_1">
+<th colspan="2" class="col1_2">
+名前
+</th>
+
+<th colspan="2" class="col3_4">
+制限
+</th>
+
+<th class="col5">
+備考
+</th>
+
+</tr>
+
+<tr id="name_2">
+<th colspan="2" class="col1_2">部屋</th>
+<th class="col3">予約制限</th>
+<th class="col4">キャンセル</th>
+<th class="col5">
+<div class="vali"><%= $remarks %></div>
+</th>
+</tr>
+
+% for my $i (1..10) {
+<tr id="s_<%= $i %>">
+<td class="col1">
+<input type="hidden" name="id" value="">
+<%= $i %>
+</td>
+
+<td class="col2">
+<input  id="name_Detail" type="text" name="name" value="" readonly>
+</td>
+
+<td class="col3">
+<select name="bookinglimit" id="booking_Detail">
+<option value="0">制限なし</option>
+<option value="1">１時間前</option>
+<option value="2">２時間前</option>
+<option value="3">３時間前</option>
+</select>
+</td>
+
+<td class="col4">
+<select name="cancellimit" id="cancel_Detail">
+<option value="0">当日不可</option>
+<option value="1">１日前不可</option>
+<option value="2">２日前不可</option>
+<option value="3">３日前不可</option>
+<option value="4">４日前不可</option>
+<option value="5">５日前不可</option>
+<option value="6">６日前不可</option>
+<option value="7">７日前不可</option>
+<option value="8">制限なし</option>
+</select>
+</td>
+
+<td class="col5">
+<input type="text" id="reserv_t_Detail_rem" name="remarks" value="">
+</td>
+
+</tr>
+% }
+
+</table>
+
+</div>
+
+<!-- /#contensNavi --></div>
+<!-- /#contents --></div>
+
+<%= include './temp/footer' %>
+
+<!-- /#wrapper --></div>
+

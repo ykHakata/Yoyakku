@@ -240,6 +240,10 @@ sub _check_rentalunit {
     my $endingtime_on = $params->{endingtime_on};
     my $rentalunit    = $params->{rentalunit};
 
+    return if !$starttime_on;
+    return if !$endingtime_on;
+    return if !$rentalunit;
+
     # 貸出単位のバリデート
     my $opening_hours = $endingtime_on - $starttime_on;
 

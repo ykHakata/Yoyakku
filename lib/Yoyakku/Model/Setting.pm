@@ -54,6 +54,7 @@ sub get_switch_com {
         = $action eq 'admin_store_edit'  ? 1
         : $action eq 'admin_store_comp'  ? 2
         : $action eq 'admin_reserv_edit' ? 3
+        : $action eq 'up_admin_r_d_edit' ? 4
         :                                  1;
 
     return $switch_com;

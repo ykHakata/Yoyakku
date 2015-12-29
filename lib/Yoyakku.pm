@@ -161,6 +161,10 @@ sub startup {
     $r->route('/admin_reserv_edit')
         ->to( controller => 'Setting::Roominfo', action => 'admin_reserv_edit' );
 
+    # 店舗管理(Setting) 予約部屋詳細設定
+    $r->route('/up_admin_r_d_edit')
+        ->to( controller => 'Setting::Roominfo', action => 'up_admin_r_d_edit' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 
