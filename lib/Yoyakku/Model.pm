@@ -12,6 +12,7 @@ use Email::MIME;
 use Email::Sender::Transport::SMTPS;
 use Try::Tiny;
 use HTML::FillInForm;
+use FindBin;
 use Yoyakku::Util qw{now_datetime switch_header_params};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::Validator;
@@ -477,10 +478,10 @@ sub check_auth_db_yoyakku {
 =cut
 
 sub teng {
-    my $self = shift;
-
-    my $dbh = DBI->connect(
-        'dbi:SQLite:./db/yoyakku.db',
+    my $self    = shift;
+    my $db_path = $FindBin::Bin . '/../../db/yoyakku.db';
+    my $dbh     = DBI->connect(
+        'dbi:SQLite:' . $db_path,
         '', '',
         +{  RaiseError        => 1,
             PrintError        => 0,

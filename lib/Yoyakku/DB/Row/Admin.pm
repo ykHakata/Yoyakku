@@ -6,6 +6,11 @@ sub fetch_profile {
     return $self->handle->single( 'profile', +{ admin_id => $self->id }, );
 }
 
+sub fetch_storeinfo {
+    my $self = shift;
+    return $self->handle->single( 'storeinfo', +{ admin_id => $self->id }, );
+}
+
 1;
 
 __END__
