@@ -8,6 +8,9 @@ sub startup {
   # Documentation browser under "/perldoc"
   $self->plugin('PODRenderer');
 
+  # コマンドをロードするための他の名前空間
+  push @{ $self->commands->namespaces }, 'Yoyakku::Command';
+
   # Router
   my $r = $self->routes;
 
