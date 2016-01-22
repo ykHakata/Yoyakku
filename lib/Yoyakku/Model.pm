@@ -492,7 +492,7 @@ sub teng {
 
     my $teng = Teng::Schema::Loader->load(
         dbh       => $dbh,
-        namespace => 'yoyakku_table',
+        namespace => 'Yoyakku::DB',
     );
 
     return $teng;
