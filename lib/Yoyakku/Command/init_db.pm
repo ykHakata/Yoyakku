@@ -1,6 +1,8 @@
 package Yoyakku::Command::init_db;
 use Mojo::Base 'Mojolicious::Command';
 use File::Basename;
+use DBI;
+use FindBin;
 
 binmode STDOUT, ':encoding(UTF-8)';
 binmode STDIN,  ':encoding(UTF-8)';
@@ -21,6 +23,18 @@ END_USAGE
 
 sub run {
     my ( $self, @args ) = @_;
+
+    my $db_path = $FindBin::Bin . '/../db/yoyakku.db';
+    my $db      = DBI->connect(
+        'dbi:SQLite:' . $db_path,
+        '', '',
+        +{  RaiseError     => 1,
+            PrintError     => 0,
+            AutoCommit     => 1,
+            sqlite_unicode => 1,
+        },
+    );
+
     return;
 }
 
