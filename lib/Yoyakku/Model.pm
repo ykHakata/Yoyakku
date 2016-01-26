@@ -418,11 +418,10 @@ sub check_auth_db {
 
 sub check_auth_db_yoyakku {
     my $self = shift;
-    my $args = shift;
 
-    my $teng       = $args->{teng};
-    my $admin_id   = $args->{admin_id};
-    my $general_id = $args->{general_id};
+    my $teng       = $self->teng();
+    my $admin_id   = $self->session->{session_admin_id};
+    my $general_id = $self->session->{session_general_id};
 
     return if !$admin_id && !$general_id;
 

@@ -23,15 +23,21 @@ use Yoyakku::Util qw{get_fill_in_params};
 
 sub check_login {
     my $self = shift;
-    my $args = shift;
-    return 1 if $args->{session_admin_id} || $args->{session_general_id};
+
+    return 1
+        if $self->session->{session_general_id}
+        || $self->session->{session_admin_id};
+
     return;
 }
 
 sub check_logout {
     my $self = shift;
-    my $args = shift;
-    return 1 if !$args->{session_admin_id} && !$args->{session_general_id};
+
+    return 1
+        if !$self->session->{session_general_id}
+        && !$self->session->{session_admin_id};
+
     return;
 }
 
@@ -146,8 +152,9 @@ sub get_session_id_with_routing {
 
 sub get_fill_in_auth {
     my $self   = shift;
-    my $args   = shift;
-    my $output = get_fill_in_params( $args->{html}, $args->{params} );
+    my $html   = $self->html();
+    my $params = $self->params();
+    my $output = get_fill_in_params( $html, $params );
     return $output;
 }
 

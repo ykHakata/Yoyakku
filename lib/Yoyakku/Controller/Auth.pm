@@ -20,7 +20,7 @@ use Yoyakku::Model::Auth;
 
 sub _init {
     my $self  = shift;
-    my $model = $self->model_auth();
+    my $model = Yoyakku::Model::Auth->new();
     $model->params( $self->req->params->to_hash );
     $model->method( uc $self->req->method );
     $model->session( $self->session );
@@ -42,13 +42,9 @@ sub _init {
 =cut
 
 sub up_login {
-    my $self = shift;
-    my $args = +{
-        session_admin_id   => $self->session('session_admin_id'),
-        session_general_id => $self->session('session_general_id'),
-    };
-    return $self->redirect_to('/index')
-        if $self->model_auth->check_login($args);
+    my $self  = shift;
+    my $model = $self->_init();
+    return $self->redirect_to('/index') if $model->check_login();
     $self->stash( class => 'up_login' );
     return $self->render( template => 'auth/up_login', format => 'html' );
 }
@@ -71,12 +67,8 @@ sub up_login {
 
 sub up_logout {
     my $self = shift;
-    my $args = +{
-        session_admin_id   => $self->session('session_admin_id'),
-        session_general_id => $self->session('session_general_id'),
-    };
-    return $self->redirect_to('/index')
-        if $self->model_auth->check_logout($args);
+    my $model = $self->_init();
+    return $self->redirect_to('/index') if $model->check_logout();
     $self->stash( class => 'up_logout' );
     $self->session( expires => 1 );
     return $self->render( template => 'auth/up_logout', format => 'html' );
@@ -222,26 +214,22 @@ sub up_login_admin {
 
 sub root_login {
     my $self  = shift;
-    my $model = $self->model_auth();
+    my $model = $self->_init();
 
-    $model->params( $self->req->params->to_hash );
-
-    $self->stash( template => 'auth/root_login' );
+    $model->template('auth/root_login');
 
     return $self->redirect_to('/up_login')
-        if ( uc $self->req->method ne 'GET' )
-        && ( uc $self->req->method ne 'POST' );
+        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
 
-    my $init_valid_params_auth
-        = $self->model_auth->get_init_valid_params_auth();
+    my $init_valid_params_auth = $model->get_init_valid_params_auth();
 
     $self->stash(
         class => 'root_login',
         %{$init_valid_params_auth},
     );
 
-    return $self->render( format => 'html' )
-        if 'GET' eq uc $self->req->method;
+    return $self->render( template => $model->template(), format => 'html' )
+        if 'GET' eq $model->method();
 
     return $self->_render_input_form( $model, 'root', );
 }
@@ -256,7 +244,7 @@ sub _render_input_form {
 
         my $valid_root_msg = $model->check_root_validator();
 
-        return $self->stash($valid_root_msg), $self->_render_auth()
+        return $self->stash($valid_root_msg), $self->_render_auth($model)
             if $valid_root_msg;
 
         # 合格の場合指定の画面へ遷移 (mainte_list) セッション書き込み
@@ -266,12 +254,12 @@ sub _render_input_form {
 
     my $valid_msg = $model->check_auth_validator();
 
-    return $self->stash($valid_msg), $self->_render_auth()
+    return $self->stash($valid_msg), $self->_render_auth($model)
         if $valid_msg;
 
     my $valid_msg_db = $model->check_auth_validator_db($table);
 
-    return $self->stash($valid_msg_db), $self->_render_auth()
+    return $self->stash($valid_msg_db), $self->_render_auth($model)
         if $valid_msg_db;
 
     my $session_id_with_routing = $model->get_session_id_with_routing($table);
@@ -285,15 +273,16 @@ sub _render_input_form {
 }
 
 sub _render_auth {
-    my $self = shift;
-    my $html = $self->render_to_string( format => 'html', )->to_string;
+    my $self  = shift;
+    my $model = shift;
 
-    my $args = +{
-        html   => \$html,
-        params => $self->req->params->to_hash,
-    };
+    my $html = $self->render_to_string(
+        template => $model->template(),
+        format   => 'html',
+    )->to_string;
 
-    my $output = $self->model_auth->get_fill_in_auth($args);
+    $model->html( \$html );
+    my $output = $model->get_fill_in_auth();
     return $self->render( text => $output );
 }
 
