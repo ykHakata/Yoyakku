@@ -20,11 +20,15 @@ use Yoyakku::Model::Calendar;
 
 sub _init {
     my $self  = shift;
-    my $model = Yoyakku::Model::Calendar->new();
+    my $model = $self->model_calendar();
     $model->params( $self->req->params->to_hash );
     $model->method( uc $self->req->method );
-    $model->session( $self->session );
-    $model->check_auth_db_yoyakku();
+    my $args = +{
+        teng       => $model->teng(),
+        admin_id   => $self->session('session_admin_id'),
+        general_id => $self->session('session_general_id'),
+    };
+    $model->check_auth_db_yoyakku($args);
     my $header_stash = $model->get_header_stash_index();
     $self->stash($header_stash);
     return $model;

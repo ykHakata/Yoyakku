@@ -8,6 +8,12 @@ sub startup {
   # Documentation browser under "/perldoc"
   $self->plugin('PODRenderer');
 
+  $self->helper( model_calendar =>
+          sub { state $model_calendar = Yoyakku::Model::Calendar->new() } );
+
+  $self->helper( model_auth =>
+          sub { state $model_auth = Yoyakku::Model::Auth->new() } );
+
   # コマンドをロードするための他の名前空間
   push @{ $self->commands->namespaces }, 'Yoyakku::Command';
 
