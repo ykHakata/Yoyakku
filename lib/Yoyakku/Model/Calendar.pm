@@ -86,8 +86,6 @@ sub get_header_stash_index {
     my $login_row  = $self->login_row();
     my $login_name = $self->login_name();
 
-    return if $login_row && !$login_row->status;
-
     my $switch_header = 2;
 
     return $self->get_header_stash_params( $switch_header, $login_name )

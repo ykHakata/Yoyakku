@@ -138,7 +138,7 @@ sub get_session_id_with_routing {
     my $profile_row = $self->profile_row();
 
     my $redirect_to = 'profile';
-    if ( $profile_row && $profile_row->status ) {
+    if ( $profile_row && $profile_row->status && $self->login_row->status) {
         $redirect_to = 'index';
     }
 
