@@ -28,11 +28,12 @@ use Yoyakku::Util qw{get_fill_in_params chenge_time_over join_time};
 =cut
 
 sub get_login_roominfo_ids {
-    my $self = shift;
-    my $rows = $self->login_roominfo_rows();
-    my $ids  = [ map { $_->id } @{$rows} ];
-    $self->params( +{ id => $ids }, );
-    return $ids;
+    my $self      = shift;
+    my $login_row = shift;
+
+    my $rows = $login_row->fetch_storeinfo->fetch_roominfos;
+    my $ids = [ map { $_->id } @{$rows} ];
+    return +{ id => $ids };
 }
 
 =head2 get_init_valid_params_admin_reserv_edit

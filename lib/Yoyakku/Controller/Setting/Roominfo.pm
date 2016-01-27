@@ -51,13 +51,18 @@ sub admin_reserv_edit {
         = $model->get_init_valid_params_admin_reserv_edit();
 
     my $switch_com = $model->get_switch_com('admin_reserv_edit');
+
+    # ログイン id から row オブジェクト
+    my $args = $self->session;
+    $self->stash->{login_row} = $model->get_login_row($args);
+
     $self->stash(
         class      => 'admin_reserv_edit',
         switch_com => $switch_com,
         %{$init_valid_params_admin_reserv_edit},
     );
 
-    $model->template('setting/admin_reserv_edit');
+    $self->stash->{template} = 'setting/admin_reserv_edit';
 
     if ( 'GET' eq $model->method() ) {
         $model->set_roominfo_params();
@@ -94,7 +99,7 @@ sub up_admin_r_d_edit {
         %{$get_init_valid_params_up_admin_r_d_edit},
     );
 
-    $model->template('setting/up_admin_r_d_edit');
+    $self->stash->{template} = 'setting/admin_reserv_edit';
 
     if ( 'GET' eq $model->method() ) {
         $model->set_roominfo_params();
@@ -107,7 +112,8 @@ sub up_admin_r_d_edit {
 sub _cancel {
     my $self  = shift;
     my $model = shift;
-    $model->get_login_roominfo_ids();
+    $self->stash->{params}
+        = $model->get_login_roominfo_ids( $self->stash->{login_row} );
     return $self->_render_fill_in_form($model);
 }
 
@@ -136,13 +142,14 @@ sub _render_fill_in_form {
     my $self  = shift;
     my $model = shift;
 
-    my $html = $self->render_to_string(
-        template => $model->template(),
-        format   => 'html',
-    )->to_string;
+    my $html = $self->render_to_string( format => 'html', )->to_string;
 
-    $model->html( \$html );
-    my $output = $model->set_fill_in_params();
+    my $args = +{
+        html   => \$html,
+        params => $self->stash->{params},
+    };
+
+    my $output = $model->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

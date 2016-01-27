@@ -62,7 +62,12 @@ sub check_validator {
 
 sub set_fill_in_params {
     my $self = shift;
-    return HTML::FillInForm->fill( $self->html(), $self->params() );
+    my $args = shift;
+
+    my $html   = $args->{html}   || $self->html();
+    my $params = $args->{params} || $self->params();
+
+    return HTML::FillInForm->fill( $html, $params );
 }
 
 =head2 get_calender_caps
@@ -408,6 +413,35 @@ sub check_auth_db {
     return if !$session || !$session_type;
     return $session if $session eq 'yoyakku' && $session_type eq 'mainte';
     return;
+}
+
+=head2 get_login_row
+
+    ログイン検証 login_row 取得 (yoyakku サイト)
+
+=cut
+
+sub get_login_row {
+    my $self = shift;
+    my $args = shift;
+
+    my $teng       = $self->teng();
+    my $admin_id   = $args->{session_admin_id};
+    my $general_id = $args->{session_general_id};
+
+    return if !$admin_id && !$general_id;
+
+    my $table = 'admin';
+    my $id    = $admin_id;
+
+    if ($general_id) {
+        $table = 'general';
+        $id    = $general_id;
+    }
+
+    my $login_row = $teng->single( $table, +{ id => $id } );
+    return if !$login_row;
+    return $login_row;
 }
 
 =head2 check_auth_db_yoyakku

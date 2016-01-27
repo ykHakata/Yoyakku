@@ -5,6 +5,13 @@ use Mojo::Base 'Mojolicious';
 sub startup {
   my $self = shift;
 
+  $self->helper(
+      model_setting_roominfo => sub {
+          state $model_setting_roominfo
+              = Yoyakku::Model::Setting::Roominfo->new();
+      }
+  );
+
   # Documentation browser under "/perldoc"
   $self->plugin('PODRenderer');
 
