@@ -2,6 +2,9 @@ package Yoyakku::Controller::Setting::Roominfo;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Setting::Roominfo;
 
+has( model_setting_roominfo =>
+        sub { Yoyakku::Model::Setting::Roominfo->new(); } );
+
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -20,7 +23,7 @@ use Yoyakku::Model::Setting::Roominfo;
 
 sub _init {
     my $self  = shift;
-    my $model = Yoyakku::Model::Setting::Roominfo->new();
+    my $model = $self->model_setting_roominfo;
     $model->params( $self->req->params->to_hash );
     $model->method( uc $self->req->method );
     $model->session( $self->session );
@@ -41,20 +44,38 @@ sub _init {
 sub admin_reserv_edit {
     my $self = shift;
 
-    my $model = $self->_init();
-    return $self->redirect_to($model) if $model eq 'index';
-    return $self->redirect_to($model) if $model eq 'profile';
     return $self->redirect_to('index')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+        if ( uc $self->req->method ne 'GET' )
+        && ( uc $self->req->method ne 'POST' );
+
+    my $model = $self->model_setting_roominfo;
+
+    $model->params( $self->req->params->to_hash );
+    $model->session( $self->session );
+    $model->check_auth_db_yoyakku();
+
+    # ログイン id から row オブジェクト
+    my $args = $self->session;
+    $self->stash->{login_row} = $model->get_login_row($args);
+
+    my $redirect_mode
+        = $model->get_redirect_mode( $self->stash->{login_row} );
+
+    return $self->redirect_to('index')
+        if $redirect_mode && $redirect_mode eq 'index';
+
+    return $self->redirect_to('profile')
+        if $redirect_mode && $redirect_mode eq 'profile';
+
+    my $header_stash
+        = $model->get_setting_header_stash( $self->stash->{login_row} );
+
+    $self->stash($header_stash);
 
     my $init_valid_params_admin_reserv_edit
         = $model->get_init_valid_params_admin_reserv_edit();
 
     my $switch_com = $model->get_switch_com('admin_reserv_edit');
-
-    # ログイン id から row オブジェクト
-    my $args = $self->session;
-    $self->stash->{login_row} = $model->get_login_row($args);
 
     $self->stash(
         class      => 'admin_reserv_edit',
@@ -64,7 +85,7 @@ sub admin_reserv_edit {
 
     $self->stash->{template} = 'setting/admin_reserv_edit';
 
-    if ( 'GET' eq $model->method() ) {
+    if ( 'GET' eq uc $self->req->method ) {
         $model->set_roominfo_params();
         return $self->_render_fill_in_form($model);
     }

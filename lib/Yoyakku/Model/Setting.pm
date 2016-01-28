@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{get_fill_in_params chenge_time_over};
+use Scalar::Util qw{blessed};
 
 =encoding utf8
 
@@ -20,6 +21,54 @@ use Yoyakku::Util qw{get_fill_in_params chenge_time_over};
     Admin コントローラーのロジック API
 
 =cut
+
+=head2 get_redirect_mode
+
+    ログイン情報からリダイレクト先を取得 (店舗情報設定)
+
+=cut
+
+sub get_redirect_mode {
+    my $self      = shift;
+    my $login_row = shift;
+
+    return 'index' if !$login_row;
+
+    my @names = split '::', blessed($login_row);
+    my $table = lc pop @names;
+
+    return 'index'   if !$table;
+    return 'index'   if $table ne 'admin';
+    return 'profile' if !$login_row->status;
+    return;
+}
+
+=head2 get_setting_mode_header_stash
+
+    ヘッダー初期値取得 (店舗情報設定)
+
+=cut
+
+sub get_setting_header_stash {
+    my $self      = shift;
+    my $login_row = shift;
+
+    my $login_name
+        = $login_row->fetch_profile
+        ? $login_row->fetch_profile->nick_name
+        : undef;
+
+    my @names = split '::', blessed($login_row);
+    my $table = lc pop @names;
+
+    if ( $table eq 'admin' ) {
+        $login_name = q{(admin)} . $login_name;
+    }
+
+    my $switch_header = $login_row->fetch_storeinfo->status eq 0 ? 10 : 7;
+
+    return $self->get_header_stash_params( $switch_header, $login_name );
+}
 
 =head2 get_header_stash_admin
 
