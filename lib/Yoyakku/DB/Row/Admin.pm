@@ -11,6 +11,11 @@ sub fetch_storeinfo {
     return $self->handle->single( 'storeinfo', +{ admin_id => $self->id }, );
 }
 
+sub get_table_name {
+    my $self = shift;
+    return 'admin';
+}
+
 1;
 
 __END__

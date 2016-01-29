@@ -4,7 +4,6 @@ use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
 use Yoyakku::Util qw{get_fill_in_params chenge_time_over};
-use Scalar::Util qw{blessed};
 
 =encoding utf8
 
@@ -34,8 +33,7 @@ sub get_redirect_mode {
 
     return 'index' if !$login_row;
 
-    my @names = split '::', blessed($login_row);
-    my $table = lc pop @names;
+    my $table = $login_row->get_table_name;
 
     return 'index'   if !$table;
     return 'index'   if $table ne 'admin';
@@ -58,8 +56,7 @@ sub get_setting_header_stash {
         ? $login_row->fetch_profile->nick_name
         : undef;
 
-    my @names = split '::', blessed($login_row);
-    my $table = lc pop @names;
+    my $table = $login_row->get_table_name;
 
     if ( $table eq 'admin' ) {
         $login_name = q{(admin)} . $login_name;

@@ -13,6 +13,11 @@ sub fetch_actings {
     return \@actings;
 }
 
+sub get_table_name {
+    my $self = shift;
+    return 'general';
+}
+
 1;
 
 __END__
