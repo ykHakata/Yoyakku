@@ -66,8 +66,10 @@ sub get_init_valid_params_up_admin_r_d_edit {
 =cut
 
 sub set_roominfo_params {
-    my $self = shift;
-    my $rows = $self->login_roominfo_rows();
+    my $self      = shift;
+    my $login_row = shift;
+
+    my $rows = $login_row->fetch_storeinfo->fetch_roominfos;
 
     my $roominfo_ref = +{};
     for my $row ( @{$rows} ) {
@@ -91,8 +93,7 @@ sub set_roominfo_params {
     for my $key (@keys) {
         $params->{$key} = $roominfo_ref->{$key};
     }
-    $self->params($params);
-    return;
+    return $params;
 }
 
 =head2 get_check_params_list
@@ -102,17 +103,18 @@ sub set_roominfo_params {
 =cut
 
 sub get_check_params_list {
-    my $self = shift;
+    my $self   = shift;
+    my $params = shift;
 
     my $check_params = [];
 
-    my @keys  = keys %{ $self->params() };
-    my $count = scalar @{ $self->params()->{ $keys[0] } };
+    my @keys  = keys %{ $params };
+    my $count = scalar @{ $params->{ $keys[0] } };
     $count -= 1;
     for my $i ( 0 .. $count ) {
         my $param_hash = +{};
         for my $key (@keys) {
-            $param_hash->{$key} = $self->params()->{$key}->[$i];
+            $param_hash->{$key} = $params->{$key}->[$i];
         }
         push @{$check_params}, $param_hash;
     }

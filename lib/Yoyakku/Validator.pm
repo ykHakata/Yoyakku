@@ -219,6 +219,12 @@ sub _check_start_and_end_on {
     my $starttime_on  = $params->{starttime_on};
     my $endingtime_on = $params->{endingtime_on};
 
+    my @start = split ':', $starttime_on;
+    my @end   = split ':', $endingtime_on;
+
+    $starttime_on  = shift @start;
+    $endingtime_on = shift @end;
+
     # 営業時間バリデート
     return '開始時刻より遅くしてください'
         if $endingtime_on <= $starttime_on;
@@ -243,6 +249,12 @@ sub _check_rentalunit {
     return if !$starttime_on;
     return if !$endingtime_on;
     return if !$rentalunit;
+
+    my @start = split ':', $starttime_on;
+    my @end   = split ':', $endingtime_on;
+
+    $starttime_on  = shift @start;
+    $endingtime_on = shift @end;
 
     # 貸出単位のバリデート
     my $opening_hours = $endingtime_on - $starttime_on;

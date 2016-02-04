@@ -50,9 +50,8 @@ sub admin_reserv_edit {
 
     my $model = $self->model_setting_roominfo;
 
-    $model->params( $self->req->params->to_hash );
-    $model->session( $self->session );
-    $model->check_auth_db_yoyakku();
+    $self->stash->{params} = $self->req->params->to_hash;
+    $model->check_auth_db_yoyakku($self->session);
 
     # ログイン id から row オブジェクト
     my $args = $self->session;
@@ -86,12 +85,12 @@ sub admin_reserv_edit {
     $self->stash->{template} = 'setting/admin_reserv_edit';
 
     if ( 'GET' eq uc $self->req->method ) {
-        $model->set_roominfo_params();
-        return $self->_render_fill_in_form($model);
+        $self->stash->{params}
+            = $model->set_roominfo_params( $self->stash->{login_row} );
+        return $self->_render_fill_in_form();
     }
-    my $params = $model->params();
-    return $self->_cancel($model) if $params->{cancel};
-    return $self->_update($model);
+    return $self->_cancel() if $self->stash->{params}->{cancel};
+    return $self->_update();
 }
 
 =head2 up_admin_r_d_edit
@@ -131,24 +130,25 @@ sub up_admin_r_d_edit {
 }
 
 sub _cancel {
-    my $self  = shift;
-    my $model = shift;
+    my $self = shift;
     $self->stash->{params}
-        = $model->get_login_roominfo_ids( $self->stash->{login_row} );
-    return $self->_render_fill_in_form($model);
+        = $self->model_setting_roominfo->get_login_roominfo_ids(
+        $self->stash->{login_row} );
+    return $self->_render_fill_in_form();
 }
 
 sub _update {
     my $self  = shift;
-    my $model = shift;
+    my $model = $self->model_setting_roominfo;
 
     $model->type('update');
 
-    my $check_params = $model->get_check_params_list();
+    my $check_params
+        = $model->get_check_params_list( $self->stash->{params} );
 
     for my $check_param ( @{$check_params} ) {
         my $valid_msg = $model->check_validator( 'roominfo', $check_param );
-        return $self->stash($valid_msg), $self->_render_fill_in_form($model)
+        return $self->stash($valid_msg), $self->_render_fill_in_form()
             if $valid_msg;
     }
 
@@ -160,8 +160,7 @@ sub _update {
 }
 
 sub _render_fill_in_form {
-    my $self  = shift;
-    my $model = shift;
+    my $self = shift;
 
     my $html = $self->render_to_string( format => 'html', )->to_string;
 
@@ -170,7 +169,7 @@ sub _render_fill_in_form {
         params => $self->stash->{params},
     };
 
-    my $output = $model->set_fill_in_params($args);
+    my $output = $self->model_setting_roominfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

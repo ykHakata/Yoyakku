@@ -451,11 +451,21 @@ sub get_login_row {
 =cut
 
 sub check_auth_db_yoyakku {
-    my $self = shift;
+    my $self    = shift;
+    my $session = shift;
 
-    my $teng       = $self->teng();
-    my $admin_id   = $self->session->{session_admin_id};
-    my $general_id = $self->session->{session_general_id};
+    my $teng = $self->teng();
+    my $admin_id;
+    my $general_id;
+
+    if ($session) {
+        $admin_id   = $session->{session_admin_id};
+        $general_id = $session->{session_general_id};
+    }
+    else {
+        $admin_id   = $self->session->{session_admin_id};
+        $general_id = $self->session->{session_general_id};
+    }
 
     return if !$admin_id && !$general_id;
 
