@@ -21,41 +21,18 @@ has( model_setting_roominfo =>
 
 =cut
 
-sub _init {
+sub index {
     my $self  = shift;
     my $model = $self->model_setting_roominfo;
-    $model->params( $self->req->params->to_hash );
-    $model->method( uc $self->req->method );
-    $model->session( $self->session );
-    $model->check_auth_db_yoyakku();
-    my $header_stash = $model->get_header_stash_admin();
-    return $header_stash if $header_stash eq 'index';
-    return $header_stash if $header_stash eq 'profile';
-    $self->stash($header_stash);
-    return $model;
-}
-
-=head2 admin_reserv_edit
-
-    予約部屋情報設定コントロール
-
-=cut
-
-sub admin_reserv_edit {
-    my $self = shift;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
         && ( uc $self->req->method ne 'POST' );
 
-    my $model = $self->model_setting_roominfo;
+    return $self->redirect_to('index')
+        if !$model->check_auth_db_yoyakku( $self->session );
 
-    $self->stash->{params} = $self->req->params->to_hash;
-    $model->check_auth_db_yoyakku($self->session);
-
-    # ログイン id から row オブジェクト
-    my $args = $self->session;
-    $self->stash->{login_row} = $model->get_login_row($args);
+    $self->stash->{login_row} = $model->get_login_row( $self->session );
 
     my $redirect_mode
         = $model->get_redirect_mode( $self->stash->{login_row} );
@@ -70,6 +47,24 @@ sub admin_reserv_edit {
         = $model->get_setting_header_stash( $self->stash->{login_row} );
 
     $self->stash($header_stash);
+    $self->stash->{params} = $self->req->params->to_hash;
+
+    my $path = $self->req->url->path->to_abs_string;
+
+    return $self->admin_reserv_edit() if $path eq '/admin_reserv_edit';
+    return $self->up_admin_r_d_edit() if $path eq '/up_admin_r_d_edit';
+    return $self->redirect_to('index');
+}
+
+=head2 admin_reserv_edit
+
+    予約部屋情報設定コントロール
+
+=cut
+
+sub admin_reserv_edit {
+    my $self  = shift;
+    my $model = $self->model_setting_roominfo;
 
     my $init_valid_params_admin_reserv_edit
         = $model->get_init_valid_params_admin_reserv_edit();
@@ -79,10 +74,9 @@ sub admin_reserv_edit {
     $self->stash(
         class      => 'admin_reserv_edit',
         switch_com => $switch_com,
+        template   => 'setting/admin_reserv_edit',
         %{$init_valid_params_admin_reserv_edit},
     );
-
-    $self->stash->{template} = 'setting/admin_reserv_edit';
 
     if ( 'GET' eq uc $self->req->method ) {
         $self->stash->{params}
@@ -100,13 +94,8 @@ sub admin_reserv_edit {
 =cut
 
 sub up_admin_r_d_edit {
-    my $self = shift;
-
-    my $model = $self->_init();
-    return $self->redirect_to($model) if $model eq 'index';
-    return $self->redirect_to($model) if $model eq 'profile';
-    return $self->redirect_to('index')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+    my $self  = shift;
+    my $model = $self->model_setting_roominfo;
 
     my $get_init_valid_params_up_admin_r_d_edit
         = $model->get_init_valid_params_up_admin_r_d_edit();
@@ -116,14 +105,14 @@ sub up_admin_r_d_edit {
     $self->stash(
         class      => 'admin_reserv_edit',
         switch_com => $switch_com,
+        template   => 'setting/up_admin_r_d_edit',
         %{$get_init_valid_params_up_admin_r_d_edit},
     );
 
-    $self->stash->{template} = 'setting/admin_reserv_edit';
-
-    if ( 'GET' eq $model->method() ) {
-        $model->set_roominfo_params();
-        return $self->_render_fill_in_form($model);
+    if ( 'GET' eq uc $self->req->method ) {
+        $self->stash->{params}
+            = $model->set_roominfo_params( $self->stash->{login_row} );
+        return $self->_render_fill_in_form();
     }
 
     return;
