@@ -120,9 +120,9 @@ sub up_admin_r_d_edit {
 
 sub _cancel {
     my $self = shift;
-    $self->stash->{params}
-        = $self->model_setting_roominfo->get_login_roominfo_ids(
-        $self->stash->{login_row} );
+    $self->stash->{params} = undef;
+    $self->stash->{params}->{id}
+        = $self->stash->{login_row}->fetch_storeinfo->get_roominfo_ids;
     return $self->_render_fill_in_form();
 }
 

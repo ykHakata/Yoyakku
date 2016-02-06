@@ -152,20 +152,12 @@ sub startup {
     $r->route('/region_state')
         ->to( controller => 'Region', action => 'region_state' );
 
-    # 店舗管理(Setting)
-    $r->route('/admin_store_edit')
+    # 店舗管理(Setting) 選択店舗情報確認 /admin_store_edit, /admin_store_comp
+    $r->route( '/:store', store => qr{admin_store_.*} )
         ->to( controller => 'Setting::Storeinfo', action => 'index' );
 
-    # 店舗管理(Setting) 選択店舗情報確認
-    $r->route('/admin_store_comp')
-        ->to( controller => 'Setting::Storeinfo', action => 'index' );
-
-    # 店舗管理(Setting) 予約部屋情報設定
-    $r->route('/admin_reserv_edit')
-        ->to( controller => 'Setting::Roominfo', action => 'index' );
-
-    # 店舗管理(Setting) 予約部屋詳細設定
-    $r->route('/up_admin_r_d_edit')
+    # 店舗管理(Setting) 予約部屋情報設定 /admin_reserv_edit, /up_admin_r_d_edit
+    $r->route( '/:room', room => qr{admin_reserv_edit|up_admin_r_d_edit} )
         ->to( controller => 'Setting::Roominfo', action => 'index' );
 
     # セッション情報設定

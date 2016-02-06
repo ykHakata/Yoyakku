@@ -21,21 +21,6 @@ use Yoyakku::Util qw{get_fill_in_params chenge_time_over join_time};
 
 =cut
 
-=head2 get_login_roominfo_ids
-
-    ログイン id から roominfo の id 取得
-
-=cut
-
-sub get_login_roominfo_ids {
-    my $self      = shift;
-    my $login_row = shift;
-
-    my $rows = $login_row->fetch_storeinfo->fetch_roominfos;
-    my $ids = [ map { $_->id } @{$rows} ];
-    return +{ id => $ids };
-}
-
 =head2 get_init_valid_params_admin_reserv_edit
 
     バリデート用パラメータ初期値(admin_reserv_edit)
