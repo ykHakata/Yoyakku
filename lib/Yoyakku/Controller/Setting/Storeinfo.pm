@@ -2,6 +2,9 @@ package Yoyakku::Controller::Setting::Storeinfo;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Setting::Storeinfo;
 
+has( model_setting_storeinfo =>
+        sub { Yoyakku::Model::Setting::Storeinfo->new(); } );
+
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -18,18 +21,39 @@ use Yoyakku::Model::Setting::Storeinfo;
 
 =cut
 
-sub _init {
+sub index {
     my $self  = shift;
-    my $model = Yoyakku::Model::Setting::Storeinfo->new();
-    $model->params( $self->req->params->to_hash );
-    $model->method( uc $self->req->method );
-    $model->session( $self->session );
-    $model->check_auth_db_yoyakku();
-    my $header_stash = $model->get_header_stash_admin();
-    return $header_stash if $header_stash eq 'index';
-    return $header_stash if $header_stash eq 'profile';
+    my $model = $self->model_setting_storeinfo;
+
+    return $self->redirect_to('index')
+        if ( uc $self->req->method ne 'GET' )
+        && ( uc $self->req->method ne 'POST' );
+
+    return $self->redirect_to('index')
+        if !$model->check_auth_db_yoyakku( $self->session );
+
+    $self->stash->{login_row} = $model->get_login_row( $self->session );
+
+    my $redirect_mode
+        = $model->get_redirect_mode( $self->stash->{login_row} );
+
+    return $self->redirect_to('index')
+        if $redirect_mode && $redirect_mode eq 'index';
+
+    return $self->redirect_to('profile')
+        if $redirect_mode && $redirect_mode eq 'profile';
+
+    my $header_stash
+        = $model->get_setting_header_stash( $self->stash->{login_row} );
+
     $self->stash($header_stash);
-    return $model;
+    $self->stash->{params} = $self->req->params->to_hash;
+
+    my $path = $self->req->url->path->to_abs_string;
+
+    return $self->admin_store_edit() if $path eq '/admin_store_edit';
+    return $self->admin_store_comp() if $path eq '/admin_store_comp';
+    return $self->redirect_to('index');
 }
 
 =head2 admin_store_edit
@@ -39,13 +63,8 @@ sub _init {
 =cut
 
 sub admin_store_edit {
-    my $self = shift;
-
-    my $model = $self->_init();
-    return $self->redirect_to($model) if $model eq 'index';
-    return $self->redirect_to($model) if $model eq 'profile';
-    return $self->redirect_to('index')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+    my $self  = shift;
+    my $model = $self->model_setting_storeinfo;
 
     my $init_valid_params_admin_store_edit
         = $model->get_init_valid_params_admin_store_edit();
@@ -54,86 +73,82 @@ sub admin_store_edit {
     $self->stash(
         class      => 'admin_store_edit',
         switch_com => $switch_com,
+        template   => 'setting/admin_store_edit',
         %{$init_valid_params_admin_store_edit},
     );
 
-    $model->template('setting/admin_store_edit');
-
-    if ( 'GET' eq $model->method() ) {
-        $model->get_login_storeinfo_params();
-        return $self->_render_fill_in_form($model);
+    if ( 'GET' eq uc $self->req->method ) {
+        $self->stash->{params}
+            = $self->stash->{login_row}->fetch_storeinfo->get_columns;
+        return $self->_render_fill_in_form();
     }
-    my $params = $model->params();
-    return $self->_cancel($model)      if $params->{cancel};
-    return $self->_post_search($model) if $params->{post_search};
-    return $self->_update($model);
+    return $self->_cancel()      if $self->stash->{params}->{cancel};
+    return $self->_post_search() if $self->stash->{params}->{post_search};
+    return $self->_update();
 }
 
 sub _cancel {
-    my $self  = shift;
-    my $model = shift;
-    $model->get_login_storeinfo_id();
-    return $self->_render_fill_in_form($model);
+    my $self = shift;
+    $self->stash->{params} = undef;
+    $self->stash->{params}->{id}
+        = $self->stash->{login_row}->fetch_storeinfo->id;
+    return $self->_render_fill_in_form();
 }
 
 sub _post_search {
     my $self  = shift;
-    my $model = shift;
-    $model->get_post_search();
-    return $self->_render_fill_in_form($model);
+    my $model = $self->model_setting_storeinfo;
+    $self->stash->{params}
+        = $model->get_post_search( $self->stash->{params} );
+    return $self->_render_fill_in_form();
 }
 
 sub _update {
     my $self  = shift;
-    my $model = shift;
+    my $model = $self->model_setting_storeinfo;
     $model->type('update');
-    return $self->_common($model);
+    return $self->_common();
 }
 
 sub _common {
     my $self  = shift;
-    my $model = shift;
-
-    my $valid_msg = $model->check_validator( 'storeinfo', $model->params() );
-
-    return $self->stash($valid_msg), $self->_render_fill_in_form($model)
+    my $model = $self->model_setting_storeinfo;
+    my $valid_msg
+        = $model->check_validator( 'storeinfo', $self->stash->{params} );
+    return $self->stash($valid_msg), $self->_render_fill_in_form()
         if $valid_msg;
-
-    $model->writing_admin_store();
-
+    $model->writing_admin_store( $self->stash->{params} );
     return $self->redirect_to('admin_store_comp');
 }
 
 sub _render_fill_in_form {
-    my $self  = shift;
-    my $model = shift;
+    my $self = shift;
 
-    my $html = $self->render_to_string(
-        template => $model->template(),
-        format   => 'html',
-    )->to_string;
+    my $html = $self->render_to_string( format => 'html', )->to_string;
 
-    $model->html( \$html );
-    my $output = $model->set_fill_in_params();
+    my $args = +{
+        html   => \$html,
+        params => $self->stash->{params},
+    };
+
+    my $output = $self->model_setting_storeinfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 
 sub admin_store_comp {
     my $self = shift;
 
-    my $model = $self->_init();
-    return $self->redirect_to($model) if $model eq 'index';
-    return $self->redirect_to($model) if $model eq 'profile';
-    return $self->redirect_to('index')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+    my $switch_com
+        = $self->model_setting_storeinfo->get_switch_com('admin_store_comp');
 
-    my $switch_com = $model->get_switch_com('admin_store_comp');
     $self->stash(
         class         => 'admin_store_comp',
         switch_com    => $switch_com,
-        storeinfo_row => $model->login_storeinfo_row,
+        storeinfo_row => $self->stash->{login_row}->fetch_storeinfo,
+        template      => 'setting/admin_store_comp',
+        format        => 'html',
     );
-    $self->render( template => 'setting/admin_store_comp', format => 'html' );
+    $self->render();
     return;
 }
 

@@ -154,11 +154,11 @@ sub startup {
 
     # 店舗管理(Setting)
     $r->route('/admin_store_edit')
-        ->to( controller => 'Setting::Storeinfo', action => 'admin_store_edit' );
+        ->to( controller => 'Setting::Storeinfo', action => 'index' );
 
     # 店舗管理(Setting) 選択店舗情報確認
     $r->route('/admin_store_comp')
-        ->to( controller => 'Setting::Storeinfo', action => 'admin_store_comp' );
+        ->to( controller => 'Setting::Storeinfo', action => 'index' );
 
     # 店舗管理(Setting) 予約部屋情報設定
     $r->route('/admin_reserv_edit')

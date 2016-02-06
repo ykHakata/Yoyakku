@@ -21,32 +21,6 @@ use Yoyakku::Util qw{get_fill_in_params};
 
 =cut
 
-=head2 get_login_storeinfo_params
-
-    ログイン id から storeinfo のテーブルより該当レコード抽出
-
-=cut
-
-sub get_login_storeinfo_params {
-    my $self   = shift;
-    my $params = $self->login_storeinfo_row()->get_columns();
-    $self->params($params);
-    return $params;
-}
-
-=head2 get_login_storeinfo_id
-
-    ログイン id から storeinfo の id 取得
-
-=cut
-
-sub get_login_storeinfo_id {
-    my $self = shift;
-    my $id   = $self->login_storeinfo_row()->id;
-    $self->params( +{ id => $id } );
-    return $id;
-}
-
 =head2 get_post_search
 
     郵便番号から住所検索
@@ -55,8 +29,8 @@ sub get_login_storeinfo_id {
 
 sub get_post_search {
     my $self   = shift;
+    my $params = shift;
     my $teng   = $self->teng();
-    my $params = $self->params();
     my $row    = $teng->single( 'post', +{ post_id => $params->{post}, }, );
     if ($row) {
         $params->{post}      = $row->post_id;
@@ -69,8 +43,7 @@ sub get_post_search {
         $params->{state}     = '登録なし';
         $params->{cities}    = '登録なし';
     }
-    $self->params($params);
-    return;
+    return $params;
 }
 
 =head2 get_init_valid_params_admin_store_edit
@@ -92,9 +65,10 @@ sub get_init_valid_params_admin_store_edit {
 =cut
 
 sub writing_admin_store {
-    my $self = shift;
+    my $self   = shift;
+    my $params = shift;
 
-    my $create_data = $self->get_create_data('storeinfo');
+    my $create_data = $self->get_create_data( 'storeinfo', $params );
 
     # 不要なカラムを削除
     delete $create_data->{admin_id};
@@ -105,8 +79,7 @@ sub writing_admin_store {
     die 'update only'
         if !$self->type() || ( $self->type() && $self->type() ne 'update' );
 
-    return $self->writing_db( 'storeinfo', $create_data,
-        $self->params()->{id} );
+    return $self->writing_db( 'storeinfo', $create_data, $params->{id} );
 }
 
 1;
