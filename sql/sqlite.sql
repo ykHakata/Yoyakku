@@ -238,18 +238,18 @@ CREATE TABLE acting(                                    -- 代行リスト
 DROP TABLE ads;
 
 CREATE TABLE ads(                                       -- 広告
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 広告ID
-    kind            INTEGER,                            -- 広告種別
-    storeinfo_id    INTEGER,                            -- 店舗ID
-    region_id       INTEGER,                            -- 地域区分ID
-    url             TEXT,                               -- 広告リンク先
-    displaystart_on TEXT,                               -- 表示開始日時
-    displayend_on   TEXT,                               -- 表示終了日時
-    name            TEXT,                               -- 広告名
-    event_date      TEXT,                               -- イベント広告日時
-    content         TEXT,                               -- 広告内容
-    create_on       TEXT,                               -- 登録日
-    modify_on       TEXT                                -- 修正日
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 広告ID (例: 5)
+    kind            INTEGER,                            -- 広告種別 (例: 5)
+    storeinfo_id    INTEGER,                            -- 店舗ID (例: 5)
+    region_id       INTEGER,                            -- 地域区分ID (例: 10000)
+    url             TEXT,                               -- 広告リンク先 (例: 'http://www.heacon.com/')
+    displaystart_on TEXT,                               -- 表示開始日時 (例: '2013-03-07')
+    displayend_on   TEXT,                               -- 表示終了日時 (例: '2013-03-07')
+    name            TEXT,                               -- 広告名 (例: 'アニソン好きの集い')
+    event_date      TEXT,                               -- イベント広告日時 (例: '2013/3/7 18:00-22:00')
+    content         TEXT,                               -- 広告内容 (例: 'とくにエヴァンゲリオン')
+    create_on       TEXT,                               -- 登録日 (例: '2015-06-06 12:24:12')
+    modify_on       TEXT                                -- 修正日 (例: '2015-06-06 12:24:12')
 );
 
 INSERT INTO ads(kind,url,displaystart_on,displayend_on,name,event_date,content,create_on)

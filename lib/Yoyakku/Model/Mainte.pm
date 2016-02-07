@@ -93,6 +93,48 @@ sub check_login_name {
     return $self->check_table_column($check_params);
 }
 
+=head2 update_form_params
+
+    update 用フィルインパラメーター作成 (hash パラメータ返却)
+
+=cut
+
+sub update_form_params {
+    my $self   = shift;
+    my $table  = shift;
+    my $params = shift;
+
+    my $columns = get_table_columns($table);
+    my $row = $self->get_single_row_search_id( $table, $params->{id} );
+
+    for my $param ( @{$columns} ) {
+        $params->{$param} = $row->$param;
+    }
+
+    # roominfo のみ 開始、終了時刻はデータを調整する00->24表示にする
+    if ( $table eq 'roominfo' ) {
+
+        my $split_t = chenge_time_over(
+            +{  start_time => $params->{starttime_on},
+                end_time   => $params->{endingtime_on},
+            }
+        );
+
+        ( $params->{starttime_on}, $params->{endingtime_on}, )
+            = join_time($split_t, 'none');
+    }
+
+    # reserve のみ 日付変換
+    if ( $table eq 'reserve' ) {
+        my $day_and_time = get_startend_day_and_time($row);
+        $params->{getstarted_on_day}  = $day_and_time->{getstarted_on_day};
+        $params->{getstarted_on_time} = $day_and_time->{getstarted_on_time};
+        $params->{enduse_on_day}      = $day_and_time->{enduse_on_day};
+        $params->{enduse_on_time}     = $day_and_time->{enduse_on_time};
+    }
+    return $params;
+}
+
 =head2 get_update_form_params
 
     update 用フィルインパラメーター作成

@@ -48,6 +48,61 @@ sub get_msg_validator {
     return;
 }
 
+=head2 ads
+
+    バリデート処理(ads)
+
+=cut
+
+sub ads {
+    my $self   = shift;
+    my $params = shift;
+
+    my $check_params = [
+        url             => [ 'NOT_NULL', 'HTTP_URL', ],
+        displaystart_on => [ 'NOT_NULL', 'DATE', ],
+        displayend_on   => [ 'NOT_NULL', 'DATE', ],
+        name       => [ 'NOT_NULL', [ 'LENGTH', 0, 30, ], ],
+        content    => [ 'NOT_NULL', [ 'LENGTH', 0, 140, ], ],
+        event_date => [ 'NOT_NULL', [ 'LENGTH', 0, 30, ], ],
+    ];
+
+    my $msg_params = [
+        'url.not_null'             => '必須入力',
+        'displaystart_on.not_null' => '必須入力',
+        'displayend_on.not_null'   => '必須入力',
+        'name.not_null'            => '必須入力',
+        'content.not_null'         => '必須入力',
+        'event_date.not_null'      => '必須入力',
+        'url.http_url' => '指定の形式で入力してください',
+        'displaystart_on.date' =>
+            '日付の形式で入力してください',
+        'displayend_on.date' => '日付の形式で入力してください',
+        'name.length'        => '文字数!!',
+        'content.length'     => '文字数!!',
+        'event_date.length'  => '文字数!!',
+    ];
+
+    my $arg = +{
+        check_params => $check_params,
+        msg_params   => $msg_params,
+        params       => $params,
+    };
+
+    my $msg = $self->get_msg_validator($arg);
+
+    return if !$msg;
+
+    return +{
+        url             => $msg->{url},
+        displaystart_on => $msg->{displaystart_on},
+        displayend_on   => $msg->{displayend_on},
+        name            => $msg->{name},
+        content         => $msg->{content},
+        event_date      => $msg->{event_date},
+    };
+}
+
 =head2 entry
 
     バリデート処理(entry)

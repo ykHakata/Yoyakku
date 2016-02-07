@@ -21,24 +21,6 @@ use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =cut
 
-=head2 search_ads_id_rows
-
-    use Yoyakku::Model::Mainte::Ads;
-
-    my $model = $self->_init();
-
-    my $ads_rows = $model->search_ads_id_rows();
-
-    テーブル一覧作成時に利用
-
-=cut
-
-sub search_ads_id_rows {
-    my $self = shift;
-    return $self->search_id_single_or_all_rows( 'ads',
-        $self->params()->{id} );
-}
-
 =head2 get_init_valid_params_ads
 
     入力フォーム表示の際に利用
@@ -83,19 +65,6 @@ sub get_region_rows_pref {
 
     my @region_rows = $teng->search_named($sql);
     return \@region_rows;
-}
-
-=head2 get_update_form_params_ads
-
-    修正用入力フォーム表示の際に利用
-
-=cut
-
-sub get_update_form_params_ads {
-    my $self = shift;
-
-    $self->get_update_form_params('ads');
-    return $self;
 }
 
 =head2 check_ads_validator
@@ -153,36 +122,23 @@ sub check_ads_validator {
 =cut
 
 sub writing_ads {
-    my $self = shift;
+    my $self   = shift;
+    my $params = shift;
 
     my $create_data = +{
-        kind            => $self->params()->{kind},
-        storeinfo_id    => $self->params()->{storeinfo_id},
-        region_id       => $self->params()->{region_id},
-        url             => $self->params()->{url},
-        displaystart_on => $self->params()->{displaystart_on},
-        displayend_on   => $self->params()->{displayend_on},
-        name            => $self->params()->{name},
-        event_date      => $self->params()->{event_date},
-        content         => $self->params()->{content},
+        kind            => $params->{kind},
+        storeinfo_id    => $params->{storeinfo_id},
+        region_id       => $params->{region_id},
+        url             => $params->{url},
+        displaystart_on => $params->{displaystart_on},
+        displayend_on   => $params->{displayend_on},
+        name            => $params->{name},
+        event_date      => $params->{event_date},
+        content         => $params->{content},
         create_on       => now_datetime(),
         modify_on       => now_datetime(),
     };
-    return $self->writing_db( 'ads', $create_data, $self->params()->{id} );
-}
-
-=head2 get_fill_in_ads
-
-    表示用 html を生成
-
-=cut
-
-sub get_fill_in_ads {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
+    return $self->writing_db( 'ads', $create_data, $params->{id} );
 }
 
 1;
