@@ -48,6 +48,36 @@ sub get_msg_validator {
     return;
 }
 
+=head2 entry
+
+    バリデート処理(entry)
+
+=cut
+
+sub entry {
+    my $self   = shift;
+    my $params = shift;
+
+    my $check_params = [ mail_j => [ 'NOT_NULL', 'EMAIL_LOOSE' ], ];
+
+    my $msg_params = [
+        'mail_j.email_loose' => 'Eメールを入力してください',
+        'mail_j.not_null'    => '必須入力',
+    ];
+
+    my $arg = +{
+        check_params => $check_params,
+        msg_params   => $msg_params,
+        params       => $params,
+    };
+
+    my $msg = $self->get_msg_validator($arg);
+
+    return if !$msg;
+
+    return +{ mail_j => $msg->{mail_j}, };
+}
+
 =head2 storeinfo
 
     バリデート処理(storeinfo)

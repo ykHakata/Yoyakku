@@ -2,6 +2,8 @@ package Yoyakku::Controller::Entry;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Entry;
 
+has( model_entry => sub { Yoyakku::Model::Entry->new(); } );
+
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -18,16 +20,27 @@ use Yoyakku::Model::Entry;
 
 =cut
 
-sub _init {
+sub index {
     my $self  = shift;
-    my $model = Yoyakku::Model::Entry->new();
-    $model->params( $self->req->params->to_hash );
-    $model->method( uc $self->req->method );
-    $model->session( $self->session );
-    return if $model->check_auth_db_yoyakku();
+    my $model = $self->model_entry;
+
+    return $self->redirect_to('index')
+        if ( uc $self->req->method ne 'GET' )
+        && ( uc $self->req->method ne 'POST' );
+
+    # ログイン中は回覧できない
+    return $self->redirect_to('index')
+        if $model->check_auth_db_yoyakku( $self->session );
+
     my $header_stash = $model->get_header_stash_entry();
+
     $self->stash($header_stash);
-    return $model;
+    $self->stash->{params} = $self->req->params->to_hash;
+
+    my $path = $self->req->url->path->to_abs_string;
+
+    return $self->entry() if $path eq '/entry';
+    return $self->redirect_to('index');
 }
 
 =head2 entry
@@ -38,12 +51,7 @@ sub _init {
 
 sub entry {
     my $self  = shift;
-    my $model = $self->_init();
-
-    return $self->redirect_to('/index') if !$model;
-
-    return $self->redirect_to('/index')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
+    my $model = $self->model_entry;
 
     my $switch_load;
     my $mail_j;
@@ -54,38 +62,41 @@ sub entry {
         switch_load  => $switch_load,
         mail_j       => $mail_j,
         adsNavi_rows => $get_ads_navi_rows,
+        template     => 'entry/entry',
+        format       => 'html',
     );
 
-    return $self->_insert($model) if $model->method() eq 'POST';
-
-    return $self->render( template => 'entry/entry', format => 'html', );
+    return $self->_insert() if uc $self->req->method eq 'POST';
+    return $self->render();
 }
 
 sub _insert {
     my $self  = shift;
-    my $model = shift;
+    my $model = $self->model_entry;
 
     $model->type('insert');
     $model->flash_msg( +{ touroku => '登録完了' } );
 
-    return $self->_common($model);
+    return $self->_common();
 }
 
 sub _common {
     my $self  = shift;
-    my $model = shift;
+    my $model = $self->model_entry;
 
-    my $valid_msg = $model->check_entry_validator();
+    my $valid_msg
+        = $model->check_validator( 'entry', $self->stash->{params} );
 
-    return $self->stash($valid_msg), $self->_render_entry($model)
+    return $self->stash($valid_msg), $self->_render_entry()
         if $valid_msg;
 
-    my $valid_msg_db = $model->check_entry_validator_db();
+    my $valid_msg_db
+        = $model->check_entry_validator_db( $self->stash->{params} );
 
-    return $self->stash($valid_msg_db), $self->_render_entry($model)
+    return $self->stash($valid_msg_db), $self->_render_entry()
         if $valid_msg_db;
 
-    $model->writing_entry();
+    $model->writing_entry($self->stash->{params});
     $self->flash( $model->flash_msg() );
 
     $self->stash( $model->mail_temp() );
@@ -103,15 +114,18 @@ sub _common {
 
 sub _render_entry {
     my $self  = shift;
-    my $model = shift;
+    my $model = $self->model_entry;
 
     my $html = $self->render_to_string(
         template => 'entry/entry',
         format   => 'html',
     )->to_string;
 
-    $model->html( \$html );
-    my $output = $model->get_fill_in_entry();
+    my $args = +{
+        html   => \$html,
+        params => $self->stash->{params},
+    };
+    my $output = $model->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

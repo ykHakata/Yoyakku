@@ -125,11 +125,11 @@ sub startup {
         ->to( controller => 'Calendar', action => 'index_next_three_m' );
 
     # 登録(entry)
-    $r->route('/entry')->to( controller => 'Entry', action => 'entry' );
+    $r->route( '/:entry', entry => qr{entry} )
+        ->to( controller => 'Entry', action => 'index' );
 
     # 予約(region)
-    my $region = qr{region_state};
-    $r->route( '/:region', region => $region )
+    $r->route( '/:region', region => qr{region_state} )
         ->to( controller => 'Region', action => 'index' );
 
     # 店舗管理(Setting) 選択店舗情報確認

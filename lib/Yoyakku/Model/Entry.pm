@@ -34,31 +34,6 @@ sub get_header_stash_entry {
     return $self->get_header_stash_params( $switch_header );
 }
 
-=head2 check_entry_validator
-
-    入力値バリデートチェックに利用
-
-=cut
-
-sub check_entry_validator {
-    my $self = shift;
-
-    my $check_params = [
-        mail_j   => [ 'NOT_NULL', 'EMAIL_LOOSE' ],
-    ];
-
-    my $msg_params = [
-        'mail_j.email_loose' => 'Eメールを入力してください',
-        'mail_j.not_null'    => '必須入力',
-    ];
-
-    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
-
-    return if !$msg;
-
-    return +{ mail_j => $msg->{mail_j}, };
-}
-
 =head2 check_entry_validator_db
 
     入力値データベースとのバリデートチェックに利用
@@ -67,12 +42,13 @@ sub check_entry_validator {
 
 sub check_entry_validator_db {
     my $self = shift;
+    my $params = shift;
 
     # ログインid(メルアド)存在確認 admin, general, 両方
     my $check_params = +{
         column => 'login',
-        param  => $self->params()->{mail_j},
-        table  => $self->params()->{select_usr},
+        param  => $params->{mail_j},
+        table  => $params->{select_usr},
     };
     my $check_entry = $self->check_table_column($check_params);
     my $valid_msg_db = +{ mail_j => $check_entry };
@@ -88,11 +64,12 @@ sub check_entry_validator_db {
 
 sub writing_entry {
     my $self = shift;
+    my $params = shift;
 
-    my $auth_table = $self->params()->{select_usr};
+    my $auth_table = $params->{select_usr};
 
     my $create_auth_data = +{
-        login     => $self->params()->{mail_j},
+        login     => $params->{mail_j},
         password  => 'yoyakku',
         status    => 0,
         create_on => now_datetime(),
@@ -106,11 +83,11 @@ sub writing_entry {
     my $create_profile_data = +{
         general_id    => undef,
         admin_id      => undef,
-        nick_name     => $self->params()->{mail_j},
+        nick_name     => $params->{mail_j},
         full_name     => '',
         phonetic_name => '',
         tel           => '',
-        mail          => $self->params()->{mail_j},
+        mail          => $params->{mail_j},
         status        => 0,
         create_on     => now_datetime(),
         modify_on     => now_datetime(),
@@ -126,13 +103,13 @@ sub writing_entry {
 
     if ( $auth_table eq 'admin' ) {
         $create_profile_data->{admin_id}    = $insert_row->id;
-        $mail_temp_entry->{admin_nick_name} = $self->params()->{mail_j};
-        $mail_temp_entry->{admin_mail}      = $self->params()->{mail_j};
+        $mail_temp_entry->{admin_nick_name} = $params->{mail_j};
+        $mail_temp_entry->{admin_mail}      = $params->{mail_j};
     }
     elsif ( $auth_table eq 'general' ) {
         $create_profile_data->{general_id}    = $insert_row->id;
-        $mail_temp_entry->{general_nick_name} = $self->params()->{mail_j};
-        $mail_temp_entry->{general_mail}      = $self->params()->{mail_j};
+        $mail_temp_entry->{general_nick_name} = $params->{mail_j};
+        $mail_temp_entry->{general_mail}      = $params->{mail_j};
     }
     else {
         die 'not insert_id!';
@@ -143,26 +120,12 @@ sub writing_entry {
 
     my $mail_header_entry = +{
         from    => $MAIL_SYSTEM,
-        to      => $self->params()->{mail_j},
+        to      => $params->{mail_j},
         subject => '[yoyakku]ID登録完了のお知らせ【' . now_datetime() . '】',
     };
 
     $self->mail_header($mail_header_entry);
     return;
-}
-
-=head2 get_fill_in_entry
-
-    表示用 html を生成
-
-=cut
-
-sub get_fill_in_entry {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
 }
 
 1;
