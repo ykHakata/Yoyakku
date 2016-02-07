@@ -98,13 +98,10 @@ sub startup {
     $r->route('/mainte_region_new')
         ->to( controller => 'Mainte::Region', action => 'mainte_region_new' );
 
-    # システム管理者(post)
-    $r->route('/mainte_post_serch')
-        ->to( controller => 'Mainte::Post', action => 'mainte_post_serch' );
-
     # システム管理者(post) 新規 編集
-    $r->route('/mainte_post_new')
-        ->to( controller => 'Mainte::Post', action => 'mainte_post_new' );
+    my $mainte_post = qr{mainte_post_serch\z|mainte_post_new\z};
+    $r->route( '/:mainte_post', mainte_post => $mainte_post )
+        ->to( controller => 'Mainte::Post', action => 'index' );
 
     # オープニングカレンダー, 今月, 1ヶ月後, 2ヶ月後, 3ヶ月後
     my $cal

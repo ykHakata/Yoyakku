@@ -249,7 +249,8 @@ sub search_id_single_or_all_rows {
 
 sub get_header_stash_auth_mainte {
     my $self    = shift;
-    my $session = $self->session();
+    my $session = shift;
+    $session = $session || $self->session();
     return if !$session;
     my $id = $self->auth_mainte($session);
     return if !$id;
