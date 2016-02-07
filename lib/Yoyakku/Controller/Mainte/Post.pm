@@ -38,7 +38,7 @@ sub index {
     my $path = $self->req->url->path->to_abs_string;
 
     return $self->mainte_post_serch() if $path eq '/mainte_post_serch';
-    return $self->redirect_to('index');
+    return $self->redirect_to('mainte_list');
 }
 
 =head2 mainte_post_serch

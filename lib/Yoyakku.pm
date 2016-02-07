@@ -90,13 +90,10 @@ sub startup {
     $r->route('/mainte_ads_new')
         ->to( controller => 'Mainte::Ads', action => 'mainte_ads_new' );
 
-    # システム管理者(region)
-    $r->route('/mainte_region_serch')
-        ->to( controller => 'Mainte::Region', action => 'mainte_region_serch' );
-
     # システム管理者(region) 新規 編集
-    $r->route('/mainte_region_new')
-        ->to( controller => 'Mainte::Region', action => 'mainte_region_new' );
+    my $mainte_region = qr{mainte_region_serch\z|mainte_region_new\z};
+    $r->route( '/:mainte_region', mainte_region => $mainte_region )
+        ->to( controller => 'Mainte::Region', action => 'index' );
 
     # システム管理者(post) 新規 編集
     my $mainte_post = qr{mainte_post_serch\z|mainte_post_new\z};
