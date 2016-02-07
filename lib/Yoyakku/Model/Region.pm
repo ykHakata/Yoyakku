@@ -22,6 +22,20 @@ use Yoyakku::Util
 
 =cut
 
+=head2 get_redirect_mode_region
+
+    ログイン情報からリダイレクト先を取得 (予約)
+
+=cut
+
+sub get_redirect_mode_region {
+    my $self      = shift;
+    my $login_row = shift;
+    my $table     = $login_row->get_table_name;
+    return 'profile' if !$login_row->status;
+    return;
+}
+
 =head2 get_header_stash_region
 
     ヘッダー初期値取得
@@ -29,13 +43,15 @@ use Yoyakku::Util
 =cut
 
 sub get_header_stash_region {
-    my $self = shift;
+    my $self      = shift;
+    my $login_row = shift;
 
-    my $table      = $self->login_table();
-    my $login_row  = $self->login_row();
-    my $login_name = $self->login_name();
+    my $table = $login_row->get_table_name;
 
-    return if $login_row && !$login_row->status;
+    my $login_name
+        = $login_row->fetch_profile
+        ? $login_row->fetch_profile->nick_name
+        : undef;
 
     my $switch_header = 5;
 
@@ -43,7 +59,8 @@ sub get_header_stash_region {
         if !$table;
 
     if ( $table eq 'admin' ) {
-        $switch_header = $self->storeinfo_row()->status() eq 0 ? 10 : 7;
+        $switch_header = $login_row->fetch_storeinfo->status eq 0 ? 10 : 7;
+        $login_name = q{(admin)} . $login_name;
     }
     elsif ( $table eq 'general' ) {
         $switch_header = 6;
@@ -186,11 +203,11 @@ sub get_region_rows_region_navi {
 
 =cut
 
-sub get_store_id_region_navi {
-    my $self     = shift;
-    my $store_id = $self->params->{store_id};
-    return $store_id;
-}
+# sub get_store_id_region_navi {
+#     my $self     = shift;
+#     my $store_id = $self->params->{store_id};
+#     return $store_id;
+# }
 
 =head2 get_cal_params
 
@@ -199,15 +216,16 @@ sub get_store_id_region_navi {
 =cut
 
 sub get_cal_params {
-    my $self = shift;
+    my $self       = shift;
+    my $req_params = shift;
 
     my $params = +{};
 
-    my $back_mon     = $self->params->{back_mon};
-    my $back_mon_val = $self->params->{back_mon_val};
-    my $next_mon     = $self->params->{next_mon};
-    my $next_mon_val = $self->params->{next_mon_val};
-    my $select_date  = $self->params->{select_date};
+    my $back_mon     = $req_params->{back_mon};
+    my $back_mon_val = $req_params->{back_mon_val};
+    my $next_mon     = $req_params->{next_mon};
+    my $next_mon_val = $req_params->{next_mon_val};
+    my $select_date  = $req_params->{select_date};
 
     my $now_date    = chang_date_6()->{now_date};
     my $next1m_date = chang_date_6()->{next1m_date};

@@ -14,44 +14,23 @@ sub startup {
   # Router
   my $r = $self->routes;
 
-    # ログインフォーム入り口
-    $r->get('/up_login')->to( controller => 'auth', action => 'up_login' );
 
-    # ログインフォーム(一般)
-    $r->route('/up_login_general')
-        ->to( controller => 'auth', action => 'up_login_general' );
+    # ログインフォーム 入り口, 一般, 店舗管理者, スーパーユーザー, ログアウト
+    my $auth
+        = qr{up_login\z|up_login_general|up_login_admin|root_login|up_logout};
+    $r->route( '/:action', action => $auth )->to( controller => 'auth' );
 
-    # ログインフォーム(店舗管理者)
-    $r->route('/up_login_admin')
-        ->to( controller => 'auth', action => 'up_login_admin' );
-
-    # ログインフォーム(スーパーユーザー)
-    $r->route('/root_login')
-        ->to( controller => 'auth', action => 'root_login' );
-
-    # ログアウト
-    $r->route('/up_logout')
-        ->to( controller => 'auth', action => 'up_logout' );
-
-    # 個人情報(入力画面)
-    $r->route('/profile')
-        ->to( controller => 'profile', action => 'profile' );
-
-    # 個人情報(確認画面)
-    $r->route('/profile_comp')
-        ->to( controller => 'profile', action => 'profile_comp' );
+    # 個人情報 入力画面, 確認画面
+    my $profile = qr{profile\z|profile_comp};
+    $r->route( '/:action', action => $profile )->to( controller => 'profile' );
 
     # システム管理者のオープニング画面
-    $r->route('/mainte_list')
-        ->to( controller => 'mainte', action => 'mainte_list' );
+    my $mainte = qr{mainte_list};
+    $r->route( '/:action', action => $mainte )->to( controller => 'mainte' );
 
     # システム管理者(admin)
-    $r->route('/mainte_registrant_serch')
-        ->to( controller => 'Mainte::Admin', action => 'mainte_registrant_serch' );
-
-    # システム管理者(admin) 新規 編集
-    $r->route('/mainte_registrant_new')
-        ->to( controller => 'Mainte::Admin', action => 'mainte_registrant_new' );
+    my $m_admin = qr{mainte_registrant_serch|mainte_registrant_new};
+    $r->route( '/:action', action => $m_admin )->to( controller => 'Mainte::Admin' );
 
     # システム管理者(general)
     $r->route('/mainte_general_serch')
@@ -149,15 +128,18 @@ sub startup {
     $r->route('/entry')->to( controller => 'Entry', action => 'entry' );
 
     # 予約(region)
-    $r->route('/region_state')
-        ->to( controller => 'Region', action => 'region_state' );
+    my $region = qr{region_state};
+    $r->route( '/:region', region => $region )
+        ->to( controller => 'Region', action => 'index' );
 
-    # 店舗管理(Setting) 選択店舗情報確認 /admin_store_edit, /admin_store_comp
-    $r->route( '/:store', store => qr{admin_store_.*} )
+    # 店舗管理(Setting) 選択店舗情報確認
+    my $setting_storeinfo = qr{admin_store_edit|admin_store_comp};
+    $r->route( '/:store', store => $setting_storeinfo )
         ->to( controller => 'Setting::Storeinfo', action => 'index' );
 
-    # 店舗管理(Setting) 予約部屋情報設定 /admin_reserv_edit, /up_admin_r_d_edit
-    $r->route( '/:room', room => qr{admin_reserv_edit|up_admin_r_d_edit} )
+    # 店舗管理(Setting) 予約部屋情報設定
+    my $setting_roominfo = qr{admin_reserv_edit|up_admin_r_d_edit};
+    $r->route( '/:room', room => $setting_roominfo )
         ->to( controller => 'Setting::Roominfo', action => 'index' );
 
     # セッション情報設定
