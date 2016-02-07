@@ -80,11 +80,19 @@ sub get_date_info {
 =cut
 
 sub get_header_stash_index {
-    my $self = shift;
+    my $self      = shift;
+    my $login_row = shift;
 
-    my $table      = $self->login_table();
-    my $login_row  = $self->login_row();
-    my $login_name = $self->login_name();
+    my $table;
+    my $login_name;
+
+    if ($login_row) {
+        $login_name
+            = $login_row->fetch_profile
+            ? $login_row->fetch_profile->nick_name
+            : undef;
+        $table = $login_row->get_table_name;
+    }
 
     my $switch_header = 2;
 
@@ -92,8 +100,9 @@ sub get_header_stash_index {
         if !$table;
 
     if ( $table eq 'admin' ) {
+        $login_name = q{(admin)} . $login_name;
         $switch_header = 4;
-        if ( $self->storeinfo_row()->status eq 0 ) {
+        if ( $login_row->fetch_storeinfo->status eq 0 ) {
             $switch_header = 9;
         }
     }

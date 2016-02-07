@@ -2,6 +2,8 @@ package Yoyakku::Controller::Calendar;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Calendar;
 
+has( model_calendar => sub { Yoyakku::Model::Calendar->new(); } );
+
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -18,42 +20,54 @@ use Yoyakku::Model::Calendar;
 
 =cut
 
-sub _init {
+sub index {
     my $self  = shift;
-    my $model = Yoyakku::Model::Calendar->new();
-    $model->params( $self->req->params->to_hash );
-    $model->method( uc $self->req->method );
-    $model->session( $self->session );
-    $model->check_auth_db_yoyakku();
-    my $header_stash = $model->get_header_stash_index();
+    my $model = $self->model_calendar;
+
+    return $self->redirect_to('index')
+        if ( uc $self->req->method ne 'GET' )
+        && ( uc $self->req->method ne 'POST' );
+
+    $model->check_auth_db_yoyakku( $self->session );
+
+    $self->stash->{login_row} = $model->get_login_row( $self->session );
+
+    my $header_stash
+        = $model->get_header_stash_index( $self->stash->{login_row} );
+
     $self->stash($header_stash);
-    return $model;
+    $self->stash->{params} = $self->req->params->to_hash;
+
+    my $path = $self->req->url->path->to_abs_string;
+
+    return $self->this_month()         if $path eq '/';
+    return $self->this_month()         if $path eq '/index';
+    return $self->index_next_m()       if $path eq '/index_next_m';
+    return $self->index_next_two_m()   if $path eq '/index_next_two_m';
+    return $self->index_next_three_m() if $path eq '/index_next_three_m';
+    return $self->redirect_to('index');
 }
 
-=head2 index
+=head2 this_month
 
     オープニングカレンダー確認画面(今月)
 
 =cut
 
-sub index {
-    my $self  = shift;
-    my $model = $self->_init();
-
+sub this_month {
+    my $self     = shift;
+    my $model    = $self->model_calendar();
     my $now_date = $model->get_date_info('now_date');
-    my $caps     = $model->get_calender_caps();
-    my $cal_now  = $model->get_calendar_info($now_date);
-    my $ads_rows = $model->get_cal_info_ads_rows($now_date);
-
     $self->stash(
         class    => 'index_this_m',
         now_date => $now_date,
-        cal_now  => $cal_now,
-        caps     => $caps,
-        ads_rows => $ads_rows,
+        cal_now  => $model->get_calendar_info($now_date),
+        caps     => $model->get_calender_caps(),
+        ads_rows => $model->get_cal_info_ads_rows($now_date),
+        template => 'calendar/index',
+        format   => 'html',
     );
-
-    return $self->render( template => 'calendar/index', format => 'html', );
+    return $self->render();
 }
 
 =head2 index_next_m
@@ -63,23 +77,19 @@ sub index {
 =cut
 
 sub index_next_m {
-    my $self  = shift;
-    my $model = $self->_init();
-
+    my $self        = shift;
+    my $model       = $self->model_calendar();
     my $next1m_date = $model->get_date_info('next1m_date');
-    my $caps        = $model->get_calender_caps();
-    my $cal_next1m  = $model->get_calendar_info($next1m_date);
-    my $ads_rows    = $model->get_cal_info_ads_rows($next1m_date);
-
     $self->stash(
         class       => 'index_next_m',
         next1m_date => $next1m_date,
-        cal_next1m  => $cal_next1m,
-        caps        => $caps,
-        ads_rows    => $ads_rows,
+        cal_next1m  => $model->get_calendar_info($next1m_date),
+        caps        => $model->get_calender_caps(),
+        ads_rows    => $model->get_cal_info_ads_rows($next1m_date),
+        template    => 'calendar/index_next_m',
+        format      => 'html',
     );
-
-    return $self->render( template => 'calendar/index_next_m', format => 'html', );
+    return $self->render();
 }
 
 =head2 index_next_two_m
@@ -89,23 +99,19 @@ sub index_next_m {
 =cut
 
 sub index_next_two_m {
-    my $self  = shift;
-    my $model = $self->_init();
-
+    my $self        = shift;
+    my $model       = $self->model_calendar();
     my $next2m_date = $model->get_date_info('next2m_date');
-    my $caps        = $model->get_calender_caps();
-    my $cal_next2m  = $model->get_calendar_info($next2m_date);
-    my $ads_rows    = $model->get_cal_info_ads_rows($next2m_date);
-
     $self->stash(
         class       => 'index_next_two_m',
         next2m_date => $next2m_date,
-        cal_next2m  => $cal_next2m,
-        caps        => $caps,
-        ads_rows    => $ads_rows,
+        cal_next2m  => $model->get_calendar_info($next2m_date),
+        caps        => $model->get_calender_caps(),
+        ads_rows    => $model->get_cal_info_ads_rows($next2m_date),
+        template    => 'calendar/index_next_two_m',
+        format      => 'html',
     );
-
-    return $self->render( template => 'calendar/index_next_two_m', format => 'html', );
+    return $self->render();
 }
 
 =head2 index_next_three_m
@@ -115,23 +121,19 @@ sub index_next_two_m {
 =cut
 
 sub index_next_three_m {
-    my $self  = shift;
-    my $model = $self->_init();
-
+    my $self        = shift;
+    my $model       = $self->model_calendar();
     my $next3m_date = $model->get_date_info('next3m_date');
-    my $caps        = $model->get_calender_caps();
-    my $cal_next3m  = $model->get_calendar_info($next3m_date);
-    my $ads_rows    = $model->get_cal_info_ads_rows($next3m_date);
-
     $self->stash(
         class       => 'index_next_three_m',
         next3m_date => $next3m_date,
-        cal_next3m  => $cal_next3m,
-        caps        => $caps,
-        ads_rows    => $ads_rows,
+        cal_next3m  => $model->get_calendar_info($next3m_date),
+        caps        => $model->get_calender_caps(),
+        ads_rows    => $model->get_cal_info_ads_rows($next3m_date),
+        template    => 'calendar/index_next_three_m',
+        format      => 'html',
     );
-
-    return $self->render( template => 'calendar/index_next_three_m', format => 'html', );
+    return $self->render();
 }
 
 1;

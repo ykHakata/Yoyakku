@@ -14,6 +14,8 @@ sub startup {
   # Router
   my $r = $self->routes;
 
+    # トップページ遷移(/)
+    $r->route('/')->to( controller => 'Calendar', action => 'index' );
 
     # ログインフォーム 入り口, 一般, 店舗管理者, スーパーユーザー, ログアウト
     my $auth
@@ -104,25 +106,11 @@ sub startup {
     $r->route('/mainte_post_new')
         ->to( controller => 'Mainte::Post', action => 'mainte_post_new' );
 
-    # トップページ遷移(/)
-    $r->route('/')
+    # オープニングカレンダー, 今月, 1ヶ月後, 2ヶ月後, 3ヶ月後
+    my $cal
+        = qr{index\z|index_next_m\z|index_next_two_m\z|index_next_three_m\z};
+    $r->route( '/:cal', cal => $cal )
         ->to( controller => 'Calendar', action => 'index' );
-
-    # オープニングカレンダー(index)
-    $r->route('/index')
-        ->to( controller => 'Calendar', action => 'index' );
-
-    # オープニングカレンダー1ヶ月後(index_next_m)
-    $r->route('/index_next_m')
-        ->to( controller => 'Calendar', action => 'index_next_m' );
-
-    # オープニングカレンダー2ヶ月後(index_next_two_m)
-    $r->route('/index_next_two_m')
-        ->to( controller => 'Calendar', action => 'index_next_two_m' );
-
-    # オープニングカレンダー3ヶ月後(index_next_three_m)
-    $r->route('/index_next_three_m')
-        ->to( controller => 'Calendar', action => 'index_next_three_m' );
 
     # 登録(entry)
     $r->route( '/:entry', entry => qr{entry} )
