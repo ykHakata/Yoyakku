@@ -227,12 +227,12 @@ CREATE TABLE reserve(                                   -- 予約履歴
 DROP TABLE acting;
 
 CREATE TABLE acting(                                    -- 代行リスト
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 代行リストID
-    general_id      INTEGER,                            -- 一般ユーザーID
-    storeinfo_id    INTEGER,                            -- 店舗ID
-    status          INTEGER,                            -- ステータス
-    create_on       TEXT,                               -- 登録日
-    modify_on       TEXT                                -- 修正日
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 代行リストID (例: 5)
+    general_id      INTEGER,                            -- 一般ユーザーID (例: 5)
+    storeinfo_id    INTEGER,                            -- 店舗ID (例: 5)
+    status          INTEGER,                            -- ステータス (例: 0: 無効, 1: 有効)
+    create_on       TEXT,                               -- 登録日 (例: '2015-06-06 12:24:12')
+    modify_on       TEXT                                -- 修正日 (例: '2015-06-06 12:24:12')
 );
 
 DROP TABLE ads;

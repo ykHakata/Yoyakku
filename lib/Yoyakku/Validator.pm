@@ -48,6 +48,42 @@ sub get_msg_validator {
     return;
 }
 
+=head2 acting
+
+    バリデート処理(acting)
+
+=cut
+
+sub acting {
+    my $self   = shift;
+    my $params = shift;
+
+    my $check_params = [
+        general_id   => [ 'NOT_NULL', ],
+        storeinfo_id => [ 'NOT_NULL', ],
+    ];
+
+    my $msg_params = [
+        'general_id.not_null'   => '両方を選んでください',
+        'storeinfo_id.not_null' => '両方を選んでください',
+    ];
+
+    my $arg = +{
+        check_params => $check_params,
+        msg_params   => $msg_params,
+        params       => $params,
+    };
+
+    my $msg = $self->get_msg_validator($arg);
+
+    return if !$msg;
+
+    return +{
+        general_id   => $msg->{general_id},
+        storeinfo_id => $msg->{storeinfo_id},
+    };
+}
+
 =head2 ads
 
     バリデート処理(ads)

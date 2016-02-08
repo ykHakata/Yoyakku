@@ -21,24 +21,6 @@ use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =cut
 
-=head2 search_acting_id_rows
-
-    use Yoyakku::Model::Mainte::Acting;
-
-    my $model = $self->_init();
-
-    my $acting_rows = $model->search_acting_id_rows();
-
-    テーブル一覧作成時に利用
-
-=cut
-
-sub search_acting_id_rows {
-    my $self = shift;
-    return $self->search_id_single_or_all_rows( 'acting',
-        $self->params()->{id} );
-}
-
 =head2 get_init_valid_params_acting
 
     入力フォーム表示の際に利用
@@ -63,47 +45,6 @@ sub get_general_rows_all {
     return \@general_rows;
 }
 
-=head2 get_update_form_params_acting
-
-    修正用入力フォーム表示の際に利用
-
-=cut
-
-sub get_update_form_params_acting {
-    my $self = shift;
-    $self->get_update_form_params('acting');
-    return $self;
-}
-
-=head2 check_acting_validator
-
-    入力値バリデートチェックに利用
-
-=cut
-
-sub check_acting_validator {
-    my $self = shift;
-
-    my $check_params = [
-        general_id   => [ 'NOT_NULL', ],
-        storeinfo_id => [ 'NOT_NULL', ],
-    ];
-
-    my $msg_params = [
-        'general_id.not_null'   => '両方を選んでください',
-        'storeinfo_id.not_null' => '両方を選んでください',
-    ];
-
-    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
-
-    return if !$msg;
-
-    return +{
-        general_id   => $msg->{general_id},
-        storeinfo_id => $msg->{storeinfo_id},
-    };
-}
-
 =head2 check_acting_validator_db
 
     入力値データベースとのバリデートチェックに利用
@@ -112,8 +53,8 @@ sub check_acting_validator {
 
 sub check_acting_validator_db {
     my $self   = shift;
+    my $params = shift;
     my $teng   = $self->teng();
-    my $params = $self->params();
 
     my $valid_msg_db = +{ general_id => '既に利用されています' };
 
@@ -141,31 +82,17 @@ sub check_acting_validator_db {
 =cut
 
 sub writing_acting {
-    my $self = shift;
+    my $self   = shift;
+    my $params = shift;
 
     my $create_data = +{
-        general_id   => $self->params()->{general_id}   || undef,
-        storeinfo_id => $self->params()->{storeinfo_id} || undef,
-        status       => $self->params()->{status},
+        general_id   => $params->{general_id}   || undef,
+        storeinfo_id => $params->{storeinfo_id} || undef,
+        status       => $params->{status},
         create_on    => now_datetime(),
         modify_on    => now_datetime(),
     };
-    return $self->writing_db( 'acting', $create_data,
-        $self->params()->{id} );
-}
-
-=head2 get_fill_in_acting
-
-    表示用 html を生成
-
-=cut
-
-sub get_fill_in_acting {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
+    return $self->writing_db( 'acting', $create_data, $params->{id} );
 }
 
 1;
