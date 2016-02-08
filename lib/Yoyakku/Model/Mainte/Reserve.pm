@@ -3,16 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Util qw{
-    now_datetime
-    join_time
-    split_time
-    chenge_time_over
-    next_day_ymd
-    join_date_time
-    get_start_end_tp
-    get_fill_in_params
-};
+use Yoyakku::Util qw{now_datetime split_time chenge_time_over};
 use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
 =encoding utf8
@@ -31,25 +22,6 @@ use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
 =cut
 
-=head2 search_reserve_id_rows
-
-    use Yoyakku::Model::Mainte::Reserve qw{search_reserve_id_rows};
-
-    # 指定の id に該当するレコードを row オブジェクトを配列リファレンスで返却
-    my $reserve_rows = $self->search_reserve_id_rows($reserve_id);
-
-    # 指定の id に該当するレコードなき場合 reserve 全てのレコード返却
-
-    reserve テーブル一覧作成時に利用
-
-=cut
-
-sub search_reserve_id_rows {
-    my $self = shift;
-    return $self->search_id_single_or_all_rows( 'reserve',
-        $self->params()->{reserve_id} );
-}
-
 sub get_init_valid_params_reserve {
     my $self = shift;
     return $self->get_init_valid_params(
@@ -61,7 +33,7 @@ sub get_init_valid_params_reserve {
 
 sub get_input_support {
     my $self   = shift;
-    my $params = $self->params();
+    my $params = shift;
     my $teng   = $self->teng();
 
     my $reserve_id  = $params->{id};
@@ -127,144 +99,10 @@ sub _get_reserve_fillIn_row {
     return $reserve_fillIn_rows[0];
 }
 
-=head2 change_format_datetime
-
-    日付と時刻に分かれたものを datetime 形式にもどす
-
-=cut
-
-sub change_format_datetime {
-    my $self   = shift;
-    my $params = $self->params();
-
-    my $start_date = $params->{getstarted_on_day};
-    my $start_time = $params->{getstarted_on_time};
-    my $end_date   = $params->{enduse_on_day};
-    my $end_time   = $params->{enduse_on_time};
-
-    # time 24:00 ~ 30:30 までの表示の場合 0:00 ~ 06:30 用に変換
-    # 時間の表示を24:00表記にもどす
-    my $split_t = chenge_time_over(
-        +{ start_time => $start_time, end_time => $end_time, }, 'normal', );
-
-    # 時間の表示を変換 日付を１日進める
-    if ( $split_t->{start_hour} >= 0 && $split_t->{start_hour} < 6 ) {
-        $start_date = next_day_ymd( $start_date );
-    }
-
-    if ( $split_t->{end_hour} >= 0 && $split_t->{end_hour} <= 6 ) {
-        $end_date = next_day_ymd( $end_date );
-    }
-
-    ( $start_time, $end_time, ) = join_time($split_t);
-
-    ( $params->{getstarted_on}, $params->{enduse_on}, ) = join_date_time(
-        +{  start_date => $start_date,
-            start_time => $start_time,
-            end_date   => $end_date,
-            end_time   => $end_time,
-        },
-    );
-
-    return $params;
-}
-
 sub get_update_form_params_reserve {
     my $self = shift;
     $self->get_update_form_params('reserve');
     return $self;
-}
-
-sub check_reserve_validator {
-    my $self   = shift;
-    my $params = $self->params();
-
-    my $check_params = [
-        roominfo_id        => [ 'INT', ],
-        getstarted_on_day  => [ 'NOT_NULL', 'DATE', ],
-        enduse_on_day      => [ 'NOT_NULL', 'DATE', ],
-        getstarted_on_time => [ 'NOT_NULL', ],
-        enduse_on_time     => [ 'NOT_NULL', ],
-        +{ on_day => [ 'getstarted_on_day', 'enduse_on_day', ], } =>
-            ['DUPLICATION'],
-        useform    => [ 'INT', ],
-        message    => [ [ 'LENGTH', 0, 20, ], ],
-        general_id => [ 'INT', ],
-        admin_id   => [ 'INT', ],
-        tel        => [ 'NOT_NULL', [ 'LENGTH', 0, 20, ], ],
-        status     => [ 'INT', ],
-    ];
-
-    my $msg_params = [
-        'roominfo_id.int' => '指定の形式で入力してください',
-        'getstarted_on_day.not_null' => '必須入力',
-        'enduse_on_day.not_null'     => '必須入力',
-        'getstarted_on_day.date' =>
-            '日付の形式で入力してください',
-        'enduse_on_day.date' => '日付の形式で入力してください',
-        'on_day.duplication' => '開始と同じ日付にして下さい',
-        'useform.int'        => '指定の形式で入力してください',
-        'message.length'     => '文字数!!',
-        'general_id.int'     => '指定の形式で入力してください',
-        'admin_id.int'       => '指定の形式で入力してください',
-        'tel.not_null'       => '必須入力',
-        'tel.length'         => '文字数!!',
-        'status.int'         => '指定の形式で入力してください',
-    ];
-
-    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
-
-    my $valid_msg_reserve = +{
-        id                 => '',
-        roominfo_id        => $msg->{roominfo_id},
-        getstarted_on_day  => $msg->{getstarted_on_day},
-        getstarted_on_time => $msg->{getstarted_on_time},
-        enduse_on_day      => $msg->{enduse_on_day} || $msg->{on_day},
-        enduse_on_time     => $msg->{enduse_on_time},
-        useform            => $msg->{useform},
-        message            => $msg->{message},
-        general_id         => $msg->{general_id},
-        admin_id           => $msg->{admin_id},
-        tel                => $msg->{tel},
-        status             => $msg->{status},
-    };
-
-    return $valid_msg_reserve if scalar values %{$msg};
-
-    # 日付の計算をするために通常の日時の表記に変更
-    $params = $self->change_format_datetime();
-
-    # 利用終了時刻が開始時刻より早くなっていないか？
-    my $check_reserve_use_time = _check_reserve_use_time($params);
-
-    $valid_msg_reserve->{enduse_on_time} = $check_reserve_use_time;
-
-    return $valid_msg_reserve if $check_reserve_use_time;
-
-    return;
-}
-
-=head2 _check_reserve_use_time
-
-    入力された利用希望時間の適正をチェック
-
-=cut
-
-sub _check_reserve_use_time {
-    my $params = shift;
-
-    my $start_date_time = $params->{getstarted_on};
-    my $end_date_time   = $params->{enduse_on};
-
-    # 日付のオブジェクトに変換
-    my ( $start_tp, $end_tp, )
-        = get_start_end_tp( $start_date_time, $end_date_time, );
-
-    # 日付のオブジェクトで比較
-    return '開始時刻より遅くして下さい' if $start_tp >= $end_tp;
-
-    # 不合格時はメッセージ、合格時は undef
-    return;
 }
 
 =head2 check_reserve_validator_db
@@ -275,8 +113,8 @@ sub _check_reserve_use_time {
 
 sub check_reserve_validator_db {
     my $self   = shift;
+    my $params = shift;
     my $type   = $self->type();
-    my $params = $self->params();
 
     my $valid_msg_reserve_db = +{};
 
@@ -471,42 +309,28 @@ sub _check_useform {
 
 =head2 writing_reserve
 
-    use Yoyakku::Model::Mainte::Reserve qw{writing_reserve};
-
-    # reserve テーブルレコード修正時
-    $self->writing_reserve( 'update', $params );
-    $self->flash( henkou => '修正完了' );
-
     reserve テーブル書込み、修正に対応
 
 =cut
 
 sub writing_reserve {
-    my $self = shift;
+    my $self   = shift;
+    my $params = shift;
 
     my $create_data = +{
-        roominfo_id   => $self->params()->{roominfo_id},
-        getstarted_on => $self->params()->{getstarted_on},
-        enduse_on     => $self->params()->{enduse_on},
-        useform       => $self->params()->{useform},
-        message       => $self->params()->{message},
-        general_id    => $self->params()->{general_id},
-        admin_id      => $self->params()->{admin_id},
-        tel           => $self->params()->{tel},
-        status        => $self->params()->{status},
+        roominfo_id   => $params->{roominfo_id},
+        getstarted_on => $params->{getstarted_on},
+        enduse_on     => $params->{enduse_on},
+        useform       => $params->{useform},
+        message       => $params->{message},
+        general_id    => $params->{general_id},
+        admin_id      => $params->{admin_id},
+        tel           => $params->{tel},
+        status        => $params->{status},
         create_on     => now_datetime(),
         modify_on     => now_datetime(),
     };
-    return $self->writing_db( 'reserve', $create_data,
-        $self->params()->{id} );
-}
-
-sub get_fill_in_reserve {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
+    return $self->writing_db( 'reserve', $create_data, $params->{id} );
 }
 
 1;

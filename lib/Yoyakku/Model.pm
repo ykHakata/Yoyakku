@@ -13,7 +13,8 @@ use Email::Sender::Transport::SMTPS;
 use Try::Tiny;
 use HTML::FillInForm;
 use FindBin;
-use Yoyakku::Util qw{now_datetime switch_header_params};
+use Yoyakku::Util qw{now_datetime switch_header_params chenge_time_over
+    next_day_ymd join_time join_date_time};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::Validator;
 
@@ -38,6 +39,48 @@ __PACKAGE__->mk_accessors(
     データベース接続関連の API を提供
 
 =cut
+
+=head2 change_format_datetime
+
+    日付と時刻に分かれたものを datetime 形式にもどす
+
+=cut
+
+sub change_format_datetime {
+    my $self   = shift;
+    my $params = shift;
+
+    my $start_date = $params->{getstarted_on_day};
+    my $start_time = $params->{getstarted_on_time};
+    my $end_date   = $params->{enduse_on_day};
+    my $end_time   = $params->{enduse_on_time};
+
+    # time 24:00 ~ 30:30 までの表示の場合 0:00 ~ 06:30 用に変換
+    # 時間の表示を24:00表記にもどす
+    my $split_t = chenge_time_over(
+        +{ start_time => $start_time, end_time => $end_time, }, 'normal', );
+
+    # 時間の表示を変換 日付を１日進める
+    if ( $split_t->{start_hour} >= 0 && $split_t->{start_hour} < 6 ) {
+        $start_date = next_day_ymd( $start_date );
+    }
+
+    if ( $split_t->{end_hour} >= 0 && $split_t->{end_hour} <= 6 ) {
+        $end_date = next_day_ymd( $end_date );
+    }
+
+    ( $start_time, $end_time, ) = join_time($split_t);
+
+    ( $params->{getstarted_on}, $params->{enduse_on}, ) = join_date_time(
+        +{  start_date => $start_date,
+            start_time => $start_time,
+            end_date   => $end_date,
+            end_time   => $end_time,
+        },
+    );
+
+    return $params;
+}
 
 =head2 check_validator
 

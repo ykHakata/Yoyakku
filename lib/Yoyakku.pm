@@ -66,13 +66,10 @@ sub startup {
     $r->route('/mainte_roominfo_new')
         ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_new' );
 
-    # システム管理者(reserve)
-    $r->route('/mainte_reserve_serch')
-        ->to( controller => 'Mainte::Reserve', action => 'mainte_reserve_serch' );
-
     # システム管理者(reserve) 新規 編集
-    $r->route('/mainte_reserve_new')
-        ->to( controller => 'Mainte::Reserve', action => 'mainte_reserve_new' );
+    my $mainte_reserve = qr{mainte_reserve_serch\z|mainte_reserve_new\z};
+    $r->route( '/:mainte_reserve', mainte_reserve => $mainte_reserve )
+        ->to( controller => 'Mainte::Reserve', action => 'index' );
 
     # システム管理者(acting) 新規 編集
     my $mainte_acting = qr{mainte_acting_serch\z|mainte_acting_new\z};

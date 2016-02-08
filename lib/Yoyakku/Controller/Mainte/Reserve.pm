@@ -2,6 +2,9 @@ package Yoyakku::Controller::Mainte::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Model::Mainte::Reserve;
 
+has( model_mainte_reserve => sub { Yoyakku::Model::Mainte::Reserve->new(); }
+);
+
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -18,21 +21,26 @@ use Yoyakku::Model::Mainte::Reserve;
 
 =cut
 
-sub _init {
+sub index {
     my $self  = shift;
-    my $model = Yoyakku::Model::Mainte::Reserve->new();
+    my $model = $self->model_mainte_reserve;
 
-    $model->params( $self->req->params->to_hash );
-    $model->method( uc $self->req->method );
-    $model->session( $self->session->{root_id} );
+    return $self->redirect_to('index')
+        if ( uc $self->req->method ne 'GET' )
+        && ( uc $self->req->method ne 'POST' );
 
-    my $header_stash = $model->get_header_stash_auth_mainte();
-
-    return if !$header_stash;
+    my $header_stash
+        = $model->get_header_stash_auth_mainte( $self->session->{root_id} );
+    return $self->redirect_to('index') if !$header_stash;
 
     $self->stash($header_stash);
+    $self->stash->{params} = $self->req->params->to_hash;
 
-    return $model;
+    my $path = $self->req->url->path->to_abs_string;
+
+    return $self->mainte_reserve_serch() if $path eq '/mainte_reserve_serch';
+    return $self->mainte_reserve_new()   if $path eq '/mainte_reserve_new';
+    return $self->redirect_to('mainte_list');
 }
 
 =head2 mainte_reserve_serch
@@ -43,21 +51,18 @@ sub _init {
 
 sub mainte_reserve_serch {
     my $self  = shift;
-    my $model = $self->_init();
+    my $model = $self->model_mainte_reserve();
 
-    return $self->redirect_to('/index') if !$model;
-
-    my $reserve_rows = $model->search_reserve_id_rows();
+    my $reserve_rows = $model->search_id_single_or_all_rows( 'reserve',
+        $self->stash->{params}->{id} );
 
     $self->stash(
         class        => 'mainte_reserve_serch',
         reserve_rows => $reserve_rows,
+        template     => 'mainte/mainte_reserve_serch',
+        format       => 'html',
     );
-
-    return $self->render(
-        template => 'mainte/mainte_reserve_serch',
-        format   => 'html',
-    );
+    return $self->render();
 }
 
 =head2 mainte_reserve_new
@@ -68,88 +73,89 @@ sub mainte_reserve_serch {
 
 sub mainte_reserve_new {
     my $self  = shift;
-    my $model = $self->_init();
-
-    return $self->redirect_to('/index') if !$model;
+    my $model = $self->model_mainte_reserve();
 
     return $self->redirect_to('/mainte_reserve_serch')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
-
-    return $self->redirect_to('/mainte_reserve_serch')
-        if !$model->params()->{id} && !$model->params()->{roominfo_id};
+        if !$self->stash->{params}->{id}
+        && !$self->stash->{params}->{roominfo_id};
 
     my $init_valid_params_reserve = $model->get_init_valid_params_reserve();
-    my $input_support_values      = $model->get_input_support();
+    my $input_support_values
+        = $model->get_input_support( $self->stash->{params} );
 
     $self->stash(
-        class => 'mainte_reserve_new',
+        class    => 'mainte_reserve_new',
+        template => 'mainte/mainte_reserve_new',
+        format   => 'html',
         %{$init_valid_params_reserve}, %{$input_support_values},
     );
 
-    return $self->_insert($model) if !$model->params()->{id};
-    return $self->_update($model);
+    return $self->_insert() if !$self->stash->{params}->{id};
+    return $self->_update();
 }
 
 sub _insert {
     my $self  = shift;
-    my $model = shift;
+    my $model = $self->model_mainte_reserve();
 
-    return $self->_render_reserve($model) if 'GET' eq $model->method();
+    return $self->_render_reserve() if 'GET' eq uc $self->req->method;
 
     $model->type('insert');
-    $model->flash_msg( +{ touroku => '登録完了' } );
+    $self->flash( +{ touroku => '登録完了' } );
 
-    return $self->_common($model);
+    return $self->_common();
 }
 
 sub _update {
     my $self  = shift;
-    my $model = shift;
+    my $model = $self->model_mainte_reserve();
 
-    return $self->_render_reserve( $model->get_update_form_params_reserve() )
-        if 'GET' eq $model->method();
+    if ( 'GET' eq uc $self->req->method() ) {
+        $self->stash->{params}
+            = $model->update_form_params( 'reserve', $self->stash->{params} );
+        return $self->_render_reserve();
+    }
 
     $model->type('update');
-    $model->flash_msg( +{ henkou => '修正完了' } );
+    $self->flash( +{ henkou => '修正完了' } );
 
-    return $self->_common($model);
+    return $self->_common();
 }
 
 sub _common {
     my $self  = shift;
-    my $model = shift;
+    my $model = $self->model_mainte_reserve;
 
-    my $valid_msg = $model->check_reserve_validator();
+    my $valid_msg
+        = $model->check_validator( 'reserve', $self->stash->{params} );
 
-    return $self->stash($valid_msg), $self->_render_reserve($model)
+    return $self->stash($valid_msg), $self->_render_reserve()
         if $valid_msg;
 
     # 日付の形式に変換
-    $model->params( $model->change_format_datetime() );
+    $self->stash->{params}
+        = $model->change_format_datetime( $self->stash->{params} );
 
     # 既存データとのバリデーション DB 問い合わせ
-    my $valid_msg_db = $model->check_reserve_validator_db();
+    my $valid_msg_db
+        = $model->check_reserve_validator_db( $self->stash->{params} );
 
-    return $self->stash($valid_msg_db), $self->_render_reserve($model)
+    return $self->stash($valid_msg_db), $self->_render_reserve()
         if $valid_msg_db;
 
-    $model->writing_reserve();
-    $self->flash( $model->flash_msg() );
+    $model->writing_reserve($self->stash->{params});
 
     return $self->redirect_to('mainte_reserve_serch');
 }
 
 sub _render_reserve {
-    my $self  = shift;
-    my $model = shift;
-
-    my $html = $self->render_to_string(
-        template => 'mainte/mainte_reserve_new',
-        format   => 'html',
-    )->to_string;
-
-    $model->html( \$html );
-    my $output = $model->get_fill_in_reserve();
+    my $self = shift;
+    my $html = $self->render_to_string->to_string;
+    my $args = +{
+        html   => \$html,
+        params => $self->stash->{params},
+    };
+    my $output = $self->model_mainte_reserve->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

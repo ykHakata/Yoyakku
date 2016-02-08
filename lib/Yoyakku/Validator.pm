@@ -4,6 +4,8 @@ use warnings;
 use utf8;
 use base qw{Class::Accessor::Fast};
 use FormValidator::Lite qw{Email URL DATE TIME};
+use Yoyakku::Util qw{get_start_end_tp};
+use parent 'Yoyakku::Model';
 
 =encoding utf8
 
@@ -45,6 +47,110 @@ sub get_msg_validator {
     }
 
     return $msg if $validator->has_error();
+    return;
+}
+
+=head2 reserve
+
+    バリデート処理(reserve)
+
+=cut
+
+sub reserve {
+    my $self   = shift;
+    my $params = shift;
+
+    my $check_params = [
+        roominfo_id        => [ 'INT', ],
+        getstarted_on_day  => [ 'NOT_NULL', 'DATE', ],
+        enduse_on_day      => [ 'NOT_NULL', 'DATE', ],
+        getstarted_on_time => [ 'NOT_NULL', ],
+        enduse_on_time     => [ 'NOT_NULL', ],
+        +{ on_day => [ 'getstarted_on_day', 'enduse_on_day', ], } =>
+            ['DUPLICATION'],
+        useform    => [ 'INT', ],
+        message    => [ [ 'LENGTH', 0, 20, ], ],
+        general_id => [ 'INT', ],
+        admin_id   => [ 'INT', ],
+        tel        => [ 'NOT_NULL', [ 'LENGTH', 0, 20, ], ],
+        status     => [ 'INT', ],
+    ];
+
+    my $msg_params = [
+        'roominfo_id.int' => '指定の形式で入力してください',
+        'getstarted_on_day.not_null' => '必須入力',
+        'enduse_on_day.not_null'     => '必須入力',
+        'getstarted_on_day.date' =>
+            '日付の形式で入力してください',
+        'enduse_on_day.date' => '日付の形式で入力してください',
+        'on_day.duplication' => '開始と同じ日付にして下さい',
+        'useform.int'        => '指定の形式で入力してください',
+        'message.length'     => '文字数!!',
+        'general_id.int'     => '指定の形式で入力してください',
+        'admin_id.int'       => '指定の形式で入力してください',
+        'tel.not_null'       => '必須入力',
+        'tel.length'         => '文字数!!',
+        'status.int'         => '指定の形式で入力してください',
+    ];
+
+    my $arg = +{
+        check_params => $check_params,
+        msg_params   => $msg_params,
+        params       => $params,
+    };
+
+    my $msg = $self->get_msg_validator($arg);
+
+    my $valid_msg_reserve = +{
+        id                 => '',
+        roominfo_id        => $msg->{roominfo_id},
+        getstarted_on_day  => $msg->{getstarted_on_day},
+        getstarted_on_time => $msg->{getstarted_on_time},
+        enduse_on_day      => $msg->{enduse_on_day} || $msg->{on_day},
+        enduse_on_time     => $msg->{enduse_on_time},
+        useform            => $msg->{useform},
+        message            => $msg->{message},
+        general_id         => $msg->{general_id},
+        admin_id           => $msg->{admin_id},
+        tel                => $msg->{tel},
+        status             => $msg->{status},
+    };
+
+    return $valid_msg_reserve if scalar values %{$msg};
+
+    # 日付の計算をするために通常の日時の表記に変更
+    $params = $self->change_format_datetime($params);
+
+    # 利用終了時刻が開始時刻より早くなっていないか？
+    my $check_reserve_use_time = _check_reserve_use_time($params);
+
+    $valid_msg_reserve->{enduse_on_time} = $check_reserve_use_time;
+
+    return $valid_msg_reserve if $check_reserve_use_time;
+
+    return;
+}
+
+=head2 _check_reserve_use_time
+
+    入力された利用希望時間の適正をチェック
+
+=cut
+
+sub _check_reserve_use_time {
+    my $params = shift;
+
+    my $start_date_time = $params->{getstarted_on};
+    my $end_date_time   = $params->{enduse_on};
+
+    # 日付のオブジェクトに変換
+    my ( $start_tp, $end_tp, )
+        = get_start_end_tp( $start_date_time, $end_date_time, );
+
+    # 日付のオブジェクトで比較
+    return '開始時刻より遅くして下さい' if $start_tp >= $end_tp;
+
+    # 不合格時はメッセージ、合格時は undef
     return;
 }
 
