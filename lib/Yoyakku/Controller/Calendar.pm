@@ -1,8 +1,5 @@
 package Yoyakku::Controller::Calendar;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Calendar;
-
-has( model_calendar => sub { Yoyakku::Model::Calendar->new(); } );
 
 =encoding utf8
 

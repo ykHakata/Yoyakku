@@ -1,9 +1,19 @@
 package Yoyakku;
 use Mojo::Base 'Mojolicious';
+use Yoyakku::Model::Calendar;
 
 # This method will run once at server start
 sub startup {
-  my $self = shift;
+    my $self = shift;
+
+    # 設定ファイル
+    my $config = $self->plugin('Config');
+
+    $self->helper(
+        model_calendar => sub {
+            Yoyakku::Model::Calendar->new( +{ yoyakku_conf => $config } );
+        }
+    );
 
   # Documentation browser under "/perldoc"
   $self->plugin('PODRenderer');

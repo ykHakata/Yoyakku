@@ -21,7 +21,8 @@ use Yoyakku::Validator;
 __PACKAGE__->mk_accessors(
     qw{params session method html login_row login_table login_name
         profile_row storeinfo_row template type flash_msg acting_rows
-        mail_temp mail_header mail_body login_storeinfo_row login_roominfo_rows}
+        mail_temp mail_header mail_body login_storeinfo_row login_roominfo_rows
+        yoyakku_conf}
 );
 
 =encoding utf8
@@ -565,18 +566,22 @@ sub check_auth_db_yoyakku {
 =cut
 
 sub teng {
-    my $self    = shift;
-    my $db_path = $FindBin::Bin . '/../../db/yoyakku.db';
-    my $dbh     = DBI->connect(
-        'dbi:SQLite:' . $db_path,
-        '', '',
-        +{  RaiseError        => 1,
-            PrintError        => 0,
-            AutoCommit        => 1,
-            sqlite_unicode    => 1,
-            mysql_enable_utf8 => 1,
-        },
-    );
+    my $self = shift;
+    my $conf = $self->yoyakku_conf->{db};
+
+    my $dsn_str = $conf->{dsn_str}
+        || 'dbi:SQLite:' . $FindBin::Bin . '/../../db/yoyakku.db';
+    my $user   = $conf->{user}   || '';
+    my $pass   = $conf->{pass}   || '';
+    my $option = $conf->{option} || +{
+        RaiseError        => 1,
+        PrintError        => 0,
+        AutoCommit        => 1,
+        sqlite_unicode    => 1,
+        mysql_enable_utf8 => 1,
+    };
+
+    my $dbh = DBI->connect( $dsn_str, $user, $pass, $option );
 
     my $teng = Teng::Schema::Loader->load(
         dbh       => $dbh,
