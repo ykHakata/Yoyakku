@@ -41,6 +41,58 @@ __PACKAGE__->mk_accessors(
 
 =cut
 
+
+=head2 login
+
+    テキスト入力フォームによるログイン機能
+
+=cut
+
+sub login {
+    my $self = shift;
+    my $args = shift;
+    my $teng = $self->teng();
+    my $row  = $teng->single( $args->{table}, +{ login => $args->{login} } );
+
+    # 不合格の場合 (DB検証 メルアド違い)
+    return 1 if !$row;
+
+    # 不合格の場合 (DB検証 パスワード違い)
+    return 2 if $row->password ne $args->{password};
+    return $row;
+}
+
+=head2 logged_in 
+
+    セッション確認によるログイン機能
+
+=cut
+
+sub logged_in {
+    my $self    = shift;
+    my $session = shift;
+    return   if !$session;
+    return 1 if $session->{session_admin_id};
+    return 1 if $session->{session_general_id};
+    return;
+}
+
+=head2 get_logged_in_row
+
+    セッション確認からログイン情報取得
+
+=cut
+
+sub get_logged_in_row {
+    my $self      = shift;
+    my $session   = shift;
+    my $logged_in = $self->logged_in($session);
+    return if !$logged_in;
+    my $login_row = $self->get_login_row($session);
+    return if !$login_row;
+    return $login_row;
+}
+
 =head2 change_format_datetime
 
     日付と時刻に分かれたものを datetime 形式にもどす
