@@ -14,13 +14,26 @@ subtest 'plugin conf' => sub {
 };
 
 subtest 'helper method' => sub {
-    my $model_calendar = $t->app->build_controller->model_calendar;
-    isa_ok( $model_calendar, 'Yoyakku::Model::Calendar' );
+    my $class_args = [
+        +{  method => 'model_calendar',
+            class  => 'Yoyakku::Model::Calendar',
+        },
+        +{  method => 'model_mainte_roominfo',
+            class  => 'Yoyakku::Model::Mainte::Roominfo',
+        },
+    ];
+
     my @model_methods = qw{params session method html login_row login_table
         login_name profile_row storeinfo_row template type flash_msg acting_rows
         mail_temp mail_header mail_body login_storeinfo_row login_roominfo_rows
         yoyakku_conf};
-    can_ok( $model_calendar, @model_methods );
+
+    for my $class ( @{$class_args} ) {
+        my $method = $class->{method};
+        my $model = $t->app->build_controller->$method;
+        isa_ok( $model, $class->{class} );
+        can_ok( $model, @model_methods );
+    }
 };
 
 subtest 'namespaces commands' => sub {
@@ -35,6 +48,10 @@ subtest 'namespaces commands' => sub {
 };
 
 subtest 'router' => sub {
+
+    # 302リダイレクトレスポンスの許可
+    $t->ua->max_redirects(1);
+
     my @url_collection = (
         '/',
         '/up_login',
@@ -53,8 +70,8 @@ subtest 'router' => sub {
         # '/mainte_profile_new',
         # '/mainte_storeinfo_serch',
         # '/mainte_storeinfo_new',
-        # '/mainte_roominfo_serch',
-        # '/mainte_roominfo_new',
+        '/mainte_roominfo_serch',
+        '/mainte_roominfo_new',
         # '/mainte_reserve_serch',
         # '/mainte_reserve_new',
         # '/mainte_acting_serch',

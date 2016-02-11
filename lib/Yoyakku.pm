@@ -1,6 +1,7 @@
 package Yoyakku;
 use Mojo::Base 'Mojolicious';
 use Yoyakku::Model::Calendar;
+use Yoyakku::Model::Mainte::Roominfo;
 
 # This method will run once at server start
 sub startup {
@@ -9,11 +10,19 @@ sub startup {
     # 設定ファイル
     my $config = $self->plugin('Config');
 
-    $self->helper(
-        model_calendar => sub {
-            Yoyakku::Model::Calendar->new( +{ yoyakku_conf => $config } );
-        }
-    );
+    my $class_args = [
+        +{  method => 'model_calendar',
+            class  => 'Yoyakku::Model::Calendar',
+        },
+        +{  method => 'model_mainte_roominfo',
+            class  => 'Yoyakku::Model::Mainte::Roominfo',
+        },
+    ];
+
+    for my $class ( @{$class_args} ) {
+        $self->helper( $class->{method} =>
+                sub { $class->{class}->new( +{ yoyakku_conf => $config } ) } );
+    }
 
   # Documentation browser under "/perldoc"
   $self->plugin('PODRenderer');
@@ -68,13 +77,18 @@ sub startup {
     $r->route('/mainte_storeinfo_new')
         ->to( controller => 'Mainte::Storeinfo', action => 'mainte_storeinfo_new' );
 
-    # システム管理者(roominfo)
-    $r->route('/mainte_roominfo_serch')
-        ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_serch' );
-
     # システム管理者(roominfo) 新規 編集
-    $r->route('/mainte_roominfo_new')
-        ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_new' );
+    my $mainte_roominfo = qr{mainte_roominfo_serch\z|mainte_roominfo_new\z};
+    $r->route( '/:mainte_roominfo', mainte_roominfo => $mainte_roominfo )
+        ->to( controller => 'Mainte::Roominfo', action => 'index' );
+
+    # # システム管理者(roominfo)
+    # $r->route('/mainte_roominfo_serch')
+    #     ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_serch' );
+
+    # # システム管理者(roominfo) 新規 編集
+    # $r->route('/mainte_roominfo_new')
+    #     ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_new' );
 
     # システム管理者(reserve) 新規 編集
     my $mainte_reserve = qr{mainte_reserve_serch\z|mainte_reserve_new\z};

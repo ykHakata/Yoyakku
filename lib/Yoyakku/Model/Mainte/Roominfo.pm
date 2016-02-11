@@ -21,30 +21,6 @@ use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =cut
 
-=head2 search_storeinfo_id_for_roominfo_rows
-
-    roominfo テーブル一覧作成時に利用
-
-=cut
-
-sub search_storeinfo_id_for_roominfo_rows {
-    my $self = shift;
-    return $self->search_id_single_or_all_rows( 'roominfo',
-        $self->params()->{storeinfo_id} );
-}
-
-sub get_init_valid_params_roominfo {
-    my $self = shift;
-    return $self->get_init_valid_params(
-        [qw{name endingtime_on rentalunit pricescomments remarks}] );
-}
-
-sub get_update_form_params_roominfo {
-    my $self = shift;
-    $self->get_update_form_params('roominfo');
-    return $self;
-}
-
 =head2 writing_roominfo
 
     roominfo テーブル書込み、修正に対応
@@ -53,7 +29,8 @@ sub get_update_form_params_roominfo {
 
 sub writing_roominfo {
     my $self   = shift;
-    my $params = $self->params();
+    my $params = shift;
+    my $type   = shift;
 
     # 書き込む前に開始、終了時刻変換
     my $FIELD_SEPARATOR_TIME = q{:};
@@ -108,18 +85,16 @@ sub writing_roominfo {
     };
 
     # update 以外は禁止
-    die 'update only'
-        if !$self->type() || ( $self->type() && $self->type() ne 'update' );
+    die 'update only' if !$type || ( $type && $type ne 'update' );
 
-    return $self->writing_db( 'roominfo', $create_data, $params->{id} );
-}
+    my $args = +{
+        table       => 'roominfo',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
+    };
 
-sub get_fill_in_roominfo {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
+    return $self->writing_from_db($args);
 }
 
 1;

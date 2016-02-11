@@ -22,22 +22,24 @@ use Yoyakku::Util qw{get_fill_in_params};
 =cut
 
 sub check_login {
-    my $self = shift;
+    my $self    = shift;
+    my $session = shift;
 
     return 1
-        if $self->session->{session_general_id}
-        || $self->session->{session_admin_id};
+        if $session->{session_general_id}
+        || $session->{session_admin_id};
 
     return;
 }
 
 sub check_logout {
-    my $self = shift;
+    my $self    = shift;
+    my $session = shift;
 
     return 1
-        if !$self->session->{session_general_id}
-        && !$self->session->{session_admin_id};
-
+        if !$session->{session_general_id}
+        && !$session->{session_admin_id}
+        && !$session->{root_id};
     return;
 }
 

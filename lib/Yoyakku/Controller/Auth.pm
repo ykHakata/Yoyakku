@@ -29,14 +29,6 @@ sub _init {
 
 =head2 up_login
 
-    リクエスト
-    URL: http:// ... /up_login
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login
-
     ログインフォーム入口画面の描写
 
 =cut
@@ -44,31 +36,23 @@ sub _init {
 sub up_login {
     my $self  = shift;
     my $model = $self->_init();
-    return $self->redirect_to('/index') if $model->check_login();
+    return $self->redirect_to('/index')
+        if $model->check_login( $self->session );
     $self->stash( class => 'up_login' );
     return $self->render( template => 'auth/up_login', format => 'html' );
 }
 
 =head2 up_logout
 
-    リクエスト
-    URL: http:// ... /up_logout
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_logout
-
-    レスポンス時に session データを消去
-
-    ログアウト機能
+    ログアウト機能 (レスポンス時に session データを消去)
 
 =cut
 
 sub up_logout {
     my $self = shift;
     my $model = $self->_init();
-    return $self->redirect_to('/index') if $model->check_logout();
+    return $self->redirect_to('/index')
+        if $model->check_logout( $self->session );
     $self->stash( class => 'up_logout' );
     $self->session( expires => 1 );
     return $self->render( template => 'auth/up_logout', format => 'html' );
@@ -111,7 +95,8 @@ sub up_login_general {
 
     $model->template('auth/up_login_general');
 
-    return $self->redirect_to('/index') if $model->check_login();
+    return $self->redirect_to('/index')
+        if $model->check_login( $self->session );
 
     return $self->redirect_to('/up_login')
         if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
@@ -166,7 +151,8 @@ sub up_login_admin {
 
     $model->template('auth/up_login_admin');
 
-    return $self->redirect_to('/index') if $model->check_login();
+    return $self->redirect_to('/index')
+        if $model->check_login( $self->session );
 
     return $self->redirect_to('/up_login')
         if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );

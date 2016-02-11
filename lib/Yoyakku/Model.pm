@@ -62,7 +62,7 @@ sub login {
     return $row;
 }
 
-=head2 logged_in 
+=head2 logged_in
 
     セッション確認によるログイン機能
 
@@ -310,6 +310,25 @@ sub get_storeinfo_rows_all {
     return \@storeinfo_rows;
 }
 
+=head2 get_valid_params
+
+    各種バリデート用パラメータ取得
+
+=cut
+
+sub get_valid_params {
+    my $self       = shift;
+    my $class_name = shift;
+    my $valid_params
+        = +{ mainte_roominfo =>
+            [qw{name endingtime_on rentalunit pricescomments remarks}], };
+    my $valid_params_stash = +{};
+    for my $param ( @{ $valid_params->{$class_name} } ) {
+        $valid_params_stash->{$param} = '';
+    }
+    return $valid_params_stash;
+}
+
 =head2 get_init_valid_params
 
     バリデート用パラメータ初期値
@@ -379,6 +398,37 @@ sub get_create_data {
         },
     };
     return $create_data->{$table_name};
+}
+
+=head2 writing_from_db
+
+    データベースへの書き込み(引数を改定)
+
+=cut
+
+sub writing_from_db {
+    my $self = shift;
+    my $args = shift;
+
+    my $table       = $args->{table};
+    my $create_data = $args->{create_data};
+    my $update_id   = $args->{update_id};
+    my $type        = $args->{type};
+
+    my $teng = $self->teng();
+
+    my $insert_row;
+    if ( $type eq 'insert' ) {
+        $insert_row = $teng->insert( $table, $create_data, );
+    }
+    elsif ( $type eq 'update' ) {
+        delete $create_data->{create_on};
+        $insert_row = $teng->single( $table, +{ id => $update_id }, );
+        $insert_row->update($create_data);
+    }
+    die 'not $insert_row' if !$insert_row;
+
+    return $insert_row;
 }
 
 =head2 writing_db
@@ -619,7 +669,11 @@ sub check_auth_db_yoyakku {
 
 sub teng {
     my $self = shift;
-    my $conf = $self->yoyakku_conf->{db};
+    my $conf;
+
+    if ( $self->yoyakku_conf ) {
+        $conf = $self->yoyakku_conf->{db};
+    }
 
     my $dsn_str = $conf->{dsn_str}
         || 'dbi:SQLite:' . $FindBin::Bin . '/../../db/yoyakku.db';

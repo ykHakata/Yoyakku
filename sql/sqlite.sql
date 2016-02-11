@@ -164,25 +164,25 @@ CREATE TABLE storeinfo (                                    -- 店舗情報
 DROP TABLE roominfo;
 
 CREATE TABLE roominfo(                                      -- 部屋情報設定
-    id                   INTEGER PRIMARY KEY AUTOINCREMENT, -- 部屋情報ID
-    storeinfo_id         INTEGER,                           -- 店舗ID
-    name                 TEXT,                              -- 部屋名
-    starttime_on         TEXT,                              -- 開始時刻
-    endingtime_on        TEXT,                              -- 終了時刻
-    rentalunit           INTEGER,                           -- 貸出単位
-    time_change          INTEGER,                           -- 開始時間切り替え
-    pricescomments       TEXT,                              -- 料金コメント
-    privatepermit        INTEGER,                           -- 個人練習許可設定
-    privatepeople        INTEGER,                           -- 個人練習許可人数
-    privateconditions    INTEGER,                           -- 個人練習許可条件
-    bookinglimit         INTEGER,                           -- 予約制限
-    cancellimit          INTEGER,                           -- キャンセル制限
-    remarks              TEXT,                              -- 備考
-    webpublishing        INTEGER,                           -- web公開設定
-    webreserve           INTEGER,                           -- web予約受付設定
-    status               INTEGER,                           -- ステータス
-    create_on            TEXT,                              -- 登録日
-    modify_on            TEXT                               -- 修正日
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT, -- 部屋情報ID (例: 10, 自動採番)
+    storeinfo_id         INTEGER,                           -- 店舗ID (例: 10, 自動採番)
+    name                 TEXT,                              -- 部屋名 (例: Aスタ)
+    starttime_on         TEXT,                              -- 開始時刻 (例: 6: '6:00', 7: '7:00', ... 29: '29:00')
+    endingtime_on        TEXT,                              -- 終了時刻 (例: 7: '7:00', 8: '8:00', ...  30: '30:00')
+    rentalunit           INTEGER,                           -- 貸出単位 (例: 1: 1時間, 2: 2時間)
+    time_change          INTEGER,                           -- 開始時間切り替え (例: 0: ':00', 1: ':30')
+    pricescomments       TEXT,                              -- 料金コメント (例: １時間1,500から)
+    privatepermit        INTEGER,                           -- 個人練習許可設定 (例: 0: 許可する, 1: 許可しない)
+    privatepeople        INTEGER,                           -- 個人練習許可人数 (例: 1: 1人まで, 2: 2人まで, 3: 3人まで)
+    privateconditions    INTEGER,                           -- 個人練習許可条件 (例: 0: 当日予約のみ, 1: １日前より, 2: ２日前より, ... 7: ７日前より, 8: 条件なし, )
+    bookinglimit         INTEGER,                           -- 予約制限 (例: 0: 制限なし, 1: １時間前, 2: ２時間前, 3: ３時間前)
+    cancellimit          INTEGER,                           -- キャンセル制限 (例: 0: 当日不可, 1: １日前不可, 2: ２日前不可, ... 7: ７日前不可, 8: 制限なし)
+    remarks              TEXT,                              -- 備考 (例: 3～4人向け)
+    webpublishing        INTEGER,                           -- web公開設定 (例: 0: 公開する, 1: 公開しない)
+    webreserve           INTEGER,                           -- web予約受付設定 (例: 0: 今月のみ, 1: １ヶ月先, 2: ２ヶ月先, 3: ３ヶ月先)
+    status               INTEGER,                           -- ステータス (例: 0: 利用停止, 1: 利用開始)
+    create_on            TEXT,                              -- 登録日 (例: 2015-06-06 12:24:12, datetime 形式)
+    modify_on            TEXT                               -- 修正日 (例: 2015-06-06 12:24:12, datetime 形式)
 );
 
 DROP TABLE post;
