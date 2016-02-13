@@ -1,0 +1,2 @@
+部屋情報ID, 店舗ID, 部屋名, 開始時刻, 終了時刻, 貸出単位, 開始時間切り替え, 料金コメント, 個人練習許可設定, 個人練習許可人数, 個人練習許可条件, 予約制限, キャンセル制限, 備考, web公開設定, web予約受付設定, ステータス, 登録日, 修正日
+id, storeinfo_id, name, starttime_on, endingtime_on, rentalunit, time_change, pricescomments, privatepermit, privatepeople, privateconditions, bookinglimit, cancellimit, remarks, webpublishing, webreserve, status, create_on, modify_on

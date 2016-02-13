@@ -1,0 +1,2 @@
+予約ID, 部屋情報ID, 利用開始日時, 利用終了日時, 利用形態名, 伝言板, 一般ユーザーID, 管理ユーザーID, 電話番号, ステータス, 登録日, 修正日
+id, roominfo_id, getstarted_on, enduse_on, useform, message, general_id, admin_id, tel, status, create_on, modify_on

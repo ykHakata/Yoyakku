@@ -1,0 +1,2 @@
+店舗ID, 地域区分ID, 管理ユーザーID, 店舗名, 店舗アイコン, 住所郵便, 住所都道府県, 住所市町村, 住所以下, 電話番号, メールアドレス, 店舗備考欄, 店舗リンク先, 地図位置情報, ステータス, 登録日, 修正日
+id, region_id, admin_id, name, icon, post, state, cities, addressbelow, tel, mail, remarks, url, locationinfor, status, create_on, modify_on

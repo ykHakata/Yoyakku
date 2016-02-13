@@ -1,0 +1,2 @@
+個人情報ID, 一般ユーザーID, 管理ユーザーID, ニックネーム, 氏名, ふりがな, 電話番号, メールアドレス, ステータス, 登録日, 修正日
+id, general_id, admin_id, nick_name, full_name, phonetic_name, tel, mail, status, create_on, modify_on

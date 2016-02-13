@@ -1,0 +1,2 @@
+広告ID, 広告種別, 店舗ID, 地域区分ID, 広告リンク先, 表示開始日時, 表示終了日時, 広告名, イベント広告日時, 広告内容, 登録日, 修正日
+id, kind, storeinfo_id, region_id, url, displaystart_on, displayend_on, name, event_date, content, create_on, modify_on
