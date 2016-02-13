@@ -319,9 +319,14 @@ sub get_storeinfo_rows_all {
 sub get_valid_params {
     my $self       = shift;
     my $class_name = shift;
-    my $valid_params
-        = +{ mainte_roominfo =>
-            [qw{name endingtime_on rentalunit pricescomments remarks}], };
+    my $valid_params = +{
+        mainte_roominfo =>
+            [qw{name endingtime_on rentalunit pricescomments remarks}],
+        mainte_storeinfo => [
+            qw{name post state cities addressbelow tel mail remarks url
+                locationinfor status}
+        ],
+    };
     my $valid_params_stash = +{};
     for my $param ( @{ $valid_params->{$class_name} } ) {
         $valid_params_stash->{$param} = '';

@@ -2,6 +2,7 @@ package Yoyakku;
 use Mojo::Base 'Mojolicious';
 use Yoyakku::Model::Calendar;
 use Yoyakku::Model::Mainte::Roominfo;
+use Yoyakku::Model::Mainte::Storeinfo;
 
 # This method will run once at server start
 sub startup {
@@ -16,6 +17,9 @@ sub startup {
         },
         +{  method => 'model_mainte_roominfo',
             class  => 'Yoyakku::Model::Mainte::Roominfo',
+        },
+        +{  method => 'model_mainte_storeinfo',
+            class  => 'Yoyakku::Model::Mainte::Storeinfo',
         },
     ];
 
@@ -69,26 +73,15 @@ sub startup {
     $r->route('/mainte_profile_new')
         ->to( controller => 'Mainte::Profile', action => 'mainte_profile_new' );
 
-    # システム管理者(storeinfo)
-    $r->route('/mainte_storeinfo_serch')
-        ->to( controller => 'Mainte::Storeinfo', action => 'mainte_storeinfo_serch' );
-
     # システム管理者(storeinfo) 新規 編集
-    $r->route('/mainte_storeinfo_new')
-        ->to( controller => 'Mainte::Storeinfo', action => 'mainte_storeinfo_new' );
+    my $mainte_storeinfo = qr{mainte_storeinfo_serch\z|mainte_storeinfo_new\z};
+    $r->route( '/:mainte_storeinfo', mainte_storeinfo => $mainte_storeinfo )
+        ->to( controller => 'Mainte::Storeinfo', action => 'index' );
 
     # システム管理者(roominfo) 新規 編集
     my $mainte_roominfo = qr{mainte_roominfo_serch\z|mainte_roominfo_new\z};
     $r->route( '/:mainte_roominfo', mainte_roominfo => $mainte_roominfo )
         ->to( controller => 'Mainte::Roominfo', action => 'index' );
-
-    # # システム管理者(roominfo)
-    # $r->route('/mainte_roominfo_serch')
-    #     ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_serch' );
-
-    # # システム管理者(roominfo) 新規 編集
-    # $r->route('/mainte_roominfo_new')
-    #     ->to( controller => 'Mainte::Roominfo', action => 'mainte_roominfo_new' );
 
     # システム管理者(reserve) 新規 編集
     my $mainte_reserve = qr{mainte_reserve_serch\z|mainte_reserve_new\z};

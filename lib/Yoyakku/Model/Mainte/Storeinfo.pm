@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Util qw{get_fill_in_params};
 
 =encoding utf8
 
@@ -21,33 +20,6 @@ use Yoyakku::Util qw{get_fill_in_params};
 
 =cut
 
-=head2 search_storeinfo_id_rows
-
-    storeinfo テーブル一覧作成時に利用
-
-=cut
-
-sub search_storeinfo_id_rows {
-    my $self = shift;
-    return $self->search_id_single_or_all_rows( 'storeinfo',
-        $self->params()->{storeinfo_id} );
-}
-
-sub get_init_valid_params_storeinfo {
-    my $self = shift;
-    return $self->get_init_valid_params(
-        [   qw{name post state cities addressbelow tel mail remarks url
-                locationinfor status }
-        ]
-    );
-}
-
-sub get_update_form_params_storeinfo {
-    my $self = shift;
-    $self->get_update_form_params('storeinfo');
-    return $self;
-}
-
 =head2 search_zipcode_for_address
 
     郵便番号から住所を検索、値を返却
@@ -56,19 +28,18 @@ sub get_update_form_params_storeinfo {
 
 sub search_zipcode_for_address {
     my $self   = shift;
-    my $params = $self->params();
+    my $params = shift;
     my $teng   = $self->teng();
 
     my $post_row = $teng->single( 'post', +{ post_id => $params->{post} }, );
 
     if ($post_row) {
         $params->{region_id} = $post_row->region_id;
-        $params->{post}      = $post_row->post;
+        $params->{post}      = $post_row->post_id;
         $params->{state}     = $post_row->state;
         $params->{cities}    = $post_row->cities;
     }
-    $self->params($params);
-    return $self;
+    return $params;
 }
 
 =head2 writing_storeinfo
@@ -78,24 +49,23 @@ sub search_zipcode_for_address {
 =cut
 
 sub writing_storeinfo {
-    my $self = shift;
+    my $self   = shift;
+    my $params = shift;
+    my $type   = shift;
 
-    my $create_data = $self->get_create_data('storeinfo');
+    my $create_data = $self->get_create_data( 'storeinfo', $params );
 
     # update 以外は禁止
-    die 'update only'
-        if !$self->type() || ( $self->type() && $self->type() ne 'update' );
+    die 'update only' if !$type || ( $type && $type ne 'update' );
 
-    return $self->writing_db( 'storeinfo', $create_data,
-        $self->params()->{id} );
-}
+    my $args = +{
+        table       => 'storeinfo',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
+    };
 
-sub get_fill_in_storeinfo {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
+    return $self->writing_from_db($args);
 }
 
 1;

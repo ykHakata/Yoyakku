@@ -35,23 +35,23 @@ CREATE TABLE profile (                                  -- 個人情報
 
 DROP TABLE IF EXISTS storeinfo;
 CREATE TABLE storeinfo (                                    -- 店舗情報
-    id                  INTEGER PRIMARY KEY AUTOINCREMENT,  -- 店舗ID
-    region_id           INTEGER,                            -- 地域区分ID
-    admin_id            INTEGER,                            -- 管理ユーザーID
-    name                TEXT,                               -- 店舗名
-    icon                TEXT,                               -- 店舗アイコン
-    post                TEXT,                               -- 住所郵便
-    state               TEXT,                               -- 住所都道府県
-    cities              TEXT,                               -- 住所市町村
-    addressbelow        TEXT,                               -- 住所以下
-    tel                 TEXT,                               -- 電話番号
-    mail                TEXT,                               -- メールアドレス
-    remarks             TEXT,                               -- 店舗備考欄
-    url                 TEXT,                               -- 店舗リンク先
-    locationinfor       TEXT,                               -- 地図位置情報
-    status              INTEGER,                            -- ステータス
-    create_on           TEXT,                               -- 登録日
-    modify_on           TEXT                                -- 修正日
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,  -- 店舗ID (例: 10, 自動採番)
+    region_id           INTEGER,                            -- 地域区分ID (例: 10, 自動採番)
+    admin_id            INTEGER,                            -- 管理ユーザーID (例: 10, 自動採番)
+    name                TEXT,                               -- 店舗名 (例: ヨヤックスタジオ)
+    icon                TEXT,                               -- 店舗アイコン (例: ファイルアップロード)
+    post                TEXT,                               -- 住所郵便 (例: 8120041)
+    state               TEXT,                               -- 住所都道府県 (例: 福岡県)
+    cities              TEXT,                               -- 住所市町村 (例: 福岡市博多区)
+    addressbelow        TEXT,                               -- 住所以下 (例: 吉塚4丁目12-9)
+    tel                 TEXT,                               -- 電話番号 (例: 080-3456-4321, )
+    mail                TEXT,                               -- メールアドレス (例: yoyakku@gmail.com, メールアドレス形式)
+    remarks             TEXT,                               -- 店舗備考欄 (例: 駅前の便利な場所にあるスタジオ)
+    url                 TEXT,                               -- 店舗リンク先 (例: http://www.yoyakku.com/)
+    locationinfor       TEXT,                               -- 地図位置情報 (例: 位置情報のテキスト)
+    status              INTEGER,                            -- ステータス (例: 0: web公開, 1: web非公開, 2: 削除)
+    create_on           TEXT,                               -- 登録日 (例: 2015-06-06 12:24:12, datetime 形式)
+    modify_on           TEXT                                -- 修正日 (例: 2015-06-06 12:24:12, datetime 形式)
 );
 
 DROP TABLE IF EXISTS roominfo;
