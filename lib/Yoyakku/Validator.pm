@@ -50,6 +50,60 @@ sub get_msg_validator {
     return;
 }
 
+
+=head2 profile
+
+    バリデート処理(profile)
+
+=cut
+
+sub profile {
+    my $self   = shift;
+    my $params = shift;
+
+    my $check_params = [
+        general_id    => [ 'INT', ],
+        admin_id      => [ 'INT', ],
+        nick_name     => [ [ 'LENGTH', 0, 20, ], ],
+        full_name     => [ [ 'LENGTH', 0, 20, ], ],
+        phonetic_name => [ [ 'LENGTH', 0, 20, ], ],
+        tel           => [ [ 'LENGTH', 0, 20, ], ],
+        mail          => [ 'EMAIL_LOOSE', ],
+    ];
+
+    my $msg_params = [
+        'general_id.not_null' => '指定の形式で入力してください',
+        'admin_id.not_null'   => '指定の形式で入力してください',
+        'nick_name.length'    => '文字数!!',
+        'full_name.length'    => '文字数!!',
+        'phonetic_name.length' => '文字数!!',
+        'tel.length'           => '文字数!!',
+        'mail.email_loose'     => 'Eメールを入力してください',
+    ];
+
+    my $arg = +{
+        check_params => $check_params,
+        msg_params   => $msg_params,
+        params       => $params,
+    };
+
+    my $msg = $self->get_msg_validator($arg);
+
+    return if !$msg;
+
+    my $valid_msg_profile = +{
+        general_id    => $msg->{general_id},
+        admin_id      => $msg->{admin_id},
+        nick_name     => $msg->{nick_name},
+        full_name     => $msg->{full_name},
+        phonetic_name => $msg->{phonetic_name},
+        tel           => $msg->{tel},
+        mail          => $msg->{mail},
+    };
+
+    return $valid_msg_profile;
+}
+
 =head2 reserve
 
     バリデート処理(reserve)

@@ -20,17 +20,17 @@ CREATE TABLE general (                              -- 一般ユーザー
 
 DROP TABLE IF EXISTS profile;
 CREATE TABLE profile (                                  -- 個人情報
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 個人情報ID
-    general_id      INTEGER,                            -- 一般ユーザーID
-    admin_id        INTEGER,                            -- 管理ユーザーID
-    nick_name       TEXT,                               -- ニックネーム
-    full_name       TEXT,                               -- 氏名
-    phonetic_name   TEXT,                               -- ふりがな
-    tel             TEXT,                               -- 電話番号
-    mail            TEXT,                               -- メールアドレス
-    status          INTEGER,                            -- ステータス
-    create_on       TEXT,                               -- 登録日
-    modify_on       TEXT                                -- 修正日
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 個人情報ID (例: 5)
+    general_id      INTEGER,                            -- 一般ユーザーID (例: 5, admin_id 存在時 null)
+    admin_id        INTEGER,                            -- 管理ユーザーID (例: 5, general_id 存在時 null)
+    nick_name       TEXT,                               -- ニックネーム (例: 'ヨヤック')
+    full_name       TEXT,                               -- 氏名 (例: '黒田清隆')
+    phonetic_name   TEXT,                               -- ふりがな (例: 'くろだ きよたか')
+    tel             TEXT,                               -- 電話番号 (例: '080-3456-4321')
+    mail            TEXT,                               -- メールアドレス (例: 'yoyakku@gmail.com')
+    status          INTEGER,                            -- ステータス (例: 0: 未承認, 1: 承認済み, 2: 削除)
+    create_on       TEXT,                               -- 登録日 (例: '2015-06-06 12:24:12')
+    modify_on       TEXT                                -- 修正日 (例: '2015-06-06 12:24:12')
 );
 
 DROP TABLE IF EXISTS storeinfo;

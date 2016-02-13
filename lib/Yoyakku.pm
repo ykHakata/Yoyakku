@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious';
 use Yoyakku::Model::Calendar;
 use Yoyakku::Model::Mainte::Roominfo;
 use Yoyakku::Model::Mainte::Storeinfo;
+use Yoyakku::Model::Mainte::Profile;
 
 # This method will run once at server start
 sub startup {
@@ -20,6 +21,9 @@ sub startup {
         },
         +{  method => 'model_mainte_storeinfo',
             class  => 'Yoyakku::Model::Mainte::Storeinfo',
+        },
+        +{  method => 'model_mainte_profile',
+            class  => 'Yoyakku::Model::Mainte::Profile',
         },
     ];
 
@@ -65,13 +69,10 @@ sub startup {
     $r->route('/mainte_general_new')
         ->to( controller => 'Mainte::General', action => 'mainte_general_new' );
 
-    # システム管理者(profile)
-    $r->route('/mainte_profile_serch')
-        ->to( controller => 'Mainte::Profile', action => 'mainte_profile_serch' );
-
     # システム管理者(profile) 新規 編集
-    $r->route('/mainte_profile_new')
-        ->to( controller => 'Mainte::Profile', action => 'mainte_profile_new' );
+    my $mainte_profile = qr{mainte_profile_serch\z|mainte_profile_new\z};
+    $r->route( '/:mainte_profile', mainte_profile => $mainte_profile )
+        ->to( controller => 'Mainte::Profile', action => 'index' );
 
     # システム管理者(storeinfo) 新規 編集
     my $mainte_storeinfo = qr{mainte_storeinfo_serch\z|mainte_storeinfo_new\z};

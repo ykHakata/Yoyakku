@@ -41,7 +41,6 @@ __PACKAGE__->mk_accessors(
 
 =cut
 
-
 =head2 login
 
     テキスト入力フォームによるログイン機能
@@ -115,11 +114,11 @@ sub change_format_datetime {
 
     # 時間の表示を変換 日付を１日進める
     if ( $split_t->{start_hour} >= 0 && $split_t->{start_hour} < 6 ) {
-        $start_date = next_day_ymd( $start_date );
+        $start_date = next_day_ymd($start_date);
     }
 
     if ( $split_t->{end_hour} >= 0 && $split_t->{end_hour} <= 6 ) {
-        $end_date = next_day_ymd( $end_date );
+        $end_date = next_day_ymd($end_date);
     }
 
     ( $start_time, $end_time, ) = join_time($split_t);
@@ -317,8 +316,8 @@ sub get_storeinfo_rows_all {
 =cut
 
 sub get_valid_params {
-    my $self       = shift;
-    my $class_name = shift;
+    my $self         = shift;
+    my $class_name   = shift;
     my $valid_params = +{
         mainte_roominfo =>
             [qw{name endingtime_on rentalunit pricescomments remarks}],
@@ -326,7 +325,11 @@ sub get_valid_params {
             qw{name post state cities addressbelow tel mail remarks url
                 locationinfor status}
         ],
+        mainte_profile => [
+            qw{general_id admin_id nick_name full_name phonetic_name tel mail}
+        ],
     };
+
     my $valid_params_stash = +{};
     for my $param ( @{ $valid_params->{$class_name} } ) {
         $valid_params_stash->{$param} = '';
@@ -363,6 +366,18 @@ sub get_create_data {
     my $params     = shift || $self->params();
 
     my $create_data = +{
+        profile => +{
+            general_id => $params->{general_id} || undef,
+            admin_id   => $params->{admin_id}   || undef,
+            nick_name  => $params->{nick_name},
+            full_name  => $params->{full_name},
+            phonetic_name => $params->{phonetic_name},
+            tel           => $params->{tel},
+            mail          => $params->{mail},
+            status        => $params->{status},
+            create_on     => now_datetime(),
+            modify_on     => now_datetime(),
+        },
         storeinfo => +{
             region_id => $params->{region_id} || undef,
             admin_id  => $params->{admin_id}  || undef,
@@ -382,9 +397,9 @@ sub get_create_data {
             modify_on     => now_datetime(),
         },
         roominfo => +{
-            storeinfo_id      => $params->{storeinfo_id} || undef,
-            name              => $params->{name},
-            starttime_on      => $params->{starttime_on},
+            storeinfo_id => $params->{storeinfo_id} || undef,
+            name         => $params->{name},
+            starttime_on => $params->{starttime_on},
             endingtime_on     => $params->{endingtime_on},
             rentalunit        => $params->{rentalunit},
             time_change       => $params->{time_change},
@@ -652,7 +667,7 @@ sub check_auth_db_yoyakku {
 
         $self->storeinfo_row($storeinfo_row);
         $self->login_storeinfo_row($storeinfo_row);
-        $self->login_roominfo_rows(\@roominfo_rows);
+        $self->login_roominfo_rows( \@roominfo_rows );
     }
     $self->login_name($login_name);
 
