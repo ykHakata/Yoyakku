@@ -5,6 +5,7 @@ use Yoyakku::Model::Mainte::Roominfo;
 use Yoyakku::Model::Mainte::Storeinfo;
 use Yoyakku::Model::Mainte::Profile;
 use Yoyakku::Model::Mainte::General;
+use Yoyakku::Model::Mainte::Admin;
 
 # This method will run once at server start
 sub startup {
@@ -28,6 +29,9 @@ sub startup {
         },
         +{  method => 'model_mainte_general',
             class  => 'Yoyakku::Model::Mainte::General',
+        },
+        +{  method => 'model_mainte_admin',
+            class  => 'Yoyakku::Model::Mainte::Admin',
         },
     ];
 
@@ -61,9 +65,10 @@ sub startup {
     my $mainte = qr{mainte_list};
     $r->route( '/:action', action => $mainte )->to( controller => 'mainte' );
 
-    # システム管理者(admin)
-    my $m_admin = qr{mainte_registrant_serch|mainte_registrant_new};
-    $r->route( '/:action', action => $m_admin )->to( controller => 'Mainte::Admin' );
+    # システム管理者(admin) 新規 編集
+    my $mainte_admin = qr{mainte_registrant_serch|mainte_registrant_new};
+    $r->route( '/:mainte_admin', mainte_admin => $mainte_admin )
+        ->to( controller => 'Mainte::Admin', action => 'index' );
 
     # システム管理者(general) 新規 編集
     my $mainte_general = qr{mainte_general_serch\z|mainte_general_new\z};

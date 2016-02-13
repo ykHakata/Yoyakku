@@ -328,7 +328,8 @@ sub get_valid_params {
         mainte_profile => [
             qw{general_id admin_id nick_name full_name phonetic_name tel mail}
         ],
-        mainte_general => [ qw{login password} ],
+        mainte_general => [qw{login password}],
+        mainte_admin   => [qw{login password}],
     };
 
     my $valid_params_stash = +{};
@@ -364,9 +365,16 @@ sub get_init_valid_params {
 sub get_create_data {
     my $self       = shift;
     my $table_name = shift;
-    my $params     = shift || $self->params();
+    my $params     = shift;
 
     my $create_data = +{
+        admin => +{
+            login     => $params->{login},
+            password  => $params->{password},
+            status    => $params->{status},
+            create_on => now_datetime(),
+            modify_on => now_datetime(),
+        },
         general => +{
             login     => $params->{login},
             password  => $params->{password},

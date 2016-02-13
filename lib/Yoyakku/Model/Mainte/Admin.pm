@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =encoding utf8
 
@@ -21,72 +20,6 @@ use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =cut
 
-=head2 search_admin_id_rows
-
-    admin テーブル一覧作成時に利用
-
-=cut
-
-sub search_admin_id_rows {
-    my $self = shift;
-    return $self->search_id_single_or_all_rows( 'admin',
-        $self->params()->{admin_id} );
-}
-
-=head2 get_init_valid_params_admin
-
-    admin 入力フォーム表示の際に利用
-
-=cut
-
-sub get_init_valid_params_admin {
-    my $self = shift;
-    return $self->get_init_valid_params( [qw{login password}] );
-}
-
-=head2 get_update_form_params_admin
-
-    admin 修正用入力フォーム表示の際に利用
-
-=cut
-
-sub get_update_form_params_admin {
-    my $self = shift;
-    $self->get_update_form_params('admin');
-    return $self;
-}
-
-=head2 check_admin_validator
-
-    admin 入力値バリデートチェックに利用
-
-=cut
-
-sub check_admin_validator {
-    my $self = shift;
-
-    my $check_params = [
-        login    => [ 'NOT_NULL', ],
-        password => [ 'NOT_NULL', ],
-    ];
-
-    my $msg_params = [
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-    ];
-
-    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
-
-    return if !$msg;
-
-    my $valid_msg_admin = +{
-        login    => $msg->{login},
-        password => $msg->{password},
-    };
-
-    return $valid_msg_admin;
-}
-
 =head2 check_admin_validator_db
 
     admin 入力値データベースとのバリデートチェックに利用
@@ -94,10 +27,11 @@ sub check_admin_validator {
 =cut
 
 sub check_admin_validator_db {
-    my $self = shift;
+    my $self   = shift;
+    my $params = shift;
 
     my $valid_msg_admin_db = +{};
-    my $check_admin_msg    = $self->check_login_name('admin');
+    my $check_admin_msg = $self->check_login_name( 'admin', $params );
 
     if ($check_admin_msg) {
         $valid_msg_admin_db = +{ login => $check_admin_msg };
@@ -113,19 +47,20 @@ sub check_admin_validator_db {
 =cut
 
 sub writing_admin {
-    my $self = shift;
-    my $teng = $self->teng();
+    my $self   = shift;
+    my $params = shift;
+    my $type   = shift;
 
-    my $create_data = +{
-        login     => $self->params()->{login},
-        password  => $self->params()->{password},
-        status    => $self->params()->{status},
-        create_on => now_datetime(),
-        modify_on => now_datetime(),
+    my $create_data = $self->get_create_data( 'admin', $params );
+
+    my $args = +{
+        table       => 'admin',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
     };
 
-    my $insert_admin_row
-        = $self->writing_db( 'admin', $create_data, $self->params()->{id} );
+    my $insert_admin_row = $self->writing_from_db($args);
 
     die 'not $insert_admin_row' if !$insert_admin_row;
 
@@ -147,20 +82,6 @@ sub writing_admin {
     return;
 }
 
-=head2 get_fill_in_registrant
-
-    表示用 html を生成
-
-=cut
-
-sub get_fill_in_registrant {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
-}
-
 1;
 
 __END__
@@ -178,8 +99,6 @@ __END__
 =item * L<parent>
 
 =item * L<Yoyakku::Model::Mainte>
-
-=item * L<Yoyakku::Util>
 
 =back
 
