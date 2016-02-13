@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =encoding utf8
 
@@ -20,17 +19,6 @@ use Yoyakku::Util qw{now_datetime get_fill_in_params};
     Acting コントローラーのロジック API
 
 =cut
-
-=head2 get_init_valid_params_acting
-
-    入力フォーム表示の際に利用
-
-=cut
-
-sub get_init_valid_params_acting {
-    my $self = shift;
-    return $self->get_init_valid_params( [qw{general_id storeinfo_id}] );
-}
 
 =head2 get_general_rows_all
 
@@ -84,15 +72,18 @@ sub check_acting_validator_db {
 sub writing_acting {
     my $self   = shift;
     my $params = shift;
+    my $type   = shift;
 
-    my $create_data = +{
-        general_id   => $params->{general_id}   || undef,
-        storeinfo_id => $params->{storeinfo_id} || undef,
-        status       => $params->{status},
-        create_on    => now_datetime(),
-        modify_on    => now_datetime(),
+    my $create_data = $self->get_create_data( 'acting', $params );
+
+    my $args = +{
+        table       => 'acting',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
     };
-    return $self->writing_db( 'acting', $create_data, $params->{id} );
+
+    return $self->writing_from_db($args);
 }
 
 1;
@@ -112,8 +103,6 @@ __END__
 =item * L<parent>
 
 =item * L<Yoyakku::Model::Mainte>
-
-=item * L<Yoyakku::Util>
 
 =back
 

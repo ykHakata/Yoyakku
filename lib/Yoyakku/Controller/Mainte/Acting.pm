@@ -1,8 +1,5 @@
 package Yoyakku::Controller::Mainte::Acting;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Mainte::Acting;
-
-has( model_mainte_acting => sub { Yoyakku::Model::Mainte::Acting->new(); } );
 
 =encoding utf8
 
@@ -17,6 +14,12 @@ has( model_mainte_acting => sub { Yoyakku::Model::Mainte::Acting->new(); } );
 =head1 SYNOPSIS (概要)
 
     システム管理者 acting 関連機能のリクエストをコントロール
+
+=cut
+
+=head2 index
+
+    コントローラー内のルーティング、セッション確認
 
 =cut
 
@@ -44,7 +47,7 @@ sub index {
 
 =head2 mainte_acting_serch
 
-    acting テーブル登録情報の一覧、検索
+    acting テーブル登録情報の確認、検索
 
 =cut
 
@@ -74,7 +77,7 @@ sub mainte_acting_new {
     my $self  = shift;
     my $model = $self->model_mainte_acting();
 
-    my $init_valid_params_acting = $model->get_init_valid_params_acting();
+    my $valid_params = $model->get_valid_params('mainte_acting');
 
     $self->stash(
         class          => 'mainte_acting_new',
@@ -82,7 +85,7 @@ sub mainte_acting_new {
         storeinfo_rows => $model->get_storeinfo_rows_all(),
         template       => 'mainte/mainte_acting_new',
         format         => 'html',
-        %{$init_valid_params_acting},
+        %{$valid_params},
     );
 
     return $self->_insert() if !$self->stash->{params}->{id};
@@ -95,7 +98,7 @@ sub _insert {
 
     return $self->_render_acting() if 'GET' eq uc $self->req->method;
 
-    $model->type('insert');
+    $self->stash->{type} = 'insert';
     $self->flash( +{ touroku => '登録完了' } );
 
     return $self->_common();
@@ -111,9 +114,8 @@ sub _update {
         return $self->_render_acting();
     }
 
-    $model->type('update');
+    $self->stash->{type} = 'update';
     $self->flash( +{ henkou => '修正完了' } );
-
     return $self->_common();
 }
 
@@ -132,7 +134,7 @@ sub _common {
     return $self->stash($valid_msg_db), $self->_render_acting()
         if $valid_msg_db;
 
-    $model->writing_acting( $self->stash->{params} );
+    $model->writing_acting( $self->stash->{params}, $self->stash->{type} );
 
     return $self->redirect_to('mainte_acting_serch');
 }
@@ -159,8 +161,6 @@ __END__
 =item * L<Mojo::Base>
 
 =item * L<Mojolicious::Controller>
-
-=item * L<Yoyakku::Model::Mainte::Acting>
 
 =back
 
