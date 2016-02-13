@@ -79,13 +79,13 @@ sub mainte_registrant_new {
     my $self  = shift;
     my $model = $self->model_mainte_admin();
 
-    my $valid_params_general = $model->get_valid_params('mainte_admin');
+    my $valid_params = $model->get_valid_params('mainte_admin');
 
     $self->stash(
         class    => 'mainte_registrant_new',
         template => 'mainte/mainte_registrant_new',
         format   => 'html',
-        %{$valid_params_general},
+        %{$valid_params},
     );
 
     return $self->_insert() if !$self->stash->{params}->{id};
