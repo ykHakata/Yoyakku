@@ -50,6 +50,43 @@ sub get_msg_validator {
     return;
 }
 
+=head2 general
+
+    バリデート処理(general)
+
+=cut
+
+sub general {
+    my $self   = shift;
+    my $params = shift;
+
+    my $check_params = [
+        login    => [ 'NOT_NULL', ],
+        password => [ 'NOT_NULL', ],
+    ];
+
+    my $msg_params = [
+        'login.not_null'    => '必須入力',
+        'password.not_null' => '必須入力',
+    ];
+
+    my $arg = +{
+        check_params => $check_params,
+        msg_params   => $msg_params,
+        params       => $params,
+    };
+
+    my $msg = $self->get_msg_validator($arg);
+
+    return if !$msg;
+
+    my $valid_msg_general = +{
+        login    => $msg->{login},
+        password => $msg->{password},
+    };
+
+    return $valid_msg_general;
+}
 
 =head2 profile
 

@@ -328,6 +328,7 @@ sub get_valid_params {
         mainte_profile => [
             qw{general_id admin_id nick_name full_name phonetic_name tel mail}
         ],
+        mainte_general => [ qw{login password} ],
     };
 
     my $valid_params_stash = +{};
@@ -366,6 +367,13 @@ sub get_create_data {
     my $params     = shift || $self->params();
 
     my $create_data = +{
+        general => +{
+            login     => $params->{login},
+            password  => $params->{password},
+            status    => $params->{status},
+            create_on => now_datetime(),
+            modify_on => now_datetime(),
+        },
         profile => +{
             general_id => $params->{general_id} || undef,
             admin_id   => $params->{admin_id}   || undef,

@@ -27,6 +27,9 @@ subtest 'helper method' => sub {
         +{  method => 'model_mainte_profile',
             class  => 'Yoyakku::Model::Mainte::Profile',
         },
+        +{  method => 'model_mainte_general',
+            class  => 'Yoyakku::Model::Mainte::General',
+        },
     ];
 
     my @model_methods = qw{params session method html login_row login_table

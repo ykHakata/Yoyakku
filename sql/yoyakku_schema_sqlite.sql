@@ -10,12 +10,12 @@ CREATE TABLE admin (                                -- 管理ユーザー
 
 DROP TABLE IF EXISTS general;
 CREATE TABLE general (                              -- 一般ユーザー
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,  -- 一般ユーザーID
-    login       TEXT,                               -- ログインID名
-    password    TEXT,                               -- ログインパスワード
-    status      INTEGER,                            -- ステータス
-    create_on   TEXT,                               -- 登録日
-    modify_on   TEXT                                -- 修正日
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,  -- 一般ユーザーID (例: 5)
+    login       TEXT,                               -- ログインID名 (例: 'yoyakku@gmail.com')
+    password    TEXT,                               -- ログインパスワード (例: 'yoyakku0000')
+    status      INTEGER,                            -- ステータス (例: 0: 未承認, 1: 承認済み, 2: 削除)
+    create_on   TEXT,                               -- 登録日 (例: '2015-06-06 12:24:12')
+    modify_on   TEXT                                -- 修正日 (例: '2015-06-06 12:24:12')
 );
 
 DROP TABLE IF EXISTS profile;

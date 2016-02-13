@@ -78,7 +78,7 @@ sub get_table_columns {
 sub check_login_name {
     my $self   = shift;
     my $table  = shift;
-    my $params = $self->params();
+    my $params = shift || $self->params();
 
     my $login = $params->{login};
     my $id    = $params->{id};
