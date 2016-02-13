@@ -1,8 +1,5 @@
 package Yoyakku::Controller::Mainte::Ads;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Mainte::Ads;
-
-has( model_mainte_ads => sub { Yoyakku::Model::Mainte::Ads->new(); } );
 
 =encoding utf8
 
@@ -17,6 +14,12 @@ has( model_mainte_ads => sub { Yoyakku::Model::Mainte::Ads->new(); } );
 =head1 SYNOPSIS (概要)
 
     システム管理者 ads 関連機能のリクエストをコントロール
+
+=cut
+
+=head2 index
+
+    コントローラー内のルーティング、セッション確認
 
 =cut
 
@@ -44,7 +47,7 @@ sub index {
 
 =head2 mainte_ads_serch
 
-    ads テーブル登録情報の一覧、検索
+    ads テーブル登録情報の確認、検索
 
 =cut
 
@@ -74,7 +77,7 @@ sub mainte_ads_new {
     my $self  = shift;
     my $model = $self->model_mainte_ads();
 
-    my $init_valid_params_ads = $model->get_init_valid_params_ads();
+    my $valid_params = $model->get_valid_params('mainte_ads');
 
     $self->stash(
         class          => 'mainte_ads_new',
@@ -82,7 +85,7 @@ sub mainte_ads_new {
         region_rows    => $model->get_region_rows_pref(),
         template       => 'mainte/mainte_ads_new',
         format         => 'html',
-        %{$init_valid_params_ads},
+        %{$valid_params},
     );
 
     return $self->_insert() if !$self->stash->{params}->{id};
@@ -95,8 +98,8 @@ sub _insert {
 
     return $self->_render_ads() if 'GET' eq uc $self->req->method;
 
-    $model->type('insert');
-    $model->flash_msg( +{ touroku => '登録完了' } );
+    $self->stash->{type} = 'insert';
+    $self->flash( +{ touroku => '登録完了' } );
 
     return $self->_common();
 }
@@ -111,9 +114,8 @@ sub _update {
         return $self->_render_ads();
     }
 
-    $model->type('update');
-    $model->flash_msg( +{ henkou => '修正完了' } );
-
+    $self->stash->{type} = 'update';
+    $self->flash( +{ henkou => '修正完了' } );
     return $self->_common();
 }
 
@@ -125,8 +127,7 @@ sub _common {
 
     return $self->stash($valid_msg), $self->_render_ads() if $valid_msg;
 
-    $model->writing_ads( $self->stash->{params} );
-    $self->flash( $model->flash_msg() );
+    $model->writing_ads( $self->stash->{params}, $self->stash->{type} );
 
     return $self->redirect_to('mainte_ads_serch');
 }

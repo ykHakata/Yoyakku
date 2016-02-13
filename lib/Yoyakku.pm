@@ -6,6 +6,7 @@ use Yoyakku::Model::Mainte::Storeinfo;
 use Yoyakku::Model::Mainte::Profile;
 use Yoyakku::Model::Mainte::General;
 use Yoyakku::Model::Mainte::Admin;
+use Yoyakku::Model::Mainte::Ads;
 
 # This method will run once at server start
 sub startup {
@@ -32,6 +33,9 @@ sub startup {
         },
         +{  method => 'model_mainte_admin',
             class  => 'Yoyakku::Model::Mainte::Admin',
+        },
+        +{  method => 'model_mainte_ads',
+            class  => 'Yoyakku::Model::Mainte::Ads',
         },
     ];
 
