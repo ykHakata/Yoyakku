@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =encoding utf8
 
@@ -63,26 +62,7 @@ sub writing_roominfo {
     $params->{starttime_on}  = sprintf '%08s', $params->{starttime_on};
     $params->{endingtime_on} = sprintf '%08s', $params->{endingtime_on};
 
-    my $create_data = +{
-        storeinfo_id      => $params->{storeinfo_id} || undef,
-        name              => $params->{name},
-        starttime_on      => $params->{starttime_on},
-        endingtime_on     => $params->{endingtime_on},
-        rentalunit        => $params->{rentalunit},
-        time_change       => $params->{time_change},
-        pricescomments    => $params->{pricescomments},
-        privatepermit     => $params->{privatepermit},
-        privatepeople     => $params->{privatepeople},
-        privateconditions => $params->{privateconditions},
-        bookinglimit      => $params->{bookinglimit},
-        cancellimit       => $params->{cancellimit},
-        remarks           => $params->{remarks},
-        webpublishing     => $params->{webpublishing},
-        webreserve        => $params->{webreserve},
-        status            => $params->{status},
-        create_on         => now_datetime(),
-        modify_on         => now_datetime(),
-    };
+    my $create_data = $self->get_create_data( 'roominfo', $params );
 
     # update 以外は禁止
     die 'update only' if !$type || ( $type && $type ne 'update' );

@@ -89,6 +89,7 @@ subtest 'mainte_roominfo_new' => sub {
     $t->ua->max_redirects(1);
     $t->post_ok('/mainte_roominfo_new' => form => $params)->status_is(200);
     $t->content_like(qr{\Q修正完了\E});
+    $t->content_like(qr{\QAB\E});
     test_logout($t);
 };
 
