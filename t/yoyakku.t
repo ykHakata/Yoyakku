@@ -39,6 +39,9 @@ subtest 'helper method' => sub {
         +{  method => 'model_mainte_acting',
             class  => 'Yoyakku::Model::Mainte::Acting',
         },
+        +{  method => 'model_mainte_post',
+            class  => 'Yoyakku::Model::Mainte::Post',
+        },
     ];
 
     my @model_methods = qw{params session method html login_row login_table
@@ -98,8 +101,8 @@ subtest 'router' => sub {
         '/mainte_ads_new',
         # '/mainte_region_serch',
         # '/mainte_region_new',
-        # '/mainte_post_serch',
-        # '/mainte_post_new',
+        '/mainte_post_serch',
+        '/mainte_post_new',
         '/index',
         '/index_next_m',
         '/index_next_two_m',
