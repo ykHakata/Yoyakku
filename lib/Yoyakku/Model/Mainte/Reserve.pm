@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Util qw{now_datetime split_time chenge_time_over};
+use Yoyakku::Util qw{split_time chenge_time_over};
 use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
 =encoding utf8
@@ -21,15 +21,6 @@ use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
     Reserve コントローラーのロジック API
 
 =cut
-
-sub get_init_valid_params_reserve {
-    my $self = shift;
-    return $self->get_init_valid_params(
-        [   qw{id roominfo_id getstarted_on_day getstarted_on_time enduse_on_day
-                enduse_on_time useform message general_id admin_id tel status}
-        ]
-    );
-}
 
 sub get_input_support {
     my $self   = shift;
@@ -99,12 +90,6 @@ sub _get_reserve_fillIn_row {
     return $reserve_fillIn_rows[0];
 }
 
-sub get_update_form_params_reserve {
-    my $self = shift;
-    $self->get_update_form_params('reserve');
-    return $self;
-}
-
 =head2 check_reserve_validator_db
 
     DB 問い合わせバリデート
@@ -114,7 +99,7 @@ sub get_update_form_params_reserve {
 sub check_reserve_validator_db {
     my $self   = shift;
     my $params = shift;
-    my $type   = $self->type();
+    my $type   = shift;
 
     my $valid_msg_reserve_db = +{};
 
@@ -316,21 +301,18 @@ sub _check_useform {
 sub writing_reserve {
     my $self   = shift;
     my $params = shift;
+    my $type   = shift;
 
-    my $create_data = +{
-        roominfo_id   => $params->{roominfo_id},
-        getstarted_on => $params->{getstarted_on},
-        enduse_on     => $params->{enduse_on},
-        useform       => $params->{useform},
-        message       => $params->{message},
-        general_id    => $params->{general_id},
-        admin_id      => $params->{admin_id},
-        tel           => $params->{tel},
-        status        => $params->{status},
-        create_on     => now_datetime(),
-        modify_on     => now_datetime(),
+    my $create_data = $self->get_create_data( 'reserve', $params );
+
+    my $args = +{
+        table       => 'reserve',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
     };
-    return $self->writing_db( 'reserve', $create_data, $params->{id} );
+
+    return $self->writing_from_db($args);
 }
 
 1;

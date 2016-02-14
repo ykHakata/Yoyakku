@@ -332,7 +332,12 @@ sub get_valid_params {
         mainte_admin   => [qw{login password}],
         mainte_ads =>
             [qw{url displaystart_on displayend_on name content event_date}],
-        mainte_acting => [qw{general_id storeinfo_id}],
+        mainte_acting  => [qw{general_id storeinfo_id}],
+        mainte_reserve => [
+            qw{id roominfo_id getstarted_on_day getstarted_on_time
+                enduse_on_day enduse_on_time useform message general_id
+                admin_id tel status}
+        ],
     };
 
     my $valid_params_stash = +{};
@@ -371,6 +376,19 @@ sub get_create_data {
     my $params     = shift;
 
     my $create_data = +{
+        reserve => +{
+            roominfo_id   => $params->{roominfo_id},
+            getstarted_on => $params->{getstarted_on},
+            enduse_on     => $params->{enduse_on},
+            useform       => $params->{useform},
+            message       => $params->{message},
+            general_id    => $params->{general_id},
+            admin_id      => $params->{admin_id},
+            tel           => $params->{tel},
+            status        => $params->{status},
+            create_on     => now_datetime(),
+            modify_on     => now_datetime(),
+        },
         acting => +{
             general_id   => $params->{general_id}   || undef,
             storeinfo_id => $params->{storeinfo_id} || undef,

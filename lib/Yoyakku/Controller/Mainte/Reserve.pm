@@ -1,9 +1,5 @@
 package Yoyakku::Controller::Mainte::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Mainte::Reserve;
-
-has( model_mainte_reserve => sub { Yoyakku::Model::Mainte::Reserve->new(); }
-);
 
 =encoding utf8
 
@@ -18,6 +14,12 @@ has( model_mainte_reserve => sub { Yoyakku::Model::Mainte::Reserve->new(); }
 =head1 SYNOPSIS (概要)
 
     システム管理者 reserve 関連機能のリクエストをコントロール
+
+=cut
+
+=head2 index
+
+    コントローラー内のルーティング、セッション確認
 
 =cut
 
@@ -45,7 +47,7 @@ sub index {
 
 =head2 mainte_reserve_serch
 
-    reserve テーブル登録情報の一覧、検索
+    reserve テーブル登録情報の確認、検索
 
 =cut
 
@@ -79,7 +81,8 @@ sub mainte_reserve_new {
         if !$self->stash->{params}->{id}
         && !$self->stash->{params}->{roominfo_id};
 
-    my $init_valid_params_reserve = $model->get_init_valid_params_reserve();
+    my $valid_params = $model->get_valid_params('mainte_reserve');
+
     my $input_support_values
         = $model->get_input_support( $self->stash->{params} );
 
@@ -87,7 +90,7 @@ sub mainte_reserve_new {
         class    => 'mainte_reserve_new',
         template => 'mainte/mainte_reserve_new',
         format   => 'html',
-        %{$init_valid_params_reserve}, %{$input_support_values},
+        %{$valid_params}, %{$input_support_values},
     );
 
     return $self->_insert() if !$self->stash->{params}->{id};
@@ -100,7 +103,7 @@ sub _insert {
 
     return $self->_render_reserve() if 'GET' eq uc $self->req->method;
 
-    $model->type('insert');
+    $self->stash->{type} = 'insert';
     $self->flash( +{ touroku => '登録完了' } );
 
     return $self->_common();
@@ -116,9 +119,8 @@ sub _update {
         return $self->_render_reserve();
     }
 
-    $model->type('update');
+    $self->stash->{type} = 'update';
     $self->flash( +{ henkou => '修正完了' } );
-
     return $self->_common();
 }
 
@@ -138,12 +140,13 @@ sub _common {
 
     # 既存データとのバリデーション DB 問い合わせ
     my $valid_msg_db
-        = $model->check_reserve_validator_db( $self->stash->{params} );
+        = $model->check_reserve_validator_db( $self->stash->{params},
+        $self->stash->{type} );
 
     return $self->stash($valid_msg_db), $self->_render_reserve()
         if $valid_msg_db;
 
-    $model->writing_reserve($self->stash->{params});
+    $model->writing_reserve( $self->stash->{params}, $self->stash->{type} );
 
     return $self->redirect_to('mainte_reserve_serch');
 }
@@ -170,8 +173,6 @@ __END__
 =item * L<Mojo::Base>
 
 =item * L<Mojolicious::Controller>
-
-=item * L<Yoyakku::Model::Mainte::Reserve>
 
 =back
 

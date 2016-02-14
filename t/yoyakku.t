@@ -45,6 +45,9 @@ subtest 'helper method' => sub {
         +{  method => 'model_mainte_region',
             class  => 'Yoyakku::Model::Mainte::Region',
         },
+        +{  method => 'model_mainte_reserve',
+            class  => 'Yoyakku::Model::Mainte::Reserve',
+        },
     ];
 
     my @model_methods = qw{params session method html login_row login_table
@@ -96,8 +99,8 @@ subtest 'router' => sub {
         '/mainte_storeinfo_new',
         '/mainte_roominfo_serch',
         '/mainte_roominfo_new',
-        # '/mainte_reserve_serch',
-        # '/mainte_reserve_new',
+        '/mainte_reserve_serch',
+        '/mainte_reserve_new',
         '/mainte_acting_serch',
         '/mainte_acting_new',
         '/mainte_ads_serch',
