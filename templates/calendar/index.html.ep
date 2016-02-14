@@ -28,7 +28,7 @@
             %# 第一週目の時だけの
             % if ($i==0) {
               %# 取り出した日付が今日より未来の場合予約リンク、日付、曜日を挿入
-              % if ($day >= $now_date->mday) {
+              % if ($day && $day >= $now_date->mday) {
               <a href="javascript:void(0)" onclick="document.cal_name<%= $iii %>.submit();return false;"><%= $day %>(<%= $caps->[$j] %>)</a>
               <form name="cal_name<%= $iii %>" method="get" action="region_state">
               % my $result = sprintf("%02d", $day );
@@ -41,7 +41,7 @@
             %# 第一週目以外のばあい
             % } else {
               %# 取り出した日付が今日より未来の場合予約リンク、日付を挿入
-              % if ($day >= $now_date->mday) {
+              % if ($day && $day >= $now_date->mday) {
                 <a href="javascript:void(0)" onclick="document.cal_name<%= $iii %>.submit();return false;"><%= $day %></a>
                 <form name="cal_name<%= $iii %>" method="get" action="region_state">
                 % my $result = sprintf("%02d", $day );
