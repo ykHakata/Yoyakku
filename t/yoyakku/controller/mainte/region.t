@@ -4,6 +4,7 @@ use open ':std', ':encoding(utf8)';
 use Test::More;
 use Test::Mojo;
 use Data::Dumper;
+$ENV{MOJO_MODE} = 'testing';
 
 BEGIN {
     use_ok('Yoyakku::Controller::Mainte::Region') || print "Bail out!\n";
@@ -12,6 +13,7 @@ BEGIN {
 my $t            = Test::Mojo->new('Yoyakku');
 my $config       = $t->app->config;
 my $login_params = $config->{mainte}->{login_account};
+$t->app->commands->start_app( 'Yoyakku', 'init_db', );
 
 =head2 method
 

@@ -3,11 +3,14 @@ use Mojo::Base -strict;
 use Test::More;
 use Test::Mojo;
 use Data::Dumper;
+$ENV{MOJO_MODE} = 'testing';
 
 BEGIN { use_ok('Yoyakku::Model') || print "Bail out!\n"; }
 
-my $t      = Test::Mojo->new('Yoyakku');
-my $config = $t->app->config;
+my $t            = Test::Mojo->new('Yoyakku');
+my $config       = $t->app->config;
+my $login_params = $config->{mainte}->{login_account};
+$t->app->commands->start_app( 'Yoyakku', 'init_db', );
 
 =head2 method
 
@@ -115,20 +118,28 @@ subtest 'login' => sub {
     my $args = +{};
 
     subtest 'success' => sub {
-        $args = +{ table => 'admin', login => 'MRT', password => 'MRT' };
+        $args = +{
+            table    => 'admin',
+            login    => 'yoyakku@gmail.com',
+            password => 'yoyakku'
+        };
         my $login_row = $obj->login($args);
         isa_ok( $login_row, 'Yoyakku::DB::Row::Admin' );
-        is( $login_row->login, 'MRT', 'login' );
+        is( $login_row->login, 'yoyakku@gmail.com', 'login' );
     };
 
     subtest 'fail not id' => sub {
-        $args = +{ table => 'admin', login => 'MR', password => 'MRT' };
+        $args = +{ table => 'admin', login => 'MR', password => 'yoyakku' };
         my $login_row = $obj->login($args);
         is( $login_row, 1, 'not id' );
     };
 
     subtest 'fail not password' => sub {
-        $args = +{ table => 'admin', login => 'MRT', password => 'MR' };
+        $args = +{
+            table    => 'admin',
+            login    => 'yoyakku@gmail.com',
+            password => 'MR'
+        };
         my $login_row = $obj->login($args);
         is( $login_row, 2, 'not password' );
     };

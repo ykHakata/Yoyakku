@@ -3,13 +3,16 @@ use Mojo::Base -strict;
 use Test::More;
 use Test::Mojo;
 use Data::Dumper;
+$ENV{MOJO_MODE} = 'testing';
 
 BEGIN {
     use_ok('Yoyakku::Controller::Mainte::Acting') || print "Bail out!\n";
 }
 
-my $t      = Test::Mojo->new('Yoyakku');
-my $config = $t->app->config;
+my $t            = Test::Mojo->new('Yoyakku');
+my $config       = $t->app->config;
+my $login_params = $config->{mainte}->{login_account};
+$t->app->commands->start_app( 'Yoyakku', 'init_db', );
 
 =head2 method
 
@@ -38,12 +41,12 @@ subtest 'index' => sub {
     # get, post 以外は トップページにリダイレクト
     $t->head_ok('/mainte_acting_serch')->status_is(302);
     $t->head_ok('/mainte_acting_new')->status_is(302);
-    is( $t->tx->res->headers->location, 'index', 'location ok' );
+    $t->header_is( Location => 'index' );
 
     # ログインセッション無き場合トップページ
     $t->get_ok('/mainte_acting_serch')->status_is(302);
     $t->get_ok('/mainte_acting_new')->status_is(302);
-    is( $t->tx->res->headers->location, 'index', 'location ok' );
+    $t->header_is( Location => 'index' );
 };
 
 =head2 mainte_acting_serch
@@ -53,10 +56,10 @@ subtest 'index' => sub {
 =cut
 
 subtest 'mainte_acting_serch' => sub {
-    test_login($t);
+    $t->post_ok( '/root_login' => form => $login_params );
     my $msg = qr{\Q代行リスト／テーブル[acting]\E};
     $t->get_ok('/mainte_acting_serch')->status_is(200)->content_like($msg);
-    test_logout($t);
+    $t->get_ok('/up_logout');
 };
 
 =head2 mainte_acting_new
@@ -69,10 +72,10 @@ subtest 'mainte_acting_new' => sub {
 
     # ログインなし
     $t->get_ok('/mainte_acting_new')->status_is(302);
-    is( $t->tx->res->headers->location, 'index', 'location ok' );
+    $t->header_is( Location => 'index' );
 
     # ログイン (編集指定 id なし 新規作成)
-    test_login($t);
+    $t->post_ok( '/root_login' => form => $login_params );
     $t->get_ok('/mainte_acting_new')->status_is(200);
     $t->content_like(qr{\Q代行リスト／テーブル[acting]\E});
     $t->element_exists('input[name=id][value=][type=text]');
@@ -84,36 +87,22 @@ subtest 'mainte_acting_new' => sub {
     $t->element_exists('input[name=id][value=2][type=text]');
 
     my $update_params
-        = $t->app->model_mainte_admin->update_form_params( 'acting', $params );
+        = $t->app->model_mainte_acting->update_form_params( 'acting',
+        $params );
 
     # storeinfo_id を変更
     $params = +{
         id           => $update_params->{id},
-        general_id   => $update_params->{general_id},
+        general_id   => $update_params->{general_id} || undef,
         storeinfo_id => 2,
+        status       => $update_params->{status},
     };
     $t->ua->max_redirects(1);
     $t->post_ok( '/mainte_acting_new' => form => $params )->status_is(200);
     $t->content_like(qr{\Q修正完了\E});
     $t->content_like(qr{\Q2\E});
-    test_logout($t);
+    $t->get_ok('/up_logout');
 };
-
-sub test_login {
-    my $self  = shift;
-    my $login = +{
-        url    => '/root_login',
-        params => +{ login => 'yoyakku', password => '0520' },
-    };
-    $self->post_ok( $login->{url} => form => $login->{params} );
-    return $self;
-}
-
-sub test_logout {
-    my $self = shift;
-    $self->get_ok('/up_logout');
-    return $self;
-}
 
 done_testing();
 

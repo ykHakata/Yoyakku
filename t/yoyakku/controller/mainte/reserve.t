@@ -3,6 +3,7 @@ use Mojo::Base -strict;
 use Test::More;
 use Test::Mojo;
 use Data::Dumper;
+$ENV{MOJO_MODE} = 'testing';
 
 BEGIN {
     use_ok('Yoyakku::Controller::Mainte::Reserve') || print "Bail out!\n";
@@ -11,6 +12,7 @@ BEGIN {
 my $t            = Test::Mojo->new('Yoyakku');
 my $config       = $t->app->config;
 my $login_params = $config->{mainte}->{login_account};
+$t->app->commands->start_app( 'Yoyakku', 'init_db', );
 
 =head2 method
 
@@ -78,15 +80,17 @@ subtest 'mainte_reserve_new' => sub {
     $t->header_is( Location => '/mainte_reserve_serch' );
 
     # ログイン (roominfo_id あり 新規作成)
-    my $params = +{ roominfo_id => 31 };
+    my $params = +{ roominfo_id => 2 };
     $t->get_ok( '/mainte_reserve_new' => form => $params )->status_is(200);
-    $t->content_like(qr{\Q予約履歴入力フォーム／テーブル[reserve]\E});
+    $t->content_like(
+        qr{\Q予約履歴入力フォーム／テーブル[reserve]\E});
     $t->element_exists('input[name=id][value=][type=text]');
 
     # 指定のレコード表示
     $params = +{ id => 1 };
     $t->get_ok( '/mainte_reserve_new' => form => $params )->status_is(200);
-    $t->content_like(qr{\Q予約履歴入力フォーム／テーブル[reserve]\E});
+    $t->content_like(
+        qr{\Q予約履歴入力フォーム／テーブル[reserve]\E});
     $t->element_exists('input[name=id][value=1][type=text]');
 
     my $update_params
@@ -95,7 +99,7 @@ subtest 'mainte_reserve_new' => sub {
 
     # tel を変更
     $params = +{
-        id => $update_params->{id},
+        id                 => $update_params->{id},
         roominfo_id        => $update_params->{roominfo_id},
         getstarted_on_day  => $update_params->{getstarted_on_day},
         enduse_on_day      => $update_params->{enduse_on_day},

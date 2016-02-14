@@ -16,8 +16,13 @@ use Yoyakku::Model::Mainte::Reserve;
 sub startup {
     my $self = shift;
 
+    my $home      = $self->home->to_string;
+    my $mode      = $self->mode;
+    my $moniker   = $self->moniker;
+    my $conf_file = qq{$home/etc/$moniker.$mode.conf};
+
     # 設定ファイル
-    my $config = $self->plugin('Config');
+    my $config = $self->plugin( Config => +{ file => $conf_file } );
 
     my $class_args = [
         +{  method => 'model_calendar',

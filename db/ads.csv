@@ -1,2 +1,3 @@
 広告ID, 広告種別, 店舗ID, 地域区分ID, 広告リンク先, 表示開始日時, 表示終了日時, 広告名, イベント広告日時, 広告内容, 登録日, 修正日
 id, kind, storeinfo_id, region_id, url, displaystart_on, displayend_on, name, event_date, content, create_on, modify_on
+1,1,1,40000,http://www.yoyakku.com/,2013-03-07,2013-03-07,アニソン好きの集い,2013/3/7 18:00-22:00,とくにエヴァンゲリオン関連が好きな人は必須のイベントです。,2016-02-14 20:28:21,2016-02-14 20:28:21
