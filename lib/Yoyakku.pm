@@ -9,6 +9,7 @@ use Yoyakku::Model::Mainte::Admin;
 use Yoyakku::Model::Mainte::Ads;
 use Yoyakku::Model::Mainte::Acting;
 use Yoyakku::Model::Mainte::Post;
+use Yoyakku::Model::Mainte::Region;
 
 # This method will run once at server start
 sub startup {
@@ -44,6 +45,9 @@ sub startup {
         },
         +{  method => 'model_mainte_post',
             class  => 'Yoyakku::Model::Mainte::Post',
+        },
+        +{  method => 'model_mainte_region',
+            class  => 'Yoyakku::Model::Mainte::Region',
         },
     ];
 

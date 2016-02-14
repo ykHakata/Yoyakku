@@ -1,8 +1,5 @@
 package Yoyakku::Controller::Mainte::Region;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Mainte::Region;
-
-has( model_mainte_region => sub { Yoyakku::Model::Mainte::Region->new(); } );
 
 =encoding utf8
 
@@ -17,6 +14,12 @@ has( model_mainte_region => sub { Yoyakku::Model::Mainte::Region->new(); } );
 =head1 SYNOPSIS (概要)
 
     システム管理者 region 関連機能のリクエストをコントロール
+
+=cut
+
+=head2 index
+
+    コントローラー内のルーティング、セッション確認
 
 =cut
 
@@ -43,7 +46,7 @@ sub index {
 
 =head2 mainte_region_serch
 
-    region テーブル登録情報の一覧、検索
+    region テーブル登録情報の確認、検索
 
 =cut
 

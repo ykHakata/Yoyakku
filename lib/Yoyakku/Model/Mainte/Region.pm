@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Mainte';
-use Yoyakku::Util qw{now_datetime get_fill_in_params};
 
 =encoding utf8
 
@@ -28,7 +27,7 @@ use Yoyakku::Util qw{now_datetime get_fill_in_params};
 =cut
 
 sub search_region_id_rows {
-    my $self = shift;
+    my $self   = shift;
     my $params = shift;
     return $self->search_id_single_or_all_rows( 'region', $params->{id} );
 }
@@ -51,8 +50,6 @@ __END__
 =item * L<parent>
 
 =item * L<Yoyakku::Model::Mainte>
-
-=item * L<Yoyakku::Util>
 
 =back
 
