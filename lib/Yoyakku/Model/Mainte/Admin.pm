@@ -75,7 +75,7 @@ sub writing_admin {
     my $new_admin_status = $insert_admin_row->status;
 
     # 承認済み 1 の場合該当の storeinfo のデータを検索
-    if ( $new_admin_status eq '1' ) {
+    if ( $new_admin_status && $new_admin_status eq '1' ) {
         $self->insert_admin_relation($new_admin_id);
     }
 
