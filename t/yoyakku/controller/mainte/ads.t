@@ -3,7 +3,6 @@ use Mojo::Base -strict;
 use Test::More;
 use Test::Mojo;
 use Data::Dumper;
-$ENV{MOJO_MODE} = 'testing';
 
 BEGIN {
     use_ok('Yoyakku::Controller::Mainte::Ads') || print "Bail out!\n";
