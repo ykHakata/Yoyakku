@@ -17,52 +17,42 @@ subtest 'plugin conf' => sub {
 };
 
 subtest 'helper method' => sub {
-    my $class_args = [
-        +{  method => 'model_calendar',
-            class  => 'Yoyakku::Model::Calendar',
-        },
-        +{  method => 'model_mainte_roominfo',
-            class  => 'Yoyakku::Model::Mainte::Roominfo',
-        },
-        +{  method => 'model_mainte_storeinfo',
-            class  => 'Yoyakku::Model::Mainte::Storeinfo',
-        },
-        +{  method => 'model_mainte_profile',
-            class  => 'Yoyakku::Model::Mainte::Profile',
-        },
-        +{  method => 'model_mainte_general',
-            class  => 'Yoyakku::Model::Mainte::General',
-        },
-        +{  method => 'model_mainte_admin',
-            class  => 'Yoyakku::Model::Mainte::Admin',
-        },
-        +{  method => 'model_mainte_ads',
-            class  => 'Yoyakku::Model::Mainte::Ads',
-        },
-        +{  method => 'model_mainte_acting',
-            class  => 'Yoyakku::Model::Mainte::Acting',
-        },
-        +{  method => 'model_mainte_post',
-            class  => 'Yoyakku::Model::Mainte::Post',
-        },
-        +{  method => 'model_mainte_region',
-            class  => 'Yoyakku::Model::Mainte::Region',
-        },
-        +{  method => 'model_mainte_reserve',
-            class  => 'Yoyakku::Model::Mainte::Reserve',
-        },
-    ];
+    my $class_args = +{
+        model_mainte_acting    => 'Yoyakku::Model::Mainte::Acting',
+        model_mainte_admin     => 'Yoyakku::Model::Mainte::Admin',
+        model_mainte_ads       => 'Yoyakku::Model::Mainte::Ads',
+        model_mainte_general   => 'Yoyakku::Model::Mainte::General',
+        model_mainte_post      => 'Yoyakku::Model::Mainte::Post',
+        model_mainte_profile   => 'Yoyakku::Model::Mainte::Profile',
+        model_mainte_region    => 'Yoyakku::Model::Mainte::Region',
+        model_mainte_reserve   => 'Yoyakku::Model::Mainte::Reserve',
+        model_mainte_roominfo  => 'Yoyakku::Model::Mainte::Roominfo',
+        model_mainte_storeinfo => 'Yoyakku::Model::Mainte::Storeinfo',
+        model_calendar         => 'Yoyakku::Model::Calendar',
+    };
 
     my @model_methods = qw{params session method html login_row login_table
         login_name profile_row storeinfo_row template type flash_msg acting_rows
         mail_temp mail_header mail_body login_storeinfo_row login_roominfo_rows
-        yoyakku_conf};
+        yoyakku_conf model_stash};
 
-    for my $class ( @{$class_args} ) {
-        my $method = $class->{method};
+    while ( my ( $method, $class, ) = each %{$class_args} ) {
         my $model = $t->app->build_controller->$method;
-        isa_ok( $model, $class->{class} );
+        isa_ok( $model, $class );
         can_ok( $model, @model_methods );
+    }
+
+    # model 値を保時
+    while ( my ( $method, $class, ) = each %{$class_args} ) {
+        my $model = $t->app->build_controller->$method;
+
+        my $model_method = 'model_stash';
+
+        $model->$model_method('stash tast');
+        is( $model->$model_method, 'stash tast', "$method method test" );
+
+        $model = $t->app->build_controller->$method;
+        is( $model->$model_method, 'stash tast', "$method method test try" );
     }
 };
 

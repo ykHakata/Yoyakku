@@ -1,16 +1,16 @@
 package Yoyakku;
 use Mojo::Base 'Mojolicious';
-use Yoyakku::Model::Calendar;
-use Yoyakku::Model::Mainte::Roominfo;
-use Yoyakku::Model::Mainte::Storeinfo;
-use Yoyakku::Model::Mainte::Profile;
-use Yoyakku::Model::Mainte::General;
+use Yoyakku::Model::Mainte::Acting;
 use Yoyakku::Model::Mainte::Admin;
 use Yoyakku::Model::Mainte::Ads;
-use Yoyakku::Model::Mainte::Acting;
+use Yoyakku::Model::Mainte::General;
 use Yoyakku::Model::Mainte::Post;
+use Yoyakku::Model::Mainte::Profile;
 use Yoyakku::Model::Mainte::Region;
 use Yoyakku::Model::Mainte::Reserve;
+use Yoyakku::Model::Mainte::Roominfo;
+use Yoyakku::Model::Mainte::Storeinfo;
+use Yoyakku::Model::Calendar;
 
 # This method will run once at server start
 sub startup {
@@ -24,45 +24,26 @@ sub startup {
     # 設定ファイル
     my $config = $self->plugin( Config => +{ file => $conf_file } );
 
-    my $class_args = [
-        +{  method => 'model_calendar',
-            class  => 'Yoyakku::Model::Calendar',
-        },
-        +{  method => 'model_mainte_roominfo',
-            class  => 'Yoyakku::Model::Mainte::Roominfo',
-        },
-        +{  method => 'model_mainte_storeinfo',
-            class  => 'Yoyakku::Model::Mainte::Storeinfo',
-        },
-        +{  method => 'model_mainte_profile',
-            class  => 'Yoyakku::Model::Mainte::Profile',
-        },
-        +{  method => 'model_mainte_general',
-            class  => 'Yoyakku::Model::Mainte::General',
-        },
-        +{  method => 'model_mainte_admin',
-            class  => 'Yoyakku::Model::Mainte::Admin',
-        },
-        +{  method => 'model_mainte_ads',
-            class  => 'Yoyakku::Model::Mainte::Ads',
-        },
-        +{  method => 'model_mainte_acting',
-            class  => 'Yoyakku::Model::Mainte::Acting',
-        },
-        +{  method => 'model_mainte_post',
-            class  => 'Yoyakku::Model::Mainte::Post',
-        },
-        +{  method => 'model_mainte_region',
-            class  => 'Yoyakku::Model::Mainte::Region',
-        },
-        +{  method => 'model_mainte_reserve',
-            class  => 'Yoyakku::Model::Mainte::Reserve',
-        },
-    ];
+    my $class_args = +{
+        model_mainte_acting    => 'Yoyakku::Model::Mainte::Acting',
+        model_mainte_admin     => 'Yoyakku::Model::Mainte::Admin',
+        model_mainte_ads       => 'Yoyakku::Model::Mainte::Ads',
+        model_mainte_general   => 'Yoyakku::Model::Mainte::General',
+        model_mainte_post      => 'Yoyakku::Model::Mainte::Post',
+        model_mainte_profile   => 'Yoyakku::Model::Mainte::Profile',
+        model_mainte_region    => 'Yoyakku::Model::Mainte::Region',
+        model_mainte_reserve   => 'Yoyakku::Model::Mainte::Reserve',
+        model_mainte_roominfo  => 'Yoyakku::Model::Mainte::Roominfo',
+        model_mainte_storeinfo => 'Yoyakku::Model::Mainte::Storeinfo',
+        model_calendar         => 'Yoyakku::Model::Calendar',
+    };
 
-    for my $class ( @{$class_args} ) {
-        $self->helper( $class->{method} =>
-                sub { $class->{class}->new( +{ yoyakku_conf => $config } ) } );
+    while ( my ( $method, $class, ) = each %{$class_args} ) {
+        $self->helper(
+            $method => sub {
+                state $model = $class->new( +{ yoyakku_conf => $config } );
+            }
+        );
     }
 
   # Documentation browser under "/perldoc"

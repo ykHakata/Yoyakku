@@ -22,7 +22,7 @@ __PACKAGE__->mk_accessors(
     qw{params session method html login_row login_table login_name
         profile_row storeinfo_row template type flash_msg acting_rows
         mail_temp mail_header mail_body login_storeinfo_row login_roominfo_rows
-        yoyakku_conf}
+        yoyakku_conf model_stash}
 );
 
 =encoding utf8
