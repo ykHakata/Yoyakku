@@ -17,6 +17,12 @@ use Mojo::Base 'Mojolicious::Controller';
 
 =cut
 
+=head2 index
+
+    コントローラー内のルーティング、セッション確認
+
+=cut
+
 sub index {
     my $self  = shift;
     my $model = $self->model_calendar;
