@@ -30,6 +30,7 @@ subtest 'helper method' => sub {
         model_mainte_storeinfo => 'Yoyakku::Model::Mainte::Storeinfo',
         model_calendar         => 'Yoyakku::Model::Calendar',
         model_auth             => 'Yoyakku::Model::Auth',
+        model_mainte           => 'Yoyakku::Model::Mainte',
     };
 
     my @model_methods = qw{params session method html login_row login_table
@@ -82,7 +83,7 @@ subtest 'router' => sub {
         '/up_logout',
         # '/profile',
         # '/profile_comp',
-        # '/mainte_list',
+        '/mainte_list',
         '/mainte_registrant_serch',
         '/mainte_registrant_new',
         '/mainte_general_serch',

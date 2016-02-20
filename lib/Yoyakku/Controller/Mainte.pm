@@ -1,6 +1,5 @@
 package Yoyakku::Controller::Mainte;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Mainte;
 
 =encoding utf8
 
@@ -18,50 +17,51 @@ use Yoyakku::Model::Mainte;
 
 =cut
 
-sub _init {
+=head2 index
+
+    コントローラー内のルーティング、セッション確認
+
+=cut
+
+sub index {
     my $self  = shift;
-    my $model = Yoyakku::Model::Mainte->new();
+    my $model = $self->model_mainte;
 
-    $model->params( $self->req->params->to_hash );
-    $model->method( uc $self->req->method );
-    $model->session( $self->session->{root_id} );
+    return $self->redirect_to('index')
+        if ( uc $self->req->method ne 'GET' )
+        && ( uc $self->req->method ne 'POST' );
 
-    my $header_stash = $model->get_header_stash_auth_mainte();
-
-    return $self->redirect_to('/index') if !$header_stash;
+    my $header_stash
+        = $model->get_header_stash_auth_mainte( $self->session->{root_id} );
+    return $self->redirect_to('index') if !$header_stash;
 
     $self->stash($header_stash);
+    $self->stash->{params} = $self->req->params->to_hash;
 
-    return $model;
+    my $path = $self->req->url->path->to_abs_string;
+
+    return $self->mainte_list() if $path eq '/mainte_list';
+    return $self->redirect_to('index');
 }
 
 =head2 mainte_list
-
-    リクエスト
-    URL: http:// ... /mainte_list
-    METHOD: GET
-
-    他詳細は調査、実装中
 
     システム管理のオープニング画面
 
 =cut
 
 sub mainte_list {
-    my $self  = shift;
-    my $model = $self->_init();
+    my $self = shift;
 
     my $login_data = $self->stash->{login_data};
 
     $self->stash(
-        class => 'mainte_list',
-        today => $login_data->{today},
-    );
-
-    return $self->render(
+        class    => 'mainte_list',
+        today    => $login_data->{today},
         template => 'mainte/mainte_list',
         format   => 'html',
     );
+    return $self->render();
 }
 
 1;
@@ -75,8 +75,6 @@ __END__
 =item * L<Mojo::Base>
 
 =item * L<Mojolicious::Controller>
-
-=item * L<Yoyakku::Model::Mainte>
 
 =back
 

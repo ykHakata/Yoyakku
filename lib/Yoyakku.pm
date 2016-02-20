@@ -12,6 +12,7 @@ use Yoyakku::Model::Mainte::Roominfo;
 use Yoyakku::Model::Mainte::Storeinfo;
 use Yoyakku::Model::Calendar;
 use Yoyakku::Model::Auth;
+use Yoyakku::Model::Mainte;
 
 # This method will run once at server start
 sub startup {
@@ -38,6 +39,7 @@ sub startup {
         model_mainte_storeinfo => 'Yoyakku::Model::Mainte::Storeinfo',
         model_calendar         => 'Yoyakku::Model::Calendar',
         model_auth             => 'Yoyakku::Model::Auth',
+        model_mainte           => 'Yoyakku::Model::Mainte',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {
@@ -72,7 +74,8 @@ sub startup {
 
     # システム管理者のオープニング画面
     my $mainte = qr{mainte_list};
-    $r->route( '/:action', action => $mainte )->to( controller => 'mainte' );
+    $r->route( '/:mainte', mainte => $mainte )
+        ->to( controller => 'mainte', action => 'index' );
 
     # システム管理者(admin) 新規 編集
     my $mainte_admin = qr{mainte_registrant_serch|mainte_registrant_new};

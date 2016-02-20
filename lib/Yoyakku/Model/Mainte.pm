@@ -135,50 +135,6 @@ sub update_form_params {
     return $params;
 }
 
-=head2 get_update_form_params
-
-    update 用フィルインパラメーター作成
-
-=cut
-
-sub get_update_form_params {
-    my $self   = shift;
-    my $table  = shift;
-    my $params = $self->params();
-
-    my $columns = get_table_columns($table);
-    my $row = $self->get_single_row_search_id( $table, $params->{id} );
-
-    for my $param ( @{$columns} ) {
-        $params->{$param} = $row->$param;
-    }
-
-    # roominfo のみ 開始、終了時刻はデータを調整する00->24表示にする
-    if ( $table eq 'roominfo' ) {
-
-        my $split_t = chenge_time_over(
-            +{  start_time => $params->{starttime_on},
-                end_time   => $params->{endingtime_on},
-            }
-        );
-
-        ( $params->{starttime_on}, $params->{endingtime_on}, )
-            = join_time($split_t, 'none');
-    }
-
-    # reserve のみ 日付変換
-    if ( $table eq 'reserve' ) {
-        my $day_and_time = get_startend_day_and_time($row);
-        $params->{getstarted_on_day}  = $day_and_time->{getstarted_on_day};
-        $params->{getstarted_on_time} = $day_and_time->{getstarted_on_time};
-        $params->{enduse_on_day}      = $day_and_time->{enduse_on_day};
-        $params->{enduse_on_time}     = $day_and_time->{enduse_on_time};
-    }
-
-    $self->params( $params );
-    return $self;
-}
-
 =head2 get_startend_day_and_time
 
     roominfo の開始時刻を入力フォーム用に変換
@@ -292,7 +248,6 @@ sub search_id_single_or_all_rows {
 sub get_header_stash_auth_mainte {
     my $self    = shift;
     my $session = shift;
-    $session = $session || $self->session();
     return if !$session;
     my $id = $self->auth_mainte($session);
     return if !$id;
