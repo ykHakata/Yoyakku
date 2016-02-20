@@ -73,6 +73,7 @@ sub logged_in {
     return   if !$session;
     return 1 if $session->{session_admin_id};
     return 1 if $session->{session_general_id};
+    return 2 if $session->{root_id};
     return;
 }
 
@@ -319,6 +320,7 @@ sub get_valid_params {
     my $self         = shift;
     my $class_name   = shift;
     my $valid_params = +{
+        auth => [qw{login password}],
         mainte_roominfo =>
             [qw{name endingtime_on rentalunit pricescomments remarks}],
         mainte_storeinfo => [

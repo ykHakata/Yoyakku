@@ -1,6 +1,5 @@
 package Yoyakku::Controller::Auth;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Auth;
 
 =encoding utf8
 
@@ -18,13 +17,30 @@ use Yoyakku::Model::Auth;
 
 =cut
 
-sub _init {
+=head2 index
+
+    コントローラー内のルーティング、セッション確認
+
+=cut
+
+sub index {
     my $self  = shift;
-    my $model = Yoyakku::Model::Auth->new();
-    $model->params( $self->req->params->to_hash );
-    $model->method( uc $self->req->method );
-    $model->session( $self->session );
-    return $model;
+    my $model = $self->model_auth;
+
+    return $self->redirect_to('index')
+        if ( uc $self->req->method ne 'GET' )
+        && ( uc $self->req->method ne 'POST' );
+
+    $self->stash->{params} = $self->req->params->to_hash;
+
+    my $path = $self->req->url->path->to_abs_string;
+
+    return $self->up_login()         if $path eq '/up_login';
+    return $self->up_login_general() if $path eq '/up_login_general';
+    return $self->up_login_admin()   if $path eq '/up_login_admin';
+    return $self->root_login()       if $path eq '/root_login';
+    return $self->up_logout()        if $path eq '/up_logout';
+    return $self->redirect_to('index');
 }
 
 =head2 up_login
@@ -34,12 +50,17 @@ sub _init {
 =cut
 
 sub up_login {
-    my $self  = shift;
-    my $model = $self->_init();
-    return $self->redirect_to('/index')
-        if $model->check_login( $self->session );
-    $self->stash( class => 'up_login' );
-    return $self->render( template => 'auth/up_login', format => 'html' );
+    my $self = shift;
+
+    return $self->redirect_to('index')
+        if $self->model_auth->logged_in( $self->session );
+
+    $self->stash(
+        class    => 'up_login',
+        template => 'auth/up_login',
+        format   => 'html',
+    );
+    return $self->render();
 }
 
 =head2 up_logout
@@ -50,86 +71,23 @@ sub up_login {
 
 sub up_logout {
     my $self = shift;
-    my $model = $self->_init();
-    return $self->redirect_to('/index')
-        if $model->check_logout( $self->session );
-    $self->stash( class => 'up_logout' );
-    $self->session( expires => 1 );
-    return $self->render( template => 'auth/up_logout', format => 'html' );
-}
 
-=head2 up_login_general
-
-    リクエスト
-    URL: http:// ... /up_login_general
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login_general
-
-    リクエスト
-    URL: http:// ... /up_login_general
-    METHOD: POST
-    PARAMETERS:
-        login: (指定の ASCII 文字)
-        password: (指定の ASCII 文字)
-
-    レスポンス (ログイン成功、profile 設定が終了している)
-    URL: http:// ... /index
-
-    レスポンス (ログイン成功、profile 設定が終了していない)
-    URL: http:// ... /profile
-
-    レスポンス (ログイン失敗)
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login_general
-
-    一般ログイン
-
-=cut
-
-sub up_login_general {
-    my $self  = shift;
-    my $model = $self->_init();
-
-    $model->template('auth/up_login_general');
-
-    return $self->redirect_to('/index')
-        if $model->check_login( $self->session );
-
-    return $self->redirect_to('/up_login')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
-
-    my $init_valid_params_auth = $model->get_init_valid_params_auth();
+    return $self->redirect_to('index')
+        if !$self->model_auth->logged_in( $self->session );
 
     $self->stash(
-        class => 'up_login_general',
-        %{$init_valid_params_auth},
+        class    => 'up_logout',
+        template => 'auth/up_logout',
+        format   => 'html',
     );
+    $self->session( expires => 1 );
+    return $self->render();
+}
 
-    return $self->render( template => $model->template(), format => 'html' )
-        if 'GET' eq $model->method();
-
-    return $self->_render_input_form( $model, 'general', );
-};
 
 =head2 up_login_admin
 
-    リクエスト
-    URL: http:// ... /up_login_admin
-    METHOD: GET
-
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/up_login_admin
-
-    リクエスト
-    URL: http:// ... /up_login_admin
-    METHOD: POST
-    PARAMETERS:
-        login: (指定の ASCII 文字)
-        password: (指定の ASCII 文字)
+    店舗管理者用ログイン
 
     レスポンス (ログイン成功、profile 設定が終了している)
     URL: http:// ... /index
@@ -140,59 +98,63 @@ sub up_login_general {
     レスポンス (ログイン失敗)
     CONTENT-TYPE: text/html;charset=UTF-8
     FILE: templates/auth/up_login_admin
-
-    店舗管理者用ログイン
 
 =cut
 
 sub up_login_admin {
     my $self  = shift;
-    my $model = $self->_init();
 
-    $model->template('auth/up_login_admin');
+    return $self->redirect_to('index')
+        if $self->model_auth->logged_in( $self->session );
 
-    return $self->redirect_to('/index')
-        if $model->check_login( $self->session );
-
-    return $self->redirect_to('/up_login')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
-
-    my $init_valid_params_auth = $model->get_init_valid_params_auth();
+    my $valid_params = $self->model_auth->get_valid_params('auth');
 
     $self->stash(
-        class => 'up_login_admin',
-        %{$init_valid_params_auth},
+        class    => 'up_login_admin',
+        template => 'auth/up_login_admin',
+        format   => 'html',
+        %{$valid_params},
     );
-
-    return $self->render( template => $model->template(), format => 'html' )
-        if 'GET' eq $model->method();
-
-    return $self->_render_input_form( $model, 'admin', );
+    return $self->render() if 'GET' eq uc $self->req->method;
+    return $self->_render_input_form('admin');
 };
 
-=head2 root_login
+=head2 up_login_general
 
-    リクエスト
-    URL: http:// ... /root_login
-    METHOD: GET
+    一般ユーザー用ログイン
 
-    レスポンス
-    CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/root_login
+    レスポンス (ログイン成功、profile 設定が終了している)
+    URL: http:// ... /index
 
-    リクエスト
-    URL: http:// ... /root_login
-    METHOD: POST
-    PARAMETERS:
-        login: (指定の ASCII 文字)
-        password: (指定の ASCII 文字)
-
-    レスポンス (ログイン成功)
-    URL: http:// ... /mainte_list
+    レスポンス (ログイン成功、profile 設定が終了していない)
+    URL: http:// ... /profile
 
     レスポンス (ログイン失敗)
     CONTENT-TYPE: text/html;charset=UTF-8
-    FILE: templates/auth/root_login
+    FILE: templates/auth/up_login_general
+
+=cut
+
+sub up_login_general {
+    my $self  = shift;
+
+    return $self->redirect_to('index')
+        if $self->model_auth->logged_in( $self->session );
+
+    my $valid_params = $self->model_auth->get_valid_params('auth');
+
+    $self->stash(
+        class    => 'up_login_general',
+        template => 'auth/up_login_general',
+        format   => 'html',
+        %{$valid_params},
+    );
+    return $self->render() if 'GET' eq uc $self->req->method;
+    return $self->_render_input_form('general');
+};
+
+
+=head2 root_login
 
     スーパーユーザー用ログイン
 
@@ -200,55 +162,54 @@ sub up_login_admin {
 
 sub root_login {
     my $self  = shift;
-    my $model = $self->_init();
 
-    $model->template('auth/root_login');
+    my $session = $self->model_auth->logged_in( $self->session );
+    return $self->redirect_to('index') if $session && $session eq 2;
 
-    return $self->redirect_to('/up_login')
-        if ( $model->method() ne 'GET' ) && ( $model->method() ne 'POST' );
-
-    my $init_valid_params_auth = $model->get_init_valid_params_auth();
+    my $valid_params = $self->model_auth->get_valid_params('auth');
 
     $self->stash(
-        class => 'root_login',
-        %{$init_valid_params_auth},
+        class    => 'root_login',
+        template => 'auth/root_login',
+        format   => 'html',
+        %{$valid_params},
     );
-
-    return $self->render( template => $model->template(), format => 'html' )
-        if 'GET' eq $model->method();
-
-    return $self->_render_input_form( $model, 'root', );
+    return $self->render() if 'GET' eq uc $self->req->method;
+    return $self->_render_input_form('root');
 }
 
 sub _render_input_form {
     my $self  = shift;
-    my $model = shift;
     my $table = shift;
+    my $model = $self->model_auth();
 
     # root ログインの場合は別処理(暫定)
     if ($table eq 'root') {
+        my $valid_msg
+            = $model->check_validator( $table, $self->stash->{params} );
 
-        my $valid_root_msg = $model->check_root_validator();
-
-        return $self->stash($valid_root_msg), $self->_render_auth($model)
-            if $valid_root_msg;
+        return $self->stash($valid_msg), $self->_render_auth()
+            if $valid_msg;
 
         # 合格の場合指定の画面へ遷移 (mainte_list) セッション書き込み
-        return $self->session( root_id => $self->param('login') ),
-            $self->redirect_to('mainte_list');
+        $self->session( root_id => $self->param('login') );
+        $self->redirect_to('mainte_list');
+        return;
     }
 
-    my $valid_msg = $model->check_auth_validator();
+    my $valid_msg = $model->check_validator( $table, $self->stash->{params} );
 
-    return $self->stash($valid_msg), $self->_render_auth($model)
+    return $self->stash($valid_msg), $self->_render_auth()
         if $valid_msg;
 
-    my $valid_msg_db = $model->check_auth_validator_db($table);
+    my $valid_msg_db
+        = $model->check_auth_validator_db( $table, $self->stash->{params} );
 
-    return $self->stash($valid_msg_db), $self->_render_auth($model)
+    return $self->stash($valid_msg_db), $self->_render_auth()
         if $valid_msg_db;
 
-    my $session_id_with_routing = $model->get_session_id_with_routing($table);
+    my $session_id_with_routing = $model->get_session_id_with_routing( $table,
+        $self->stash->{params} );
 
     my $session_name = 'session_' . $table . '_id';
 
@@ -259,16 +220,13 @@ sub _render_input_form {
 }
 
 sub _render_auth {
-    my $self  = shift;
-    my $model = shift;
-
-    my $html = $self->render_to_string(
-        template => $model->template(),
-        format   => 'html',
-    )->to_string;
-
-    $model->html( \$html );
-    my $output = $model->get_fill_in_auth();
+    my $self = shift;
+    my $html = $self->render_to_string->to_string;
+    my $args = +{
+        html   => \$html,
+        params => $self->stash->{params},
+    };
+    my $output = $self->model_auth->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 
@@ -283,8 +241,6 @@ __END__
 =item * L<Mojo::Base>
 
 =item * L<Mojolicious::Controller>
-
-=item * L<Yoyakku::Model::Auth>
 
 =back
 

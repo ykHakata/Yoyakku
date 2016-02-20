@@ -29,6 +29,7 @@ subtest 'helper method' => sub {
         model_mainte_roominfo  => 'Yoyakku::Model::Mainte::Roominfo',
         model_mainte_storeinfo => 'Yoyakku::Model::Mainte::Storeinfo',
         model_calendar         => 'Yoyakku::Model::Calendar',
+        model_auth             => 'Yoyakku::Model::Auth',
     };
 
     my @model_methods = qw{params session method html login_row login_table
@@ -78,7 +79,7 @@ subtest 'router' => sub {
         '/up_login_general',
         '/up_login_admin',
         '/root_login',
-        # '/up_logout',
+        '/up_logout',
         # '/profile',
         # '/profile_comp',
         # '/mainte_list',

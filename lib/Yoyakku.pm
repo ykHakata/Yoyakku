@@ -11,6 +11,7 @@ use Yoyakku::Model::Mainte::Reserve;
 use Yoyakku::Model::Mainte::Roominfo;
 use Yoyakku::Model::Mainte::Storeinfo;
 use Yoyakku::Model::Calendar;
+use Yoyakku::Model::Auth;
 
 # This method will run once at server start
 sub startup {
@@ -36,6 +37,7 @@ sub startup {
         model_mainte_roominfo  => 'Yoyakku::Model::Mainte::Roominfo',
         model_mainte_storeinfo => 'Yoyakku::Model::Mainte::Storeinfo',
         model_calendar         => 'Yoyakku::Model::Calendar',
+        model_auth             => 'Yoyakku::Model::Auth',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {
@@ -61,7 +63,8 @@ sub startup {
     # ログインフォーム 入り口, 一般, 店舗管理者, スーパーユーザー, ログアウト
     my $auth
         = qr{up_login\z|up_login_general|up_login_admin|root_login|up_logout};
-    $r->route( '/:action', action => $auth )->to( controller => 'auth' );
+    $r->route( '/:auth', auth => $auth )
+        ->to( controller => 'Auth', action => 'index' );
 
     # 個人情報 入力画面, 確認画面
     my $profile = qr{profile\z|profile_comp};

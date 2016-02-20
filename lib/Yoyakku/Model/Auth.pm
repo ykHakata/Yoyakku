@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
-use Yoyakku::Util qw{get_fill_in_params};
 
 =encoding utf8
 
@@ -21,103 +20,29 @@ use Yoyakku::Util qw{get_fill_in_params};
 
 =cut
 
-sub check_login {
-    my $self    = shift;
-    my $session = shift;
-
-    return 1
-        if $session->{session_general_id}
-        || $session->{session_admin_id};
-
-    return;
-}
-
-sub check_logout {
-    my $self    = shift;
-    my $session = shift;
-
-    return 1
-        if !$session->{session_general_id}
-        && !$session->{session_admin_id}
-        && !$session->{root_id};
-    return;
-}
-
-sub get_init_valid_params_auth {
-    my $self = shift;
-    return $self->get_init_valid_params( [qw{login password}] );
-}
-
-sub check_root_validator {
-    my $self = shift;
-
-    my $check_params = [
-        login    => [ 'NOT_NULL', [ EQUAL => 'yoyakku' ] ],
-        password => [ 'NOT_NULL', [ EQUAL => '0520' ] ],
-    ];
-
-    my $msg_params = [
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-        'login.equal'       => 'ID違い',
-        'password.equal'    => 'password違い',
-    ];
-
-    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
-
-    return if !$msg;
-
-    my $valid_msg = +{
-        login    => $msg->{login},
-        password => $msg->{password},
-    };
-
-    return $valid_msg;
-}
-
-sub check_auth_validator {
-    my $self = shift;
-
-    my $check_params = [
-        login    => [ 'NOT_NULL', ],
-        password => [ 'NOT_NULL', ],
-    ];
-
-    my $msg_params = [
-        'login.not_null'    => '必須入力',
-        'password.not_null' => '必須入力',
-    ];
-
-    my $msg = $self->get_msg_validator( $check_params, $msg_params, );
-
-    return if !$msg;
-
-    my $valid_msg = +{
-        login    => $msg->{login},
-        password => $msg->{password},
-    };
-
-    return $valid_msg;
-}
-
 sub check_auth_validator_db {
     my $self   = shift;
     my $table  = shift;
-    my $params = $self->params();
+    my $params = shift;
     my $teng   = $self->teng();
 
     my $valid_msg_db = +{};
 
-    my $row = $teng->single( $table, +{ login => $params->{login} } );
+    my $args = +{
+        table => $table,
+        %{$params},
+    };
+
+    my $row = $self->login($args);
 
     # 不合格の場合 (DB検証 メルアド違い)
-    if ( !$row ) {
+    if ( ref $row eq '' && $row eq 1) {
         $valid_msg_db->{login} = 'メールアドレス違い';
         return $valid_msg_db;
     }
 
     # 不合格の場合 (DB検証 パスワード違い)
-    if ( $row->password ne $params->{password} ) {
+    if ( ref $row eq '' && $row eq 2) {
         $valid_msg_db->{password} = 'パスワードが違います';
         return $valid_msg_db;
     }
@@ -136,28 +61,29 @@ sub check_auth_validator_db {
 }
 
 sub get_session_id_with_routing {
-    my $self        = shift;
-    my $profile_row = $self->profile_row();
+    my $self   = shift;
+    my $table  = shift;
+    my $params = shift;
+
+    my $args = +{
+        table => $table,
+        %{$params},
+    };
+
+    my $login_row   = $self->login($args);
+    my $profile_row = $login_row->fetch_profile();
 
     my $redirect_to = 'profile';
-    if ( $profile_row && $profile_row->status && $self->login_row->status) {
+    if ( $profile_row && $profile_row->status && $login_row->status ) {
         $redirect_to = 'index';
     }
 
     my $session_id_with_routing = +{
-        session_id  => $self->login_row()->id,
+        session_id  => $login_row->id,
         redirect_to => $redirect_to,
     };
 
     return $session_id_with_routing;
-}
-
-sub get_fill_in_auth {
-    my $self   = shift;
-    my $html   = $self->html();
-    my $params = $self->params();
-    my $output = get_fill_in_params( $html, $params );
-    return $output;
 }
 
 1;
@@ -177,8 +103,6 @@ __END__
 =item * L<parent>
 
 =item * L<Yoyakku::Model>
-
-=item * L<Yoyakku::Util>
 
 =back
 
