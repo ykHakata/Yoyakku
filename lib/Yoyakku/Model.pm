@@ -204,6 +204,7 @@ sub get_ads_navi_rows {
 
 sub send_gmail {
     my $self = shift;
+    my $conf = $self->yoyakku_conf;
 
     my $email = Email::MIME->create(
         header => [
@@ -228,7 +229,12 @@ sub send_gmail {
     );
 
     try {
-        sendmail( $email, +{ transport => $transport } );
+        if ( $conf->{mode} eq 'testing' ) {
+            $self->model_stash( $email, +{ transport => $transport } );
+        }
+        else {
+            sendmail( $email, +{ transport => $transport } );
+        }
     }
     catch {
         my $e = shift;

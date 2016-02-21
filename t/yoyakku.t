@@ -31,6 +31,7 @@ subtest 'helper method' => sub {
         model_calendar         => 'Yoyakku::Model::Calendar',
         model_auth             => 'Yoyakku::Model::Auth',
         model_mainte           => 'Yoyakku::Model::Mainte',
+        model_entry            => 'Yoyakku::Model::Entry',
     };
 
     my @model_methods = qw{params session method html login_row login_table
@@ -108,7 +109,7 @@ subtest 'router' => sub {
         '/index_next_m',
         '/index_next_two_m',
         '/index_next_three_m',
-        # '/entry',
+        '/entry',
         # '/region_state',
         # '/admin_store_edit',
         # '/admin_store_comp',

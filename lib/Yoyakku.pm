@@ -13,6 +13,7 @@ use Yoyakku::Model::Mainte::Storeinfo;
 use Yoyakku::Model::Calendar;
 use Yoyakku::Model::Auth;
 use Yoyakku::Model::Mainte;
+use Yoyakku::Model::Entry;
 
 # This method will run once at server start
 sub startup {
@@ -40,6 +41,7 @@ sub startup {
         model_calendar         => 'Yoyakku::Model::Calendar',
         model_auth             => 'Yoyakku::Model::Auth',
         model_mainte           => 'Yoyakku::Model::Mainte',
+        model_entry            => 'Yoyakku::Model::Entry',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {

@@ -1,8 +1,5 @@
 package Yoyakku::Controller::Entry;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Entry;
-
-has( model_entry => sub { Yoyakku::Model::Entry->new(); } );
 
 =encoding utf8
 
@@ -17,6 +14,12 @@ has( model_entry => sub { Yoyakku::Model::Entry->new(); } );
 =head1 SYNOPSIS (概要)
 
     登録、関連機能のリクエストをコントロール
+
+=cut
+
+=head2 index
+
+    コントローラー内のルーティング、セッション確認
 
 =cut
 
@@ -50,12 +53,11 @@ sub index {
 =cut
 
 sub entry {
-    my $self  = shift;
-    my $model = $self->model_entry;
+    my $self = shift;
 
     my $switch_load;
     my $mail_j;
-    my $get_ads_navi_rows = $model->get_ads_navi_rows();
+    my $get_ads_navi_rows = $self->model_entry->get_ads_navi_rows();
 
     $self->stash(
         class        => 'entry',
@@ -71,11 +73,10 @@ sub entry {
 }
 
 sub _insert {
-    my $self  = shift;
-    my $model = $self->model_entry;
+    my $self = shift;
 
-    $model->type('insert');
-    $model->flash_msg( +{ touroku => '登録完了' } );
+    $self->stash->{type} = 'insert';
+    $self->flash( +{ touroku => '登録完了' } );
 
     return $self->_common();
 }
@@ -96,8 +97,7 @@ sub _common {
     return $self->stash($valid_msg_db), $self->_render_entry()
         if $valid_msg_db;
 
-    $model->writing_entry($self->stash->{params});
-    $self->flash( $model->flash_msg() );
+    $model->writing_entry( $self->stash->{params}, $self->stash->{type} );
 
     $self->stash( $model->mail_temp() );
 
@@ -113,19 +113,13 @@ sub _common {
 }
 
 sub _render_entry {
-    my $self  = shift;
-    my $model = $self->model_entry;
-
-    my $html = $self->render_to_string(
-        template => 'entry/entry',
-        format   => 'html',
-    )->to_string;
-
+    my $self = shift;
+    my $html = $self->render_to_string->to_string;
     my $args = +{
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $model->set_fill_in_params($args);
+    my $output = $self->model_entry->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

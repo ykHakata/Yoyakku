@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model';
-use Yoyakku::Util qw{now_datetime get_fill_in_params};
+use Yoyakku::Util qw{now_datetime};
 use Yoyakku::Master qw{$MAIL_SYSTEM};
 
 =encoding utf8
@@ -41,7 +41,7 @@ sub get_header_stash_entry {
 =cut
 
 sub check_entry_validator_db {
-    my $self = shift;
+    my $self   = shift;
     my $params = shift;
 
     # ログインid(メルアド)存在確認 admin, general, 両方
@@ -63,8 +63,9 @@ sub check_entry_validator_db {
 =cut
 
 sub writing_entry {
-    my $self = shift;
+    my $self   = shift;
     my $params = shift;
+    my $type   = shift;
 
     my $auth_table = $params->{select_usr};
 
@@ -76,8 +77,15 @@ sub writing_entry {
         modify_on => now_datetime(),
     };
 
+    my $args = +{
+        table       => $auth_table,
+        create_data => $create_auth_data,
+        update_id   => undef,
+        type        => $type,
+    };
+
     # admin or general への新規作成
-    my $insert_row = $self->writing_db( $auth_table, $create_auth_data, );
+    my $insert_row = $self->writing_from_db($args);
 
     # 該当する profile の新規作成
     my $create_profile_data = +{
@@ -115,7 +123,14 @@ sub writing_entry {
         die 'not insert_id!';
     }
 
-    $self->writing_db( 'profile', $create_profile_data, );
+    $args = +{
+        table       => 'profile',
+        create_data => $create_profile_data,
+        update_id   => undef,
+        type        => $type,
+    };
+
+    $self->writing_from_db($args);
     $self->mail_temp($mail_temp_entry);
 
     my $mail_header_entry = +{
