@@ -50,6 +50,99 @@ sub get_msg_validator {
     return;
 }
 
+
+=head2 profile_with_auth
+
+    バリデート処理(profile_with_auth)
+
+=cut
+
+sub profile_with_auth {
+    my $self   = shift;
+    my $params = shift;
+
+    my $check_params = [
+
+        # admin or general
+        id         => [ 'NOT_NULL', ],
+        login      => [ 'NOT_NULL', ],
+        password   => [ 'NOT_NULL', ],
+        password_2 => [ 'NOT_NULL', ],
+        +{ passwords => [qw/password password_2/] } => ['DUPLICATION'],
+
+        # profile
+        profile_id    => [ 'INT', ],
+        nick_name     => [ 'NOT_NULL', [ 'LENGTH', 0, 20, ], ],
+        full_name     => [ [ 'LENGTH', 0, 20, ], ],
+        phonetic_name => [ [ 'LENGTH', 0, 20, ], ],
+        tel           => [ [ 'LENGTH', 0, 20, ], ],
+        mail          => [ 'EMAIL_LOOSE', ],
+
+        # acting
+        acting_1 => [ 'INT', ],
+        acting_2 => [ 'INT', ],
+        acting_3 => [ 'INT', ],
+    ];
+
+    my $msg_params = [
+        'id.not_null'         => '必須入力',
+        'login.not_null'      => '必須入力',
+        'password.not_null'   => '必須入力',
+        'password_2.not_null' => '必須入力',
+        'passwords.duplication' =>
+            '入力したパスワードが違います',
+        'profile_id.int'     => '指定の形式で入力してください',
+        'nick_name.length'   => '文字数!!',
+        'nick_name.not_null' => '必須入力',
+        'full_name.length'   => '文字数!!',
+        'phonetic_name.length' => '文字数!!',
+        'tel.length'           => '文字数!!',
+        'mail.email_loose'     => 'Eメールを入力してください',
+        'acting_1.int' => '指定の形式で入力してください',
+        'acting_2.int' => '指定の形式で入力してください',
+        'acting_3.int' => '指定の形式で入力してください',
+    ];
+
+    my $arg = +{
+        check_params => $check_params,
+        msg_params   => $msg_params,
+        params       => $params,
+    };
+
+    my $msg = $self->get_msg_validator($arg);
+
+    # acting(storeinfo_id) 選択しなくてもよいが、重複不可
+    my $acting_1 = $params->{acting_1};
+    my $acting_2 = $params->{acting_2};
+    my $acting_3 = $params->{acting_3};
+
+    my $acting_msg
+        = $acting_1 && $acting_1 eq $acting_2 ? '同じものは入力不可'
+        : $acting_1 && $acting_1 eq $acting_3 ? '同じものは入力不可'
+        : $acting_2 && $acting_2 eq $acting_1 ? '同じものは入力不可'
+        : $acting_2 && $acting_2 eq $acting_3 ? '同じものは入力不可'
+        : $acting_3 && $acting_3 eq $acting_1 ? '同じものは入力不可'
+        : $acting_3 && $acting_3 eq $acting_2 ? '同じものは入力不可'
+        :                                       undef;
+
+    if ($acting_msg) {
+        $msg->{acting_1} = $acting_msg;
+    }
+
+    return if !$msg;
+
+    return +{
+        nick_name     => $msg->{nick_name},
+        password      => $msg->{password},
+        password_2    => $msg->{password_2} || $msg->{passwords},
+        full_name     => $msg->{full_name},
+        phonetic_name => $msg->{phonetic_name},
+        tel           => $msg->{tel},
+        mail          => $msg->{mail},
+        acting_1      => $msg->{acting_1},
+    };
+}
+
 =head2 root
 
     バリデート処理(root)

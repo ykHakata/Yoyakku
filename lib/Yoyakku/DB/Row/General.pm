@@ -8,7 +8,7 @@ sub fetch_profile {
 
 sub fetch_actings {
     my $self    = shift;
-    my @actings = $teng->search( 'acting',
+    my @actings = $self->handle->search( 'acting',
         +{ general_id => $self->id, status => 1, } );
     return \@actings;
 }
@@ -16,6 +16,13 @@ sub fetch_actings {
 sub get_table_name {
     my $self = shift;
     return 'general';
+}
+
+sub get_login_name {
+    my $self = shift;
+    my $row
+        = $self->handle->single( 'profile', +{ general_id => $self->id }, );
+    return $row->nick_name;
 }
 
 1;

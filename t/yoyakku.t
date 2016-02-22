@@ -32,6 +32,7 @@ subtest 'helper method' => sub {
         model_auth             => 'Yoyakku::Model::Auth',
         model_mainte           => 'Yoyakku::Model::Mainte',
         model_entry            => 'Yoyakku::Model::Entry',
+        model_profile          => 'Yoyakku::Model::Profile',
     };
 
     my @model_methods = qw{params session method html login_row login_table
@@ -82,8 +83,8 @@ subtest 'router' => sub {
         '/up_login_admin',
         '/root_login',
         '/up_logout',
-        # '/profile',
-        # '/profile_comp',
+        '/profile',
+        '/profile_comp',
         '/mainte_list',
         '/mainte_registrant_serch',
         '/mainte_registrant_new',

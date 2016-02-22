@@ -326,6 +326,10 @@ sub get_valid_params {
     my $self         = shift;
     my $class_name   = shift;
     my $valid_params = +{
+        profile => [
+            qw{password password_2 nick_name full_name phonetic_name tel mail
+                acting_1}
+        ],
         auth => [qw{login password}],
         mainte_roominfo =>
             [qw{name endingtime_on rentalunit pricescomments remarks}],

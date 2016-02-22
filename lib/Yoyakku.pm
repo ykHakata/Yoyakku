@@ -14,6 +14,7 @@ use Yoyakku::Model::Calendar;
 use Yoyakku::Model::Auth;
 use Yoyakku::Model::Mainte;
 use Yoyakku::Model::Entry;
+use Yoyakku::Model::Profile;
 
 # This method will run once at server start
 sub startup {
@@ -42,6 +43,7 @@ sub startup {
         model_auth             => 'Yoyakku::Model::Auth',
         model_mainte           => 'Yoyakku::Model::Mainte',
         model_entry            => 'Yoyakku::Model::Entry',
+        model_profile          => 'Yoyakku::Model::Profile',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {
@@ -72,7 +74,8 @@ sub startup {
 
     # 個人情報 入力画面, 確認画面
     my $profile = qr{profile\z|profile_comp};
-    $r->route( '/:action', action => $profile )->to( controller => 'profile' );
+    $r->route( '/:profile', profile => $profile )
+        ->to( controller => 'profile', action => 'index' );
 
     # システム管理者のオープニング画面
     my $mainte = qr{mainte_list};
