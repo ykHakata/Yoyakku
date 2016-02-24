@@ -108,11 +108,11 @@ subtest 'entry' => sub {
             'mail body' );
 
         # 登録完了後、レコード新規追加
-        my $mail  = $params->{mail_j};
-        my $table = $params->{select_usr};
+        my $mail_j = $params->{mail_j};
+        my $table  = $params->{select_usr};
 
         my $create_user = $t->app->model_entry->teng->single( $table,
-            +{ login => $mail } );
+            +{ login => $mail_j } );
 
         is( $create_user->password, 'yoyakku', 'password ok' );
         is( $create_user->status,   0,         'status ok' );
@@ -120,9 +120,9 @@ subtest 'entry' => sub {
         my $create_profile = $t->app->model_entry->teng->single( 'profile',
             +{ admin_id => $create_user->id, } );
 
-        is( $create_profile->nick_name, $mail, 'nick_name ok' );
-        is( $create_profile->mail,      $mail, 'mail ok' );
-        is( $create_profile->status,    0,     'status ok' );
+        is( $create_profile->nick_name, $mail_j, 'nick_name ok' );
+        is( $create_profile->mail,      $mail_j, 'mail ok' );
+        is( $create_profile->status,    0,       'status ok' );
     };
 
     subtest 'fail' => sub {
