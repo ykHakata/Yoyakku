@@ -92,8 +92,8 @@ subtest 'mainte_profile_new' => sub {
     # nick_name を変更
     $params = +{
         id            => $update_params->{id},
-        general_id    => $update_params->{general_id} || undef,
-        admin_id      => $update_params->{admin_id} || undef,
+        general_id    => $update_params->{general_id},
+        admin_id      => $update_params->{admin_id},
         nick_name     => 'テストニックネーム',
         full_name     => $update_params->{full_name},
         phonetic_name => $update_params->{phonetic_name},
