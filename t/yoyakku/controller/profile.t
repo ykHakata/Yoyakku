@@ -52,9 +52,87 @@ subtest 'index' => sub {
     $t->get_ok('/profile_comp')->status_is(302)->header_is(@to_index);
 };
 
+=head2 profile_comp
+
+    プロフィール情報確認画面
+
+=cut
+
+subtest 'profile_comp' => sub {
+
+    my @to_index = ( Location => 'index' );
+
+    subtest 'success' => sub {
+
+        # ログイン (admin)
+        $t->post_ok( '/up_login_admin' => form => $login_admin )
+            ->status_is(302)->header_is(@to_index);
+
+        $t->get_ok('/profile_comp')->status_is(200)
+            ->content_type_is('text/html;charset=UTF-8')
+            ->text_is(
+            'html head title' => 'yoyakkuプロフィール設定' )
+            ->content_like(
+            qr{\Qプロフィールの確認／(admin)スタジオヨヤック\E}
+            );
+
+        my $elements = [
+            'input[type=hidden][name=id][value=1]',
+            'input[name=login][value=yoyakku@gmail.com][readonly=readonly][type=text]',
+            'input[type=text][name=nick_name][value=スタジオヨヤック][readonly=readonly]',
+            'input[value=yoyakku][name=password][readonly=readonly][type=password]',
+            'input[type=text][name=full_name][value=藤村 真帆][readonly=readonly]',
+            'input[value=ふじむら まほ][name=phonetic_name][readonly=readonly][type=text]',
+            'input[type=text][readonly=readonly][value=090-2568-4213][name=tel]',
+            'input[type=text][name=mail][value=yoyakku@gmail.com][readonly=readonly]',
+        ];
+
+        for my $element ( @{$elements} ) {
+            $t->element_exists($element);
+        }
+
+        $t->get_ok('/up_logout')->status_is(200);
+
+        # ログイン (general)
+        $t->post_ok( '/up_login_general' => form => $login_general )
+            ->status_is(302)->header_is(@to_index);
+
+        $t->get_ok('/profile_comp')->status_is(200)
+            ->content_type_is('text/html;charset=UTF-8')
+            ->text_is(
+            'html head title' => 'yoyakkuプロフィール設定' )
+            ->content_like(
+            qr{\Qプロフィールの確認／ふくしま\E});
+
+        $elements = [
+            'input[type=hidden][value=1][name=id]',
+            'input[readonly=readonly][name=login][value=yoyakku+user@gmail.com][type=text]',
+            'input[type=text][value=ふくしま][readonly=readonly][name=nick_name]',
+            'input[readonly=readonly][name=password][value=yoyakku+user][type=password]',
+            'input[type=text][value=福島 寛][readonly=readonly][name=full_name]',
+            'input[readonly=readonly][name=phonetic_name][value=ふくしま ひろし][type=text]',
+            'input[value=080-3134-9970][type=text][readonly=readonly][name=tel]',
+            'input[value=yoyakku+user@gmailcom][type=text][name=mail][readonly=readonly]',
+            'input[type=text][value=スタジオヨヤック][name=acting_1][readonly=readonly]',
+            'input[type=text][name=acting_2][readonly=readonly]',
+            'input[readonly=readonly][name=acting_3][type=text]',
+        ];
+
+        for my $element ( @{$elements} ) {
+            $t->element_exists($element);
+        }
+
+        $t->get_ok('/up_logout')->status_is(200);
+    };
+
+    subtest 'fail' => sub {
+        $t->post_ok('/profile_comp')->status_is(302)->header_is(@to_index);
+    };
+};
+
 =head2 profile
 
-    登録画面
+    プロフィール登録画面
 
 =cut
 
@@ -63,71 +141,107 @@ subtest 'profile' => sub {
     my @to_index = ( Location => 'index' );
 
     subtest 'success' => sub {
-        # $t->get_ok('/profile')->status_is(200)
-        #     ->content_type_is('text/html;charset=UTF-8')
-        #     ->text_is( 'html head title' => 'yoyakkuオープニング' )
-        #     ->content_like(qr{\Qyoyakkuログイン登録\E})
-        #     ->content_like(
-        #     qr{\Qログイン登録/yoyakkuベーター版について\E})
-        #     ->content_like(qr{\QQ&A\E});
 
-        # # 登録完了からメール配信
-        # my $params = +{
-        #     mail_j     => 'yoyakku+test@gmail.com',
-        #     select_usr => 'admin',
-        # };
+        subtest 'update' => sub {
 
-        # $t->ua->max_redirects(1);
+            # ログイン (admin)
+            $t->post_ok( '/up_login_admin' => form => $login_admin )
+                ->status_is(302)->header_is(@to_index);
 
-        # $t->post_ok( '/entry' => form => $params )->status_is(200)
-        #     ->header_is('entry')->content_like(qr{\Q登録完了\E});
+            $t->get_ok('/profile')->status_is(200)
+                ->content_type_is('text/html;charset=UTF-8')
+                ->text_is(
+                'html head title' => 'yoyakkuプロフィール設定' )
+                ->content_like(
+                qr{\Qプロフィールの設定／(admin)スタジオヨヤック\E}
+                );
 
-        # $t->ua->max_redirects(0);
+            my $elements = [
+                'input[name=id][value=1][type=hidden]',
+                'input[readonly=readonly][name=login][type=text][value=yoyakku@gmail.com]',
+                'input[value=スタジオヨヤック][type=text][name=nick_name]',
+                'input[type=password][value=yoyakku][name=password]',
+                'input[type=password][value=yoyakku][name=password_2]',
+                'input[name=profile_id][type=hidden][value=1]',
+                'input[type=text][value=藤村 真帆][name=full_name]',
+                'input[value=ふじむら まほ][type=text][name=phonetic_name]',
+                'input[name=tel][type=text][value=090-2568-4213]',
+                'input[name=mail][value=yoyakku@gmail.com][type=text]',
+                'input[id=button_submit][name=submit][value=登録][type=submit]',
+            ];
 
-        # # メール内容確認
-        # my $send_mail = $t->app->model_entry->model_stash;
-        # my $mail      = shift @{$send_mail};
-        # my $transport = shift @{$send_mail};
+            for my $element ( @{$elements} ) {
+                $t->element_exists($element);
+            }
 
-        # like( $mail->body_str, qr{\Qyoyakku+test\E}, 'mail body' );
-        # like( $mail->body_str, qr{\Qはじめてのyoyakku利用の方へ\E},
-        #     'mail body' );
+            # パラメーターの取得
+            my $login_row = $t->app->model_profile->teng->single( 'admin',
+                +{ id => 1 } );
 
-        # # 登録完了後、レコード新規追加
-        # my $mail  = $params->{mail_j};
-        # my $table = $params->{select_usr};
+            my $update_params
+                = $t->app->model_profile->set_form_params_profile( 'profile',
+                $login_row );
 
-        # my $create_user = $t->app->model_entry->teng->single( $table,
-        #     +{ login => $mail } );
+            # nick_name を変更
+            my $params = +{
+                id            => $update_params->{id},
+                login         => $update_params->{login},
+                password      => $update_params->{password},
+                password_2    => $update_params->{password_2},
+                profile_id    => $update_params->{profile_id},
+                nick_name     => 'テストニックネーム',
+                full_name     => $update_params->{full_name},
+                phonetic_name => $update_params->{phonetic_name},
+                tel           => $update_params->{tel},
+                mail          => $update_params->{mail},
+            };
 
-        # is( $create_user->password, 'yoyakku', 'password ok' );
-        # is( $create_user->status,   0,         'status ok' );
+            $t->ua->max_redirects(1);
+            $t->post_ok( '/profile' => form => $params )->status_is(200);
+            $t->content_like(qr{\Q修正完了\E});
+            $t->content_like(qr{\Qテストニックネーム\E});
+            $t->ua->max_redirects(0);
 
-        # my $create_profile = $t->app->model_entry->teng->single( 'profile',
-        #     +{ admin_id => $create_user->id, } );
+            $t->get_ok('/up_logout')->status_is(200);
 
-        # is( $create_profile->nick_name, $mail, 'nick_name ok' );
-        # is( $create_profile->mail,      $mail, 'mail ok' );
-        # is( $create_profile->status,    0,     'status ok' );
-        ok(1);
+            # ログイン (general)
+            $t->post_ok( '/up_login_general' => form => $login_general )
+                ->status_is(302)->header_is(@to_index);
+
+            $t->get_ok('/profile')->status_is(200)
+                ->content_type_is('text/html;charset=UTF-8')
+                ->text_is(
+                'html head title' => 'yoyakkuプロフィール設定' )
+                ->content_like(
+                qr{\Qプロフィールの設定／ふくしま\E} );
+
+            $elements = [
+                'input[value=1][type=hidden][name=id]',
+                'input[name=login][type=text][readonly=readonly][value=yoyakku+user@gmail.com]',
+                'input[value=ふくしま][type=text][name=nick_name]',
+                'input[type=password][name=password][value=yoyakku+user]',
+                'input[name=password_2][type=password][value=yoyakku+user]',
+                'input[value=2][type=hidden][name=profile_id]',
+                'input[type=text][name=full_name][value=福島 寛]',
+                'input[type=text][name=phonetic_name][value=ふくしま ひろし]',
+                'input[type=text][name=tel][value=080-3134-9970]',
+                'input[type=text][name=mail][value=yoyakku+user@gmailcom]',
+                'select[name=acting_1]',
+                'select[name=acting_2]',
+                'select[name=acting_3]',
+            ];
+
+            for my $element ( @{$elements} ) {
+                $t->element_exists($element);
+            }
+
+            $t->get_ok('/up_logout')->status_is(200);
+        };
     };
 
     # subtest 'fail' => sub {
 
-    #     my $params = +{};
-    #     $t->post_ok( '/entry' => form => $params )->status_is(200)
-    #         ->content_type_is('text/html;charset=UTF-8')
-    #         ->text_is( 'html head title' => 'yoyakkuオープニング' )
-    #         ->content_like(qr{\Q必須入力\E});
-
-    #     $params = +{ mail_j => 'fail_mail' };
-    #     $t->post_ok( '/entry' => form => $params )->status_is(200)
-    #         ->content_like(qr{\QEメールを入力してください\E});
-
-    #     $params = +{ mail_j => 'yoyakku@gmail.com', select_usr => 'admin', };
-    #     $t->post_ok( '/entry' => form => $params )->status_is(200)
-    #         ->content_like(qr{\Q既に利用されています\E});
-    # };
+   # };
 };
 
 done_testing();

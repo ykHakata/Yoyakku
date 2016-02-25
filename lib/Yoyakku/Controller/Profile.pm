@@ -1,6 +1,5 @@
 package Yoyakku::Controller::Profile;
 use Mojo::Base 'Mojolicious::Controller';
-# use Yoyakku::Model::Profile;
 
 =encoding utf8
 
@@ -50,22 +49,6 @@ sub index {
     return $self->redirect_to('index');
 }
 
-# sub _init {
-#     my $self  = shift;
-#     my $model = Yoyakku::Model::Profile->new();
-
-#     $model->params( $self->req->params->to_hash );
-#     $model->method( uc $self->req->method );
-#     $model->session( $self->session );
-
-#     return if !$model->check_auth_db_yoyakku();
-
-#     my $header_stash = $model->get_header_stash_profile();
-#     $self->stash($header_stash);
-
-#     return $model;
-# }
-
 =head2 profile_comp
 
     プロフィール情報確認画面
@@ -89,29 +72,9 @@ sub profile_comp {
         $self->stash->{login_row} );
 
     return $self->_render_profile();
-    # my $self  = shift;
-    # my $model = $self->_init();
-
-    # return $self->redirect_to('/index') if !$model;
-
-    # $self->stash(
-    #     class         => 'profile_comp',
-    #     login         => $model->login_name(),
-    #     switch_acting => $model->get_switch_acting(),
-    # );
-
-    # $model->set_form_params_profile('profile_comp');
-    # $model->template('profile/profile_comp');
-    # return $self->_render_profile($model);
 }
 
 =head2 profile
-
-    リクエスト
-    URL: http:// ... /profile
-    METHOD: GET
-
-    他詳細は調査、実装中
 
     プロフィール登録画面
 
@@ -127,34 +90,15 @@ sub profile {
         class          => 'profile',
         login          => $self->stash->{login_row}->get_login_name,
         storeinfo_rows => $model->get_storeinfo_rows_all(),
-        switch_acting  => $model->get_switch_acting($self->stash->{login_row}),
-        template       => 'profile/profile',
-        format         => 'html',
+        switch_acting =>
+            $model->get_switch_acting( $self->stash->{login_row} ),
+        template => 'profile/profile',
+        format   => 'html',
         %{$valid_params},
     );
 
     return $self->_insert() if !$self->stash->{login_row}->fetch_profile;
     return $self->_update();
-
-    # my $self  = shift;
-    # my $model = $self->_init();
-
-    # return $self->redirect_to('/index') if !$model;
-
-    # my $init_valid_params_profile = $model->get_init_valid_params_profile();
-
-    # $self->stash(
-    #     class          => 'profile',
-    #     login          => $model->login_name(),
-    #     storeinfo_rows => $model->get_storeinfo_rows_all(),
-    #     switch_acting  => $model->get_switch_acting(),
-    #     %{$init_valid_params_profile},
-    # );
-
-    # $model->template('profile/profile');
-
-    # return $self->_insert($model) if !$model->profile_row();
-    # return $self->_update($model);
 }
 
 sub _insert {
@@ -171,18 +115,6 @@ sub _insert {
     $self->flash( +{ touroku => '登録完了' } );
 
     return $self->_common();
-    # my $self  = shift;
-    # my $model = shift;
-
-    # if ( 'GET' eq $model->method() ) {
-    #     $model->set_form_params_profile('profile');
-    #     return $self->_render_profile($model);
-    # }
-
-    # $model->type('insert');
-    # $model->flash_msg( +{ touroku => '登録完了' } );
-
-    # return $self->_common($model);
 }
 
 sub _update {
@@ -197,19 +129,8 @@ sub _update {
 
     $self->stash->{type} = 'update';
     $self->flash( +{ henkou => '修正完了' } );
+
     return $self->_common();
-    # my $self  = shift;
-    # my $model = shift;
-
-    # if ( 'GET' eq $model->method() ) {
-    #     $model->set_form_params_profile('profile');
-    #     return $self->_render_profile($model);
-    # }
-
-    # $model->type('update');
-    # $model->flash_msg( +{ henkou => '修正完了' } );
-
-    # return $self->_common($model);
 }
 
 sub _common {
@@ -229,17 +150,6 @@ sub _common {
     );
 
     return $self->redirect_to('profile_comp');
-    # my $self  = shift;
-    # my $model = shift;
-
-    # my $valid_msg = $model->check_profile_with_auth_validator();
-
-    # return $self->stash($valid_msg), $self->_render_profile($model)
-    #     if $valid_msg;
-
-    # $model->writing_profile();
-    # $self->flash( $model->flash_msg() );
-    # return $self->redirect_to('profile_comp');
 }
 
 sub _render_profile {
@@ -251,17 +161,6 @@ sub _render_profile {
     };
     my $output = $self->model_profile->set_fill_in_params($args);
     return $self->render( text => $output );
-    # my $self  = shift;
-    # my $model = shift;
-
-    # my $html = $self->render_to_string(
-    #     template => $model->template(),
-    #     format   => 'html',
-    # )->to_string;
-
-    # $model->html( \$html );
-    # my $output = $model->get_fill_in_profile();
-    # return $self->render( text => $output );
 }
 
 1;

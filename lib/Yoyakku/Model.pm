@@ -4,7 +4,6 @@ use warnings;
 use utf8;
 use Teng;
 use Teng::Schema::Loader;
-use FormValidator::Lite qw{Email URL DATE TIME};
 use base qw{Class::Accessor::Fast};
 use Encode qw{encode};
 use Email::Sender::Simple 'sendmail';
@@ -603,36 +602,6 @@ sub insert_admin_relation {
             $teng->fast_insert( 'roominfo', $create_data_roominfo, );
         }
     }
-}
-
-=head2 get_msg_validator
-
-    入力値バリデート処理
-
-=cut
-
-sub get_msg_validator {
-    my $self         = shift;
-    my $check_params = shift;
-    my $msg_params   = shift;
-    my $params       = $self->params();
-
-    my $validator = FormValidator::Lite->new($params);
-
-    $validator->check( @{$check_params} );
-    $validator->set_message( @{$msg_params} );
-
-    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
-
-    my $msg = +{};
-    for my $error_param ( @{$error_params} ) {
-        $msg->{$error_param}
-            = $validator->get_error_messages_from_param($error_param);
-        $msg->{$error_param} = shift @{ $msg->{$error_param} };
-    }
-
-    return $msg if $validator->has_error();
-    return;
 }
 
 =head2 check_auth_db
