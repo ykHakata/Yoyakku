@@ -15,6 +15,7 @@ use Yoyakku::Model::Auth;
 use Yoyakku::Model::Mainte;
 use Yoyakku::Model::Entry;
 use Yoyakku::Model::Profile;
+use Yoyakku::Model::Region;
 
 # This method will run once at server start
 sub startup {
@@ -44,6 +45,7 @@ sub startup {
         model_mainte           => 'Yoyakku::Model::Mainte',
         model_entry            => 'Yoyakku::Model::Entry',
         model_profile          => 'Yoyakku::Model::Profile',
+        model_region           => 'Yoyakku::Model::Region',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {
@@ -54,14 +56,14 @@ sub startup {
         );
     }
 
-  # Documentation browser under "/perldoc"
-  $self->plugin('PODRenderer');
+    # Documentation browser under "/perldoc"
+    $self->plugin('PODRenderer');
 
-  # コマンドをロードするための他の名前空間
-  push @{ $self->commands->namespaces }, 'Yoyakku::Command';
+    # コマンドをロードするための他の名前空間
+    push @{ $self->commands->namespaces }, 'Yoyakku::Command';
 
-  # Router
-  my $r = $self->routes;
+    # Router
+    my $r = $self->routes;
 
     # トップページ遷移(/)
     $r->route('/')->to( controller => 'Calendar', action => 'index' );
@@ -98,7 +100,8 @@ sub startup {
         ->to( controller => 'Mainte::Profile', action => 'index' );
 
     # システム管理者(storeinfo) 新規 編集
-    my $mainte_storeinfo = qr{mainte_storeinfo_serch\z|mainte_storeinfo_new\z};
+    my $mainte_storeinfo
+        = qr{mainte_storeinfo_serch\z|mainte_storeinfo_new\z};
     $r->route( '/:mainte_storeinfo', mainte_storeinfo => $mainte_storeinfo )
         ->to( controller => 'Mainte::Storeinfo', action => 'index' );
 

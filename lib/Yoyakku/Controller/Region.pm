@@ -1,8 +1,5 @@
 package Yoyakku::Controller::Region;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Region;
-
-has( model_region => sub { Yoyakku::Model::Region->new(); } );
 
 =encoding utf8
 
@@ -27,9 +24,6 @@ sub index {
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
         && ( uc $self->req->method ne 'POST' );
-
-    return $self->redirect_to('index')
-        if !$model->check_auth_db_yoyakku( $self->session );
 
     $self->stash->{login_row} = $model->get_login_row( $self->session );
 
@@ -87,6 +81,8 @@ sub region_state {
 
 1;
 
+__END__
+
 =head1 DEPENDENCIES (依存モジュール)
 
 =over
@@ -95,8 +91,6 @@ sub region_state {
 
 =item * L<Mojolicious::Controller>
 
-=item * L<Yoyakku::Model::Region>
-
 =back
 
 =head1 SEE ALSO (参照)
@@ -104,5 +98,3 @@ sub region_state {
 L<Guides>
 
 =cut
-
-__END__

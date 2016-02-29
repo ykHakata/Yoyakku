@@ -31,8 +31,7 @@ use Yoyakku::Util
 sub get_redirect_mode_region {
     my $self      = shift;
     my $login_row = shift;
-    my $table     = $login_row->get_table_name;
-    return 'profile' if !$login_row->status;
+    return 'profile' if $login_row && !$login_row->status;
     return;
 }
 
@@ -46,12 +45,16 @@ sub get_header_stash_region {
     my $self      = shift;
     my $login_row = shift;
 
-    my $table = $login_row->get_table_name;
+    my $table;
+    my $login_name;
 
-    my $login_name
-        = $login_row->fetch_profile
-        ? $login_row->fetch_profile->nick_name
-        : undef;
+    if ($login_row) {
+        $table = $login_row->get_table_name;
+        $login_name
+            = $login_row->fetch_profile
+            ? $login_row->fetch_profile->nick_name
+            : undef;
+    }
 
     my $switch_header = 5;
 

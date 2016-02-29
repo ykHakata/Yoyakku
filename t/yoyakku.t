@@ -33,6 +33,7 @@ subtest 'helper method' => sub {
         model_mainte           => 'Yoyakku::Model::Mainte',
         model_entry            => 'Yoyakku::Model::Entry',
         model_profile          => 'Yoyakku::Model::Profile',
+        model_region           => 'Yoyakku::Model::Region',
     };
 
     my @model_methods = qw{params session method html login_row login_table
@@ -111,7 +112,7 @@ subtest 'router' => sub {
         '/index_next_two_m',
         '/index_next_three_m',
         '/entry',
-        # '/region_state',
+        '/region_state',
         # '/admin_store_edit',
         # '/admin_store_comp',
         # '/admin_reserv_edit',
