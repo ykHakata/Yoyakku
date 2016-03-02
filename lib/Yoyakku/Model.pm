@@ -325,6 +325,8 @@ sub get_valid_params {
     my $self         = shift;
     my $class_name   = shift;
     my $valid_params = +{
+        admin_store_edit =>
+            [ qw{name post state cities addressbelow tel mail remarks url} ],
         profile => [
             qw{password password_2 nick_name full_name phonetic_name tel mail
                 acting_1}

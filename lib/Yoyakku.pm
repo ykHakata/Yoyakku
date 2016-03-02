@@ -16,6 +16,7 @@ use Yoyakku::Model::Mainte;
 use Yoyakku::Model::Entry;
 use Yoyakku::Model::Profile;
 use Yoyakku::Model::Region;
+use Yoyakku::Model::Setting::Storeinfo;
 
 # This method will run once at server start
 sub startup {
@@ -30,22 +31,23 @@ sub startup {
     my $config = $self->plugin( Config => +{ file => $conf_file } );
 
     my $class_args = +{
-        model_mainte_acting    => 'Yoyakku::Model::Mainte::Acting',
-        model_mainte_admin     => 'Yoyakku::Model::Mainte::Admin',
-        model_mainte_ads       => 'Yoyakku::Model::Mainte::Ads',
-        model_mainte_general   => 'Yoyakku::Model::Mainte::General',
-        model_mainte_post      => 'Yoyakku::Model::Mainte::Post',
-        model_mainte_profile   => 'Yoyakku::Model::Mainte::Profile',
-        model_mainte_region    => 'Yoyakku::Model::Mainte::Region',
-        model_mainte_reserve   => 'Yoyakku::Model::Mainte::Reserve',
-        model_mainte_roominfo  => 'Yoyakku::Model::Mainte::Roominfo',
-        model_mainte_storeinfo => 'Yoyakku::Model::Mainte::Storeinfo',
-        model_calendar         => 'Yoyakku::Model::Calendar',
-        model_auth             => 'Yoyakku::Model::Auth',
-        model_mainte           => 'Yoyakku::Model::Mainte',
-        model_entry            => 'Yoyakku::Model::Entry',
-        model_profile          => 'Yoyakku::Model::Profile',
-        model_region           => 'Yoyakku::Model::Region',
+        model_mainte_acting     => 'Yoyakku::Model::Mainte::Acting',
+        model_mainte_admin      => 'Yoyakku::Model::Mainte::Admin',
+        model_mainte_ads        => 'Yoyakku::Model::Mainte::Ads',
+        model_mainte_general    => 'Yoyakku::Model::Mainte::General',
+        model_mainte_post       => 'Yoyakku::Model::Mainte::Post',
+        model_mainte_profile    => 'Yoyakku::Model::Mainte::Profile',
+        model_mainte_region     => 'Yoyakku::Model::Mainte::Region',
+        model_mainte_reserve    => 'Yoyakku::Model::Mainte::Reserve',
+        model_mainte_roominfo   => 'Yoyakku::Model::Mainte::Roominfo',
+        model_mainte_storeinfo  => 'Yoyakku::Model::Mainte::Storeinfo',
+        model_calendar          => 'Yoyakku::Model::Calendar',
+        model_auth              => 'Yoyakku::Model::Auth',
+        model_mainte            => 'Yoyakku::Model::Mainte',
+        model_entry             => 'Yoyakku::Model::Entry',
+        model_profile           => 'Yoyakku::Model::Profile',
+        model_region            => 'Yoyakku::Model::Region',
+        model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {

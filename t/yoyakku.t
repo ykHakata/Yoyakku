@@ -9,7 +9,7 @@ BEGIN { use_ok('Yoyakku') || print "Bail out!\n"; }
 my $t            = Test::Mojo->new('Yoyakku');
 my $config       = $t->app->config;
 my $login_params = $config->{mainte}->{login_account};
-$t->app->commands->start_app( 'Yoyakku', 'init_db', );
+$t->app->commands->run('init_db');
 
 subtest 'plugin conf' => sub {
     my $conf = $t->app->config;
@@ -18,22 +18,23 @@ subtest 'plugin conf' => sub {
 
 subtest 'helper method' => sub {
     my $class_args = +{
-        model_mainte_acting    => 'Yoyakku::Model::Mainte::Acting',
-        model_mainte_admin     => 'Yoyakku::Model::Mainte::Admin',
-        model_mainte_ads       => 'Yoyakku::Model::Mainte::Ads',
-        model_mainte_general   => 'Yoyakku::Model::Mainte::General',
-        model_mainte_post      => 'Yoyakku::Model::Mainte::Post',
-        model_mainte_profile   => 'Yoyakku::Model::Mainte::Profile',
-        model_mainte_region    => 'Yoyakku::Model::Mainte::Region',
-        model_mainte_reserve   => 'Yoyakku::Model::Mainte::Reserve',
-        model_mainte_roominfo  => 'Yoyakku::Model::Mainte::Roominfo',
-        model_mainte_storeinfo => 'Yoyakku::Model::Mainte::Storeinfo',
-        model_calendar         => 'Yoyakku::Model::Calendar',
-        model_auth             => 'Yoyakku::Model::Auth',
-        model_mainte           => 'Yoyakku::Model::Mainte',
-        model_entry            => 'Yoyakku::Model::Entry',
-        model_profile          => 'Yoyakku::Model::Profile',
-        model_region           => 'Yoyakku::Model::Region',
+        model_mainte_acting     => 'Yoyakku::Model::Mainte::Acting',
+        model_mainte_admin      => 'Yoyakku::Model::Mainte::Admin',
+        model_mainte_ads        => 'Yoyakku::Model::Mainte::Ads',
+        model_mainte_general    => 'Yoyakku::Model::Mainte::General',
+        model_mainte_post       => 'Yoyakku::Model::Mainte::Post',
+        model_mainte_profile    => 'Yoyakku::Model::Mainte::Profile',
+        model_mainte_region     => 'Yoyakku::Model::Mainte::Region',
+        model_mainte_reserve    => 'Yoyakku::Model::Mainte::Reserve',
+        model_mainte_roominfo   => 'Yoyakku::Model::Mainte::Roominfo',
+        model_mainte_storeinfo  => 'Yoyakku::Model::Mainte::Storeinfo',
+        model_calendar          => 'Yoyakku::Model::Calendar',
+        model_auth              => 'Yoyakku::Model::Auth',
+        model_mainte            => 'Yoyakku::Model::Mainte',
+        model_entry             => 'Yoyakku::Model::Entry',
+        model_profile           => 'Yoyakku::Model::Profile',
+        model_region            => 'Yoyakku::Model::Region',
+        model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
     };
 
     my @model_methods = qw{params session method html login_row login_table
@@ -113,8 +114,8 @@ subtest 'router' => sub {
         '/index_next_three_m',
         '/entry',
         '/region_state',
-        # '/admin_store_edit',
-        # '/admin_store_comp',
+        '/admin_store_edit',
+        '/admin_store_comp',
         # '/admin_reserv_edit',
         # '/up_admin_r_d_edit',
     );

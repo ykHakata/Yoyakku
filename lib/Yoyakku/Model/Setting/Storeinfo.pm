@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Setting';
-use Yoyakku::Util qw{get_fill_in_params};
 
 =encoding utf8
 
@@ -46,18 +45,6 @@ sub get_post_search {
     return $params;
 }
 
-=head2 get_init_valid_params_admin_store_edit
-
-    バリデート用パラメータ初期値(admin_store_edit)
-
-=cut
-
-sub get_init_valid_params_admin_store_edit {
-    my $self = shift;
-    return $self->get_init_valid_params(
-        [qw{name post state cities addressbelow tel mail remarks url }] );
-}
-
 =head2 writing_admin_store
 
     storeinfo テーブル書込み、修正に対応
@@ -67,6 +54,7 @@ sub get_init_valid_params_admin_store_edit {
 sub writing_admin_store {
     my $self   = shift;
     my $params = shift;
+    my $type   = shift;
 
     my $create_data = $self->get_create_data( 'storeinfo', $params );
 
@@ -76,10 +64,16 @@ sub writing_admin_store {
     delete $create_data->{status};
 
     # update 以外は禁止
-    die 'update only'
-        if !$self->type() || ( $self->type() && $self->type() ne 'update' );
+    die 'update only' if !$type || ( $type && $type ne 'update' );
 
-    return $self->writing_db( 'storeinfo', $create_data, $params->{id} );
+    my $args = +{
+        table       => 'storeinfo',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
+    };
+
+    return $self->writing_from_db($args);
 }
 
 1;
@@ -99,8 +93,6 @@ __END__
 =item * L<parent>
 
 =item * L<Yoyakku::Model::Setting>
-
-=item * L<Yoyakku::Util>
 
 =back
 
