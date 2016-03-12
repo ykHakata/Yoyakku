@@ -52,8 +52,9 @@ sub index {
 sub up_login {
     my $self = shift;
 
+    my $exists_session = $self->model_auth->logged_in( $self->session );
     return $self->redirect_to('index')
-        if $self->model_auth->logged_in( $self->session );
+        if $exists_session && $exists_session eq 1;
 
     $self->stash(
         class    => 'up_login',
@@ -104,8 +105,9 @@ sub up_logout {
 sub up_login_admin {
     my $self  = shift;
 
+    my $exists_session = $self->model_auth->logged_in( $self->session );
     return $self->redirect_to('index')
-        if $self->model_auth->logged_in( $self->session );
+        if $exists_session && $exists_session eq 1;
 
     my $valid_params = $self->model_auth->get_valid_params('auth');
 
@@ -138,8 +140,9 @@ sub up_login_admin {
 sub up_login_general {
     my $self  = shift;
 
+    my $exists_session = $self->model_auth->logged_in( $self->session );
     return $self->redirect_to('index')
-        if $self->model_auth->logged_in( $self->session );
+        if $exists_session && $exists_session eq 1;
 
     my $valid_params = $self->model_auth->get_valid_params('auth');
 

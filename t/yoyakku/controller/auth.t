@@ -86,6 +86,18 @@ subtest 'up_login' => sub {
         $t->get_ok('/up_logout')->status_is(200);
         $t->get_ok('/up_login')->status_is(200);
     };
+    # root login 時は ログイン可能
+    subtest 'render login select root login' => sub {
+        $t->post_ok( '/root_login' => form => $login_root )->status_is(302)
+            ->header_is('mainte_list');
+        $t->get_ok('/up_login')->status_is(200)
+            ->content_type_is('text/html;charset=UTF-8')
+            ->text_is( 'html head title' => 'yoyakkuログイン' )
+            ->content_like(qr{\Qログインを選択してください。\E})
+            ->content_like(qr{\Q一般ユーザーログイン\E})
+            ->content_like(qr{\Q店舗管理者ログイン\E});
+        $t->get_ok('/up_logout')->status_is(200);
+    };
 };
 
 =head2 up_logout
@@ -145,14 +157,32 @@ subtest 'up_login_admin' => sub {
 
         # セッション成功リダイレクト (profile 設定済み)
         subtest 'success' => sub {
+            $t->ua->max_redirects(1);
             $t->post_ok( '/up_login_admin' => form => $login_admin )
-                ->status_is(302)->header_is(@to_index);
-
+                ->status_is(200)->content_type_is('text/html;charset=UTF-8')
+                ->text_is( 'html head title' => 'yoyakkuオープニング' )
+                ->content_like(qr{\Q(admin)スタジオヨヤック\E});
+            $t->ua->max_redirects(0);
             $t->get_ok('/up_logout')->status_is(200)
                 ->content_type_is('text/html;charset=UTF-8')
                 ->text_is( 'html head title' => 'ログアウト' )
                 ->content_like(qr{\Qログアウトしました。\E})
                 ->content_like(qr{\Qありがとうございました。\E});
+
+            # root login 中はログイン可能
+            subtest 'loging in' => sub {
+                $t->post_ok( '/root_login' => form => $login_root )
+                    ->status_is(302)->header_is('mainte_list');
+                $t->ua->max_redirects(1);
+                $t->post_ok( '/up_login_admin' => form => $login_admin )
+                    ->status_is(200)
+                    ->content_type_is('text/html;charset=UTF-8')
+                    ->text_is(
+                    'html head title' => 'yoyakkuオープニング' )
+                    ->content_like(qr{\Q(admin)スタジオヨヤック\E});
+                $t->ua->max_redirects(0);
+                $t->get_ok('/up_logout')->status_is(200);
+            };
         };
 
         # 入力値の違い
@@ -260,13 +290,34 @@ subtest 'up_login_general' => sub {
 
         # セッション成功リダイレクト (profile 設定済み)
         subtest 'success' => sub {
+            $t->ua->max_redirects(1);
             $t->post_ok( '/up_login_general' => form => $login_general )
-                ->status_is(302)->header_is(@to_index);
+                ->status_is(200)
+                ->content_type_is('text/html;charset=UTF-8')
+                ->text_is(
+                'html head title' => 'yoyakkuオープニング' )
+                ->content_like(qr{\Qふくしま\E});
+            $t->ua->max_redirects(0);
             $t->get_ok('/up_logout')->status_is(200)
                 ->content_type_is('text/html;charset=UTF-8')
                 ->text_is( 'html head title' => 'ログアウト' )
                 ->content_like(qr{\Qログアウトしました。\E})
                 ->content_like(qr{\Qありがとうございました。\E});
+
+            # root login 中はログイン可能
+            subtest 'loging in' => sub {
+                $t->post_ok( '/root_login' => form => $login_root )
+                    ->status_is(302)->header_is('mainte_list');
+                $t->ua->max_redirects(1);
+                $t->post_ok( '/up_login_general' => form => $login_general )
+                    ->status_is(200)
+                    ->content_type_is('text/html;charset=UTF-8')
+                    ->text_is(
+                    'html head title' => 'yoyakkuオープニング' )
+                    ->content_like(qr{\Qふくしま\E});
+                $t->ua->max_redirects(0);
+                $t->get_ok('/up_logout')->status_is(200);
+            };
         };
 
         # 入力値の違い
