@@ -13,7 +13,7 @@ use Yoyakku::Util qw{now_datetime switch_header_params chenge_time_over
     next_day_ymd join_time join_date_time};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::Validator;
-use parent 'Yoyakku::DB::Model';
+use parent 'Yoyakku::DB::Model::Base';
 
 __PACKAGE__->mk_accessors(
     qw{mail_temp mail_header mail_body yoyakku_conf model_stash});

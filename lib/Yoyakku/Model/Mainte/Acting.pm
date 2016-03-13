@@ -28,9 +28,8 @@ use parent 'Yoyakku::Model::Mainte';
 
 sub get_general_rows_all {
     my $self         = shift;
-    my $teng         = $self->teng();
-    my @general_rows = $teng->search( 'general', +{}, );
-    return \@general_rows;
+    my $general_rows = $self->general_db_rows_all();
+    return $general_rows;
 }
 
 =head2 check_acting_validator_db
@@ -42,18 +41,16 @@ sub get_general_rows_all {
 sub check_acting_validator_db {
     my $self   = shift;
     my $params = shift;
-    my $teng   = $self->teng();
 
     my $valid_msg_db = +{ general_id => '既に利用されています' };
 
     # general_id, storeinfo_id, 組み合わせの重複確認
-    my $check_acting_row = $teng->single(
-        'acting',
-        +{  general_id   => $params->{general_id},
-            storeinfo_id => $params->{storeinfo_id},
-            status       => 1,
-        },
-    );
+    my $args = +{
+        general_id   => $params->{general_id},
+        storeinfo_id => $params->{storeinfo_id},
+        status       => 1,
+    };
+    my $check_acting_row = $self->acting_db_overlap_id($args);
 
     return if !$check_acting_row;
     return $valid_msg_db if !$params->{id};    # 新規
