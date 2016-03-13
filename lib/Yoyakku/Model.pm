@@ -2,8 +2,6 @@ package Yoyakku::Model;
 use strict;
 use warnings;
 use utf8;
-use Teng;
-use Teng::Schema::Loader;
 use base qw{Class::Accessor::Fast};
 use Encode qw{encode};
 use Email::Sender::Simple 'sendmail';
@@ -11,11 +9,11 @@ use Email::MIME;
 use Email::Sender::Transport::SMTPS;
 use Try::Tiny;
 use HTML::FillInForm;
-use FindBin;
 use Yoyakku::Util qw{now_datetime switch_header_params chenge_time_over
     next_day_ymd join_time join_date_time};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::Validator;
+use parent 'Yoyakku::DB::Model';
 
 __PACKAGE__->mk_accessors(
     qw{mail_temp mail_header mail_body yoyakku_conf model_stash});
@@ -652,37 +650,6 @@ sub check_auth_db_yoyakku {
     return 1;
 }
 
-=head2 teng
-
-    teng モジュールセットアップ
-
-=cut
-
-sub teng {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf->{db};
-
-    my $dsn_str = $conf->{dsn_str};
-    my $user    = $conf->{user} || '';
-    my $pass    = $conf->{pass} || '';
-    my $option  = $conf->{option} || +{
-        RaiseError        => 1,
-        PrintError        => 0,
-        AutoCommit        => 1,
-        sqlite_unicode    => 1,
-        mysql_enable_utf8 => 1,
-    };
-
-    my $dbh = DBI->connect( $dsn_str, $user, $pass, $option );
-
-    my $teng = Teng::Schema::Loader->load(
-        dbh       => $dbh,
-        namespace => 'Yoyakku::DB',
-    );
-
-    return $teng;
-}
-
 1;
 
 __END__
@@ -696,12 +663,6 @@ __END__
 =item * L<warnings>
 
 =item * L<utf8>
-
-=item * L<Teng>
-
-=item * L<Teng::Schema::Loader>
-
-=item * L<FormValidator::Lite>
 
 =item * L<base>
 
@@ -720,6 +681,8 @@ __END__
 =item * L<Yoyakku::Util>
 
 =item * L<Yoyakku::Master>
+
+=item * L<Yoyakku::DB::Model>
 
 =back
 
