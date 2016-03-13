@@ -35,12 +35,11 @@ subtest 'helper method' => sub {
         model_profile           => 'Yoyakku::Model::Profile',
         model_region            => 'Yoyakku::Model::Region',
         model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
+        model_setting_roominfo  => 'Yoyakku::Model::Setting::Roominfo',
     };
 
-    my @model_methods = qw{params session method html login_row login_table
-        login_name profile_row storeinfo_row template type flash_msg acting_rows
-        mail_temp mail_header mail_body login_storeinfo_row login_roominfo_rows
-        yoyakku_conf model_stash};
+    my @model_methods
+        = qw{mail_temp mail_header mail_body yoyakku_conf model_stash};
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {
         my $model = $t->app->build_controller->$method;
@@ -116,8 +115,8 @@ subtest 'router' => sub {
         '/region_state',
         '/admin_store_edit',
         '/admin_store_comp',
-        # '/admin_reserv_edit',
-        # '/up_admin_r_d_edit',
+        '/admin_reserv_edit',
+        '/up_admin_r_d_edit',
     );
 
     for my $url (@url_collection) {

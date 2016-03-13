@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use parent 'Yoyakku::Model::Setting';
-use Yoyakku::Util qw{get_fill_in_params chenge_time_over join_time};
+use Yoyakku::Util qw{chenge_time_over join_time};
 
 =encoding utf8
 
@@ -20,29 +20,6 @@ use Yoyakku::Util qw{get_fill_in_params chenge_time_over join_time};
     Setting::Roominfo コントローラーのロジック API
 
 =cut
-
-=head2 get_init_valid_params_admin_reserv_edit
-
-    バリデート用パラメータ初期値(admin_reserv_edit)
-
-=cut
-
-sub get_init_valid_params_admin_reserv_edit {
-    my $self = shift;
-    return $self->get_init_valid_params(
-        [qw{name endingtime_on rentalunit pricescomments}] );
-}
-
-=head2 get_init_valid_params_up_admin_r_d_edit
-
-    バリデート用パラメータ初期値(up_admin_r_d_edit)
-
-=cut
-
-sub get_init_valid_params_up_admin_r_d_edit {
-    my $self = shift;
-    return $self->get_init_valid_params( [qw{remarks}] );
-}
 
 =head2 set_roominfo_params
 
@@ -116,6 +93,7 @@ sub get_check_params_list {
 sub writing_admin_reserv {
     my $self   = shift;
     my $params = shift;
+    my $type   = shift;
 
     # 書き込む前に開始、終了時刻変換
     my $FIELD_SEPARATOR_TIME = q{:};
@@ -165,10 +143,16 @@ sub writing_admin_reserv {
     }
 
     # update 以外は禁止
-    die 'update only'
-        if !$self->type() || ( $self->type() && $self->type() ne 'update' );
+    die 'update only' if !$type || ( $type && $type ne 'update' );
 
-    return $self->writing_db( 'roominfo', $create_data, $params->{id} );
+    my $args = +{
+        table       => 'roominfo',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
+    };
+
+    return $self->writing_from_db($args);
 }
 
 1;

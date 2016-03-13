@@ -200,18 +200,6 @@ sub get_region_rows_region_navi {
     return \@rows;
 }
 
-=head2 get_store_id_region_navi
-
-    地域ナビため、検索結果店舗id受け取り
-
-=cut
-
-# sub get_store_id_region_navi {
-#     my $self     = shift;
-#     my $store_id = $self->params->{store_id};
-#     return $store_id;
-# }
-
 =head2 get_cal_params
 
     選択したカレンダー情報一式を取得

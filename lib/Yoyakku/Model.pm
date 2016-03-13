@@ -18,11 +18,7 @@ use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::Validator;
 
 __PACKAGE__->mk_accessors(
-    qw{params session method html login_row login_table login_name
-        profile_row storeinfo_row template type flash_msg acting_rows
-        mail_temp mail_header mail_body login_storeinfo_row login_roominfo_rows
-        yoyakku_conf model_stash}
-);
+    qw{mail_temp mail_header mail_body yoyakku_conf model_stash});
 
 =encoding utf8
 
@@ -143,7 +139,7 @@ sub change_format_datetime {
 sub check_validator {
     my $self      = shift;
     my $table     = shift;
-    my $params    = shift || $self->params();
+    my $params    = shift;
     my $validator = Yoyakku::Validator->new();
     my $msg       = $validator->$table($params);
     return $msg;
@@ -159,8 +155,8 @@ sub set_fill_in_params {
     my $self = shift;
     my $args = shift;
 
-    my $html   = $args->{html}   || $self->html();
-    my $params = $args->{params} || $self->params();
+    my $html   = $args->{html};
+    my $params = $args->{params};
 
     return HTML::FillInForm->fill( $html, $params );
 }
@@ -325,6 +321,9 @@ sub get_valid_params {
     my $self         = shift;
     my $class_name   = shift;
     my $valid_params = +{
+        up_admin_r_d_edit => [qw{remarks}],
+        admin_reserv_edit =>
+            [qw{name endingtime_on rentalunit pricescomments}],
         admin_store_edit =>
             [ qw{name post state cities addressbelow tel mail remarks url} ],
         profile => [
@@ -521,35 +520,6 @@ sub writing_from_db {
     return $insert_row;
 }
 
-=head2 writing_db
-
-    データベースへの書き込み
-
-=cut
-
-sub writing_db {
-    my $self        = shift;
-    my $table       = shift;
-    my $create_data = shift;
-    my $update_id   = shift;
-    my $type        = $self->type();
-
-    my $teng = $self->teng();
-
-    my $insert_row;
-    if ( $type eq 'insert' ) {
-        $insert_row = $teng->insert( $table, $create_data, );
-    }
-    elsif ( $type eq 'update' ) {
-        delete $create_data->{create_on};
-        $insert_row = $teng->single( $table, +{ id => $update_id }, );
-        $insert_row->update($create_data);
-    }
-    die 'not $insert_row' if !$insert_row;
-
-    return $insert_row;
-}
-
 =head2 insert_admin_relation
 
     admin 有効の際の関連データ作成
@@ -660,18 +630,9 @@ sub check_auth_db_yoyakku {
     my $self    = shift;
     my $session = shift;
 
-    my $teng = $self->teng();
-    my $admin_id;
-    my $general_id;
-
-    if ($session) {
-        $admin_id   = $session->{session_admin_id};
-        $general_id = $session->{session_general_id};
-    }
-    else {
-        $admin_id   = $self->session->{session_admin_id};
-        $general_id = $self->session->{session_general_id};
-    }
+    my $teng       = $self->teng();
+    my $admin_id   = $session->{session_admin_id};
+    my $general_id = $session->{session_general_id};
 
     return if !$admin_id && !$general_id;
 
@@ -688,36 +649,6 @@ sub check_auth_db_yoyakku {
     my $login_row = $teng->single( $table, +{ id => $id } );
     return if !$login_row;
 
-    $self->login_row($login_row);
-    $self->profile_row( $teng->single( 'profile', +{ $column => $id } ) );
-    $self->login_table($table);
-
-    my $login_name
-        = $self->profile_row() ? $self->profile_row()->nick_name : undef;
-
-    if ($admin_id) {
-        $login_name = q{(admin)} . $login_name;
-
-        my $storeinfo_row
-            = $teng->single( 'storeinfo', +{ admin_id => $id } );
-
-        my @roominfo_rows
-            = $teng->search( 'roominfo',
-            +{ storeinfo_id => $storeinfo_row->id } );
-
-        $self->storeinfo_row($storeinfo_row);
-        $self->login_storeinfo_row($storeinfo_row);
-        $self->login_roominfo_rows( \@roominfo_rows );
-    }
-    $self->login_name($login_name);
-
-    if ($general_id) {
-        my @actings = $teng->search( 'acting',
-            +{ general_id => $login_row->id, status => 1, } );
-
-        $self->acting_rows( \@actings );
-    }
-
     return 1;
 }
 
@@ -729,17 +660,12 @@ sub check_auth_db_yoyakku {
 
 sub teng {
     my $self = shift;
-    my $conf;
+    my $conf = $self->yoyakku_conf->{db};
 
-    if ( $self->yoyakku_conf ) {
-        $conf = $self->yoyakku_conf->{db};
-    }
-
-    my $dsn_str = $conf->{dsn_str}
-        || 'dbi:SQLite:' . $FindBin::Bin . '/../../db/yoyakku.db';
-    my $user   = $conf->{user}   || '';
-    my $pass   = $conf->{pass}   || '';
-    my $option = $conf->{option} || +{
+    my $dsn_str = $conf->{dsn_str};
+    my $user    = $conf->{user} || '';
+    my $pass    = $conf->{pass} || '';
+    my $option  = $conf->{option} || +{
         RaiseError        => 1,
         PrintError        => 0,
         AutoCommit        => 1,

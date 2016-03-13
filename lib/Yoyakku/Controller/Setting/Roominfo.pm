@@ -1,9 +1,5 @@
 package Yoyakku::Controller::Setting::Roominfo;
 use Mojo::Base 'Mojolicious::Controller';
-use Yoyakku::Model::Setting::Roominfo;
-
-has( model_setting_roominfo =>
-        sub { Yoyakku::Model::Setting::Roominfo->new(); } );
 
 =encoding utf8
 
@@ -66,16 +62,15 @@ sub admin_reserv_edit {
     my $self  = shift;
     my $model = $self->model_setting_roominfo;
 
-    my $init_valid_params_admin_reserv_edit
-        = $model->get_init_valid_params_admin_reserv_edit();
-
-    my $switch_com = $model->get_switch_com('admin_reserv_edit');
+    my $valid_params = $model->get_valid_params('admin_reserv_edit');
+    my $switch_com   = $model->get_switch_com('admin_reserv_edit');
 
     $self->stash(
         class      => 'admin_reserv_edit',
         switch_com => $switch_com,
         template   => 'setting/admin_reserv_edit',
-        %{$init_valid_params_admin_reserv_edit},
+        format     => 'html',
+        %{$valid_params},
     );
 
     if ( 'GET' eq uc $self->req->method ) {
@@ -83,6 +78,7 @@ sub admin_reserv_edit {
             = $model->set_roominfo_params( $self->stash->{login_row} );
         return $self->_render_fill_in_form();
     }
+
     return $self->_cancel() if $self->stash->{params}->{cancel};
     return $self->_update();
 }
@@ -97,16 +93,15 @@ sub up_admin_r_d_edit {
     my $self  = shift;
     my $model = $self->model_setting_roominfo;
 
-    my $get_init_valid_params_up_admin_r_d_edit
-        = $model->get_init_valid_params_up_admin_r_d_edit();
-
-    my $switch_com = $model->get_switch_com('up_admin_r_d_edit');
+    my $valid_params = $model->get_valid_params('up_admin_r_d_edit');
+    my $switch_com   = $model->get_switch_com('up_admin_r_d_edit');
 
     $self->stash(
         class      => 'admin_reserv_edit',
         switch_com => $switch_com,
         template   => 'setting/up_admin_r_d_edit',
-        %{$get_init_valid_params_up_admin_r_d_edit},
+        format     => 'html',
+        %{$valid_params},
     );
 
     if ( 'GET' eq uc $self->req->method ) {
@@ -130,7 +125,7 @@ sub _update {
     my $self  = shift;
     my $model = $self->model_setting_roominfo;
 
-    $model->type('update');
+    $self->stash->{type} = 'update';
 
     my $check_params
         = $model->get_check_params_list( $self->stash->{params} );
@@ -142,7 +137,7 @@ sub _update {
     }
 
     for my $check_param ( @{$check_params} ) {
-        $model->writing_admin_reserv($check_param);
+        $model->writing_admin_reserv( $check_param, $self->stash->{type}, );
     }
 
     return $self->redirect_to('up_admin_r_d_edit');
@@ -150,14 +145,11 @@ sub _update {
 
 sub _render_fill_in_form {
     my $self = shift;
-
-    my $html = $self->render_to_string( format => 'html', )->to_string;
-
+    my $html = $self->render_to_string->to_string;
     my $args = +{
         html   => \$html,
         params => $self->stash->{params},
     };
-
     my $output = $self->model_setting_roominfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }

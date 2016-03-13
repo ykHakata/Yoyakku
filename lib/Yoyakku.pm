@@ -17,6 +17,7 @@ use Yoyakku::Model::Entry;
 use Yoyakku::Model::Profile;
 use Yoyakku::Model::Region;
 use Yoyakku::Model::Setting::Storeinfo;
+use Yoyakku::Model::Setting::Roominfo;
 
 # This method will run once at server start
 sub startup {
@@ -48,6 +49,7 @@ sub startup {
         model_profile           => 'Yoyakku::Model::Profile',
         model_region            => 'Yoyakku::Model::Region',
         model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
+        model_setting_roominfo  => 'Yoyakku::Model::Setting::Roominfo',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {

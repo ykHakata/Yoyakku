@@ -52,11 +52,6 @@ sub check_auth_validator_db {
         : $table eq 'admin'   ? 'admin_id'
         :                       '';
 
-    my $profile_row
-        = $teng->single( 'profile', +{ $search_column => $row->id } );
-
-    $self->login_row($row);
-    $self->profile_row($profile_row);
     return;
 }
 
