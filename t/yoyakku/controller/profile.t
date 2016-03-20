@@ -175,11 +175,11 @@ subtest 'profile' => sub {
             }
 
             # パラメーターの取得
-            my $login_row = $t->app->model_profile->teng->single( 'admin',
+            my $login_row = $t->app->model->profile->teng->single( 'admin',
                 +{ id => 1 } );
 
             my $update_params
-                = $t->app->model_profile->set_form_params_profile( 'profile',
+                = $t->app->model->profile->set_form_params_profile( 'profile',
                 $login_row );
 
             # nick_name を変更

@@ -28,14 +28,10 @@ subtest 'helper method' => sub {
         model_mainte_reserve    => 'Yoyakku::Model::Mainte::Reserve',
         model_mainte_roominfo   => 'Yoyakku::Model::Mainte::Roominfo',
         model_mainte_storeinfo  => 'Yoyakku::Model::Mainte::Storeinfo',
-        model_calendar          => 'Yoyakku::Model::Calendar',
-        model_auth              => 'Yoyakku::Model::Auth',
         model_mainte            => 'Yoyakku::Model::Mainte',
-        model_entry             => 'Yoyakku::Model::Entry',
-        model_profile           => 'Yoyakku::Model::Profile',
-        model_region            => 'Yoyakku::Model::Region',
         model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
         model_setting_roominfo  => 'Yoyakku::Model::Setting::Roominfo',
+        model                   => 'Yoyakku::Model::Base',
     };
 
     my @model_methods

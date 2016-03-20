@@ -10,14 +10,10 @@ use Yoyakku::Model::Mainte::Region;
 use Yoyakku::Model::Mainte::Reserve;
 use Yoyakku::Model::Mainte::Roominfo;
 use Yoyakku::Model::Mainte::Storeinfo;
-use Yoyakku::Model::Calendar;
-use Yoyakku::Model::Auth;
 use Yoyakku::Model::Mainte;
-use Yoyakku::Model::Entry;
-use Yoyakku::Model::Profile;
-use Yoyakku::Model::Region;
 use Yoyakku::Model::Setting::Storeinfo;
 use Yoyakku::Model::Setting::Roominfo;
+use Yoyakku::Model::Base;
 
 # This method will run once at server start
 sub startup {
@@ -42,14 +38,10 @@ sub startup {
         model_mainte_reserve    => 'Yoyakku::Model::Mainte::Reserve',
         model_mainte_roominfo   => 'Yoyakku::Model::Mainte::Roominfo',
         model_mainte_storeinfo  => 'Yoyakku::Model::Mainte::Storeinfo',
-        model_calendar          => 'Yoyakku::Model::Calendar',
-        model_auth              => 'Yoyakku::Model::Auth',
         model_mainte            => 'Yoyakku::Model::Mainte',
-        model_entry             => 'Yoyakku::Model::Entry',
-        model_profile           => 'Yoyakku::Model::Profile',
-        model_region            => 'Yoyakku::Model::Region',
         model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
         model_setting_roominfo  => 'Yoyakku::Model::Setting::Roominfo',
+        model                   => 'Yoyakku::Model::Base',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {

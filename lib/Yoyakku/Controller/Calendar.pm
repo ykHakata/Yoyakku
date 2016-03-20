@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_calendar;
+    my $model = $self->model->calendar;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -59,7 +59,7 @@ sub index {
 
 sub this_month {
     my $self     = shift;
-    my $model    = $self->model_calendar();
+    my $model    = $self->model->calendar();
     my $now_date = $model->get_date_info('now_date');
     $self->stash(
         class    => 'index_this_m',
@@ -81,7 +81,7 @@ sub this_month {
 
 sub index_next_m {
     my $self        = shift;
-    my $model       = $self->model_calendar();
+    my $model       = $self->model->calendar();
     my $next1m_date = $model->get_date_info('next1m_date');
     $self->stash(
         class       => 'index_next_m',
@@ -103,7 +103,7 @@ sub index_next_m {
 
 sub index_next_two_m {
     my $self        = shift;
-    my $model       = $self->model_calendar();
+    my $model       = $self->model->calendar();
     my $next2m_date = $model->get_date_info('next2m_date');
     $self->stash(
         class       => 'index_next_two_m',
@@ -125,7 +125,7 @@ sub index_next_two_m {
 
 sub index_next_three_m {
     my $self        = shift;
-    my $model       = $self->model_calendar();
+    my $model       = $self->model->calendar();
     my $next3m_date = $model->get_date_info('next3m_date');
     $self->stash(
         class       => 'index_next_three_m',

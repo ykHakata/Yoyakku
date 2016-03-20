@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_entry;
+    my $model = $self->model->entry;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -57,7 +57,7 @@ sub entry {
 
     my $switch_load;
     my $mail_j;
-    my $get_ads_navi_rows = $self->model_entry->get_ads_navi_rows();
+    my $get_ads_navi_rows = $self->model->entry->get_ads_navi_rows();
 
     $self->stash(
         class        => 'entry',
@@ -83,7 +83,7 @@ sub _insert {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model_entry;
+    my $model = $self->model->entry;
 
     my $valid_msg
         = $model->check_validator( 'entry', $self->stash->{params} );
@@ -119,7 +119,7 @@ sub _render_entry {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_entry->set_fill_in_params($args);
+    my $output = $self->model->entry->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

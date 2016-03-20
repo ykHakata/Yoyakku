@@ -61,7 +61,7 @@ subtest 'index' => sub {
 =cut
 
 subtest 'this_month' => sub {
-    my $tp_obj     = $t->app->model_calendar->get_date_info('now_date');
+    my $tp_obj     = $t->app->model->calendar->get_date_info('now_date');
     my $year_month = $tp_obj->year . '年' . $tp_obj->mon . '月';
 
     $t->get_ok('/')->status_is(200)
@@ -80,7 +80,7 @@ subtest 'this_month' => sub {
 =cut
 
 subtest 'index_next_m' => sub {
-    my $tp_obj     = $t->app->model_calendar->get_date_info('next1m_date');
+    my $tp_obj     = $t->app->model->calendar->get_date_info('next1m_date');
     my $year_month = $tp_obj->year . '年' . $tp_obj->mon . '月';
 
     $t->get_ok('/index_next_m')->status_is(200)
@@ -95,7 +95,7 @@ subtest 'index_next_m' => sub {
 =cut
 
 subtest 'index_next_two_m' => sub {
-    my $tp_obj     = $t->app->model_calendar->get_date_info('next2m_date');
+    my $tp_obj     = $t->app->model->calendar->get_date_info('next2m_date');
     my $year_month = $tp_obj->year . '年' . $tp_obj->mon . '月';
 
     $t->get_ok('/index_next_two_m')->status_is(200)
@@ -110,7 +110,7 @@ subtest 'index_next_two_m' => sub {
 =cut
 
 subtest 'index_next_three_m' => sub {
-    my $tp_obj     = $t->app->model_calendar->get_date_info('next3m_date');
+    my $tp_obj     = $t->app->model->calendar->get_date_info('next3m_date');
     my $year_month = $tp_obj->year . '年' . $tp_obj->mon . '月';
 
     $t->get_ok('/index_next_three_m')->status_is(200)

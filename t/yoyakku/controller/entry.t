@@ -99,7 +99,7 @@ subtest 'entry' => sub {
         $t->ua->max_redirects(0);
 
         # メール内容確認
-        my $send_mail = $t->app->model_entry->model_stash;
+        my $send_mail = $t->app->model->entry->model_stash;
         my $mail      = shift @{$send_mail};
         my $transport = shift @{$send_mail};
 
@@ -111,13 +111,13 @@ subtest 'entry' => sub {
         my $mail_j = $params->{mail_j};
         my $table  = $params->{select_usr};
 
-        my $create_user = $t->app->model_entry->teng->single( $table,
+        my $create_user = $t->app->model->entry->teng->single( $table,
             +{ login => $mail_j } );
 
         is( $create_user->password, 'yoyakku', 'password ok' );
         is( $create_user->status,   0,         'status ok' );
 
-        my $create_profile = $t->app->model_entry->teng->single( 'profile',
+        my $create_profile = $t->app->model->entry->teng->single( 'profile',
             +{ admin_id => $create_user->id, } );
 
         is( $create_profile->nick_name, $mail_j, 'nick_name ok' );

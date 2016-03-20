@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_profile;
+    my $model = $self->model->profile;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -57,7 +57,7 @@ sub index {
 
 sub profile_comp {
     my $self  = shift;
-    my $model = $self->model_profile();
+    my $model = $self->model->profile();
 
     $self->stash(
         class => 'profile_comp',
@@ -82,9 +82,9 @@ sub profile_comp {
 
 sub profile {
     my $self  = shift;
-    my $model = $self->model_profile();
+    my $model = $self->model->profile();
 
-    my $valid_params = $self->model_profile->get_valid_params('profile');
+    my $valid_params = $self->model->profile->get_valid_params('profile');
 
     $self->stash(
         class          => 'profile',
@@ -103,7 +103,7 @@ sub profile {
 
 sub _insert {
     my $self  = shift;
-    my $model = $self->model_profile;
+    my $model = $self->model->profile;
 
     if ( 'GET' eq uc $self->req->method ) {
         $self->stash->{params} = $model->set_form_params_profile( 'profile',
@@ -119,7 +119,7 @@ sub _insert {
 
 sub _update {
     my $self  = shift;
-    my $model = $self->model_profile;
+    my $model = $self->model->profile;
 
     if ( 'GET' eq uc $self->req->method ) {
         $self->stash->{params} = $model->set_form_params_profile( 'profile',
@@ -135,7 +135,7 @@ sub _update {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model_profile;
+    my $model = $self->model->profile;
 
     my $valid_msg = $model->check_validator( 'profile_with_auth',
         $self->stash->{params} );
@@ -159,7 +159,7 @@ sub _render_profile {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_profile->set_fill_in_params($args);
+    my $output = $self->model->profile->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

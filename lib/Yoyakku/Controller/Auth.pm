@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_auth;
+    my $model = $self->model->auth;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -52,7 +52,7 @@ sub index {
 sub up_login {
     my $self = shift;
 
-    my $exists_session = $self->model_auth->logged_in( $self->session );
+    my $exists_session = $self->model->auth->logged_in( $self->session );
     return $self->redirect_to('index')
         if $exists_session && $exists_session eq 1;
 
@@ -74,7 +74,7 @@ sub up_logout {
     my $self = shift;
 
     return $self->redirect_to('index')
-        if !$self->model_auth->logged_in( $self->session );
+        if !$self->model->auth->logged_in( $self->session );
 
     $self->stash(
         class    => 'up_logout',
@@ -105,11 +105,11 @@ sub up_logout {
 sub up_login_admin {
     my $self  = shift;
 
-    my $exists_session = $self->model_auth->logged_in( $self->session );
+    my $exists_session = $self->model->auth->logged_in( $self->session );
     return $self->redirect_to('index')
         if $exists_session && $exists_session eq 1;
 
-    my $valid_params = $self->model_auth->get_valid_params('auth');
+    my $valid_params = $self->model->auth->get_valid_params('auth');
 
     $self->stash(
         class    => 'up_login_admin',
@@ -140,11 +140,11 @@ sub up_login_admin {
 sub up_login_general {
     my $self  = shift;
 
-    my $exists_session = $self->model_auth->logged_in( $self->session );
+    my $exists_session = $self->model->auth->logged_in( $self->session );
     return $self->redirect_to('index')
         if $exists_session && $exists_session eq 1;
 
-    my $valid_params = $self->model_auth->get_valid_params('auth');
+    my $valid_params = $self->model->auth->get_valid_params('auth');
 
     $self->stash(
         class    => 'up_login_general',
@@ -166,10 +166,10 @@ sub up_login_general {
 sub root_login {
     my $self  = shift;
 
-    my $session = $self->model_auth->logged_in( $self->session );
+    my $session = $self->model->auth->logged_in( $self->session );
     return $self->redirect_to('index') if $session && $session eq 2;
 
-    my $valid_params = $self->model_auth->get_valid_params('auth');
+    my $valid_params = $self->model->auth->get_valid_params('auth');
 
     $self->stash(
         class    => 'root_login',
@@ -184,7 +184,7 @@ sub root_login {
 sub _render_input_form {
     my $self  = shift;
     my $table = shift;
-    my $model = $self->model_auth();
+    my $model = $self->model->auth();
 
     # root ログインの場合は別処理(暫定)
     if ($table eq 'root') {
@@ -229,7 +229,7 @@ sub _render_auth {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_auth->set_fill_in_params($args);
+    my $output = $self->model->auth->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 
