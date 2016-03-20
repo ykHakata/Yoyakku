@@ -1,5 +1,5 @@
 package Yoyakku::DB::Model::General;
-use Mojo::Base 'Yoyakku::DB::Model';
+use Mojo::Base 'Yoyakku::DB::Model::Base';
 
 =encoding utf8
 

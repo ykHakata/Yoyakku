@@ -1,12 +1,13 @@
 package Yoyakku::DB::Model::Base;
-use Mojo::Base 'Yoyakku::DB::Model::Acting';
-use Mojo::Base 'Yoyakku::DB::Model::General';
+use Mojo::Base -base;
+use Teng;
+use Teng::Schema::Loader;
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::DB::Model::Base - データベース Model 集約
+    Yoyakku::DB::Model::Base - データベース Model
 
 =head1 VERSION (改定番号)
 
@@ -14,9 +15,42 @@ use Mojo::Base 'Yoyakku::DB::Model::General';
 
 =head1 SYNOPSIS (概要)
 
-    yoyakku テーブルの API 一式を提供
+    データベース接続の API teng を提供
 
 =cut
+
+has [qw{yoyakku_conf}];
+
+=head2 teng
+
+    teng モジュールセットアップ
+
+=cut
+
+sub teng {
+    my $self = shift;
+    my $conf = $self->yoyakku_conf->{db};
+
+    my $dsn_str = $conf->{dsn_str};
+    my $user    = $conf->{user} || '';
+    my $pass    = $conf->{pass} || '';
+    my $option  = $conf->{option} || +{
+        RaiseError        => 1,
+        PrintError        => 0,
+        AutoCommit        => 1,
+        sqlite_unicode    => 1,
+        mysql_enable_utf8 => 1,
+    };
+
+    my $dbh = DBI->connect( $dsn_str, $user, $pass, $option );
+
+    my $teng = Teng::Schema::Loader->load(
+        dbh       => $dbh,
+        namespace => 'Yoyakku::DB',
+    );
+
+    return $teng;
+}
 
 1;
 
@@ -28,9 +62,9 @@ __END__
 
 =item * L<Mojo::Base>
 
-=item * L<Yoyakku::DB::Model::Acting>
+=item * L<Teng>
 
-=item * L<Yoyakku::DB::Model::General>
+=item * L<Teng::Schema::Loader>
 
 =back
 

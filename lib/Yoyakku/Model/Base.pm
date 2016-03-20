@@ -1,5 +1,5 @@
 package Yoyakku::Model::Base;
-use Mojo::Base 'Yoyakku::DB::Model::Base';
+use Mojo::Base 'Yoyakku::DB::Model';
 use Encode qw{encode};
 use Email::Sender::Simple 'sendmail';
 use Email::MIME;
