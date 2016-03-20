@@ -17,11 +17,11 @@ has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::Model - データベース関連 API
+    Yoyakku::Model::Base - データベース関連 API
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::Model version 0.0.1
+    This documentation referes to Yoyakku::Model::Base version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
