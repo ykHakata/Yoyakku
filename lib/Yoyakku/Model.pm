@@ -6,6 +6,22 @@ use Yoyakku::Model::Entry;
 use Yoyakku::Model::Profile;
 use Yoyakku::Model::Region;
 
+=encoding utf8
+
+=head1 NAME (モジュール名)
+
+    Yoyakku::Model - データベース Model アクセスメソッド
+
+=head1 VERSION (改定番号)
+
+    This documentation referes to Yoyakku::Model version 0.0.1
+
+=head1 SYNOPSIS (概要)
+
+    yoyakku コントローラーモデルへのアクセス一式
+
+=cut
+
 has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
 
 has auth => sub {
@@ -36,27 +52,12 @@ has profile => sub {
     return $obj;
 };
 
-has region => sub {my $self = shift;
+has region => sub {
+    my $self = shift;
     my $conf = $self->yoyakku_conf;
     my $obj  = Yoyakku::Model::Region->new( +{ yoyakku_conf => $conf } );
     return $obj;
 };
-
-=encoding utf8
-
-=head1 NAME (モジュール名)
-
-    Yoyakku::Model::Base - データベース Model 集約
-
-=head1 VERSION (改定番号)
-
-    This documentation referes to Yoyakku::Model::Base version 0.0.1
-
-=head1 SYNOPSIS (概要)
-
-    yoyakku コントローラーのモデル API 一式を提供
-
-=cut
 
 1;
 
