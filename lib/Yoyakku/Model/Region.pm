@@ -1,8 +1,5 @@
 package Yoyakku::Model::Region;
-use strict;
-use warnings;
-use utf8;
-use parent 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model';
 use Yoyakku::Util
     qw{chang_date_6 get_month_last_date get_calendar get_tp_obj_strptime};
 
@@ -337,13 +334,7 @@ __END__
 
 =over
 
-=item * L<strict>
-
-=item * L<warnings>
-
-=item * L<utf8>
-
-=item * L<parent>
+=item * L<Mojo::Base>
 
 =item * L<Yoyakku::Model>
 

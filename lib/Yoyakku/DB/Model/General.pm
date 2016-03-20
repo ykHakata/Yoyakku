@@ -1,8 +1,5 @@
 package Yoyakku::DB::Model::General;
-use strict;
-use warnings;
-use utf8;
-use parent 'Yoyakku::DB::Model';
+use Mojo::Base 'Yoyakku::DB::Model';
 
 =encoding utf8
 
@@ -36,3 +33,19 @@ sub general_db_rows_all {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojo::Base>
+
+=item * L<Yoyakku::DB::Model>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut

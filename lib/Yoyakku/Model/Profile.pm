@@ -1,8 +1,5 @@
 package Yoyakku::Model::Profile;
-use strict;
-use warnings;
-use utf8;
-use parent 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model';
 use Yoyakku::Util qw{now_datetime};
 
 =encoding utf8
@@ -289,13 +286,7 @@ __END__
 
 =over
 
-=item * L<strict>
-
-=item * L<warnings>
-
-=item * L<utf8>
-
-=item * L<parent>
+=item * L<Mojo::Base>
 
 =item * L<Yoyakku::Model>
 

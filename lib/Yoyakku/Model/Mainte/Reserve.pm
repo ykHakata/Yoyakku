@@ -1,8 +1,5 @@
 package Yoyakku::Model::Mainte::Reserve;
-use strict;
-use warnings;
-use utf8;
-use parent 'Yoyakku::Model::Mainte';
+use Mojo::Base 'Yoyakku::Model::Mainte';
 use Yoyakku::Util qw{split_time chenge_time_over};
 use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
@@ -323,13 +320,7 @@ __END__
 
 =over
 
-=item * L<strict>
-
-=item * L<warnings>
-
-=item * L<utf8>
-
-=item * L<parent>
+=item * L<Mojo::Base>
 
 =item * L<Yoyakku::Model::Mainte>
 

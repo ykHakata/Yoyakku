@@ -1,11 +1,7 @@
 package Yoyakku::Validator;
-use strict;
-use warnings;
-use utf8;
-use base qw{Class::Accessor::Fast};
+use Mojo::Base 'Yoyakku::Model';
 use FormValidator::Lite qw{Email URL DATE TIME};
 use Yoyakku::Util qw{get_start_end_tp};
-use parent 'Yoyakku::Model';
 
 =encoding utf8
 
@@ -763,17 +759,13 @@ __END__
 
 =over
 
-=item * L<strict>
+=item * L<Mojo::Base>
 
-=item * L<warnings>
-
-=item * L<utf8>
-
-=item * L<base>
-
-=item * L<Class::Accessor::Fast>
+=item * L<Yoyakku::Model>
 
 =item * L<FormValidator::Lite>
+
+=item * L<Yoyakku::Util>
 
 =back
 

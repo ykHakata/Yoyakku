@@ -1,8 +1,5 @@
 package Yoyakku::Model;
-use strict;
-use warnings;
-use utf8;
-use base qw{Class::Accessor::Fast};
+use Mojo::Base 'Yoyakku::DB::Model::Base';
 use Encode qw{encode};
 use Email::Sender::Simple 'sendmail';
 use Email::MIME;
@@ -13,10 +10,8 @@ use Yoyakku::Util qw{now_datetime switch_header_params chenge_time_over
     next_day_ymd join_time join_date_time};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::Validator;
-use parent 'Yoyakku::DB::Model::Base';
 
-__PACKAGE__->mk_accessors(
-    qw{mail_temp mail_header mail_body yoyakku_conf model_stash});
+has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
 
 =encoding utf8
 
@@ -223,7 +218,8 @@ sub send_gmail {
 
     try {
         if ( $conf->{mode} eq 'testing' ) {
-            $self->model_stash( $email, +{ transport => $transport } );
+            my $test_mail = [ $email, +{ transport => $transport } ];
+            $self->model_stash($test_mail);
         }
         else {
             sendmail( $email, +{ transport => $transport } );
@@ -658,15 +654,9 @@ __END__
 
 =over
 
-=item * L<strict>
+=item * L<Mojo::Base>
 
-=item * L<warnings>
-
-=item * L<utf8>
-
-=item * L<base>
-
-=item * L<Class::Accessor::Fast>
+=item * L<Yoyakku::DB::Model::Base>
 
 =item * L<Encode>
 
@@ -678,11 +668,13 @@ __END__
 
 =item * L<Try::Tiny>
 
+=item * L<HTML::FillInForm>
+
 =item * L<Yoyakku::Util>
 
 =item * L<Yoyakku::Master>
 
-=item * L<Yoyakku::DB::Model>
+=item * L<Yoyakku::Validator>
 
 =back
 

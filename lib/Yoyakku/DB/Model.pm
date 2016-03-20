@@ -1,7 +1,5 @@
 package Yoyakku::DB::Model;
-use strict;
-use warnings;
-use utf8;
+use Mojo::Base -base;
 use Teng;
 use Teng::Schema::Loader;
 
@@ -20,6 +18,8 @@ use Teng::Schema::Loader;
     データベース接続の API teng を提供
 
 =cut
+
+has [qw{yoyakku_conf}];
 
 =head2 teng
 
@@ -55,3 +55,21 @@ sub teng {
 1;
 
 __END__
+
+=head1 DEPENDENCIES (依存モジュール)
+
+=over
+
+=item * L<Mojo::Base>
+
+=item * L<Teng>
+
+=item * L<Teng::Schema::Loader>
+
+=back
+
+=head1 SEE ALSO (参照)
+
+L<Guides>
+
+=cut
