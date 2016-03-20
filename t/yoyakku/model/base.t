@@ -4,7 +4,7 @@ use Test::More;
 use Test::Mojo;
 use Data::Dumper;
 
-BEGIN { use_ok('Yoyakku::Model') || print "Bail out!\n"; }
+BEGIN { use_ok('Yoyakku::Model::Base') || print "Bail out!\n"; }
 
 my $t            = Test::Mojo->new('Yoyakku');
 my $config       = $t->app->config;
@@ -18,8 +18,8 @@ $t->app->commands->start_app( 'Yoyakku', 'init_db', );
 =cut
 
 subtest 'method' => sub {
-    my $obj = Yoyakku::Model->new();
-    isa_ok( $obj, 'Yoyakku::Model' );
+    my $obj = Yoyakku::Model::Base->new();
+    isa_ok( $obj, 'Yoyakku::Model::Base' );
 
     my @methods = qw{login logged_in get_login_row get_logged_in_row login};
 
@@ -35,7 +35,7 @@ subtest 'method' => sub {
 =cut
 
 subtest 'get_login_row' => sub {
-    my $obj = Yoyakku::Model->new( +{ yoyakku_conf => $config } );
+    my $obj = Yoyakku::Model::Base->new( +{ yoyakku_conf => $config } );
 
     my $session = +{};
 
@@ -62,7 +62,7 @@ subtest 'get_login_row' => sub {
 =cut
 
 subtest 'logged_in' => sub {
-    my $obj = Yoyakku::Model->new( +{ yoyakku_conf => $config } );
+    my $obj = Yoyakku::Model::Base->new( +{ yoyakku_conf => $config } );
     my $session = +{};
 
     subtest 'success' => sub {
@@ -87,7 +87,7 @@ subtest 'logged_in' => sub {
 =cut
 
 subtest 'get_logged_in_row' => sub {
-    my $obj = Yoyakku::Model->new( +{ yoyakku_conf => $config } );
+    my $obj = Yoyakku::Model::Base->new( +{ yoyakku_conf => $config } );
     my $session = +{};
 
     subtest 'success' => sub {
@@ -113,7 +113,7 @@ subtest 'get_logged_in_row' => sub {
 =cut
 
 subtest 'login' => sub {
-    my $obj = Yoyakku::Model->new( +{ yoyakku_conf => $config } );
+    my $obj = Yoyakku::Model::Base->new( +{ yoyakku_conf => $config } );
     my $args = +{};
 
     subtest 'success' => sub {

@@ -1,5 +1,5 @@
 package Yoyakku::Model::Region;
-use Mojo::Base 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model::Base';
 use Yoyakku::Util
     qw{chang_date_6 get_month_last_date get_calendar get_tp_obj_strptime};
 

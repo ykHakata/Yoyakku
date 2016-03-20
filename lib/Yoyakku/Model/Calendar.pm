@@ -1,5 +1,5 @@
 package Yoyakku::Model::Calendar;
-use Mojo::Base 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model::Base';
 use Yoyakku::Util qw{chang_date_6 get_calendar};
 
 =encoding utf8

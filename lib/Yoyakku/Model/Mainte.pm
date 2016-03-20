@@ -1,5 +1,5 @@
 package Yoyakku::Model::Mainte;
-use Mojo::Base 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model::Base';
 use Yoyakku::Util qw{
     switch_header_params
     join_time

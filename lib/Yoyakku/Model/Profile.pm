@@ -1,5 +1,5 @@
 package Yoyakku::Model::Profile;
-use Mojo::Base 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model::Base';
 use Yoyakku::Util qw{now_datetime};
 
 =encoding utf8

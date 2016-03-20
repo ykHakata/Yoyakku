@@ -1,5 +1,5 @@
 package Yoyakku::Model::Auth;
-use Mojo::Base 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model::Base';
 
 =encoding utf8
 

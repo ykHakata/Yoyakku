@@ -31,7 +31,7 @@ subtest 'helper method' => sub {
         model_mainte            => 'Yoyakku::Model::Mainte',
         model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
         model_setting_roominfo  => 'Yoyakku::Model::Setting::Roominfo',
-        model                   => 'Yoyakku::Model::Base',
+        model                   => 'Yoyakku::Model',
     };
 
     my @model_methods

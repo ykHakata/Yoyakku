@@ -1,5 +1,5 @@
 package Yoyakku::Model::Entry;
-use Mojo::Base 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model::Base';
 use Yoyakku::Util qw{now_datetime};
 use Yoyakku::Master qw{$MAIL_SYSTEM};
 

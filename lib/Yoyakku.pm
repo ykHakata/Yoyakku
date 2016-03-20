@@ -13,7 +13,7 @@ use Yoyakku::Model::Mainte::Storeinfo;
 use Yoyakku::Model::Mainte;
 use Yoyakku::Model::Setting::Storeinfo;
 use Yoyakku::Model::Setting::Roominfo;
-use Yoyakku::Model::Base;
+use Yoyakku::Model;
 
 # This method will run once at server start
 sub startup {
@@ -41,7 +41,7 @@ sub startup {
         model_mainte            => 'Yoyakku::Model::Mainte',
         model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
         model_setting_roominfo  => 'Yoyakku::Model::Setting::Roominfo',
-        model                   => 'Yoyakku::Model::Base',
+        model                   => 'Yoyakku::Model',
     };
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {

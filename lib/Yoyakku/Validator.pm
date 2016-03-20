@@ -1,5 +1,5 @@
 package Yoyakku::Validator;
-use Mojo::Base 'Yoyakku::Model';
+use Mojo::Base 'Yoyakku::Model::Base';
 use FormValidator::Lite qw{Email URL DATE TIME};
 use Yoyakku::Util qw{get_start_end_tp};
 
