@@ -11,8 +11,6 @@ use Yoyakku::Model::Mainte::Reserve;
 use Yoyakku::Model::Mainte::Roominfo;
 use Yoyakku::Model::Mainte::Storeinfo;
 use Yoyakku::Model::Mainte;
-use Yoyakku::Model::Setting::Storeinfo;
-use Yoyakku::Model::Setting::Roominfo;
 use Yoyakku::Model;
 
 # This method will run once at server start
@@ -39,8 +37,6 @@ sub startup {
         model_mainte_roominfo   => 'Yoyakku::Model::Mainte::Roominfo',
         model_mainte_storeinfo  => 'Yoyakku::Model::Mainte::Storeinfo',
         model_mainte            => 'Yoyakku::Model::Mainte',
-        model_setting_storeinfo => 'Yoyakku::Model::Setting::Storeinfo',
-        model_setting_roominfo  => 'Yoyakku::Model::Setting::Roominfo',
         model                   => 'Yoyakku::Model',
     };
 

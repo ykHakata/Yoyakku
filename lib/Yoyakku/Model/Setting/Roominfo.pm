@@ -1,5 +1,5 @@
 package Yoyakku::Model::Setting::Roominfo;
-use Mojo::Base 'Yoyakku::Model::Setting';
+use Mojo::Base 'Yoyakku::Model::Setting::Base';
 use Yoyakku::Util qw{chenge_time_over join_time};
 
 =encoding utf8

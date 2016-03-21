@@ -19,7 +19,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_setting_roominfo;
+    my $model = $self->model->setting->roominfo;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -60,7 +60,7 @@ sub index {
 
 sub admin_reserv_edit {
     my $self  = shift;
-    my $model = $self->model_setting_roominfo;
+    my $model = $self->model->setting->roominfo;
 
     my $valid_params = $model->get_valid_params('admin_reserv_edit');
     my $switch_com   = $model->get_switch_com('admin_reserv_edit');
@@ -91,7 +91,7 @@ sub admin_reserv_edit {
 
 sub up_admin_r_d_edit {
     my $self  = shift;
-    my $model = $self->model_setting_roominfo;
+    my $model = $self->model->setting->roominfo;
 
     my $valid_params = $model->get_valid_params('up_admin_r_d_edit');
     my $switch_com   = $model->get_switch_com('up_admin_r_d_edit');
@@ -123,7 +123,7 @@ sub _cancel {
 
 sub _update {
     my $self  = shift;
-    my $model = $self->model_setting_roominfo;
+    my $model = $self->model->setting->roominfo;
 
     $self->stash->{type} = 'update';
 
@@ -150,7 +150,7 @@ sub _render_fill_in_form {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_setting_roominfo->set_fill_in_params($args);
+    my $output = $self->model->setting->roominfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

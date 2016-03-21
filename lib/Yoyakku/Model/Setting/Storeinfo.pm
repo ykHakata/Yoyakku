@@ -1,5 +1,5 @@
 package Yoyakku::Model::Setting::Storeinfo;
-use Mojo::Base 'Yoyakku::Model::Setting';
+use Mojo::Base 'Yoyakku::Model::Setting::Base';
 
 =encoding utf8
 

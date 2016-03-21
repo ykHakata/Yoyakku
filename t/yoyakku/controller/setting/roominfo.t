@@ -164,8 +164,8 @@ subtest 'admin_reserv_edit' => sub {
                 login    => $login_admin->{login},
                 password => $login_admin->{password},
             };
-            my $login_row = $t->app->model_setting_roominfo->login($args);
-            my $params = $t->app->model_setting_roominfo->set_roominfo_params(
+            my $login_row = $t->app->model->setting->roominfo->login($args);
+            my $params = $t->app->model->setting->roominfo->set_roominfo_params(
                 $login_row);
 
             # 部屋名変更

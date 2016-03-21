@@ -19,7 +19,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_setting_storeinfo;
+    my $model = $self->model->setting->storeinfo;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -60,7 +60,7 @@ sub index {
 
 sub admin_store_edit {
     my $self  = shift;
-    my $model = $self->model_setting_storeinfo;
+    my $model = $self->model->setting->storeinfo;
 
     my $valid_params = $model->get_valid_params('admin_store_edit');
     my $switch_com   = $model->get_switch_com('admin_store_edit');
@@ -94,7 +94,7 @@ sub _cancel {
 
 sub _post_search {
     my $self  = shift;
-    my $model = $self->model_setting_storeinfo;
+    my $model = $self->model->setting->storeinfo;
 
     $self->stash->{params}
         = $model->get_post_search( $self->stash->{params} );
@@ -110,7 +110,7 @@ sub _update {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model_setting_storeinfo;
+    my $model = $self->model->setting->storeinfo;
     my $valid_msg
         = $model->check_validator( 'storeinfo', $self->stash->{params} );
     return $self->stash($valid_msg), $self->_render_fill_in_form()
@@ -129,7 +129,7 @@ sub _render_fill_in_form {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_setting_storeinfo->set_fill_in_params($args);
+    my $output = $self->model->setting->storeinfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 
@@ -143,7 +143,7 @@ sub admin_store_comp {
     my $self = shift;
 
     my $switch_com
-        = $self->model_setting_storeinfo->get_switch_com('admin_store_comp');
+        = $self->model->setting->storeinfo->get_switch_com('admin_store_comp');
 
     $self->stash(
         class         => 'admin_store_comp',

@@ -5,6 +5,7 @@ use Yoyakku::Model::Calendar;
 use Yoyakku::Model::Entry;
 use Yoyakku::Model::Profile;
 use Yoyakku::Model::Region;
+use Yoyakku::Model::Setting;
 
 =encoding utf8
 
@@ -23,6 +24,13 @@ use Yoyakku::Model::Region;
 =cut
 
 has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
+
+has setting => sub {
+    my $self = shift;
+    my $conf = $self->yoyakku_conf;
+    my $obj  = Yoyakku::Model::Setting->new( +{ yoyakku_conf => $conf } );
+    return $obj;
+};
 
 has auth => sub {
     my $self = shift;

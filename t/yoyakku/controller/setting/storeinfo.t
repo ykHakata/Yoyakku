@@ -152,7 +152,7 @@ subtest 'admin_store_edit' => sub {
                 login    => $login_admin->{login},
                 password => $login_admin->{password},
             };
-            my $login_row = $t->app->model_setting_storeinfo->login($args);
+            my $login_row = $t->app->model->setting->storeinfo->login($args);
             my $params    = $login_row->fetch_storeinfo->get_columns;
 
             $params->{post_search} = '検索';
@@ -198,7 +198,7 @@ subtest 'admin_store_edit' => sub {
                 login    => $login_admin->{login},
                 password => $login_admin->{password},
             };
-            my $login_row = $t->app->model_setting_storeinfo->login($args);
+            my $login_row = $t->app->model->setting->storeinfo->login($args);
             my $params    = $login_row->fetch_storeinfo->get_columns;
 
             $params->{name} = $params->{name} . 'テスト';
