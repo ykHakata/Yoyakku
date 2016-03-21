@@ -86,7 +86,7 @@ subtest 'mainte_general_new' => sub {
     $t->element_exists('input[name=id][value=1][type=text]');
 
     my $update_params
-        = $t->app->model_mainte_general->update_form_params( 'general',
+        = $t->app->model->mainte->general->update_form_params( 'general',
         $params );
 
     # password を変更

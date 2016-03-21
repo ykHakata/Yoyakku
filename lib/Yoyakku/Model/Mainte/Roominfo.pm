@@ -1,5 +1,5 @@
 package Yoyakku::Model::Mainte::Roominfo;
-use Mojo::Base 'Yoyakku::Model::Mainte';
+use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 =encoding utf8
 

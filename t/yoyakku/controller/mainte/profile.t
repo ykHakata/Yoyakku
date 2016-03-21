@@ -86,7 +86,7 @@ subtest 'mainte_profile_new' => sub {
     $t->element_exists('input[name=id][value=1][type=text]');
 
     my $update_params
-        = $t->app->model_mainte_profile->update_form_params( 'profile',
+        = $t->app->model->mainte->profile->update_form_params( 'profile',
         $params );
 
     # nick_name を変更

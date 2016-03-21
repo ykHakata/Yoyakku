@@ -17,20 +17,7 @@ subtest 'plugin conf' => sub {
 };
 
 subtest 'helper method' => sub {
-    my $class_args = +{
-        model_mainte_acting     => 'Yoyakku::Model::Mainte::Acting',
-        model_mainte_admin      => 'Yoyakku::Model::Mainte::Admin',
-        model_mainte_ads        => 'Yoyakku::Model::Mainte::Ads',
-        model_mainte_general    => 'Yoyakku::Model::Mainte::General',
-        model_mainte_post       => 'Yoyakku::Model::Mainte::Post',
-        model_mainte_profile    => 'Yoyakku::Model::Mainte::Profile',
-        model_mainte_region     => 'Yoyakku::Model::Mainte::Region',
-        model_mainte_reserve    => 'Yoyakku::Model::Mainte::Reserve',
-        model_mainte_roominfo   => 'Yoyakku::Model::Mainte::Roominfo',
-        model_mainte_storeinfo  => 'Yoyakku::Model::Mainte::Storeinfo',
-        model_mainte            => 'Yoyakku::Model::Mainte',
-        model                   => 'Yoyakku::Model',
-    };
+    my $class_args = +{ model => 'Yoyakku::Model', };
 
     my @model_methods
         = qw{mail_temp mail_header mail_body yoyakku_conf model_stash};

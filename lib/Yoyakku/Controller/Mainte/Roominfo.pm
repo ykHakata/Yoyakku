@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_mainte_roominfo;
+    my $model = $self->model->mainte->roominfo;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -53,7 +53,7 @@ sub index {
 
 sub mainte_roominfo_serch {
     my $self  = shift;
-    my $model = $self->model_mainte_roominfo();
+    my $model = $self->model->mainte->roominfo();
 
     my $roominfo_rows = $model->search_id_single_or_all_rows( 'roominfo',
         $self->stash->{params}->{storeinfo_id} );
@@ -75,7 +75,7 @@ sub mainte_roominfo_serch {
 
 sub mainte_roominfo_new {
     my $self  = shift;
-    my $model = $self->model_mainte_roominfo();
+    my $model = $self->model->mainte->roominfo();
 
     return $self->redirect_to('mainte_roominfo_serch')
         if !$self->stash->{params}->{id};
@@ -94,7 +94,7 @@ sub mainte_roominfo_new {
 
 sub _update {
     my $self  = shift;
-    my $model = $self->model_mainte_roominfo;
+    my $model = $self->model->mainte->roominfo;
 
     if ( 'GET' eq uc $self->req->method() ) {
         $self->stash->{params}
@@ -109,7 +109,7 @@ sub _update {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model_mainte_roominfo();
+    my $model = $self->model->mainte->roominfo();
 
     my $valid_msg
         = $model->check_validator( 'roominfo', $self->stash->{params} );
@@ -129,7 +129,7 @@ sub _render_roominfo {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_mainte_roominfo->set_fill_in_params($args);
+    my $output = $self->model->mainte->roominfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

@@ -1,5 +1,5 @@
 package Yoyakku::Model::Mainte::General;
-use Mojo::Base 'Yoyakku::Model::Mainte';
+use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 =encoding utf8
 

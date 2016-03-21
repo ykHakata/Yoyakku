@@ -1,5 +1,5 @@
 package Yoyakku::Model::Mainte::Reserve;
-use Mojo::Base 'Yoyakku::Model::Mainte';
+use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 use Yoyakku::Util qw{split_time chenge_time_over};
 use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 

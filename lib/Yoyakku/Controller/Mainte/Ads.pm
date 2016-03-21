@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_mainte_ads;
+    my $model = $self->model->mainte->ads;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -53,7 +53,7 @@ sub index {
 
 sub mainte_ads_serch {
     my $self  = shift;
-    my $model = $self->model_mainte_ads();
+    my $model = $self->model->mainte->ads();
 
     my $ads_rows = $model->search_id_single_or_all_rows( 'ads',
         $self->stash->{params}->{id} );
@@ -75,7 +75,7 @@ sub mainte_ads_serch {
 
 sub mainte_ads_new {
     my $self  = shift;
-    my $model = $self->model_mainte_ads();
+    my $model = $self->model->mainte->ads();
 
     my $valid_params = $model->get_valid_params('mainte_ads');
 
@@ -94,7 +94,7 @@ sub mainte_ads_new {
 
 sub _insert {
     my $self  = shift;
-    my $model = $self->model_mainte_ads();
+    my $model = $self->model->mainte->ads();
 
     return $self->_render_ads() if 'GET' eq uc $self->req->method;
 
@@ -106,7 +106,7 @@ sub _insert {
 
 sub _update {
     my $self  = shift;
-    my $model = $self->model_mainte_ads();
+    my $model = $self->model->mainte->ads();
 
     if ( 'GET' eq uc $self->req->method() ) {
         $self->stash->{params}
@@ -121,7 +121,7 @@ sub _update {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model_mainte_ads;
+    my $model = $self->model->mainte->ads;
 
     my $valid_msg = $model->check_validator( 'ads', $self->stash->{params} );
 
@@ -139,7 +139,7 @@ sub _render_ads {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_mainte_ads->set_fill_in_params($args);
+    my $output = $self->model->mainte->ads->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

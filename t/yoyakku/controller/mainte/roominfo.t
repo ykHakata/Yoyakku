@@ -85,7 +85,7 @@ subtest 'mainte_roominfo_new' => sub {
     $t->element_exists('input[name=id][value=1][type=text]');
 
     my $update_params
-        = $t->app->model_mainte_roominfo->update_form_params( 'roominfo',
+        = $t->app->model->mainte->roominfo->update_form_params( 'roominfo',
         $params );
 
     # 部屋名を変更

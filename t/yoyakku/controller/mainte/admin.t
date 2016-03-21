@@ -87,7 +87,7 @@ subtest 'mainte_registrant_new' => sub {
     $t->element_exists('input[name=id][value=2][type=text]');
 
     my $update_params
-        = $t->app->model_mainte_admin->update_form_params( 'admin', $params );
+        = $t->app->model->mainte->admin->update_form_params( 'admin', $params );
 
     # password を変更
     $params = +{

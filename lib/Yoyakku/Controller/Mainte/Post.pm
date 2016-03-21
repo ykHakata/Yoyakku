@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_mainte_post;
+    my $model = $self->model->mainte->post;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -52,7 +52,7 @@ sub index {
 
 sub mainte_post_serch {
     my $self  = shift;
-    my $model = $self->model_mainte_post();
+    my $model = $self->model->mainte->post();
 
     my $post_rows = $model->search_post_id_rows();
 

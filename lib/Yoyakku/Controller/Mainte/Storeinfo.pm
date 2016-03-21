@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_mainte_storeinfo;
+    my $model = $self->model->mainte->storeinfo;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -54,7 +54,7 @@ sub index {
 
 sub mainte_storeinfo_serch {
     my $self  = shift;
-    my $model = $self->model_mainte_storeinfo();
+    my $model = $self->model->mainte->storeinfo();
 
     my $storeinfo_rows = $model->search_id_single_or_all_rows( 'storeinfo',
         $self->stash->{params}->{storeinfo_id} );
@@ -76,7 +76,7 @@ sub mainte_storeinfo_serch {
 
 sub mainte_storeinfo_new {
     my $self  = shift;
-    my $model = $self->model_mainte_storeinfo();
+    my $model = $self->model->mainte->storeinfo();
 
     return $self->redirect_to('mainte_storeinfo_serch')
         if !$self->stash->{params}->{id};
@@ -94,7 +94,7 @@ sub mainte_storeinfo_new {
 
 sub _update {
     my $self  = shift;
-    my $model = $self->model_mainte_storeinfo;
+    my $model = $self->model->mainte->storeinfo;
 
     if ( 'GET' eq uc $self->req->method() ) {
         $self->stash->{params}
@@ -119,7 +119,7 @@ sub _update {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model_mainte_storeinfo();
+    my $model = $self->model->mainte->storeinfo();
 
     my $valid_msg
         = $model->check_validator( 'storeinfo', $self->stash->{params} );
@@ -139,7 +139,7 @@ sub _render_storeinfo {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_mainte_storeinfo->set_fill_in_params($args);
+    my $output = $self->model->mainte->storeinfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

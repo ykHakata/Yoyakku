@@ -86,7 +86,7 @@ subtest 'mainte_acting_new' => sub {
     $t->element_exists('input[name=id][value=2][type=text]');
 
     my $update_params
-        = $t->app->model_mainte_acting->update_form_params( 'acting',
+        = $t->app->model->mainte->acting->update_form_params( 'acting',
         $params );
 
     # storeinfo_id を変更

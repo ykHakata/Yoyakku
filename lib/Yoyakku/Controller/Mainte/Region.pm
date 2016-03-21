@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_mainte_region;
+    my $model = $self->model->mainte->region;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -52,7 +52,7 @@ sub index {
 
 sub mainte_region_serch {
     my $self  = shift;
-    my $model = $self->model_mainte_region();
+    my $model = $self->model->mainte->region();
 
     my $region_rows = $model->search_region_id_rows();
 

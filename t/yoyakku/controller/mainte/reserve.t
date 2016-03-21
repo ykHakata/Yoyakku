@@ -93,7 +93,7 @@ subtest 'mainte_reserve_new' => sub {
     $t->element_exists('input[name=id][value=1][type=text]');
 
     my $update_params
-        = $t->app->model_mainte_reserve->update_form_params( 'reserve',
+        = $t->app->model->mainte->reserve->update_form_params( 'reserve',
         $params );
 
     # tel を変更

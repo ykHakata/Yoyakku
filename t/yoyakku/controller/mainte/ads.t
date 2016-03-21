@@ -89,7 +89,7 @@ subtest 'mainte_ads_new' => sub {
     $t->element_exists('input[name=id][value=1][type=text]');
 
     my $update_params
-        = $t->app->model_mainte_ads->update_form_params( 'ads', $params );
+        = $t->app->model->mainte->ads->update_form_params( 'ads', $params );
 
     # url を変更
     $params = +{

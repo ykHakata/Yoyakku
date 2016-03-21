@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_mainte_reserve;
+    my $model = $self->model->mainte->reserve;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -53,7 +53,7 @@ sub index {
 
 sub mainte_reserve_serch {
     my $self  = shift;
-    my $model = $self->model_mainte_reserve();
+    my $model = $self->model->mainte->reserve();
 
     my $reserve_rows = $model->search_id_single_or_all_rows( 'reserve',
         $self->stash->{params}->{id} );
@@ -75,7 +75,7 @@ sub mainte_reserve_serch {
 
 sub mainte_reserve_new {
     my $self  = shift;
-    my $model = $self->model_mainte_reserve();
+    my $model = $self->model->mainte->reserve();
 
     return $self->redirect_to('/mainte_reserve_serch')
         if !$self->stash->{params}->{id}
@@ -99,7 +99,7 @@ sub mainte_reserve_new {
 
 sub _insert {
     my $self  = shift;
-    my $model = $self->model_mainte_reserve();
+    my $model = $self->model->mainte->reserve();
 
     return $self->_render_reserve() if 'GET' eq uc $self->req->method;
 
@@ -111,7 +111,7 @@ sub _insert {
 
 sub _update {
     my $self  = shift;
-    my $model = $self->model_mainte_reserve();
+    my $model = $self->model->mainte->reserve();
 
     if ( 'GET' eq uc $self->req->method() ) {
         $self->stash->{params}
@@ -126,7 +126,7 @@ sub _update {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model_mainte_reserve;
+    my $model = $self->model->mainte->reserve;
 
     my $valid_msg
         = $model->check_validator( 'reserve', $self->stash->{params} );
@@ -158,7 +158,7 @@ sub _render_reserve {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_mainte_reserve->set_fill_in_params($args);
+    my $output = $self->model->mainte->reserve->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

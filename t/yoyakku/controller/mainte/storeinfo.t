@@ -99,7 +99,7 @@ subtest 'mainte_storeinfo_new' => sub {
     }
 
     my $update_params
-        = $t->app->model_mainte_storeinfo->update_form_params( 'storeinfo',
+        = $t->app->model->mainte->storeinfo->update_form_params( 'storeinfo',
         $params );
 
     # 店舗名を変更

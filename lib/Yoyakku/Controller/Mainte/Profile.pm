@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_mainte_profile;
+    my $model = $self->model->mainte->profile;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -53,7 +53,7 @@ sub index {
 
 sub mainte_profile_serch {
     my $self  = shift;
-    my $model = $self->model_mainte_profile();
+    my $model = $self->model->mainte->profile();
 
     my $profile_rows = $model->search_id_single_or_all_rows( 'profile',
         $self->stash->{params}->{profile_id} );
@@ -75,7 +75,7 @@ sub mainte_profile_serch {
 
 sub mainte_profile_new {
     my $self  = shift;
-    my $model = $self->model_mainte_profile();
+    my $model = $self->model->mainte->profile();
 
     my $valid_params_profile = $model->get_valid_params('mainte_profile');
 
@@ -94,7 +94,7 @@ sub mainte_profile_new {
 
 sub _insert {
     my $self  = shift;
-    my $model = $self->model_mainte_profile();
+    my $model = $self->model->mainte->profile();
 
     return $self->_render_profile() if 'GET' eq uc $self->req->method();
 
@@ -106,7 +106,7 @@ sub _insert {
 
 sub _update {
     my $self  = shift;
-    my $model = $self->model_mainte_profile();
+    my $model = $self->model->mainte->profile();
 
     if ( 'GET' eq uc $self->req->method() ) {
         $self->stash->{params}
@@ -121,7 +121,7 @@ sub _update {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model_mainte_profile();
+    my $model = $self->model->mainte->profile();
 
     my $valid_msg
         = $model->check_validator( 'profile', $self->stash->{params} );
@@ -147,7 +147,7 @@ sub _render_profile {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model_mainte_profile->set_fill_in_params($args);
+    my $output = $self->model->mainte->profile->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 

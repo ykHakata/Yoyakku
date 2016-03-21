@@ -25,7 +25,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model_mainte;
+    my $model = $self->model->mainte->base;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
