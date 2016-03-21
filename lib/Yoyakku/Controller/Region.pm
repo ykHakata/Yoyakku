@@ -25,7 +25,8 @@ sub index {
         if ( uc $self->req->method ne 'GET' )
         && ( uc $self->req->method ne 'POST' );
 
-    $self->stash->{login_row} = $model->get_login_row( $self->session );
+    $self->stash->{login_row}
+        = $self->model->auth->get_logged_in_row( $self->session );
 
     my $redirect_mode
         = $model->get_redirect_mode_region( $self->stash->{login_row} );

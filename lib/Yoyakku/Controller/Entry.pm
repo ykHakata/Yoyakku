@@ -33,7 +33,7 @@ sub index {
 
     # ログイン中は回覧できない
     return $self->redirect_to('index')
-        if $model->check_auth_db_yoyakku( $self->session );
+        if $self->model->auth->get_logged_in_row( $self->session );
 
     my $header_stash = $model->get_header_stash_entry();
 

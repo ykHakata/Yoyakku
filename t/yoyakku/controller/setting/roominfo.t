@@ -164,7 +164,7 @@ subtest 'admin_reserv_edit' => sub {
                 login    => $login_admin->{login},
                 password => $login_admin->{password},
             };
-            my $login_row = $t->app->model->setting->roominfo->login($args);
+            my $login_row = $t->app->model->auth->login($args);
             my $params = $t->app->model->setting->roominfo->set_roominfo_params(
                 $login_row);
 

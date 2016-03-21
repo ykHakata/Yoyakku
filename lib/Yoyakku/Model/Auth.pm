@@ -17,6 +17,75 @@ use Mojo::Base 'Yoyakku::Model::Base';
 
 =cut
 
+=head2 logged_in
+
+    セッション確認によるログイン機能
+
+=cut
+
+sub logged_in {
+    my $self    = shift;
+    my $session = shift;
+    return   if !$session;
+    return 1 if $session->{session_admin_id};
+    return 1 if $session->{session_general_id};
+    return 2 if $session->{root_id};
+    return;
+}
+
+=head2 get_logged_in_row
+
+    セッション確認からログイン情報取得
+
+=cut
+
+sub get_logged_in_row {
+    my $self      = shift;
+    my $session   = shift;
+    my $logged_in = $self->logged_in($session);
+
+    return if !$logged_in;
+
+    my $teng       = $self->db->base->teng();
+    my $admin_id   = $session->{session_admin_id};
+    my $general_id = $session->{session_general_id};
+
+    return if !$admin_id && !$general_id;
+
+    my $table = 'admin';
+    my $id    = $admin_id;
+
+    if ($general_id) {
+        $table = 'general';
+        $id    = $general_id;
+    }
+
+    my $login_row = $teng->single( $table, +{ id => $id } );
+
+    return if !$login_row;
+    return $login_row;
+}
+
+=head2 login
+
+    テキスト入力フォームによるログイン機能
+
+=cut
+
+sub login {
+    my $self = shift;
+    my $args = shift;
+    my $teng = $self->db->base->teng();
+    my $row  = $teng->single( $args->{table}, +{ login => $args->{login} } );
+
+    # 不合格の場合 (DB検証 メルアド違い)
+    return 1 if !$row;
+
+    # 不合格の場合 (DB検証 パスワード違い)
+    return 2 if $row->password ne $args->{password};
+    return $row;
+}
+
 sub check_auth_validator_db {
     my $self   = shift;
     my $table  = shift;

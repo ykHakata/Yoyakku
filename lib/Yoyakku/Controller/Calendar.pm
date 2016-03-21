@@ -31,9 +31,8 @@ sub index {
         if ( uc $self->req->method ne 'GET' )
         && ( uc $self->req->method ne 'POST' );
 
-    $model->check_auth_db_yoyakku( $self->session );
-
-    $self->stash->{login_row} = $model->get_login_row( $self->session );
+    $self->stash->{login_row}
+        = $self->model->auth->get_logged_in_row( $self->session );
 
     my $header_stash
         = $model->get_header_stash_index( $self->stash->{login_row} );

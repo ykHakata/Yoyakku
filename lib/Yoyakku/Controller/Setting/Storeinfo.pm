@@ -25,10 +25,9 @@ sub index {
         if ( uc $self->req->method ne 'GET' )
         && ( uc $self->req->method ne 'POST' );
 
-    return $self->redirect_to('index')
-        if !$model->check_auth_db_yoyakku( $self->session );
-
-    $self->stash->{login_row} = $model->get_login_row( $self->session );
+    $self->stash->{login_row}
+        = $self->model->auth->get_logged_in_row( $self->session );
+    return $self->redirect_to('index') if !$self->stash->{login_row};
 
     my $redirect_mode
         = $model->get_redirect_mode( $self->stash->{login_row} );

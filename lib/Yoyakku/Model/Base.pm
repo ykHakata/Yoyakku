@@ -1,5 +1,5 @@
 package Yoyakku::Model::Base;
-use Mojo::Base 'Yoyakku::DB::Model';
+use Mojo::Base -base;
 use Encode qw{encode};
 use Email::Sender::Simple 'sendmail';
 use Email::MIME;
@@ -36,58 +36,6 @@ has db => sub {
     データベース接続関連の API を提供
 
 =cut
-
-=head2 login
-
-    テキスト入力フォームによるログイン機能
-
-=cut
-
-sub login {
-    my $self = shift;
-    my $args = shift;
-    my $teng = $self->db->base->teng();
-    my $row  = $teng->single( $args->{table}, +{ login => $args->{login} } );
-
-    # 不合格の場合 (DB検証 メルアド違い)
-    return 1 if !$row;
-
-    # 不合格の場合 (DB検証 パスワード違い)
-    return 2 if $row->password ne $args->{password};
-    return $row;
-}
-
-=head2 logged_in
-
-    セッション確認によるログイン機能
-
-=cut
-
-sub logged_in {
-    my $self    = shift;
-    my $session = shift;
-    return   if !$session;
-    return 1 if $session->{session_admin_id};
-    return 1 if $session->{session_general_id};
-    return 2 if $session->{root_id};
-    return;
-}
-
-=head2 get_logged_in_row
-
-    セッション確認からログイン情報取得
-
-=cut
-
-sub get_logged_in_row {
-    my $self      = shift;
-    my $session   = shift;
-    my $logged_in = $self->logged_in($session);
-    return if !$logged_in;
-    my $login_row = $self->get_login_row($session);
-    return if !$login_row;
-    return $login_row;
-}
 
 =head2 change_format_datetime
 
@@ -569,82 +517,6 @@ sub insert_admin_relation {
             $teng->fast_insert( 'roominfo', $create_data_roominfo, );
         }
     }
-}
-
-=head2 check_auth_db
-
-    ログイン検証(yoyakku 管理画面側)
-
-=cut
-
-sub check_auth_db {
-    my $self         = shift;
-    my $session      = shift;
-    my $session_type = shift;
-    return if !$session || !$session_type;
-    return $session if $session eq 'yoyakku' && $session_type eq 'mainte';
-    return;
-}
-
-=head2 get_login_row
-
-    ログイン検証 login_row 取得 (yoyakku サイト)
-
-=cut
-
-sub get_login_row {
-    my $self = shift;
-    my $args = shift;
-
-    my $teng       = $self->db->base->teng();
-    my $admin_id   = $args->{session_admin_id};
-    my $general_id = $args->{session_general_id};
-
-    return if !$admin_id && !$general_id;
-
-    my $table = 'admin';
-    my $id    = $admin_id;
-
-    if ($general_id) {
-        $table = 'general';
-        $id    = $general_id;
-    }
-
-    my $login_row = $teng->single( $table, +{ id => $id } );
-    return if !$login_row;
-    return $login_row;
-}
-
-=head2 check_auth_db_yoyakku
-
-    ログイン検証(yoyakku サイト)
-
-=cut
-
-sub check_auth_db_yoyakku {
-    my $self    = shift;
-    my $session = shift;
-
-    my $teng       = $self->db->base->teng();
-    my $admin_id   = $session->{session_admin_id};
-    my $general_id = $session->{session_general_id};
-
-    return if !$admin_id && !$general_id;
-
-    my $table  = 'admin';
-    my $id     = $admin_id;
-    my $column = 'admin_id';
-
-    if ($general_id) {
-        $table  = 'general';
-        $id     = $general_id;
-        $column = 'general_id';
-    }
-
-    my $login_row = $teng->single( $table, +{ id => $id } );
-    return if !$login_row;
-
-    return 1;
 }
 
 1;

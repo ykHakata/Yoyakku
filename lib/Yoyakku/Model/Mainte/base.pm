@@ -265,6 +265,21 @@ sub auth_mainte {
     return $session;
 }
 
+=head2 check_auth_db
+
+    ログイン検証(yoyakku 管理画面側)
+
+=cut
+
+sub check_auth_db {
+    my $self         = shift;
+    my $session      = shift;
+    my $session_type = shift;
+    return if !$session || !$session_type;
+    return $session if $session eq 'yoyakku' && $session_type eq 'mainte';
+    return;
+}
+
 =head2 switch_stash_mainte_list
 
     Mainte アクションログイン時の初期値作成
