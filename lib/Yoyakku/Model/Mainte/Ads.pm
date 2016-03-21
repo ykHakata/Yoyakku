@@ -25,7 +25,7 @@ use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 sub get_storeinfo_rows_all {
     my $self           = shift;
-    my $teng           = $self->teng();
+    my $teng           = $self->db->base->teng();
     my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
     return \@storeinfo_rows;
 }
@@ -38,7 +38,7 @@ sub get_storeinfo_rows_all {
 
 sub get_region_rows_pref {
     my $self = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     my $sql = q{
         SELECT id, name

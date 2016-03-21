@@ -22,7 +22,7 @@ use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 sub get_input_support {
     my $self   = shift;
     my $params = shift;
-    my $teng   = $self->teng();
+    my $teng   = $self->db->base->teng();
 
     my $reserve_id  = $params->{id};
     my $roominfo_id = $params->{roominfo_id};
@@ -55,7 +55,7 @@ sub get_input_support {
 sub _get_reserve_fillIn_row {
     my $self        = shift;
     my $roominfo_id = shift;
-    my $teng        = $self->teng();
+    my $teng        = $self->db->base->teng();
 
     my $sql = q{
         SELECT
@@ -151,7 +151,7 @@ sub _check_reserve_dupli {
     my $type   = shift;
     my $params = shift;
 
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     my $reserve_id    = $params->{id};
     my $roominfo_id   = $params->{roominfo_id};
@@ -186,7 +186,7 @@ sub _check_roominfo_open_time {
     my $self   = shift;
     my $params = shift;
 
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     # 予約希望した roominfo を取得し、営業時間を調べる
     my $roominfo_row
@@ -228,7 +228,7 @@ sub _check_lend_unit {
     my $self   = shift;
     my $params = shift;
 
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     # 予約希望した roominfo を取得し、貸出単位を調べる
     my $roominfo_row
@@ -263,7 +263,7 @@ sub _check_useform {
     my $self   = shift;
     my $params = shift;
 
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     # 予約希望したroominfoを取得し、利用形態名調査
     my $roominfo_row

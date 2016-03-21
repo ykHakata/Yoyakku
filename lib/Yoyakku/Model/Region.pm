@@ -77,7 +77,7 @@ sub get_header_stash_region {
 
 sub get_ads_one_rows {
     my $self = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     my @ads_one_rows = $teng->search(
         'ads',
@@ -102,7 +102,7 @@ sub get_ads_one_rows {
 
 sub get_ads_reco_rows {
     my $self = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
     my $sql  = q{
         SELECT
             ads.id,
@@ -136,7 +136,7 @@ sub get_ads_reco_rows {
 
 sub get_ads_rows {
     my $self         = shift;
-    my $teng         = $self->teng();
+    my $teng         = $self->db->base->teng();
     my $now_data_ymd = chang_date_6()->{now_date}->date();
     my $next3m_last_ymd
         = get_month_last_date( chang_date_6()->{next3m_date} );
@@ -175,7 +175,7 @@ sub get_switch_calnavi {
 
 sub get_storeinfo_rows_region_navi {
     my $self = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
     my @rows = $teng->search(
         'storeinfo',
         +{ status   => 0, },
@@ -192,7 +192,7 @@ sub get_storeinfo_rows_region_navi {
 
 sub get_region_rows_region_navi {
     my $self = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
     my @rows = $teng->search( 'region', +{}, +{ order_by => 'id', }, );
     return \@rows;
 }

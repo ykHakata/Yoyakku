@@ -7,6 +7,7 @@ use Yoyakku::Model::Profile;
 use Yoyakku::Model::Region;
 use Yoyakku::Model::Setting;
 use Yoyakku::Model::Mainte;
+use Yoyakku::DB::Model;
 
 =encoding utf8
 
@@ -25,6 +26,13 @@ use Yoyakku::Model::Mainte;
 =cut
 
 has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
+
+has db => sub {
+    my $self = shift;
+    my $conf = $self->yoyakku_conf;
+    my $obj  = Yoyakku::DB::Model->new( +{ yoyakku_conf => $conf } );
+    return $obj;
+};
 
 has mainte => sub {
     my $self = shift;

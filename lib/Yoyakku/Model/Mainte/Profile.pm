@@ -25,7 +25,7 @@ use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 sub get_general_rows_all {
     my $self = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
     my @general_rows = $teng->search( 'general', +{}, );
     return \@general_rows;
 }
@@ -38,7 +38,7 @@ sub get_general_rows_all {
 
 sub get_admin_rows_all {
     my $self = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
     my @admin_rows = $teng->search( 'admin', +{}, );
     return \@admin_rows;
 }

@@ -1,6 +1,31 @@
 package Yoyakku::DB::Model;
-use Mojo::Base 'Yoyakku::DB::Model::Acting';
-use Mojo::Base 'Yoyakku::DB::Model::General';
+use Mojo::Base -base;
+use Yoyakku::DB::Model::Acting;
+use Yoyakku::DB::Model::Base;
+use Yoyakku::DB::Model::General;
+
+has [qw{yoyakku_conf}];
+
+has acting => sub {
+    my $self = shift;
+    my $conf = $self->yoyakku_conf;
+    my $obj  = Yoyakku::DB::Model::Acting->new( +{ yoyakku_conf => $conf } );
+    return $obj;
+};
+
+has base => sub {
+    my $self = shift;
+    my $conf = $self->yoyakku_conf;
+    my $obj  = Yoyakku::DB::Model::Base->new( +{ yoyakku_conf => $conf } );
+    return $obj;
+};
+
+has general => sub {
+    my $self = shift;
+    my $conf = $self->yoyakku_conf;
+    my $obj  = Yoyakku::DB::Model::General->new( +{ yoyakku_conf => $conf } );
+    return $obj;
+};
 
 =encoding utf8
 
@@ -29,6 +54,8 @@ __END__
 =item * L<Mojo::Base>
 
 =item * L<Yoyakku::DB::Model::Acting>
+
+=item * L<Yoyakku::DB::Model::Base>
 
 =item * L<Yoyakku::DB::Model::General>
 

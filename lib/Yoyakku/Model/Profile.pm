@@ -133,7 +133,7 @@ sub get_switch_acting {
 sub get_acting_name {
     my $self       = shift;
     my $login_row  = shift;
-    my $teng       = $self->teng();
+    my $teng       = $self->db->base->teng();
     my $acting_ids = $self->get_acting_ids($login_row);
 
     my $storeinfo_id_1 = $acting_ids->[0]->{storeinfo_id};
@@ -196,7 +196,7 @@ sub writing_profile {
     my $type      = shift;
     my $login_row = shift;
 
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     # 認証 admin or general
     my $auth_data = +{

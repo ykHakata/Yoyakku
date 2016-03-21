@@ -21,7 +21,7 @@ sub check_auth_validator_db {
     my $self   = shift;
     my $table  = shift;
     my $params = shift;
-    my $teng   = $self->teng();
+    my $teng   = $self->db->base->teng();
 
     my $valid_msg_db = +{};
 

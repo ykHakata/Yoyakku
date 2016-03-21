@@ -111,13 +111,13 @@ subtest 'entry' => sub {
         my $mail_j = $params->{mail_j};
         my $table  = $params->{select_usr};
 
-        my $create_user = $t->app->model->entry->teng->single( $table,
+        my $create_user = $t->app->model->db->base->teng->single( $table,
             +{ login => $mail_j } );
 
         is( $create_user->password, 'yoyakku', 'password ok' );
         is( $create_user->status,   0,         'status ok' );
 
-        my $create_profile = $t->app->model->entry->teng->single( 'profile',
+        my $create_profile = $t->app->model->db->base->teng->single( 'profile',
             +{ admin_id => $create_user->id, } );
 
         is( $create_profile->nick_name, $mail_j, 'nick_name ok' );

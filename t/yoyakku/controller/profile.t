@@ -175,7 +175,7 @@ subtest 'profile' => sub {
             }
 
             # パラメーターの取得
-            my $login_row = $t->app->model->profile->teng->single( 'admin',
+            my $login_row = $t->app->model->db->base->teng->single( 'admin',
                 +{ id => 1 } );
 
             my $update_params

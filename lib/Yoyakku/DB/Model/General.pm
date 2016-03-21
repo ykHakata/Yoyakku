@@ -17,16 +17,18 @@ use Mojo::Base 'Yoyakku::DB::Model::Base';
 
 =cut
 
-=head2 general_db_rows_all
+has table => 'general';
+
+=head2 rows_all
 
     一般ユーザー情報の全てを row オブジェクトで取得重複確認
 
 =cut
 
-sub general_db_rows_all {
+sub rows_all {
     my $self = shift;
     my $teng = $self->teng();
-    my @rows = $teng->search( 'general', +{}, );
+    my @rows = $teng->search( $self->table, +{}, );
     return \@rows;
 }
 
@@ -40,7 +42,7 @@ __END__
 
 =item * L<Mojo::Base>
 
-=item * L<Yoyakku::DB::Model>
+=item * L<Yoyakku::DB::Model::Base>
 
 =back
 

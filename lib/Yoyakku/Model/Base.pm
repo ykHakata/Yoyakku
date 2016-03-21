@@ -10,8 +10,16 @@ use Yoyakku::Util qw{now_datetime switch_header_params chenge_time_over
     next_day_ymd join_time join_date_time};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::Validator;
+use Yoyakku::DB::Model;
 
 has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
+
+has db => sub {
+    my $self = shift;
+    my $conf = $self->yoyakku_conf;
+    my $obj  = Yoyakku::DB::Model->new( +{ yoyakku_conf => $conf } );
+    return $obj;
+};
 
 =encoding utf8
 
@@ -38,7 +46,7 @@ has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
 sub login {
     my $self = shift;
     my $args = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
     my $row  = $teng->single( $args->{table}, +{ login => $args->{login} } );
 
     # 不合格の場合 (DB検証 メルアド違い)
@@ -174,7 +182,7 @@ sub get_calender_caps {
 
 sub get_ads_navi_rows {
     my $self = shift;
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     my @ads_navi_rows = $teng->search(
         'ads',
@@ -243,7 +251,7 @@ sub check_table_column {
     my $self         = shift;
     my $check_params = shift;
 
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     my $column = $check_params->{column};
     my $param  = $check_params->{param};
@@ -300,7 +308,7 @@ sub get_header_stash_params {
 
 sub get_storeinfo_rows_all {
     my $self           = shift;
-    my $teng           = $self->teng();
+    my $teng           = $self->db->base->teng();
     my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
     return \@storeinfo_rows;
 }
@@ -498,7 +506,7 @@ sub writing_from_db {
     my $update_id   = $args->{update_id};
     my $type        = $args->{type};
 
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     my $insert_row;
     if ( $type eq 'insert' ) {
@@ -524,7 +532,7 @@ sub insert_admin_relation {
     my $self         = shift;
     my $new_admin_id = shift;
 
-    my $teng = $self->teng();
+    my $teng = $self->db->base->teng();
 
     my $storeinfo_row
         = $teng->single( 'storeinfo', +{ admin_id => $new_admin_id, }, );
@@ -595,7 +603,7 @@ sub get_login_row {
     my $self = shift;
     my $args = shift;
 
-    my $teng       = $self->teng();
+    my $teng       = $self->db->base->teng();
     my $admin_id   = $args->{session_admin_id};
     my $general_id = $args->{session_general_id};
 
@@ -624,7 +632,7 @@ sub check_auth_db_yoyakku {
     my $self    = shift;
     my $session = shift;
 
-    my $teng       = $self->teng();
+    my $teng       = $self->db->base->teng();
     my $admin_id   = $session->{session_admin_id};
     my $general_id = $session->{session_general_id};
 

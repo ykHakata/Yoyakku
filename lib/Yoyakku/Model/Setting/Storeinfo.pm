@@ -26,7 +26,7 @@ use Mojo::Base 'Yoyakku::Model::Setting::Base';
 sub get_post_search {
     my $self   = shift;
     my $params = shift;
-    my $teng   = $self->teng();
+    my $teng   = $self->db->base->teng();
     my $row    = $teng->single( 'post', +{ post_id => $params->{post}, }, );
     if ($row) {
         $params->{post}      = $row->post_id;

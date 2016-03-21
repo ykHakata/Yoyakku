@@ -17,19 +17,21 @@ use Mojo::Base 'Yoyakku::DB::Model::Base';
 
 =cut
 
-=head2 acting_db_overlap_id
+has table => 'acting';
+
+=head2 overlap_id
 
     general_id, storeinfo_id, 組み合わせの重複確認
 
 =cut
 
-sub acting_db_overlap_id {
+sub overlap_id {
     my $self = shift;
     my $args = shift;
     my $teng = $self->teng();
 
     my $check_acting_row = $teng->single(
-        'acting',
+        $self->table,
         +{  general_id   => $args->{general_id},
             storeinfo_id => $args->{storeinfo_id},
             status       => $args->{status},
@@ -37,7 +39,6 @@ sub acting_db_overlap_id {
     );
     return $check_acting_row;
 }
-
 1;
 
 __END__
@@ -48,7 +49,7 @@ __END__
 
 =item * L<Mojo::Base>
 
-=item * L<Yoyakku::DB::Model>
+=item * L<Yoyakku::DB::Model::Base>
 
 =back
 

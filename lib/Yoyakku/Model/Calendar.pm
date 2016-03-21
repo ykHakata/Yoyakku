@@ -28,7 +28,7 @@ sub get_cal_info_ads_rows {
     my $self      = shift;
     my $date_info = shift;
 
-    my $teng      = $self->teng();
+    my $teng      = $self->db->base->teng();
     my $like_date = $date_info->strftime('%Y-%m');
 
     # 今月のイベント広告データ取得

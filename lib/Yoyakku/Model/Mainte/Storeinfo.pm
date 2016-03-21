@@ -26,7 +26,7 @@ use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 sub search_zipcode_for_address {
     my $self   = shift;
     my $params = shift;
-    my $teng   = $self->teng();
+    my $teng   = $self->db->base->teng();
 
     my $post_row = $teng->single( 'post', +{ post_id => $params->{post} }, );
 
