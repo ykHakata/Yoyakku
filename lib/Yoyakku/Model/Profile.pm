@@ -133,16 +133,18 @@ sub get_switch_acting {
 sub get_acting_name {
     my $self       = shift;
     my $login_row  = shift;
-    my $teng       = $self->db->base->teng();
     my $acting_ids = $self->get_acting_ids($login_row);
 
     my $storeinfo_id_1 = $acting_ids->[0]->{storeinfo_id};
     my $storeinfo_id_2 = $acting_ids->[1]->{storeinfo_id};
     my $storeinfo_id_3 = $acting_ids->[2]->{storeinfo_id};
 
-    my $acting_1 = $teng->single( 'storeinfo', +{ id => $storeinfo_id_1, } );
-    my $acting_2 = $teng->single( 'storeinfo', +{ id => $storeinfo_id_2, } );
-    my $acting_3 = $teng->single( 'storeinfo', +{ id => $storeinfo_id_3, } );
+    my $acting_1
+        = $self->db->storeinfo->single_row_search_id($storeinfo_id_1);
+    my $acting_2
+        = $self->db->storeinfo->single_row_search_id($storeinfo_id_2);
+    my $acting_3
+        = $self->db->storeinfo->single_row_search_id($storeinfo_id_3);
 
     my $acting_1_name = $acting_1 ? $acting_1->name : undef;
     my $acting_2_name = $acting_2 ? $acting_2->name : undef;

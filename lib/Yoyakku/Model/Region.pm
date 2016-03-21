@@ -77,14 +77,8 @@ sub get_header_stash_region {
 
 sub get_ads_one_rows {
     my $self = shift;
-    my $teng = $self->db->base->teng();
-
-    my @ads_one_rows = $teng->search(
-        'ads',
-        +{ kind     => 2, },
-        +{ order_by => 'displaystart_on' },
-    );
-    return \@ads_one_rows;
+    my $rows = $self->db->ads->ads_one_rows();
+    return $rows;
 }
 
 =head2 get_ads_reco_rows
@@ -175,13 +169,8 @@ sub get_switch_calnavi {
 
 sub get_storeinfo_rows_region_navi {
     my $self = shift;
-    my $teng = $self->db->base->teng();
-    my @rows = $teng->search(
-        'storeinfo',
-        +{ status   => 0, },
-        +{ order_by => 'region_id', },
-    );
-    return \@rows;
+    my $rows = $self->db->storeinfo->storeinfo_rows_region_navi();
+    return $rows;
 }
 
 =head2 get_region_rows_region_navi
@@ -192,9 +181,8 @@ sub get_storeinfo_rows_region_navi {
 
 sub get_region_rows_region_navi {
     my $self = shift;
-    my $teng = $self->db->base->teng();
-    my @rows = $teng->search( 'region', +{}, +{ order_by => 'id', }, );
-    return \@rows;
+    my $rows = $self->db->region->rows_all();
+    return $rows;
 }
 
 =head2 get_cal_params

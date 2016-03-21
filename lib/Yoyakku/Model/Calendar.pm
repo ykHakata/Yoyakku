@@ -27,20 +27,8 @@ use Yoyakku::Util qw{chang_date_6 get_calendar};
 sub get_cal_info_ads_rows {
     my $self      = shift;
     my $date_info = shift;
-
-    my $teng      = $self->db->base->teng();
-    my $like_date = $date_info->strftime('%Y-%m');
-
-    # 今月のイベント広告データ取得
-    my $sql = q{
-        SELECT * FROM ads
-        WHERE kind=1 AND displaystart_on
-        like :like_date
-        ORDER BY displaystart_on ASC;
-    };
-    my $bind_values = +{ like_date => $like_date . "%", };
-    my @ads_rows = $teng->search_named( $sql, $bind_values );
-    return \@ads_rows;
+    my $rows      = $self->db->ads->cal_info_ads_rows($date_info);
+    return $rows;
 }
 
 =head2 get_calendar_info

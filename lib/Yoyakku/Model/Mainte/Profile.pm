@@ -25,9 +25,8 @@ use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 sub get_general_rows_all {
     my $self = shift;
-    my $teng = $self->db->base->teng();
-    my @general_rows = $teng->search( 'general', +{}, );
-    return \@general_rows;
+    my $rows = $self->db->general->rows_all();
+    return $rows;
 }
 
 =head2 get_admin_rows_all
@@ -38,9 +37,8 @@ sub get_general_rows_all {
 
 sub get_admin_rows_all {
     my $self = shift;
-    my $teng = $self->db->base->teng();
-    my @admin_rows = $teng->search( 'admin', +{}, );
-    return \@admin_rows;
+    my $rows = $self->db->admin->rows_all();
+    return $rows;
 }
 
 =head2 check_profile_validator_db

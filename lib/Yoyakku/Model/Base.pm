@@ -182,14 +182,8 @@ sub get_calender_caps {
 
 sub get_ads_navi_rows {
     my $self = shift;
-    my $teng = $self->db->base->teng();
-
-    my @ads_navi_rows = $teng->search(
-        'ads',
-        +{ kind     => 3, },
-        +{ order_by => 'displaystart_on' },
-    );
-    return \@ads_navi_rows;
+    my $row = $self->db->ads->ads_navi_rows();
+    return $row;
 }
 
 =head2 send_gmail
@@ -307,10 +301,9 @@ sub get_header_stash_params {
 =cut
 
 sub get_storeinfo_rows_all {
-    my $self           = shift;
-    my $teng           = $self->db->base->teng();
-    my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
-    return \@storeinfo_rows;
+    my $self = shift;
+    my $rows = $self->db->storeinfo->rows_all();
+    return $rows;
 }
 
 =head2 get_valid_params

@@ -1,27 +1,27 @@
-package Yoyakku::DB::Model::General;
+package Yoyakku::DB::Model::Admin;
 use Mojo::Base 'Yoyakku::DB::Model::Base';
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::DB::Model::General - データベース Model
+    Yoyakku::DB::Model::Admin - データベース Model
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::DB::Model::General version 0.0.1
+    This documentation referes to Yoyakku::DB::Model::Admin version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-    general テーブルの API を提供
+    Admin テーブルの API を提供
 
 =cut
 
-has table => 'general';
+has table => 'admin';
 
 =head2 rows_all
 
-    一般ユーザー情報の全てを row オブジェクトで取得
+    店舗ユーザー情報の全てを row オブジェクトで取得
 
 =cut
 

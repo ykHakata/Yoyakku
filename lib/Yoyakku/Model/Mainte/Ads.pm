@@ -17,19 +17,6 @@ use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 =cut
 
-=head2 get_storeinfo_rows_all
-
-    店舗情報の全てを row オブジェクトで取得
-
-=cut
-
-sub get_storeinfo_rows_all {
-    my $self           = shift;
-    my $teng           = $self->db->base->teng();
-    my @storeinfo_rows = $teng->search( 'storeinfo', +{}, );
-    return \@storeinfo_rows;
-}
-
 =head2 get_region_rows_pref
 
     地域ID情報、全国都道府県のみ row オブジェクトで取得
@@ -38,17 +25,8 @@ sub get_storeinfo_rows_all {
 
 sub get_region_rows_pref {
     my $self = shift;
-    my $teng = $self->db->base->teng();
-
-    my $sql = q{
-        SELECT id, name
-        FROM region
-        WHERE id REGEXP '(^[0-4][0-9])0{3}$'
-        ORDER BY id ASC;
-    };
-
-    my @region_rows = $teng->search_named($sql);
-    return \@region_rows;
+    my $rows = $self->db->region->region_rows_pref();
+    return $rows;
 }
 
 =head2 writing_ads
