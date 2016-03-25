@@ -112,7 +112,7 @@ sub _common {
     my $model = $self->model->mainte->roominfo();
 
     my $valid_msg
-        = $model->check_validator( 'roominfo', $self->stash->{params} );
+        = $self->model->validator->check( 'roominfo', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_roominfo()
         if $valid_msg;

@@ -189,7 +189,7 @@ sub _render_input_form {
     # root ログインの場合は別処理(暫定)
     if ($table eq 'root') {
         my $valid_msg
-            = $model->check_validator( $table, $self->stash->{params} );
+            = $self->model->validator->check( $table, $self->stash->{params} );
 
         return $self->stash($valid_msg), $self->_render_auth()
             if $valid_msg;
@@ -200,7 +200,7 @@ sub _render_input_form {
         return;
     }
 
-    my $valid_msg = $model->check_validator( $table, $self->stash->{params} );
+    my $valid_msg = $self->model->validator->check( $table, $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_auth()
         if $valid_msg;

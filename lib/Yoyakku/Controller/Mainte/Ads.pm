@@ -81,7 +81,7 @@ sub mainte_ads_new {
 
     $self->stash(
         class          => 'mainte_ads_new',
-        storeinfo_rows => $model->get_storeinfo_rows_all(),
+        storeinfo_rows => $self->model->db->storeinfo->rows_all(),
         region_rows    => $model->get_region_rows_pref(),
         template       => 'mainte/mainte_ads_new',
         format         => 'html',
@@ -123,7 +123,7 @@ sub _common {
     my $self  = shift;
     my $model = $self->model->mainte->ads;
 
-    my $valid_msg = $model->check_validator( 'ads', $self->stash->{params} );
+    my $valid_msg = $self->model->validator->check( 'ads', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_ads() if $valid_msg;
 

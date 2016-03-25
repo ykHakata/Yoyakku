@@ -111,7 +111,7 @@ sub _common {
     my $self  = shift;
     my $model = $self->model->setting->storeinfo;
     my $valid_msg
-        = $model->check_validator( 'storeinfo', $self->stash->{params} );
+        = $self->model->validator->check( 'storeinfo', $self->stash->{params} );
     return $self->stash($valid_msg), $self->_render_fill_in_form()
         if $valid_msg;
     $model->writing_admin_store(

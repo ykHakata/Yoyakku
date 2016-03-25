@@ -129,7 +129,7 @@ sub _common {
     my $model = $self->model->mainte->reserve;
 
     my $valid_msg
-        = $model->check_validator( 'reserve', $self->stash->{params} );
+        = $self->model->validator->check( 'reserve', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_reserve()
         if $valid_msg;

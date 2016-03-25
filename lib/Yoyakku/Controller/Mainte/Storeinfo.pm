@@ -122,7 +122,7 @@ sub _common {
     my $model = $self->model->mainte->storeinfo();
 
     my $valid_msg
-        = $model->check_validator( 'storeinfo', $self->stash->{params} );
+        = $self->model->validator->check( 'storeinfo', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_storeinfo()
         if $valid_msg;

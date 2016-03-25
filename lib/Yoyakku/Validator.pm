@@ -19,6 +19,20 @@ use Yoyakku::Util qw{get_start_end_tp};
 
 =cut
 
+=head2 check
+
+    バリデートチェック
+
+=cut
+
+sub check {
+    my $self   = shift;
+    my $table  = shift;
+    my $params = shift;
+    my $msg    = $self->$table($params);
+    return $msg;
+}
+
 =head2 get_msg_validator
 
     入力値バリデート処理

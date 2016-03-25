@@ -124,7 +124,7 @@ sub _common {
     my $model = $self->model->mainte->profile();
 
     my $valid_msg
-        = $model->check_validator( 'profile', $self->stash->{params} );
+        = $self->model->validator->check( 'profile', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_profile()
         if $valid_msg;

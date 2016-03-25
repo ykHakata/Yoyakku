@@ -57,7 +57,7 @@ sub entry {
 
     my $switch_load;
     my $mail_j;
-    my $get_ads_navi_rows = $self->model->entry->get_ads_navi_rows();
+    my $get_ads_navi_rows = $self->model->db->ads->ads_navi_rows();
 
     $self->stash(
         class        => 'entry',
@@ -86,7 +86,7 @@ sub _common {
     my $model = $self->model->entry;
 
     my $valid_msg
-        = $model->check_validator( 'entry', $self->stash->{params} );
+        = $self->model->validator->check( 'entry', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_entry()
         if $valid_msg;

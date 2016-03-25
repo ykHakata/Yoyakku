@@ -130,7 +130,7 @@ sub _update {
         = $model->get_check_params_list( $self->stash->{params} );
 
     for my $check_param ( @{$check_params} ) {
-        my $valid_msg = $model->check_validator( 'roominfo', $check_param );
+        my $valid_msg = $self->model->validator->check( 'roominfo', $check_param );
         return $self->stash($valid_msg), $self->_render_fill_in_form()
             if $valid_msg;
     }

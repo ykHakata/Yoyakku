@@ -8,6 +8,7 @@ use Yoyakku::Model::Region;
 use Yoyakku::Model::Setting;
 use Yoyakku::Model::Mainte;
 use Yoyakku::DB::Model;
+use Yoyakku::Validator;
 
 =encoding utf8
 
@@ -26,6 +27,13 @@ use Yoyakku::DB::Model;
 =cut
 
 has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
+
+has validator => sub {
+    my $self = shift;
+    my $conf = $self->yoyakku_conf;
+    my $obj  = Yoyakku::Validator->new( +{ yoyakku_conf => $conf } );
+    return $obj;
+};
 
 has db => sub {
     my $self = shift;

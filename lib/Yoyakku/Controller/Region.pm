@@ -56,12 +56,13 @@ sub region_state {
     my $self   = shift;
     my $model  = $self->model->region;
     my $params = $model->get_cal_params( $self->stash->{params} );
+    my $get_ads_navi_rows = $self->model->db->ads->ads_navi_rows();
     $self->stash(
         class              => 'state',
         adsReco_rows       => $model->get_ads_reco_rows(),
         adsOne_rows        => $model->get_ads_one_rows(),
         ads_rows           => $model->get_ads_rows(),
-        adsNavi_rows       => $model->get_ads_navi_rows(),
+        adsNavi_rows       => $get_ads_navi_rows,
         back_mon_val       => $params->{back_mon_val},
         select_date_ym     => $params->{select_date_ym},
         next_mon_val       => $params->{next_mon_val},

@@ -9,7 +9,6 @@ use HTML::FillInForm;
 use Yoyakku::Util qw{now_datetime switch_header_params chenge_time_over
     next_day_ymd join_time join_date_time};
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
-use Yoyakku::Validator;
 use Yoyakku::DB::Model;
 
 has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
@@ -79,21 +78,6 @@ sub change_format_datetime {
     return $params;
 }
 
-=head2 check_validator
-
-    バリデートチェック
-
-=cut
-
-sub check_validator {
-    my $self      = shift;
-    my $table     = shift;
-    my $params    = shift;
-    my $validator = Yoyakku::Validator->new();
-    my $msg       = $validator->$table($params);
-    return $msg;
-}
-
 =head2 set_fill_in_params
 
     html パラメーターフィルインを設定
@@ -120,18 +104,6 @@ sub get_calender_caps {
     my $self = shift;
     my $caps = [qw{日 月 火 水 木 金 土}];
     return $caps;
-}
-
-=head2 get_ads_navi_rows
-
-    ナビ広告データ取得
-
-=cut
-
-sub get_ads_navi_rows {
-    my $self = shift;
-    my $row = $self->db->ads->ads_navi_rows();
-    return $row;
 }
 
 =head2 send_gmail
@@ -240,18 +212,6 @@ sub get_header_stash_params {
     };
 
     return $stash;
-}
-
-=head2 get_storeinfo_rows_all
-
-    店舗情報の全てを row オブジェクトで取得
-
-=cut
-
-sub get_storeinfo_rows_all {
-    my $self = shift;
-    my $rows = $self->db->storeinfo->rows_all();
-    return $rows;
 }
 
 =head2 get_valid_params

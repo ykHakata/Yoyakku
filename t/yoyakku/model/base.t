@@ -21,9 +21,9 @@ subtest 'method' => sub {
     my $obj = Yoyakku::Model::Base->new();
     isa_ok( $obj, 'Yoyakku::Model::Base' );
 
-    my @methods = qw{change_format_datetime check_validator set_fill_in_params
-        get_calender_caps get_ads_navi_rows send_gmail check_table_column
-        get_header_stash_params get_storeinfo_rows_all get_valid_params
+    my @methods = qw{change_format_datetime set_fill_in_params
+        get_calender_caps send_gmail check_table_column
+        get_header_stash_params get_valid_params
         get_init_valid_params get_create_data writing_from_db
         insert_admin_relation};
 

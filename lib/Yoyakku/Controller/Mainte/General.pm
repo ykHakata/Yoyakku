@@ -122,7 +122,7 @@ sub _common {
     my $model = $self->model->mainte->general();
 
     my $valid_msg
-        = $model->check_validator( 'general', $self->stash->{params} );
+        = $self->model->validator->check( 'general', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_general()
         if $valid_msg;

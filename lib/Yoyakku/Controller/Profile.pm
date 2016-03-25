@@ -88,7 +88,7 @@ sub profile {
     $self->stash(
         class          => 'profile',
         login          => $self->stash->{login_row}->get_login_name,
-        storeinfo_rows => $model->get_storeinfo_rows_all(),
+        storeinfo_rows => $self->model->db->storeinfo->rows_all(),
         switch_acting =>
             $model->get_switch_acting( $self->stash->{login_row} ),
         template => 'profile/profile',
@@ -136,7 +136,7 @@ sub _common {
     my $self  = shift;
     my $model = $self->model->profile;
 
-    my $valid_msg = $model->check_validator( 'profile_with_auth',
+    my $valid_msg = $self->model->validator->check( 'profile_with_auth',
         $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_profile()

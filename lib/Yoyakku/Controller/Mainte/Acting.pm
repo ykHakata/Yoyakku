@@ -82,7 +82,7 @@ sub mainte_acting_new {
     $self->stash(
         class          => 'mainte_acting_new',
         general_rows   => $model->get_general_rows_all(),
-        storeinfo_rows => $model->get_storeinfo_rows_all(),
+        storeinfo_rows => $self->model->db->storeinfo->rows_all(),
         template       => 'mainte/mainte_acting_new',
         format         => 'html',
         %{$valid_params},
@@ -124,7 +124,7 @@ sub _common {
     my $model = $self->model->mainte->acting();
 
     my $valid_msg
-        = $model->check_validator( 'acting', $self->stash->{params} );
+        = $self->model->validator->check( 'acting', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_acting() if $valid_msg;
 

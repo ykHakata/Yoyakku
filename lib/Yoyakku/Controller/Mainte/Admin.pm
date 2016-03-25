@@ -124,7 +124,7 @@ sub _common {
     my $model = $self->model->mainte->admin();
 
     my $valid_msg
-        = $model->check_validator( 'admin', $self->stash->{params} );
+        = $self->model->validator->check( 'admin', $self->stash->{params} );
 
     return $self->stash($valid_msg), $self->_render_registrant()
         if $valid_msg;
