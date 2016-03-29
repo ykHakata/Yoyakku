@@ -14,10 +14,7 @@ use Yoyakku::DB::Model;
 has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
 
 has db => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 =encoding utf8

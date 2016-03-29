@@ -22,19 +22,13 @@ use Yoyakku::Model::Setting::Storeinfo;
 has [qw{yoyakku_conf}];
 
 has roominfo => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Setting::Roominfo->new(
-        +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Setting::Roominfo->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has storeinfo => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Setting::Storeinfo->new(
-        +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Setting::Storeinfo->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 1;

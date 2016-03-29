@@ -14,73 +14,50 @@ use Yoyakku::DB::Model::Storeinfo;
 has [qw{yoyakku_conf}];
 
 has acting => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Acting->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Acting->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has admin => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Admin->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Admin->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has ads => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Ads->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Ads->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has base => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Base->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Base->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has general => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::General->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::General->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has post => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Post->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Post->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has region => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Region->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Region->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has reserve => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Reserve->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Reserve->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has roominfo => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Roominfo->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Roominfo->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has storeinfo => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model::Storeinfo->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model::Storeinfo->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 =encoding utf8

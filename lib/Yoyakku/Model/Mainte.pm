@@ -31,88 +31,58 @@ use Yoyakku::Model::Mainte::Storeinfo;
 has [qw{yoyakku_conf}];
 
 has acting => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj
-        = Yoyakku::Model::Mainte::Acting->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Acting->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has admin => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj
-        = Yoyakku::Model::Mainte::Admin->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Admin->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has ads => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Mainte::Ads->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Ads->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has base => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Mainte::Base->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Base->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has general => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj
-        = Yoyakku::Model::Mainte::General->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::General->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has post => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj = Yoyakku::Model::Mainte::Post->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Post->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has profile => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj
-        = Yoyakku::Model::Mainte::Profile->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Profile->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has region => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj
-        = Yoyakku::Model::Mainte::Region->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Region->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has reserve => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj
-        = Yoyakku::Model::Mainte::Reserve->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Reserve->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has roominfo => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj
-        = Yoyakku::Model::Mainte::Roominfo->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Roominfo->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has storeinfo => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Mainte::Storeinfo->new(
-        +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte::Storeinfo->new(
+        +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 1;

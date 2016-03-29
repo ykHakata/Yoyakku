@@ -2,6 +2,7 @@ package Yoyakku::Command::init_db;
 use Mojo::Base 'Mojolicious::Command';
 use Carp;
 use File::Basename;
+use File::Temp;
 
 binmode STDOUT, ':encoding(UTF-8)';
 binmode STDIN,  ':encoding(UTF-8)';
@@ -39,12 +40,37 @@ sub run {
 IMPORT_ACTION:
     while ( my ( $table, $file, ) = each %{$data} ) {
         next IMPORT_ACTION if !$file;
+        $file = $self->_delete_header($file);
         $cmd = qq{sqlite3 -separator , $db '.import $file $table'};
         system $cmd
             and croak "Couldn'n run: $cmd ($!)";
     }
 
     return;
+}
+
+sub _delete_header {
+    my $self = shift;
+    my $file = shift;
+
+    my $file_temp = File::Temp->new(
+        DIR    => $self->app->config->{init_db}->{dir_db},
+        SUFFIX => '.csv',
+    );
+
+    open my $fh, '<:encoding(utf8)', $file
+        or croak "can't open '$file': $!";
+
+    open my $fh_temp, '>>:encoding(utf8)', $file_temp
+        or croak "can't open '$file': $!";
+
+    while ( my $row = <$fh> ) {
+        next if $. <= 2;
+        chomp $row;
+        $fh_temp->say($row);
+    }
+
+    return $file_temp;
 }
 
 1;

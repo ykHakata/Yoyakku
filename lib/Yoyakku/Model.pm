@@ -29,66 +29,39 @@ use Yoyakku::Validator;
 has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
 
 has validator => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Validator->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Validator->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has db => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::DB::Model->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::DB::Model->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has mainte => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Mainte->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Mainte->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has setting => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Setting->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Setting->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has auth => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Auth->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Auth->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has calendar => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Calendar->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Calendar->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has entry => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Entry->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Entry->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has profile => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Profile->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Profile->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 has region => sub {
-    my $self = shift;
-    my $conf = $self->yoyakku_conf;
-    my $obj  = Yoyakku::Model::Region->new( +{ yoyakku_conf => $conf } );
-    return $obj;
+    Yoyakku::Model::Region->new( +{ yoyakku_conf => shift->yoyakku_conf } );
 };
 
 1;
