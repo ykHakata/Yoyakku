@@ -20,7 +20,7 @@ subtest 'helper method' => sub {
     my $class_args = +{ model => 'Yoyakku::Model', };
 
     my @model_methods
-        = qw{mail_temp mail_header mail_body yoyakku_conf model_stash};
+        = qw{app model_stash};
 
     while ( my ( $method, $class, ) = each %{$class_args} ) {
         my $model = $t->app->build_controller->$method;

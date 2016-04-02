@@ -25,7 +25,7 @@ use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 sub get_general_rows_all {
     my $self = shift;
-    my $rows = $self->db->general->rows_all();
+    my $rows = $self->app->model->db->general->rows_all();
     return $rows;
 }
 
@@ -37,7 +37,7 @@ sub get_general_rows_all {
 
 sub get_admin_rows_all {
     my $self = shift;
-    my $rows = $self->db->admin->rows_all();
+    my $rows = $self->app->model->db->admin->rows_all();
     return $rows;
 }
 

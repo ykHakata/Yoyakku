@@ -25,7 +25,7 @@ use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 sub get_region_rows_pref {
     my $self = shift;
-    my $rows = $self->db->region->region_rows_pref();
+    my $rows = $self->app->model->db->region->region_rows_pref();
     return $rows;
 }
 

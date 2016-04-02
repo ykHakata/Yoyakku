@@ -28,61 +28,50 @@ use Yoyakku::Model::Mainte::Storeinfo;
 
 =cut
 
-has [qw{yoyakku_conf}];
+has [qw{app}];
 
 has acting => sub {
-    Yoyakku::Model::Mainte::Acting->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Acting->new( +{ app => shift->app } );
 };
 
 has admin => sub {
-    Yoyakku::Model::Mainte::Admin->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Admin->new( +{ app => shift->app } );
 };
 
 has ads => sub {
-    Yoyakku::Model::Mainte::Ads->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Ads->new( +{ app => shift->app } );
 };
 
 has base => sub {
-    Yoyakku::Model::Mainte::Base->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Base->new( +{ app => shift->app } );
 };
 
 has general => sub {
-    Yoyakku::Model::Mainte::General->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::General->new( +{ app => shift->app } );
 };
 
 has post => sub {
-    Yoyakku::Model::Mainte::Post->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Post->new( +{ app => shift->app } );
 };
 
 has profile => sub {
-    Yoyakku::Model::Mainte::Profile->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Profile->new( +{ app => shift->app } );
 };
 
 has region => sub {
-    Yoyakku::Model::Mainte::Region->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Region->new( +{ app => shift->app } );
 };
 
 has reserve => sub {
-    Yoyakku::Model::Mainte::Reserve->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Reserve->new( +{ app => shift->app } );
 };
 
 has roominfo => sub {
-    Yoyakku::Model::Mainte::Roominfo->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Roominfo->new( +{ app => shift->app } );
 };
 
 has storeinfo => sub {
-    Yoyakku::Model::Mainte::Storeinfo->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte::Storeinfo->new( +{ app => shift->app } );
 };
 
 1;

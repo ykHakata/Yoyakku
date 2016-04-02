@@ -25,7 +25,7 @@ use Mojo::Base 'Yoyakku::Model::Mainte::Base';
 
 sub get_general_rows_all {
     my $self = shift;
-    my $rows = $self->db->general->rows_all();
+    my $rows = $self->app->model->db->general->rows_all();
     return $rows;
 }
 
@@ -47,7 +47,7 @@ sub check_acting_validator_db {
         storeinfo_id => $params->{storeinfo_id},
         status       => 1,
     };
-    my $check_acting_row = $self->db->acting->overlap_id($args);
+    my $check_acting_row = $self->app->model->db->acting->overlap_id($args);
 
     return if !$check_acting_row;
     return $valid_msg_db if !$params->{id};    # 新規

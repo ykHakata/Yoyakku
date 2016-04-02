@@ -11,11 +11,7 @@ use Yoyakku::Util qw{now_datetime switch_header_params chenge_time_over
 use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::DB::Model;
 
-has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
-
-has db => sub {
-    Yoyakku::DB::Model->new( +{ yoyakku_conf => shift->yoyakku_conf } );
-};
+has [qw{mail_temp mail_header mail_body app model_stash}];
 
 =encoding utf8
 
@@ -111,7 +107,7 @@ sub get_calender_caps {
 
 sub send_gmail {
     my $self = shift;
-    my $conf = $self->yoyakku_conf;
+    my $conf = $self->app->config;
 
     my $email = Email::MIME->create(
         header => [
@@ -162,7 +158,7 @@ sub check_table_column {
     my $self         = shift;
     my $check_params = shift;
 
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
 
     my $column = $check_params->{column};
     my $param  = $check_params->{param};
@@ -404,7 +400,7 @@ sub writing_from_db {
     my $update_id   = $args->{update_id};
     my $type        = $args->{type};
 
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
 
     my $insert_row;
     if ( $type eq 'insert' ) {
@@ -430,7 +426,7 @@ sub insert_admin_relation {
     my $self         = shift;
     my $new_admin_id = shift;
 
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
 
     my $storeinfo_row
         = $teng->single( 'storeinfo', +{ admin_id => $new_admin_id, }, );

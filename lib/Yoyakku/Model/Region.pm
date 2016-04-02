@@ -77,7 +77,7 @@ sub get_header_stash_region {
 
 sub get_ads_one_rows {
     my $self = shift;
-    my $rows = $self->db->ads->ads_one_rows();
+    my $rows = $self->app->model->db->ads->ads_one_rows();
     return $rows;
 }
 
@@ -96,7 +96,7 @@ sub get_ads_one_rows {
 
 sub get_ads_reco_rows {
     my $self = shift;
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
     my $sql  = q{
         SELECT
             ads.id,
@@ -130,7 +130,7 @@ sub get_ads_reco_rows {
 
 sub get_ads_rows {
     my $self         = shift;
-    my $teng         = $self->db->base->teng();
+    my $teng         = $self->app->model->db->base->teng();
     my $now_data_ymd = chang_date_6()->{now_date}->date();
     my $next3m_last_ymd
         = get_month_last_date( chang_date_6()->{next3m_date} );
@@ -169,7 +169,7 @@ sub get_switch_calnavi {
 
 sub get_storeinfo_rows_region_navi {
     my $self = shift;
-    my $rows = $self->db->storeinfo->storeinfo_rows_region_navi();
+    my $rows = $self->app->model->db->storeinfo->storeinfo_rows_region_navi();
     return $rows;
 }
 
@@ -181,7 +181,7 @@ sub get_storeinfo_rows_region_navi {
 
 sub get_region_rows_region_navi {
     my $self = shift;
-    my $rows = $self->db->region->rows_all();
+    my $rows = $self->app->model->db->region->rows_all();
     return $rows;
 }
 

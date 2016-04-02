@@ -11,53 +11,46 @@ use Yoyakku::DB::Model::Reserve;
 use Yoyakku::DB::Model::Roominfo;
 use Yoyakku::DB::Model::Storeinfo;
 
-has [qw{yoyakku_conf}];
+has [qw{app}];
 
 has acting => sub {
-    Yoyakku::DB::Model::Acting->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Acting->new( +{ app => shift->app } );
 };
 
 has admin => sub {
-    Yoyakku::DB::Model::Admin->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Admin->new( +{ app => shift->app } );
 };
 
 has ads => sub {
-    Yoyakku::DB::Model::Ads->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Ads->new( +{ app => shift->app } );
 };
 
 has base => sub {
-    Yoyakku::DB::Model::Base->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Base->new( +{ app => shift->app } );
 };
 
 has general => sub {
-    Yoyakku::DB::Model::General->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::General->new( +{ app => shift->app } );
 };
 
 has post => sub {
-    Yoyakku::DB::Model::Post->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Post->new( +{ app => shift->app } );
 };
 
 has region => sub {
-    Yoyakku::DB::Model::Region->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Region->new( +{ app => shift->app } );
 };
 
 has reserve => sub {
-    Yoyakku::DB::Model::Reserve->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Reserve->new( +{ app => shift->app } );
 };
 
 has roominfo => sub {
-    Yoyakku::DB::Model::Roominfo->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Roominfo->new( +{ app => shift->app } );
 };
 
 has storeinfo => sub {
-    Yoyakku::DB::Model::Storeinfo->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model::Storeinfo->new( +{ app => shift->app } );
 };
 
 =encoding utf8

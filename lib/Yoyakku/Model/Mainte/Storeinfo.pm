@@ -28,7 +28,7 @@ sub search_zipcode_for_address {
     my $params = shift;
 
     my $post_row
-        = $self->db->post->single_row_search_post_id( $params->{post} );
+        = $self->app->model->db->post->single_row_search_post_id( $params->{post} );
 
     if ($post_row) {
         $params->{region_id} = $post_row->region_id;

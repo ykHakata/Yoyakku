@@ -186,7 +186,7 @@ sub get_single_row_search_id {
     my $table     = shift;
     my $search_id = shift;
 
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
 
     my $row = $teng->single( $table, +{ id => $search_id, }, );
 
@@ -206,7 +206,7 @@ sub search_id_single_or_all_rows {
     my $table     = shift;
     my $search_id = shift;
 
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
 
     my $search_column = 'id';
 

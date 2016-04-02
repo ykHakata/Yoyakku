@@ -26,42 +26,42 @@ use Yoyakku::Validator;
 
 =cut
 
-has [qw{mail_temp mail_header mail_body yoyakku_conf model_stash}];
+has [qw{app model_stash}];
 
 has validator => sub {
-    Yoyakku::Validator->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Validator->new( +{ app => shift->app } );
 };
 
 has db => sub {
-    Yoyakku::DB::Model->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::DB::Model->new( +{ app => shift->app } );
 };
 
 has mainte => sub {
-    Yoyakku::Model::Mainte->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Mainte->new( +{ app => shift->app } );
 };
 
 has setting => sub {
-    Yoyakku::Model::Setting->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Setting->new( +{ app => shift->app } );
 };
 
 has auth => sub {
-    Yoyakku::Model::Auth->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Auth->new( +{ app => shift->app } );
 };
 
 has calendar => sub {
-    Yoyakku::Model::Calendar->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Calendar->new( +{ app => shift->app } );
 };
 
 has entry => sub {
-    Yoyakku::Model::Entry->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Entry->new( +{ app => shift->app } );
 };
 
 has profile => sub {
-    Yoyakku::Model::Profile->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Profile->new( +{ app => shift->app } );
 };
 
 has region => sub {
-    Yoyakku::Model::Region->new( +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Region->new( +{ app => shift->app } );
 };
 
 1;

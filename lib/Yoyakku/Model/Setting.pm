@@ -19,16 +19,14 @@ use Yoyakku::Model::Setting::Storeinfo;
 
 =cut
 
-has [qw{yoyakku_conf}];
+has [qw{app}];
 
 has roominfo => sub {
-    Yoyakku::Model::Setting::Roominfo->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Setting::Roominfo->new( +{ app => shift->app } );
 };
 
 has storeinfo => sub {
-    Yoyakku::Model::Setting::Storeinfo->new(
-        +{ yoyakku_conf => shift->yoyakku_conf } );
+    Yoyakku::Model::Setting::Storeinfo->new( +{ app => shift->app } );
 };
 
 1;

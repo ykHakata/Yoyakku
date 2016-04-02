@@ -27,7 +27,7 @@ use Yoyakku::Util qw{chang_date_6 get_calendar};
 sub get_cal_info_ads_rows {
     my $self      = shift;
     my $date_info = shift;
-    my $rows      = $self->db->ads->cal_info_ads_rows($date_info);
+    my $rows      = $self->app->model->db->ads->cal_info_ads_rows($date_info);
     return $rows;
 }
 

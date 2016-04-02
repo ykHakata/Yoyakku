@@ -19,7 +19,7 @@ use Teng::Schema::Loader;
 
 =cut
 
-has [qw{yoyakku_conf}];
+has [qw{app}];
 
 =head2 teng
 
@@ -29,7 +29,7 @@ has [qw{yoyakku_conf}];
 
 sub teng {
     my $self = shift;
-    my $conf = $self->yoyakku_conf->{db};
+    my $conf = $self->app->config->{db};
 
     my $dsn_str = $conf->{dsn_str};
     my $user    = $conf->{user} || '';

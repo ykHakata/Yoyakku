@@ -46,7 +46,7 @@ sub get_logged_in_row {
 
     return if !$logged_in;
 
-    my $teng       = $self->db->base->teng();
+    my $teng       = $self->app->model->db->base->teng();
     my $admin_id   = $session->{session_admin_id};
     my $general_id = $session->{session_general_id};
 
@@ -75,7 +75,7 @@ sub get_logged_in_row {
 sub login {
     my $self = shift;
     my $args = shift;
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
     my $row  = $teng->single( $args->{table}, +{ login => $args->{login} } );
 
     # 不合格の場合 (DB検証 メルアド違い)

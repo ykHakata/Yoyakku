@@ -37,7 +37,7 @@ subtest 'method' => sub {
 =cut
 
 subtest 'logged_in' => sub {
-    my $obj = Yoyakku::Model::Auth->new( +{ yoyakku_conf => $config } );
+    my $obj = Yoyakku::Model::Auth->new( +{ app => $t->app } );
     my $session = +{};
 
     subtest 'success' => sub {
@@ -62,7 +62,7 @@ subtest 'logged_in' => sub {
 =cut
 
 subtest 'get_logged_in_row' => sub {
-    my $obj = Yoyakku::Model::Auth->new( +{ yoyakku_conf => $config } );
+    my $obj = Yoyakku::Model::Auth->new( +{ app => $t->app } );
     my $session = +{};
 
     subtest 'success' => sub {
@@ -88,7 +88,7 @@ subtest 'get_logged_in_row' => sub {
 =cut
 
 subtest 'login' => sub {
-    my $obj = Yoyakku::Model::Auth->new( +{ yoyakku_conf => $config } );
+    my $obj = Yoyakku::Model::Auth->new( +{ app => $t->app } );
     my $args = +{};
 
     subtest 'success' => sub {

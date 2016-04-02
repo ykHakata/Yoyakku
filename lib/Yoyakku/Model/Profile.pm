@@ -140,11 +140,11 @@ sub get_acting_name {
     my $storeinfo_id_3 = $acting_ids->[2]->{storeinfo_id};
 
     my $acting_1
-        = $self->db->storeinfo->single_row_search_id($storeinfo_id_1);
+        = $self->app->model->db->storeinfo->single_row_search_id($storeinfo_id_1);
     my $acting_2
-        = $self->db->storeinfo->single_row_search_id($storeinfo_id_2);
+        = $self->app->model->db->storeinfo->single_row_search_id($storeinfo_id_2);
     my $acting_3
-        = $self->db->storeinfo->single_row_search_id($storeinfo_id_3);
+        = $self->app->model->db->storeinfo->single_row_search_id($storeinfo_id_3);
 
     my $acting_1_name = $acting_1 ? $acting_1->name : undef;
     my $acting_2_name = $acting_2 ? $acting_2->name : undef;
@@ -198,7 +198,7 @@ sub writing_profile {
     my $type      = shift;
     my $login_row = shift;
 
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
 
     # 認証 admin or general
     my $auth_data = +{

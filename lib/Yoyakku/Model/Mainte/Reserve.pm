@@ -28,7 +28,7 @@ sub get_input_support {
 
     if ( !$roominfo_id ) {
         my $reserve_row
-            = $self->db->reserve->single_row_search_id($reserve_id);
+            = $self->app->model->db->reserve->single_row_search_id($reserve_id);
         $roominfo_id = $reserve_row->roominfo_id;
     }
 
@@ -40,7 +40,7 @@ sub get_input_support {
             end_time   => $reserve_fillIn_row->endingtime_on,
         }
     );
-    my $get_general_rows_all = $self->db->general->rows_all();
+    my $get_general_rows_all = $self->app->model->db->general->rows_all();
 
     return +{
         reserve_fillIn_values => $reserve_fillIn_row,
@@ -53,7 +53,7 @@ sub get_input_support {
 sub _get_reserve_fillIn_row {
     my $self        = shift;
     my $roominfo_id = shift;
-    my $teng        = $self->db->base->teng();
+    my $teng        = $self->app->model->db->base->teng();
 
     my $sql = q{
         SELECT
@@ -149,7 +149,7 @@ sub _check_reserve_dupli {
     my $type   = shift;
     my $params = shift;
 
-    my $teng = $self->db->base->teng();
+    my $teng = $self->app->model->db->base->teng();
 
     my $reserve_id    = $params->{id};
     my $roominfo_id   = $params->{roominfo_id};
@@ -186,7 +186,7 @@ sub _check_roominfo_open_time {
 
     # 予約希望した roominfo を取得し、営業時間を調べる
     my $roominfo_row
-        = $self->db->roominfo->single_row_search_id( $params->{roominfo_id} );
+        = $self->app->model->db->roominfo->single_row_search_id( $params->{roominfo_id} );
 
     # 比較するため、両方を6:00-29:00の表記
     # roominfo -> reserve 入力
@@ -226,7 +226,7 @@ sub _check_lend_unit {
 
     # 予約希望した roominfo を取得し、貸出単位を調べる
     my $roominfo_row
-        = $self->db->roominfo->single_row_search_id( $params->{roominfo_id} );
+        = $self->app->model->db->roominfo->single_row_search_id( $params->{roominfo_id} );
 
     # rentalunit:INTEGER(例: 1: 1時間, 2: 2時間)貸出単位
     my $rentalunit = $roominfo_row->{rentalunit};
@@ -259,7 +259,7 @@ sub _check_useform {
 
     # 予約希望したroominfoを取得し、利用形態名調査
     my $roominfo_row
-        = $self->db->roominfo->single_row_search_id( $params->{roominfo_id} );
+        = $self->app->model->db->roominfo->single_row_search_id( $params->{roominfo_id} );
 
     # privatepermit:(0: 許可する, 1: 許可しない)個人練習許可
     $roominfo_row->privatepermit;

@@ -12,12 +12,11 @@ sub startup {
     my $conf_file = qq{$home/etc/$moniker.$mode.conf};
 
     # 設定ファイル
-    my $config = $self->plugin( Config => +{ file => $conf_file } );
+    $self->plugin( Config => +{ file => $conf_file } );
 
     $self->helper(
         model => sub {
-            state $model
-                = Yoyakku::Model->new( +{ yoyakku_conf => $config } );
+            state $model = Yoyakku::Model->new( +{ app => $self->app } );
         }
     );
 

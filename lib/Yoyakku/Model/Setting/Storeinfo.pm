@@ -26,7 +26,7 @@ use Mojo::Base 'Yoyakku::Model::Setting::Base';
 sub get_post_search {
     my $self   = shift;
     my $params = shift;
-    my $row = $self->db->post->single_row_search_post_id( $params->{post} );
+    my $row = $self->app->model->db->post->single_row_search_post_id( $params->{post} );
     if ($row) {
         $params->{post}      = $row->post_id;
         $params->{region_id} = $row->region_id;
