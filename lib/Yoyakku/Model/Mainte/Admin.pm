@@ -48,16 +48,8 @@ sub writing_admin {
     my $params = shift;
     my $type   = shift;
 
-    my $create_data = $self->get_create_data( 'admin', $params );
-
-    my $args = +{
-        table       => 'admin',
-        create_data => $create_data,
-        update_id   => $params->{id},
-        type        => $type,
-    };
-
-    my $insert_admin_row = $self->writing_from_db($args);
+    my $insert_admin_row
+        = $self->app->model->db->admin->writing( $params, $type );
 
     die 'not $insert_admin_row' if !$insert_admin_row;
 

@@ -1,4 +1,4 @@
-package Yoyakku::DB::Model::Admin;
+package Yoyakku::DB::Model::Profile;
 use Mojo::Base 'Yoyakku::DB::Model::Base';
 use Yoyakku::Util qw{now_datetime};
 
@@ -6,32 +6,19 @@ use Yoyakku::Util qw{now_datetime};
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::DB::Model::Admin - データベース Model
+    Yoyakku::DB::Model::Profile - データベース Model
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::DB::Model::Admin version 0.0.1
+    This documentation referes to Yoyakku::DB::Model::Profile version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-    Admin テーブルの API を提供
+    Profile テーブルの API を提供
 
 =cut
 
-has table => 'admin';
-
-=head2 rows_all
-
-    店舗ユーザー情報の全てを row オブジェクトで取得
-
-=cut
-
-sub rows_all {
-    my $self = shift;
-    my $teng = $self->teng();
-    my @rows = $teng->search( $self->table, +{}, );
-    return \@rows;
-}
+has table => 'profile';
 
 =head2 writing
 
@@ -45,11 +32,16 @@ sub writing {
     my $type   = shift;
 
     my $create_data = +{
-        login     => $params->{login},
-        password  => $params->{password},
-        status    => $params->{status},
-        create_on => now_datetime(),
-        modify_on => now_datetime(),
+        general_id => $params->{general_id} || undef,
+        admin_id   => $params->{admin_id}   || undef,
+        nick_name  => $params->{nick_name},
+        full_name  => $params->{full_name},
+        phonetic_name => $params->{phonetic_name},
+        tel           => $params->{tel},
+        mail          => $params->{mail},
+        status        => $params->{status},
+        create_on     => now_datetime(),
+        modify_on     => now_datetime(),
     };
 
     my $args = +{

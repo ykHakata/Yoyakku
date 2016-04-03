@@ -127,7 +127,8 @@ sub _common {
 
     return $self->stash($valid_msg), $self->_render_ads() if $valid_msg;
 
-    $model->writing_ads( $self->stash->{params}, $self->stash->{type} );
+    $self->model->db->ads->writing( $self->stash->{params},
+        $self->stash->{type} );
 
     return $self->redirect_to('mainte_ads_serch');
 }

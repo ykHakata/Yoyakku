@@ -52,7 +52,8 @@ sub writing_admin_store {
     my $params = shift;
     my $type   = shift;
 
-    my $create_data = $self->get_create_data( 'storeinfo', $params );
+    my $create_data
+        = $self->app->model->db->storeinfo->get_create_data($params);
 
     # 不要なカラムを削除
     delete $create_data->{admin_id};
@@ -69,7 +70,7 @@ sub writing_admin_store {
         type        => $type,
     };
 
-    return $self->writing_from_db($args);
+    return $self->app->model->db->base->writing_db($args);
 }
 
 1;

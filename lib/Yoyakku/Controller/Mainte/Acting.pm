@@ -134,7 +134,8 @@ sub _common {
     return $self->stash($valid_msg_db), $self->_render_acting()
         if $valid_msg_db;
 
-    $model->writing_acting( $self->stash->{params}, $self->stash->{type} );
+    $self->model->db->acting->writing( $self->stash->{params},
+        $self->stash->{type} );
 
     return $self->redirect_to('mainte_acting_serch');
 }

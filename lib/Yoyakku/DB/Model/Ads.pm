@@ -1,5 +1,6 @@
 package Yoyakku::DB::Model::Ads;
 use Mojo::Base 'Yoyakku::DB::Model::Base';
+use Yoyakku::Util qw{now_datetime};
 
 =encoding utf8
 
@@ -79,6 +80,41 @@ sub ads_one_rows {
     return \@rows;
 }
 
+=head2 writing
+
+    テーブル書込み、新規、修正、両方に対応
+
+=cut
+
+sub writing {
+    my $self   = shift;
+    my $params = shift;
+    my $type   = shift;
+
+    my $create_data = +{
+        kind            => $params->{kind},
+        storeinfo_id    => $params->{storeinfo_id},
+        region_id       => $params->{region_id},
+        url             => $params->{url},
+        displaystart_on => $params->{displaystart_on},
+        displayend_on   => $params->{displayend_on},
+        name            => $params->{name},
+        event_date      => $params->{event_date},
+        content         => $params->{content},
+        create_on       => now_datetime(),
+        modify_on       => now_datetime(),
+    };
+
+    my $args = +{
+        table       => $self->table,
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
+    };
+
+    return $self->writing_db($args);
+}
+
 1;
 
 __END__
@@ -90,6 +126,8 @@ __END__
 =item * L<Mojo::Base>
 
 =item * L<Yoyakku::DB::Model::Base>
+
+=item * L<Yoyakku::Util>
 
 =back
 

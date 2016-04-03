@@ -135,7 +135,8 @@ sub _common {
     return $self->stash($valid_msg_db), $self->_render_profile()
         if $valid_msg_db;
 
-    $model->writing_profile( $self->stash->{params}, $self->stash->{type} );
+    $self->model->db->profile->writing( $self->stash->{params},
+        $self->stash->{type} );
 
     return $self->redirect_to('mainte_profile_serch');
 }

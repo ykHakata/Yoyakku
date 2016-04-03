@@ -281,29 +281,6 @@ sub _check_useform {
     return;
 }
 
-=head2 writing_reserve
-
-    reserve テーブル書込み、修正に対応
-
-=cut
-
-sub writing_reserve {
-    my $self   = shift;
-    my $params = shift;
-    my $type   = shift;
-
-    my $create_data = $self->get_create_data( 'reserve', $params );
-
-    my $args = +{
-        table       => 'reserve',
-        create_data => $create_data,
-        update_id   => $params->{id},
-        type        => $type,
-    };
-
-    return $self->writing_from_db($args);
-}
-
 1;
 
 __END__

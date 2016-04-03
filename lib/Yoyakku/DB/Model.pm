@@ -6,6 +6,7 @@ use Yoyakku::DB::Model::Ads;
 use Yoyakku::DB::Model::Base;
 use Yoyakku::DB::Model::General;
 use Yoyakku::DB::Model::Post;
+use Yoyakku::DB::Model::Profile;
 use Yoyakku::DB::Model::Region;
 use Yoyakku::DB::Model::Reserve;
 use Yoyakku::DB::Model::Roominfo;
@@ -35,6 +36,10 @@ has general => sub {
 
 has post => sub {
     Yoyakku::DB::Model::Post->new( +{ app => shift->app } );
+};
+
+has profile => sub {
+    Yoyakku::DB::Model::Profile->new( +{ app => shift->app } );
 };
 
 has region => sub {

@@ -146,7 +146,8 @@ sub _common {
     return $self->stash($valid_msg_db), $self->_render_reserve()
         if $valid_msg_db;
 
-    $model->writing_reserve( $self->stash->{params}, $self->stash->{type} );
+    $self->model->db->reserve->writing( $self->stash->{params},
+        $self->stash->{type} );
 
     return $self->redirect_to('mainte_reserve_serch');
 }

@@ -24,7 +24,7 @@ subtest 'method' => sub {
     my @methods = qw{change_format_datetime set_fill_in_params
         get_calender_caps send_gmail check_table_column
         get_header_stash_params get_valid_params
-        get_init_valid_params get_create_data writing_from_db
+        get_init_valid_params
         insert_admin_relation};
 
     can_ok( $obj, @methods );

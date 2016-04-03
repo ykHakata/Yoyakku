@@ -52,6 +52,37 @@ sub teng {
     return $teng;
 }
 
+=head2 writing_db
+
+    データベースへの書き込み
+
+=cut
+
+sub writing_db {
+    my $self = shift;
+    my $args = shift;
+
+    my $table       = $args->{table};
+    my $create_data = $args->{create_data};
+    my $update_id   = $args->{update_id};
+    my $type        = $args->{type};
+
+    my $teng = $self->teng();
+
+    my $insert_row;
+    if ( $type eq 'insert' ) {
+        $insert_row = $teng->insert( $table, $create_data, );
+    }
+    elsif ( $type eq 'update' ) {
+        delete $create_data->{create_on};
+        $insert_row = $teng->single( $table, +{ id => $update_id }, );
+        $insert_row->update($create_data);
+    }
+    die 'not $insert_row' if !$insert_row;
+
+    return $insert_row;
+}
+
 1;
 
 __END__

@@ -82,7 +82,7 @@ sub writing_entry {
     };
 
     # admin or general への新規作成
-    my $insert_row = $self->writing_from_db($args);
+    my $insert_row = $self->app->model->db->base->writing_db($args);
 
     # 該当する profile の新規作成
     my $create_profile_data = +{
@@ -127,7 +127,7 @@ sub writing_entry {
         type        => $type,
     };
 
-    $self->writing_from_db($args);
+    $self->app->model->db->base->writing_db($args);
     $self->mail_temp($mail_temp_entry);
 
     my $mail_header_entry = +{

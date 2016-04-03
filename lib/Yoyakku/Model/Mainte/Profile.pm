@@ -96,28 +96,6 @@ sub _check_admin_and_general_id {
     return $self->check_table_column($check_params) if $general_id;
 }
 
-=head2 writing_profile
-
-    profile テーブル書込み、新規、修正、両方に対応
-
-=cut
-
-sub writing_profile {
-    my $self = shift;
-    my $params = shift;
-    my $type   = shift;
-
-    my $create_data = $self->get_create_data( 'profile', $params );
-
-    my $args = +{
-        table       => 'profile',
-        create_data => $create_data,
-        update_id   => $params->{id},
-        type        => $type,
-    };
-    return $self->writing_from_db($args);
-}
-
 1;
 
 __END__

@@ -59,19 +59,10 @@ sub writing_roominfo {
     $params->{starttime_on}  = sprintf '%08s', $params->{starttime_on};
     $params->{endingtime_on} = sprintf '%08s', $params->{endingtime_on};
 
-    my $create_data = $self->get_create_data( 'roominfo', $params );
-
     # update 以外は禁止
     die 'update only' if !$type || ( $type && $type ne 'update' );
 
-    my $args = +{
-        table       => 'roominfo',
-        create_data => $create_data,
-        update_id   => $params->{id},
-        type        => $type,
-    };
-
-    return $self->writing_from_db($args);
+    return $self->app->model->db->roominfo->writing( $params, $type );
 }
 
 1;

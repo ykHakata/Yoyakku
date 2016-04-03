@@ -29,29 +29,6 @@ sub get_region_rows_pref {
     return $rows;
 }
 
-=head2 writing_ads
-
-    テーブル書込み、新規、修正、両方に対応
-
-=cut
-
-sub writing_ads {
-    my $self   = shift;
-    my $params = shift;
-    my $type   = shift;
-
-    my $create_data = $self->get_create_data( 'ads', $params );
-
-    my $args = +{
-        table       => 'ads',
-        create_data => $create_data,
-        update_id   => $params->{id},
-        type        => $type,
-    };
-
-    return $self->writing_from_db($args);
-}
-
 1;
 
 __END__

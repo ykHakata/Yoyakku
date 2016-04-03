@@ -50,19 +50,10 @@ sub writing_storeinfo {
     my $params = shift;
     my $type   = shift;
 
-    my $create_data = $self->get_create_data( 'storeinfo', $params );
-
     # update 以外は禁止
     die 'update only' if !$type || ( $type && $type ne 'update' );
 
-    my $args = +{
-        table       => 'storeinfo',
-        create_data => $create_data,
-        update_id   => $params->{id},
-        type        => $type,
-    };
-
-    return $self->writing_from_db($args);
+    return $self->app->model->db->storeinfo->writing( $params, $type );
 }
 
 1;

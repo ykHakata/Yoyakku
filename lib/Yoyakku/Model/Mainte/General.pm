@@ -37,28 +37,6 @@ sub check_general_validator_db {
     return;
 }
 
-=head2 writing_general
-
-    general テーブル書込み、新規、修正、両方に対応
-
-=cut
-
-sub writing_general {
-    my $self   = shift;
-    my $params = shift;
-    my $type   = shift;
-
-    my $create_data = $self->get_create_data( 'general', $params );
-
-    my $args = +{
-        table       => 'general',
-        create_data => $create_data,
-        update_id   => $params->{id},
-        type        => $type,
-    };
-    return $self->writing_from_db($args);
-}
-
 1;
 
 __END__

@@ -123,7 +123,8 @@ sub writing_admin_reserv {
     $params->{starttime_on}  = sprintf '%08s', $params->{starttime_on};
     $params->{endingtime_on} = sprintf '%08s', $params->{endingtime_on};
 
-    my $create_data = $self->get_create_data( 'roominfo', $params );
+    my $create_data
+        = $self->app->model->db->roominfo->get_create_data($params);
 
     # 不要なカラムを削除
     delete $create_data->{storeinfo_id};
@@ -149,7 +150,7 @@ sub writing_admin_reserv {
         type        => $type,
     };
 
-    return $self->writing_from_db($args);
+    return $self->app->model->db->base->writing_db($args);
 }
 
 1;
