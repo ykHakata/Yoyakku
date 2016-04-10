@@ -1,7 +1,6 @@
 package Yoyakku::Model::Entry;
 use Mojo::Base 'Yoyakku::Model::Base';
 use Yoyakku::Util qw{now_datetime};
-use Yoyakku::Master qw{$MAIL_SYSTEM};
 
 =encoding utf8
 
@@ -131,7 +130,7 @@ sub writing_entry {
     $self->mail_temp($mail_temp_entry);
 
     my $mail_header_entry = +{
-        from    => $MAIL_SYSTEM,
+        from    => $self->app->config->{mail}->{system},
         to      => $params->{mail_j},
         subject => '[yoyakku]ID登録完了のお知らせ【' . now_datetime() . '】',
     };

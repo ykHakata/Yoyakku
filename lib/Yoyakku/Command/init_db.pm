@@ -25,11 +25,10 @@ END_USAGE
 sub run {
     my ( $self, @args ) = @_;
 
-    my $config  = $self->app->config;
-    my $init_db = $config->{init_db};
-    my $db      = $init_db->{db};
-    my $schema  = $init_db->{schema};
-    my $data    = $init_db->{data};
+    my $config = $self->app->config;
+    my $db     = $config->{init_db_file};
+    my $schema = $config->{init_schema};
+    my $data   = $config->{init_data};
 
     # スキーマー読み込み初期化
     my $cmd = "sqlite3 $db < $schema";
@@ -54,7 +53,7 @@ sub _delete_header {
     my $file = shift;
 
     my $file_temp = File::Temp->new(
-        DIR    => $self->app->config->{init_db}->{dir_db},
+        DIR    => $self->app->config->{dir_db},
         SUFFIX => '.csv',
     );
 

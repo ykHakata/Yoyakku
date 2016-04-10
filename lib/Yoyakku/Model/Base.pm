@@ -8,7 +8,6 @@ use Try::Tiny;
 use HTML::FillInForm;
 use Yoyakku::Util qw{now_datetime switch_header_params chenge_time_over
     next_day_ymd join_time join_date_time};
-use Yoyakku::Master qw{$MAIL_USER $MAIL_PASS};
 use Yoyakku::DB::Model;
 
 has [qw{mail_temp mail_header mail_body app model_stash}];
@@ -126,8 +125,8 @@ sub send_gmail {
     my $transport = Email::Sender::Transport::SMTPS->new(
         +{  host          => 'smtp.gmail.com',
             ssl           => 'starttls',
-            sasl_username => $MAIL_USER,
-            sasl_password => $MAIL_PASS,
+            sasl_username => $conf->{mail}->{system},
+            sasl_password => $conf->{mail}->{pass},
         }
     );
 

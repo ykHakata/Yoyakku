@@ -163,9 +163,10 @@ sub root {
     my $self   = shift;
     my $params = shift;
 
-    my $check_params = [
-        login    => [ 'NOT_NULL', [ EQUAL => 'yoyakku' ] ],
-        password => [ 'NOT_NULL', [ EQUAL => '0520' ] ],
+    my $login_account = $self->app->config->{mainte}->{login_account};
+    my $check_params  = [
+        login    => [ 'NOT_NULL', [ EQUAL => $login_account->{login} ] ],
+        password => [ 'NOT_NULL', [ EQUAL => $login_account->{password} ] ],
     ];
 
     my $msg_params = [

@@ -6,13 +6,15 @@ use Yoyakku::Model;
 sub startup {
     my $self = shift;
 
-    my $home      = $self->home->to_string;
-    my $mode      = $self->mode;
-    my $moniker   = $self->moniker;
-    my $conf_file = qq{$home/etc/$moniker.$mode.conf};
+    my $home        = $self->home->to_string;
+    my $mode        = $self->mode;
+    my $moniker     = $self->moniker;
+    my $conf_file   = qq{$home/etc/$moniker.$mode.conf};
+    my $common_file = qq{$home/etc/$moniker.common.conf};
 
     # 設定ファイル
     $self->plugin( Config => +{ file => $conf_file } );
+    $self->plugin( Config => +{ file => $common_file } );
 
     $self->helper(
         model => sub {
