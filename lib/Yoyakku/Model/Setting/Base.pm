@@ -1,6 +1,5 @@
 package Yoyakku::Model::Setting::Base;
 use Mojo::Base 'Yoyakku::Model::Base';
-use Yoyakku::Util qw{get_fill_in_params chenge_time_over};
 
 =encoding utf8
 
