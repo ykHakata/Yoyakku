@@ -27,45 +27,6 @@ use Yoyakku::Master qw{$HOUR_00 $HOUR_06};
 
 =cut
 
-=head2 get_table_columns
-
-    各テーブルカラム取得
-
-=cut
-
-sub get_table_columns {
-    my $table = shift;
-
-    my $table_columns = +{
-        admin   => [qw{id login password status create_on modify_on}],
-        general => [qw{id login password status create_on modify_on}],
-        profile => [
-            qw{id general_id admin_id nick_name full_name
-                phonetic_name tel mail status create_on modify_on}
-        ],
-        storeinfo => [
-            qw{id region_id admin_id name icon post state cities addressbelow
-                tel mail remarks url locationinfor status create_on modify_on}
-        ],
-        roominfo => [
-            qw{id storeinfo_id name starttime_on endingtime_on rentalunit
-                time_change pricescomments privatepermit privatepeople
-                privateconditions bookinglimit cancellimit remarks
-                webpublishing webreserve status create_on modify_on}
-        ],
-        reserve => [
-            qw{id roominfo_id getstarted_on enduse_on useform message
-                general_id admin_id tel status create_on modify_on}
-        ],
-        acting => [qw{id general_id storeinfo_id status create_on modify_on}],
-        ads    => [
-            qw{id kind storeinfo_id region_id url displaystart_on
-                displayend_on name event_date content create_on modify_on}
-        ],
-    };
-    return $table_columns->{$table};
-}
-
 =head2 check_login_name
 
     ログイン名の重複確認
@@ -101,8 +62,9 @@ sub update_form_params {
     my $table  = shift;
     my $params = shift;
 
-    my $columns = get_table_columns($table);
-    my $row = $self->get_single_row_search_id( $table, $params->{id} );
+    my $teng    = $self->app->model->db->base->teng;
+    my $columns = $teng->schema->get_table($table)->columns;
+    my $row     = $teng->single( $table, +{ id => $params->{id} } );
 
     for my $param ( @{$columns} ) {
         $params->{$param} = $row->$param;
@@ -173,26 +135,6 @@ sub get_startend_day_and_time {
     };
 
     return $startend_day_time;
-}
-
-=head2 get_single_row_search_id
-
-    レコード更新の為の情報取得
-
-=cut
-
-sub get_single_row_search_id {
-    my $self      = shift;
-    my $table     = shift;
-    my $search_id = shift;
-
-    my $teng = $self->app->model->db->base->teng();
-
-    my $row = $teng->single( $table, +{ id => $search_id, }, );
-
-    die 'not row!!' if !$row;
-
-    return $row;
 }
 
 =head2 search_id_single_or_all_rows
