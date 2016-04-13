@@ -60,6 +60,32 @@ sub get_msg_validator {
     return;
 }
 
+=head2 get_msg_validator_new
+
+    入力値バリデート処理 (改定)
+
+=cut
+
+sub get_msg_validator_new {
+    my $self = shift;
+    my $arg  = shift;
+
+    my $validator = FormValidator::Lite->new( $arg->{params} );
+    $validator->check( %{ $arg->{check_params} } );
+    $validator->set_message( %{ $arg->{msg_params} } );
+
+    my $error_params = [ map {$_} keys %{ $validator->errors() } ];
+
+    my $msg = +{};
+    for my $error_param ( @{$error_params} ) {
+        $msg->{$error_param}
+            = $validator->get_error_messages_from_param($error_param);
+        $msg->{$error_param} = shift @{ $msg->{$error_param} };
+    }
+
+    return $msg if $validator->has_error();
+    return;
+}
 
 =head2 profile_with_auth
 
@@ -613,6 +639,102 @@ sub storeinfo {
     return $valid_msg;
 }
 
+=head2 _roominfo_params
+
+    roominfo のバリデートパラメーター
+
+=cut
+
+sub _roominfo_params {
+    my $self = shift;
+    my $type = shift;
+
+    my $params = +{
+        check => +{
+            name => [ [ 'LENGTH', 0, 2, ], [ REGEXP => qr/\S/ ] ],
+            starttime_on   => [ [ 'LENGTH', 0, 20, ], ],
+            endingtime_on  => [ [ 'LENGTH', 0, 20, ], ],
+            rentalunit     => [ 'INT', ],
+            time_change    => [ 'INT', ],
+            pricescomments => [ [ 'LENGTH', 0, 20, ], ],
+            privatepermit  => [ 'INT', ],
+            privatepeople  => [ 'INT', ],
+            privateconditions => [ 'INT', ],
+            bookinglimit      => [ 'INT', ],
+            cancellimit       => [ 'INT', ],
+            remarks           => [ [ 'LENGTH', 0, 200, ], ],
+            webpublishing     => [ 'INT', ],
+            webreserve        => [ 'INT', ],
+            status            => [ 'INT', ],
+        },
+        msg => +{
+            'name.length'          => '文字数!!',
+            'name.regexp'          => '空白文字は不可!!',
+            'starttime_on.length'  => '文字数!!',
+            'endingtime_on.length' => '文字数!!',
+            'rentalunit.int'  => '指定の形式で入力してください',
+            'time_change.int' => '指定の形式で入力してください',
+            'pricescomments.length' => '文字数!!',
+            'privatepermit.int' =>
+                '指定の形式で入力してください',
+            'privatepeople.int' =>
+                '指定の形式で入力してください',
+            'privateconditions.int' =>
+                '指定の形式で入力してください',
+            'bookinglimit.int' =>
+                '指定の形式で入力してください',
+            'cancellimit.int' => '指定の形式で入力してください',
+            'remarks.length'  => '文字数!!',
+            'webpublishing.int' =>
+                '指定の形式で入力してください',
+            'webreserve.int' => '指定の形式で入力してください',
+            'status.int'     => '指定の形式で入力してください',
+        },
+    };
+
+    return $params->{$type};
+}
+
+=head2 up_admin_r_d_edit
+
+    バリデート処理(up_admin_r_d_edit アクション用)
+
+=cut
+
+sub up_admin_r_d_edit {
+    my $self   = shift;
+    my $params = shift;
+
+    my $check_params = $self->_roominfo_params('check');
+    my $msg_params   = $self->_roominfo_params('msg');
+
+    delete $check_params->{name};
+    delete $check_params->{starttime_on};
+    delete $check_params->{endingtime_on};
+    delete $check_params->{rentalunit};
+    delete $check_params->{time_change};
+    delete $check_params->{pricescomments};
+    delete $check_params->{privatepermit};
+    delete $check_params->{privatepeople};
+    delete $check_params->{privateconditions};
+    delete $check_params->{bookinglimit};
+    delete $check_params->{cancellimit};
+    delete $check_params->{webpublishing};
+    delete $check_params->{webreserve};
+    delete $check_params->{status};
+
+    my $arg = +{
+        check_params => $check_params,
+        msg_params   => $msg_params,
+        params       => $params,
+    };
+
+    my $msg = $self->get_msg_validator_new($arg);
+    my $valid_msg = +{ remarks => $msg->{remarks}, };
+    return $valid_msg if scalar values %{$msg};
+    return;
+}
+
 =head2 roominfo
 
     バリデート処理(roominfo)
@@ -623,43 +745,8 @@ sub roominfo {
     my $self   = shift;
     my $params = shift;
 
-    my $check_params = [
-        name              => [ [ 'LENGTH', 0, 2, ], [ REGEXP => qr/\S/ ] ],
-        starttime_on      => [ [ 'LENGTH', 0, 20, ], ],
-        endingtime_on     => [ [ 'LENGTH', 0, 20, ], ],
-        rentalunit        => [ 'INT', ],
-        time_change       => [ 'INT', ],
-        pricescomments    => [ [ 'LENGTH', 0, 20, ], ],
-        privatepermit     => [ 'INT', ],
-        privatepeople     => [ 'INT', ],
-        privateconditions => [ 'INT', ],
-        bookinglimit      => [ 'INT', ],
-        cancellimit       => [ 'INT', ],
-        remarks           => [ [ 'LENGTH', 0, 200, ], ],
-        webpublishing     => [ 'INT', ],
-        webreserve        => [ 'INT', ],
-        status            => [ 'INT', ],
-    ];
-
-    my $msg_params = [
-        'name.length'          => '文字数!!',
-        'name.regexp'          => '空白文字は不可!!',
-        'starttime_on.length'  => '文字数!!',
-        'endingtime_on.length' => '文字数!!',
-        'rentalunit.int'  => '指定の形式で入力してください',
-        'time_change.int' => '指定の形式で入力してください',
-        'pricescomments.length' => '文字数!!',
-        'privatepermit.int' => '指定の形式で入力してください',
-        'privatepeople.int' => '指定の形式で入力してください',
-        'privateconditions.int' =>
-            '指定の形式で入力してください',
-        'bookinglimit.int'  => '指定の形式で入力してください',
-        'cancellimit.int'   => '指定の形式で入力してください',
-        'remarks.length'    => '文字数!!',
-        'webpublishing.int' => '指定の形式で入力してください',
-        'webreserve.int'    => '指定の形式で入力してください',
-        'status.int'        => '指定の形式で入力してください',
-    ];
+    my $check_params = $self->_roominfo_params('check');
+    my $msg_params   = $self->_roominfo_params('msg');
 
     my $arg = +{
         check_params => $check_params,
@@ -667,7 +754,7 @@ sub roominfo {
         params       => $params,
     };
 
-    my $msg = $self->get_msg_validator($arg);
+    my $msg = $self->get_msg_validator_new($arg);
 
     my $valid_msg_roominfo = +{
         name              => $msg->{name},

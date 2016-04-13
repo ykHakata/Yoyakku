@@ -153,6 +153,53 @@ sub writing_admin_reserv {
     return $self->app->model->db->base->writing_db($args);
 }
 
+=head2 writing_up_admin_r_d_edit
+
+    roominfo テーブル書込み、修正に対応
+
+=cut
+
+sub writing_up_admin_r_d_edit {
+    my $self   = shift;
+    my $params = shift;
+    my $type   = shift;
+
+    my $create_data
+        = $self->app->model->db->roominfo->get_create_data($params);
+
+    # 不要なカラムを削除
+   delete $create_data->{storeinfo_id};
+   delete $create_data->{starttime_on};
+   delete $create_data->{endingtime_on};
+   delete $create_data->{rentalunit};
+   delete $create_data->{time_change};
+   delete $create_data->{pricescomments};
+   delete $create_data->{privatepermit};
+   delete $create_data->{privatepeople};
+   delete $create_data->{privateconditions};
+   delete $create_data->{webpublishing};
+   delete $create_data->{webreserve};
+   delete $create_data->{status};
+
+    # name (部屋名) が存在するときだけ status 1 (利用可能)
+    $create_data->{status} = 0;
+    if ( $create_data->{name} ) {
+        $create_data->{status} = 1;
+    }
+
+    # update 以外は禁止
+    die 'update only' if !$type || ( $type && $type ne 'update' );
+
+    my $args = +{
+        table       => 'roominfo',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
+    };
+
+    return $self->app->model->db->base->writing_db($args);
+}
+
 1;
 
 __END__

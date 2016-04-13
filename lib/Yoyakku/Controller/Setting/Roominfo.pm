@@ -109,7 +109,8 @@ sub up_admin_r_d_edit {
         return $self->_render_fill_in_form();
     }
 
-    return;
+    $self->stash( +{ action => 'up_admin_r_d_edit' } );
+    return $self->_update();
 }
 
 sub _cancel {
@@ -129,10 +130,28 @@ sub _update {
     my $check_params
         = $model->get_check_params_list( $self->stash->{params} );
 
+    my $validator_check = 'roominfo';
+
+    if ( $self->stash('action') eq 'up_admin_r_d_edit' ) {
+        $validator_check = 'up_admin_r_d_edit';
+    }
+
     for my $check_param ( @{$check_params} ) {
-        my $valid_msg = $self->model->validator->check( 'roominfo', $check_param );
+        my $valid_msg = $self->model->validator->check( $validator_check, $check_param );
         return $self->stash($valid_msg), $self->_render_fill_in_form()
             if $valid_msg;
+    }
+
+    if ( $self->stash('action') eq 'up_admin_r_d_edit' ) {
+        for my $check_param ( @{$check_params} ) {
+            $model->writing_up_admin_r_d_edit( $check_param,
+                $self->stash->{type},
+            );
+        }
+
+        # 暫定にて up_admin_r_d_edit, admin_reserv_comp の実装が終了後切替
+        return $self->redirect_to('up_admin_r_d_edit');
+        # return $self->redirect_to('admin_reserv_comp');
     }
 
     for my $check_param ( @{$check_params} ) {
