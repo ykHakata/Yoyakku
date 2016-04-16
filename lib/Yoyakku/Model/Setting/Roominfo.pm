@@ -18,6 +18,72 @@ use Yoyakku::Util qw{chenge_time_over join_time};
 
 =cut
 
+=head2 set_admin_reserv_comp_params
+
+    admin_reserv_comp 表示用パラメーター変換
+
+=cut
+
+sub set_admin_reserv_comp_params {
+    my $self      = shift;
+    my $login_row = shift;
+    my $config    = $self->app->config;
+    my $params    = $self->set_roominfo_params($login_row);
+    my $stash     = [];
+
+    # 開始時刻 10:00:00 -> 10:00 starttime_on
+    for my $param ( @{ $params->{starttime_on} } ) {
+        my ( $hour, $min, $sec ) = split ':', $param;
+        my $time = $hour . ':' . $min;
+        push @{$stash}, $time;
+    }
+    $params->{starttime_on} = $stash;
+    $stash = [];
+
+    # 終了時刻 22:00:00 -> 22:00 endingtime_on
+    for my $param ( @{ $params->{endingtime_on} } ) {
+        my ( $hour, $min, $sec ) = split ':', $param;
+        my $time = $hour . ':' . $min;
+        push @{$stash}, $time;
+    }
+    $params->{endingtime_on} = $stash;
+    $stash = [];
+
+    # 単位 1 -> 1h rentalunit
+    $params->{rentalunit} = [ map { $_ . 'h' } @{ $params->{rentalunit} } ];
+
+    # 個人練習 許可 0, 1 -> ○, ×, privatepermit
+    for my $param ( @{ $params->{privatepermit} } ) {
+        my $val = $config->{constant}->{PRIVATE_MIT_0};
+        if ( $param eq 1 ) {
+            $val = $config->{constant}->{PRIVATE_MIT_1};
+        }
+        push @{$stash}, $val;
+    }
+    $params->{privatepermit} = $stash;
+    $stash = [];
+
+    # 個人練習 予約条件 1日前 ... privateconditions
+    for my $param ( @{ $params->{privateconditions} } ) {
+
+        my $val
+            = ( $param eq 0 ) ? $config->{constant}->{PRIVATE_COND_0}
+            : ( $param eq 1 ) ? $config->{constant}->{PRIVATE_COND_1}
+            : ( $param eq 2 ) ? $config->{constant}->{PRIVATE_COND_2}
+            : ( $param eq 3 ) ? $config->{constant}->{PRIVATE_COND_3}
+            : ( $param eq 4 ) ? $config->{constant}->{PRIVATE_COND_4}
+            : ( $param eq 5 ) ? $config->{constant}->{PRIVATE_COND_5}
+            : ( $param eq 6 ) ? $config->{constant}->{PRIVATE_COND_6}
+            : ( $param eq 7 ) ? $config->{constant}->{PRIVATE_COND_7}
+            :                   $config->{constant}->{PRIVATE_COND_8};
+
+        push @{$stash}, $val;
+    }
+    $params->{privateconditions} = $stash;
+
+    return $params;
+}
+
 =head2 set_roominfo_params
 
     予約情報設定のためのパラメーター取得
