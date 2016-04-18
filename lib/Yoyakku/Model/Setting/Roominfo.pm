@@ -28,60 +28,63 @@ sub set_admin_reserv_comp_params {
     my $self      = shift;
     my $login_row = shift;
     my $config    = $self->app->config;
-    my $params    = $self->set_roominfo_params($login_row);
-    my $stash     = [];
 
-    # 開始時刻 10:00:00 -> 10:00 starttime_on
-    for my $param ( @{ $params->{starttime_on} } ) {
-        my ( $hour, $min, $sec ) = split ':', $param;
-        my $time = $hour . ':' . $min;
-        push @{$stash}, $time;
-    }
-    $params->{starttime_on} = $stash;
-    $stash = [];
+    my $rows = $login_row->fetch_storeinfo->fetch_roominfos;
 
-    # 終了時刻 22:00:00 -> 22:00 endingtime_on
-    for my $param ( @{ $params->{endingtime_on} } ) {
-        my ( $hour, $min, $sec ) = split ':', $param;
-        my $time = $hour . ':' . $min;
-        push @{$stash}, $time;
-    }
-    $params->{endingtime_on} = $stash;
-    $stash = [];
+    my $roominfo_ref;
+    for my $row ( @{$rows} ) {
+        my $row_hash = $row->get_columns();
+        my $split_t  = chenge_time_over(
+            +{  start_time => $row->starttime_on,
+                end_time   => $row->endingtime_on,
+            },
+        );
+        ( $row_hash->{starttime_on}, $row_hash->{endingtime_on}, )
+            = join_time( $split_t, 'none' );
 
-    # 単位 1 -> 1h rentalunit
-    $params->{rentalunit} = [ map { $_ . 'h' } @{ $params->{rentalunit} } ];
+        # 開始時刻 10:00:00 -> 10:00 starttime_on
+        my ( $hour, $min, $sec ) = split ':', $row_hash->{starttime_on};
+        $row_hash->{starttime_on} = $hour . ':' . $min;
 
-    # 個人練習 許可 0, 1 -> ○, ×, privatepermit
-    for my $param ( @{ $params->{privatepermit} } ) {
-        my $val = $config->{constant}->{PRIVATE_MIT_0};
-        if ( $param eq 1 ) {
-            $val = $config->{constant}->{PRIVATE_MIT_1};
+        # 終了時刻 22:00:00 -> 22:00 endingtime_on
+        ( $hour, $min, $sec ) = split ':', $row_hash->{endingtime_on};
+        $row_hash->{endingtime_on} = $hour . ':' . $min;
+
+        # 単位 1 -> 1h rentalunit
+        $row_hash->{rentalunit} = $row_hash->{rentalunit} . 'h';
+
+        # 個人練習 許可 0, 1 -> ○, ×, privatepermit
+        if ( $row_hash->{privatepermit} eq 1 ) {
+            $row_hash->{privatepermit} = $config->{constant}->{PRIVATE_MIT_1};
         }
-        push @{$stash}, $val;
-    }
-    $params->{privatepermit} = $stash;
-    $stash = [];
+        else {
+            $row_hash->{privatepermit} = $config->{constant}->{PRIVATE_MIT_0};
+        }
 
-    # 個人練習 予約条件 1日前 ... privateconditions
-    for my $param ( @{ $params->{privateconditions} } ) {
-
+        # 個人練習 予約条件 1日前 ... privateconditions
+        my $private = $row_hash->{privateconditions};
         my $val
-            = ( $param eq 0 ) ? $config->{constant}->{PRIVATE_COND_0}
-            : ( $param eq 1 ) ? $config->{constant}->{PRIVATE_COND_1}
-            : ( $param eq 2 ) ? $config->{constant}->{PRIVATE_COND_2}
-            : ( $param eq 3 ) ? $config->{constant}->{PRIVATE_COND_3}
-            : ( $param eq 4 ) ? $config->{constant}->{PRIVATE_COND_4}
-            : ( $param eq 5 ) ? $config->{constant}->{PRIVATE_COND_5}
-            : ( $param eq 6 ) ? $config->{constant}->{PRIVATE_COND_6}
-            : ( $param eq 7 ) ? $config->{constant}->{PRIVATE_COND_7}
-            :                   $config->{constant}->{PRIVATE_COND_8};
+            = ( $private eq 0 ) ? $config->{constant}->{PRIVATE_COND_0}
+            : ( $private eq 1 ) ? $config->{constant}->{PRIVATE_COND_1}
+            : ( $private eq 2 ) ? $config->{constant}->{PRIVATE_COND_2}
+            : ( $private eq 3 ) ? $config->{constant}->{PRIVATE_COND_3}
+            : ( $private eq 4 ) ? $config->{constant}->{PRIVATE_COND_4}
+            : ( $private eq 5 ) ? $config->{constant}->{PRIVATE_COND_5}
+            : ( $private eq 6 ) ? $config->{constant}->{PRIVATE_COND_6}
+            : ( $private eq 7 ) ? $config->{constant}->{PRIVATE_COND_7}
+            :                     $config->{constant}->{PRIVATE_COND_8};
+        $row_hash->{privateconditions} = $val;
 
-        push @{$stash}, $val;
+        # status が 0 無効のものは表示しない
+        while ( my ( $key, $value ) = each %{$row_hash} ) {
+            if ( $row_hash->{status} eq 0 ) {
+                $value = '';
+            }
+            push @{ $roominfo_ref->{$key} }, $value;
+        }
     }
-    $params->{privateconditions} = $stash;
 
-    return $params;
+    return $roominfo_ref;
 }
 
 =head2 set_roominfo_params
@@ -113,7 +116,7 @@ sub set_roominfo_params {
     }
 
     my @keys = keys %{$roominfo_ref};
-
+    # warn '$roominfo_ref',dumper($roominfo_ref);
     my $params = +{};
     for my $key (@keys) {
         $params->{$key} = $roominfo_ref->{$key};
