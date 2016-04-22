@@ -121,7 +121,7 @@ sub startup {
         ->to( controller => 'Setting::Storeinfo', action => 'index' );
 
     # 店舗管理(Setting) 予約部屋情報設定
-    my $setting_roominfo = qr{admin_reserv_edit|up_admin_r_d_edit|admin_reserv_comp};
+    my $setting_roominfo = qr{admin_reserv_edit|up_admin_r_d_edit|admin_reserv_comp|admin_pub_edit};
     $r->route( '/:room', room => $setting_roominfo )
         ->to( controller => 'Setting::Roominfo', action => 'index' );
 

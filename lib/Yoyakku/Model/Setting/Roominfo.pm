@@ -99,7 +99,7 @@ sub set_roominfo_params {
 
     my $rows = $login_row->fetch_storeinfo->fetch_roominfos;
 
-    my $roominfo_ref = +{};
+    my $roominfo_ref;
     for my $row ( @{$rows} ) {
         my $row_hash = $row->get_columns();
         my $split_t  = chenge_time_over(
@@ -115,13 +115,7 @@ sub set_roominfo_params {
         }
     }
 
-    my @keys = keys %{$roominfo_ref};
-    # warn '$roominfo_ref',dumper($roominfo_ref);
-    my $params = +{};
-    for my $key (@keys) {
-        $params->{$key} = $roominfo_ref->{$key};
-    }
-    return $params;
+    return $roominfo_ref;
 }
 
 =head2 get_check_params_list
@@ -249,6 +243,54 @@ sub writing_up_admin_r_d_edit {
    delete $create_data->{webpublishing};
    delete $create_data->{webreserve};
    delete $create_data->{status};
+
+    # name (部屋名) が存在するときだけ status 1 (利用可能)
+    $create_data->{status} = 0;
+    if ( $create_data->{name} ) {
+        $create_data->{status} = 1;
+    }
+
+    # update 以外は禁止
+    die 'update only' if !$type || ( $type && $type ne 'update' );
+
+    my $args = +{
+        table       => 'roominfo',
+        create_data => $create_data,
+        update_id   => $params->{id},
+        type        => $type,
+    };
+
+    return $self->app->model->db->base->writing_db($args);
+}
+
+=head2 writing_admin_pub_edit
+
+    roominfo テーブル書込み、修正に対応
+
+=cut
+
+sub writing_admin_pub_edit {
+    my $self   = shift;
+    my $params = shift;
+    my $type   = shift;
+
+    my $create_data
+        = $self->app->model->db->roominfo->get_create_data($params);
+
+    # 不要なカラムを削除
+    delete $create_data->{storeinfo_id};
+    delete $create_data->{starttime_on};
+    delete $create_data->{endingtime_on};
+    delete $create_data->{rentalunit};
+    delete $create_data->{time_change};
+    delete $create_data->{pricescomments};
+    delete $create_data->{privatepermit};
+    delete $create_data->{privatepeople};
+    delete $create_data->{privateconditions};
+    delete $create_data->{bookinglimit};
+    delete $create_data->{cancellimit};
+    delete $create_data->{remarks};
+    delete $create_data->{status};
 
     # name (部屋名) が存在するときだけ status 1 (利用可能)
     $create_data->{status} = 0;

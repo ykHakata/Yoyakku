@@ -49,6 +49,7 @@ sub index {
     return $self->admin_reserv_edit() if $path eq '/admin_reserv_edit';
     return $self->up_admin_r_d_edit() if $path eq '/up_admin_r_d_edit';
     return $self->admin_reserv_comp() if $path eq '/admin_reserv_comp';
+    return $self->admin_pub_edit()    if $path eq '/admin_pub_edit';
     return $self->redirect_to('index');
 }
 
@@ -111,6 +112,9 @@ sub up_admin_r_d_edit {
     }
 
     $self->stash( +{ action => 'up_admin_r_d_edit' } );
+
+    # この cancel は戻るボタンとして機能
+    return $self->_cancel() if $self->stash->{params}->{cancel};
     return $self->_update();
 }
 
@@ -143,8 +147,51 @@ sub admin_reserv_comp {
     return;
 }
 
+=head2 admin_pub_edit
+
+    予約部屋、web公開設定コントロール
+
+=cut
+
+sub admin_pub_edit {
+    my $self  = shift;
+    my $model = $self->model->setting->roominfo;
+
+    my $switch_com = $model->get_switch_com('admin_pub_edit');
+
+    $self->stash(
+        class      => 'admin_pub_edit',
+        switch_com => $switch_com,
+        template   => 'setting/admin_pub_edit',
+        format     => 'html',
+    );
+
+    if ( 'GET' eq uc $self->req->method ) {
+        $self->stash->{params}
+            = $model->set_roominfo_params( $self->stash->{login_row} );
+        return $self->_render_fill_in_form();
+    }
+
+    $self->stash( +{ action => 'admin_pub_edit' } );
+
+    # この cancel は戻るボタンとして機能
+    return $self->_cancel() if $self->stash->{params}->{cancel};
+    return $self->_update();
+}
+
 sub _cancel {
     my $self = shift;
+
+    #リダイレクトで予約情報設定完了の画面に戻す
+    if ( $self->stash('action') eq 'admin_pub_edit' ) {
+        return $self->redirect_to('admin_reserv_comp');
+    }
+
+    #リダイレクトで設定の最初の画面に戻す
+    if ( $self->stash('action') eq 'up_admin_r_d_edit' ) {
+        return $self->redirect_to('admin_reserv_edit');
+    }
+
     $self->stash->{params} = undef;
     $self->stash->{params}->{id}
         = $self->stash->{login_row}->fetch_storeinfo->get_roominfo_ids;
@@ -164,6 +211,19 @@ sub _update {
 
     if ( $self->stash('action') eq 'up_admin_r_d_edit' ) {
         $validator_check = 'up_admin_r_d_edit';
+    }
+
+    # バリデートしない
+    if ( $self->stash('action') eq 'admin_pub_edit' ) {
+        for my $check_param ( @{$check_params} ) {
+            $model->writing_admin_pub_edit( $check_param,
+                $self->stash->{type},
+            );
+        }
+
+        # admin_pub_comp の実装するまで暫定にて
+        return $self->redirect_to('admin_pub_edit');
+        # return $self->redirect_to('admin_pub_comp');
     }
 
     for my $check_param ( @{$check_params} ) {
@@ -220,3 +280,7 @@ __END__
 L<Guides>
 
 =cut
+
+# スタートガイドは管理者idでログインし、店舗web公開しない->1の時に限り表示し、
+# 店舗web公開する->0の時は管理者ナビゲートを表示
+# 店舗情報を後から変更したいときは、パンくずリストをクリックすると移動できるようにする。
