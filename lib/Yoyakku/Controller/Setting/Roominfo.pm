@@ -50,6 +50,7 @@ sub index {
     return $self->up_admin_r_d_edit() if $path eq '/up_admin_r_d_edit';
     return $self->admin_reserv_comp() if $path eq '/admin_reserv_comp';
     return $self->admin_pub_edit()    if $path eq '/admin_pub_edit';
+    return $self->admin_pub_comp()    if $path eq '/admin_pub_comp';
     return $self->redirect_to('index');
 }
 
@@ -179,6 +180,34 @@ sub admin_pub_edit {
     return $self->_update();
 }
 
+=head2 admin_pub_comp
+
+    予約部屋、公開設定確認コントロール
+
+=cut
+
+sub admin_pub_comp {
+    my $self  = shift;
+    my $model = $self->model->setting->roominfo;
+
+    my $switch_com = $model->get_switch_com('admin_pub_comp');
+
+    $self->stash(
+        class      => 'admin_pub_comp',
+        switch_com => $switch_com,
+        template   => 'setting/admin_pub_comp',
+        format     => 'html',
+    );
+
+    if ( 'GET' eq uc $self->req->method ) {
+        $self->stash->{params}
+            = $model->set_admin_pub_comp_params( $self->stash->{login_row} );
+        return $self->_render_fill_in_form();
+    }
+
+    return;
+}
+
 sub _cancel {
     my $self = shift;
 
@@ -220,14 +249,12 @@ sub _update {
                 $self->stash->{type},
             );
         }
-
-        # admin_pub_comp の実装するまで暫定にて
-        return $self->redirect_to('admin_pub_edit');
-        # return $self->redirect_to('admin_pub_comp');
+        return $self->redirect_to('admin_pub_comp');
     }
 
     for my $check_param ( @{$check_params} ) {
-        my $valid_msg = $self->model->validator->check( $validator_check, $check_param );
+        my $valid_msg = $self->model->validator->check( $validator_check,
+            $check_param );
         return $self->stash($valid_msg), $self->_render_fill_in_form()
             if $valid_msg;
     }

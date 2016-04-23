@@ -1,0 +1,80 @@
+% layout 'default';
+% title 'yoyakku管理モード';
+
+<div id="wrapper">
+
+<%= include './temp/header_navi_new' %>
+
+<%= include './temp/admin_navi' %>
+
+<div id="contents">
+
+<div id="bgTop">
+<ul class="topicpath">
+    <li id="tpp1">スタート&nbsp;-&gt;</li>
+    <li id="tpp2"><a href="admin_store_comp">店舗情報</a>&nbsp;-&gt;</li>
+    <li id="tpp3"><a href="admin_reserv_comp">予約情報設定</a>&nbsp;-&gt;</li>
+    <li id="tpp4">公開設定&nbsp;-&gt;</li>
+    <li id="tpp5"></li>
+</ul>
+</div>
+
+<div id="contensNavi">
+
+<div id="reserv_out">
+
+<table id="botton_t">
+    <tr>
+        <td id="botton_l">
+<a href="admin_pub_edit">
+<input type="button" name="button1" value="編集">
+</a>
+        </td>
+        <td id="com_r">
+        </td>
+    </tr>
+</table>
+
+
+
+
+<table id="pub_t">
+
+<tr id="name">
+<th class="col1">部屋</th>
+<th class="col2">WEB公開設定</th>
+<th class="col3">WEB予約受付</th>
+<th class="col4"></th>
+<th class="col5"></th>
+</tr>
+
+% for my $i (1..10) {
+<tr id="s_<%= $i %>">
+<td class="col1">
+%# <input type="text" name="id" value="" readonly>
+<input type="text" name="name" value="" readonly>
+</td>
+<td class="col2">
+<input type="text" name="webpublishing" value="" readonly>
+</td>
+<td class="col3">
+<input type="text" name="webreserve" value="" readonly>
+</td>
+<td class="col4">
+</td>
+
+<td class="col5"></td>
+</tr>
+% }
+
+</table>
+
+
+</div>
+<!-- /#contensNavi --></div>
+<!-- /#contents --></div>
+
+
+<%= include './temp/footer' %>
+
+<!-- /#wrapper --></div>

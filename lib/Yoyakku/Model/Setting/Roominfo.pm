@@ -18,6 +18,52 @@ use Yoyakku::Util qw{chenge_time_over join_time};
 
 =cut
 
+=head2 set_admin_pub_comp_params
+
+    admin_pub_comp 表示用パラメーター変換
+
+=cut
+
+sub set_admin_pub_comp_params {
+    my $self      = shift;
+    my $login_row = shift;
+    my $config    = $self->app->config;
+
+    my $rows = $login_row->fetch_storeinfo->fetch_roominfos;
+
+    my $roominfo_ref;
+    for my $row ( @{$rows} ) {
+        my $row_hash = $row->get_columns();
+
+        # web公開設定 (例: 0: 公開する, 1: 公開しない)
+        if ( $row_hash->{webpublishing} eq 1 ) {
+            $row_hash->{webpublishing} = $config->{constant}->{WEB_PUBLI_1};
+        }
+        else {
+            $row_hash->{webpublishing} = $config->{constant}->{WEB_PUBLI_0};
+        }
+
+        # web予約受付設定 (例: 0: 今月のみ, 1: １ヶ月先, 2: ２ヶ月先, 3: ３ヶ月先)
+        my $webreserve = $row_hash->{webreserve};
+        my $val
+            = ( $webreserve eq 0 ) ? $config->{constant}->{WEB_RESERVE_0}
+            : ( $webreserve eq 1 ) ? $config->{constant}->{WEB_RESERVE_1}
+            : ( $webreserve eq 2 ) ? $config->{constant}->{WEB_RESERVE_2}
+            :                        $config->{constant}->{WEB_RESERVE_3};
+        $row_hash->{webreserve} = $val;
+
+        # status が 0 無効のものは表示しない
+        while ( my ( $key, $value ) = each %{$row_hash} ) {
+            if ( $row_hash->{status} eq 0 ) {
+                $value = '';
+            }
+            push @{ $roominfo_ref->{$key} }, $value;
+        }
+    }
+
+    return $roominfo_ref;
+}
+
 =head2 set_admin_reserv_comp_params
 
     admin_reserv_comp 表示用パラメーター変換

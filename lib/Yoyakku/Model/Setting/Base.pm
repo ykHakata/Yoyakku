@@ -80,6 +80,7 @@ sub get_switch_com {
         : $action eq 'up_admin_r_d_edit' ? 4
         : $action eq 'admin_reserv_comp' ? 5
         : $action eq 'admin_pub_edit'    ? 6
+        : $action eq 'admin_pub_comp'    ? 7
         :                                  1;
 
     return $switch_com;
