@@ -1,15 +1,15 @@
-package Yoyakku::Controller::Setting::Storeinfo;
+package Yoyakku::Controller::Management::Storeinfo;
 use Mojo::Base 'Mojolicious::Controller';
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::Controller::Setting::Storeinfo - 店舗管理のコントローラー
+    Yoyakku::Controller::Management::Storeinfo - 店舗管理のコントローラー
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::Controller::Setting::Storeinfo version 0.0.1
+    This documentation referes to Yoyakku::Controller::Management::Storeinfo version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
@@ -19,7 +19,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model->setting->storeinfo;
+    my $model = $self->model->management->storeinfo;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -39,7 +39,7 @@ sub index {
         if $redirect_mode && $redirect_mode eq 'profile';
 
     my $header_stash
-        = $model->get_setting_header_stash( $self->stash->{login_row} );
+        = $model->get_management_header_stash( $self->stash->{login_row} );
 
     $self->stash($header_stash);
     $self->stash->{params} = $self->req->params->to_hash;
@@ -59,7 +59,7 @@ sub index {
 
 sub admin_store_edit {
     my $self  = shift;
-    my $model = $self->model->setting->storeinfo;
+    my $model = $self->model->management->storeinfo;
 
     my $valid_params = $model->get_valid_params('admin_store_edit');
     my $switch_com   = $model->get_switch_com('admin_store_edit');
@@ -67,7 +67,7 @@ sub admin_store_edit {
     $self->stash(
         class      => 'admin_store_edit',
         switch_com => $switch_com,
-        template   => 'setting/admin_store_edit',
+        template   => 'management/admin_store_edit',
         format     => 'html',
         %{$valid_params},
     );
@@ -93,7 +93,7 @@ sub _cancel {
 
 sub _post_search {
     my $self  = shift;
-    my $model = $self->model->setting->storeinfo;
+    my $model = $self->model->management->storeinfo;
 
     $self->stash->{params}
         = $model->get_post_search( $self->stash->{params} );
@@ -109,7 +109,7 @@ sub _update {
 
 sub _common {
     my $self  = shift;
-    my $model = $self->model->setting->storeinfo;
+    my $model = $self->model->management->storeinfo;
     my $valid_msg
         = $self->model->validator->check( 'storeinfo', $self->stash->{params} );
     return $self->stash($valid_msg), $self->_render_fill_in_form()
@@ -128,7 +128,7 @@ sub _render_fill_in_form {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model->setting->storeinfo->set_fill_in_params($args);
+    my $output = $self->model->management->storeinfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 
@@ -142,13 +142,13 @@ sub admin_store_comp {
     my $self = shift;
 
     my $switch_com
-        = $self->model->setting->storeinfo->get_switch_com('admin_store_comp');
+        = $self->model->management->storeinfo->get_switch_com('admin_store_comp');
 
     $self->stash(
         class         => 'admin_store_comp',
         switch_com    => $switch_com,
         storeinfo_row => $self->stash->{login_row}->fetch_storeinfo,
-        template      => 'setting/admin_store_comp',
+        template      => 'management/admin_store_comp',
         format        => 'html',
     );
     $self->render();

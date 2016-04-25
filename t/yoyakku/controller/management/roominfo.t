@@ -5,7 +5,7 @@ use Test::Mojo;
 use Data::Dumper;
 
 BEGIN {
-    use_ok('Yoyakku::Controller::Setting::Roominfo') || print "Bail out!\n";
+    use_ok('Yoyakku::Controller::Management::Roominfo') || print "Bail out!\n";
 }
 
 my $t             = Test::Mojo->new('Yoyakku');
@@ -24,8 +24,8 @@ $t->app->commands->run('init_db');
 =cut
 
 subtest 'method' => sub {
-    my $obj = Yoyakku::Controller::Setting::Roominfo->new();
-    isa_ok( $obj, 'Yoyakku::Controller::Setting::Roominfo' );
+    my $obj = Yoyakku::Controller::Management::Roominfo->new();
+    isa_ok( $obj, 'Yoyakku::Controller::Management::Roominfo' );
 
     my @methods = qw{index admin_reserv_edit up_admin_r_d_edit _cancel
                  _update _render_fill_in_form};
@@ -165,7 +165,7 @@ subtest 'admin_reserv_edit' => sub {
                 password => $login_admin->{password},
             };
             my $login_row = $t->app->model->auth->login($args);
-            my $params = $t->app->model->setting->roominfo->set_roominfo_params(
+            my $params = $t->app->model->management->roominfo->set_roominfo_params(
                 $login_row);
 
             # 部屋名変更

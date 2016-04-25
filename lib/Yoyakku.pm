@@ -115,15 +115,15 @@ sub startup {
     $r->route( '/:region', region => qr{region_state} )
         ->to( controller => 'Region', action => 'index' );
 
-    # 店舗管理(Setting) 選択店舗情報確認
-    my $setting_storeinfo = qr{admin_store_edit|admin_store_comp};
-    $r->route( '/:store', store => $setting_storeinfo )
-        ->to( controller => 'Setting::Storeinfo', action => 'index' );
+    # 店舗管理(Management) 選択店舗情報確認
+    my $management_storeinfo = qr{admin_store_edit|admin_store_comp};
+    $r->route( '/:store', store => $management_storeinfo )
+        ->to( controller => 'Management::Storeinfo', action => 'index' );
 
-    # 店舗管理(Setting) 予約部屋情報設定
-    my $setting_roominfo = qr{admin_reserv_edit|up_admin_r_d_edit|admin_reserv_comp|admin_pub_edit|admin_pub_comp};
-    $r->route( '/:room', room => $setting_roominfo )
-        ->to( controller => 'Setting::Roominfo', action => 'index' );
+    # 店舗管理(Management) 予約部屋情報設定
+    my $management_roominfo = qr{admin_reserv_edit|up_admin_r_d_edit|admin_reserv_comp|admin_pub_edit|admin_pub_comp};
+    $r->route( '/:room', room => $management_roominfo )
+        ->to( controller => 'Management::Roominfo', action => 'index' );
 
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');

@@ -1,15 +1,15 @@
-package Yoyakku::Model::Setting::Base;
+package Yoyakku::Model::Management::Base;
 use Mojo::Base 'Yoyakku::Model::Base';
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::Model::Setting::Base - 店舗管理 API
+    Yoyakku::Model::Management::Base - 店舗管理 API
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::Model::Setting::Base version 0.0.1
+    This documentation referes to Yoyakku::Model::Management::Base version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
@@ -37,13 +37,13 @@ sub get_redirect_mode {
     return;
 }
 
-=head2 get_setting_mode_header_stash
+=head2 get_management_mode_header_stash
 
     ヘッダー初期値取得 (店舗情報設定)
 
 =cut
 
-sub get_setting_header_stash {
+sub get_management_header_stash {
     my $self      = shift;
     my $login_row = shift;
 

@@ -1,20 +1,20 @@
-package Yoyakku::Model::Setting::Roominfo;
-use Mojo::Base 'Yoyakku::Model::Setting::Base';
+package Yoyakku::Model::Management::Roominfo;
+use Mojo::Base 'Yoyakku::Model::Management::Base';
 use Yoyakku::Util qw{chenge_time_over join_time};
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::Model::Setting::Roominfo - 店舗管理 API
+    Yoyakku::Model::Management::Roominfo - 店舗管理 API
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::Model::Setting::Roominfo version 0.0.1
+    This documentation referes to Yoyakku::Model::Management::Roominfo version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-    Setting::Roominfo コントローラーのロジック API
+    Management::Roominfo コントローラーのロジック API
 
 =cut
 
@@ -367,7 +367,7 @@ __END__
 
 =item * L<Mojo::Base>
 
-=item * L<Yoyakku::Model::Setting>
+=item * L<Yoyakku::Model::Management>
 
 =item * L<Yoyakku::Util>
 

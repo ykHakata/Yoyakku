@@ -5,7 +5,7 @@ use Test::Mojo;
 use Data::Dumper;
 
 BEGIN {
-    use_ok('Yoyakku::Controller::Setting::Storeinfo') || print "Bail out!\n";
+    use_ok('Yoyakku::Controller::Management::Storeinfo') || print "Bail out!\n";
 }
 
 my $t             = Test::Mojo->new('Yoyakku');
@@ -24,8 +24,8 @@ $t->app->commands->run('init_db');
 =cut
 
 subtest 'method' => sub {
-    my $obj = Yoyakku::Controller::Setting::Storeinfo->new();
-    isa_ok( $obj, 'Yoyakku::Controller::Setting::Storeinfo' );
+    my $obj = Yoyakku::Controller::Management::Storeinfo->new();
+    isa_ok( $obj, 'Yoyakku::Controller::Management::Storeinfo' );
 
     my @methods = qw{index admin_store_edit _cancel _post_search _update
         _common _render_fill_in_form admin_store_comp};

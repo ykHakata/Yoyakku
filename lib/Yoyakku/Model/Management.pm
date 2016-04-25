@@ -1,26 +1,17 @@
-package Yoyakku::Model::Mainte;
+package Yoyakku::Model::Management;
 use Mojo::Base -base;
-use Yoyakku::Model::Mainte::Acting;
-use Yoyakku::Model::Mainte::Admin;
-use Yoyakku::Model::Mainte::Ads;
-use Yoyakku::Model::Mainte::Base;
-use Yoyakku::Model::Mainte::General;
-use Yoyakku::Model::Mainte::Post;
-use Yoyakku::Model::Mainte::Profile;
-use Yoyakku::Model::Mainte::Region;
-use Yoyakku::Model::Mainte::Reserve;
-use Yoyakku::Model::Mainte::Roominfo;
-use Yoyakku::Model::Mainte::Storeinfo;
+use Yoyakku::Model::Management::Roominfo;
+use Yoyakku::Model::Management::Storeinfo;
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::Model::Mainte - アクセスメソッド
+    Yoyakku::Model::Management - データベース Model::Management アクセスメソッド
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::Model::Mainte version 0.0.1
+    This documentation referes to Yoyakku::Model::Management version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
@@ -32,15 +23,6 @@ has [qw{app}];
 
 my $methods = [
     qw{
-        acting
-        admin
-        ads
-        base
-        general
-        post
-        profile
-        region
-        reserve
         roominfo
         storeinfo
         }

@@ -1,19 +1,19 @@
-package Yoyakku::Model::Setting::Storeinfo;
-use Mojo::Base 'Yoyakku::Model::Setting::Base';
+package Yoyakku::Model::Management::Storeinfo;
+use Mojo::Base 'Yoyakku::Model::Management::Base';
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::Model::Setting::Storeinfo - 店舗管理 API
+    Yoyakku::Model::Management::Storeinfo - 店舗管理 API
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::Model::Setting::Storeinfo version 0.0.1
+    This documentation referes to Yoyakku::Model::Management::Storeinfo version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
-    Setting::Storeinfo コントローラーのロジック API
+    Management::Storeinfo コントローラーのロジック API
 
 =cut
 
@@ -83,7 +83,7 @@ __END__
 
 =item * L<Mojo::Base>
 
-=item * L<Yoyakku::Model::Setting>
+=item * L<Yoyakku::Model::Management>
 
 =back
 

@@ -14,49 +14,29 @@ use Yoyakku::DB::Model::Storeinfo;
 
 has [qw{app}];
 
-has acting => sub {
-    Yoyakku::DB::Model::Acting->new( +{ app => shift->app } );
-};
+my $methods = [
+    qw{
+        acting
+        admin
+        ads
+        base
+        general
+        post
+        profile
+        region
+        reserve
+        roominfo
+        storeinfo
+        }
+];
 
-has admin => sub {
-    Yoyakku::DB::Model::Admin->new( +{ app => shift->app } );
-};
-
-has ads => sub {
-    Yoyakku::DB::Model::Ads->new( +{ app => shift->app } );
-};
-
-has base => sub {
-    Yoyakku::DB::Model::Base->new( +{ app => shift->app } );
-};
-
-has general => sub {
-    Yoyakku::DB::Model::General->new( +{ app => shift->app } );
-};
-
-has post => sub {
-    Yoyakku::DB::Model::Post->new( +{ app => shift->app } );
-};
-
-has profile => sub {
-    Yoyakku::DB::Model::Profile->new( +{ app => shift->app } );
-};
-
-has region => sub {
-    Yoyakku::DB::Model::Region->new( +{ app => shift->app } );
-};
-
-has reserve => sub {
-    Yoyakku::DB::Model::Reserve->new( +{ app => shift->app } );
-};
-
-has roominfo => sub {
-    Yoyakku::DB::Model::Roominfo->new( +{ app => shift->app } );
-};
-
-has storeinfo => sub {
-    Yoyakku::DB::Model::Storeinfo->new( +{ app => shift->app } );
-};
+for my $method ( @{$methods} ) {
+    my $package_name = ucfirst $method;
+    my $package      = __PACKAGE__ . '::' . $package_name;
+    has $method => sub {
+        $package->new( +{ app => shift->app } );
+    };
+}
 
 =encoding utf8
 

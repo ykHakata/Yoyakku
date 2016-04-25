@@ -1,15 +1,15 @@
-package Yoyakku::Controller::Setting::Roominfo;
+package Yoyakku::Controller::Management::Roominfo;
 use Mojo::Base 'Mojolicious::Controller';
 
 =encoding utf8
 
 =head1 NAME (モジュール名)
 
-    Yoyakku::Controller::Setting::Roominfo - 店舗管理のコントローラー
+    Yoyakku::Controller::Management::Roominfo - 店舗管理のコントローラー
 
 =head1 VERSION (改定番号)
 
-    This documentation referes to Yoyakku::Controller::Setting::Roominfo version 0.0.1
+    This documentation referes to Yoyakku::Controller::Management::Roominfo version 0.0.1
 
 =head1 SYNOPSIS (概要)
 
@@ -19,7 +19,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 sub index {
     my $self  = shift;
-    my $model = $self->model->setting->roominfo;
+    my $model = $self->model->management->roominfo;
 
     return $self->redirect_to('index')
         if ( uc $self->req->method ne 'GET' )
@@ -39,7 +39,7 @@ sub index {
         if $redirect_mode && $redirect_mode eq 'profile';
 
     my $header_stash
-        = $model->get_setting_header_stash( $self->stash->{login_row} );
+        = $model->get_management_header_stash( $self->stash->{login_row} );
 
     $self->stash($header_stash);
     $self->stash->{params} = $self->req->params->to_hash;
@@ -62,7 +62,7 @@ sub index {
 
 sub admin_reserv_edit {
     my $self  = shift;
-    my $model = $self->model->setting->roominfo;
+    my $model = $self->model->management->roominfo;
 
     my $valid_params = $model->get_valid_params('admin_reserv_edit');
     my $switch_com   = $model->get_switch_com('admin_reserv_edit');
@@ -70,7 +70,7 @@ sub admin_reserv_edit {
     $self->stash(
         class      => 'admin_reserv_edit',
         switch_com => $switch_com,
-        template   => 'setting/admin_reserv_edit',
+        template   => 'management/admin_reserv_edit',
         format     => 'html',
         %{$valid_params},
     );
@@ -93,7 +93,7 @@ sub admin_reserv_edit {
 
 sub up_admin_r_d_edit {
     my $self  = shift;
-    my $model = $self->model->setting->roominfo;
+    my $model = $self->model->management->roominfo;
 
     my $valid_params = $model->get_valid_params('up_admin_r_d_edit');
     my $switch_com   = $model->get_switch_com('up_admin_r_d_edit');
@@ -101,7 +101,7 @@ sub up_admin_r_d_edit {
     $self->stash(
         class      => 'admin_reserv_edit',
         switch_com => $switch_com,
-        template   => 'setting/up_admin_r_d_edit',
+        template   => 'management/up_admin_r_d_edit',
         format     => 'html',
         %{$valid_params},
     );
@@ -127,14 +127,14 @@ sub up_admin_r_d_edit {
 
 sub admin_reserv_comp {
     my $self  = shift;
-    my $model = $self->model->setting->roominfo;
+    my $model = $self->model->management->roominfo;
 
     my $switch_com = $model->get_switch_com('admin_reserv_comp');
 
     $self->stash(
         class      => 'admin_reserv_comp',
         switch_com => $switch_com,
-        template   => 'setting/admin_reserv_comp',
+        template   => 'management/admin_reserv_comp',
         format     => 'html',
     );
 
@@ -156,14 +156,14 @@ sub admin_reserv_comp {
 
 sub admin_pub_edit {
     my $self  = shift;
-    my $model = $self->model->setting->roominfo;
+    my $model = $self->model->management->roominfo;
 
     my $switch_com = $model->get_switch_com('admin_pub_edit');
 
     $self->stash(
         class      => 'admin_pub_edit',
         switch_com => $switch_com,
-        template   => 'setting/admin_pub_edit',
+        template   => 'management/admin_pub_edit',
         format     => 'html',
     );
 
@@ -188,14 +188,14 @@ sub admin_pub_edit {
 
 sub admin_pub_comp {
     my $self  = shift;
-    my $model = $self->model->setting->roominfo;
+    my $model = $self->model->management->roominfo;
 
     my $switch_com = $model->get_switch_com('admin_pub_comp');
 
     $self->stash(
         class      => 'admin_pub_comp',
         switch_com => $switch_com,
-        template   => 'setting/admin_pub_comp',
+        template   => 'management/admin_pub_comp',
         format     => 'html',
     );
 
@@ -229,7 +229,7 @@ sub _cancel {
 
 sub _update {
     my $self  = shift;
-    my $model = $self->model->setting->roominfo;
+    my $model = $self->model->management->roominfo;
 
     $self->stash->{type} = 'update';
 
@@ -282,7 +282,7 @@ sub _render_fill_in_form {
         html   => \$html,
         params => $self->stash->{params},
     };
-    my $output = $self->model->setting->roominfo->set_fill_in_params($args);
+    my $output = $self->model->management->roominfo->set_fill_in_params($args);
     return $self->render( text => $output );
 }
 
@@ -298,7 +298,7 @@ __END__
 
 =item * L<Mojolicious::Controller>
 
-=item * L<Yoyakku::Model::Setting::Roominfo>
+=item * L<Yoyakku::Model::Management::Roominfo>
 
 =back
 
