@@ -2,6 +2,7 @@ package Yoyakku::Model::Management;
 use Mojo::Base -base;
 use Yoyakku::Model::Management::Roominfo;
 use Yoyakku::Model::Management::Storeinfo;
+use Yoyakku::Model::Management::Reserve;
 
 =encoding utf8
 
@@ -25,6 +26,7 @@ my $methods = [
     qw{
         roominfo
         storeinfo
+        reserve
         }
 ];
 
@@ -49,6 +51,8 @@ __END__
 =item * L<Yoyakku::Model::Management::Roominfo>
 
 =item * L<Yoyakku::Model::Management::Storeinfo>
+
+=item * L<Yoyakku::Model::Management::Reserve>
 
 =back
 

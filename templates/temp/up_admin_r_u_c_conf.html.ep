@@ -1,0 +1,110 @@
+
+<div id="pop_wrapper">
+<div id="pop_section">
+<div id="bottom">
+    <p><a href="admin_reserv_list">×</a></p>
+</div>
+<div id="head">
+    <h2 id="pop_section_head">キャンセル確認(管理者)</h2>
+</div>
+
+
+<div id="section">
+
+<form method="post" action="">
+
+%# <div id="r_navi_out">
+<div id="admin_reserv_cansel_frem">
+
+
+%# <table id="r_navi_t">
+<table id="admin_reserv_cansel">
+    %# <tr id="room_n">
+    <tr id="">
+        <th class="col1">部屋</th>
+        <td class="col2">
+        <input type="text" name="room_name" value="" readonly class="admin_modify_name">
+        <input type="hidden" name="roominfo_id" value="" readonly class="admin_modify_name">
+        <input type="hidden" name="id" value="" readonly class="admin_input_name"></td>
+        </td>
+        <td class="col3"></td>
+    </tr>
+    %# <tr id="start_t">
+    <tr id="">
+        <th class="col1">開始</th>
+        <td class="col2">
+        <input type="text" id="from" name="getstarted_on_day" value="" class="admin_modify_name"><br />
+        </td>
+        <td class="col3">
+        <select name="getstarted_on_time" class="admin_modify_select">
+        % for (my $i=6;$i < 30;++$i) {
+        <option value="<%= $i %>"><%= $i %>:00</option>
+        % }
+        </select>
+        </td>
+    </tr>
+    %# <tr id="end_t">
+    <tr id="">
+        <th class="col1">終了</th>
+        <td class="col2">
+        <input type="text" id="to" name="enduse_on_day" value="" class="admin_modify_name"><br />
+        </td>
+        <td class="col3">
+<select name="enduse_on_time" class="admin_modify_select">
+% for (my $i=7;$i <= 30;++$i) {
+<option value="<%= $i %>"><%= $i %>:00</option>
+% }
+</select>
+        </td>
+    </tr>
+    %# <tr id="use">
+    <tr id="">
+        <th class="col1">利用</th>
+        <td class="col2">
+        <select name="useform" class="admin_modify_select">
+        <option value="0">バンド</option>
+        <option value="1">個人</option>
+        <option value="2">利用停止</option>
+        </select>
+        </td>
+        <td class="col3"></td>
+    </tr>
+    %# <tr id="name_r">
+    <tr id="">
+        <th class="col1">予約者</th>
+        <td class="col2_3" colspan="2">
+        <input type="text" name="subscriber" value="" readonly class="admin_modify_name">
+        </td>
+    </tr>
+    %# <tr id="tel">
+    <tr id="">
+        <th class="col1">電話</th>
+        <td class="col2_3" colspan="2">
+        <input type="text" name="tel" value="" readonly class="admin_modify_name">
+        </td>
+    </tr>
+    <tr id="">
+        <th class="col1">伝言板</th>
+        <td class="col2_3" colspan="2">
+        <input type="text" name="message" value="" class="admin_input_name">
+        </td>
+    </tr>
+</table>
+%#<table id="r_navi_b_t">
+<table id="admin_reserv_cansel_botton">
+    <tr id="botton">
+        <td class="col1">
+            <a href="admin_reserv_list"><input type="button" value="戻る" class="h_cansel_botton"></a>
+        </td>
+        <td class="col2">
+            <input type="submit" name="exe_cansel" value="予約取消実行" class="h_cansel_botton" >
+        </td>
+    </tr>
+</table>
+</div>
+
+</form>
+
+<!-- section --></div>
+<!-- pop_section --></div>
+<!-- pop_wrapper --></div>

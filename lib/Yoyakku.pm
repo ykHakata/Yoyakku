@@ -125,6 +125,11 @@ sub startup {
     $r->route( '/:room', room => $management_roominfo )
         ->to( controller => 'Management::Roominfo', action => 'index' );
 
+    # 店舗管理(Management) 管理者予約
+    my $management_reserve = qr{admin_reserv_list};
+    $r->route( '/:reserve', reserve => $management_reserve )
+        ->to( controller => 'Management::Reserve', action => 'index' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 
