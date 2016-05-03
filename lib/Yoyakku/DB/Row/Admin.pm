@@ -23,6 +23,27 @@ sub get_login_name {
     return $login_name;
 }
 
+sub fetch_reserve {
+    my $self        = shift;
+    my $search_time = shift;
+
+    my $start_time = $search_time->{start};
+    my $end_time   = $search_time->{end};
+
+    # 利用開始日時 getstarted_on
+    my @reserve_rows = $self->handle->search(
+        'reserve',
+        +{  admin_id => $self->id,
+            status   => 0,
+            getstarted_on =>
+                [ '-and', +{ '>=' => $start_time }, +{ '<' => $end_time }, ],
+        },
+        +{ order_by => 'getstarted_on ASC' },
+    );
+
+    return \@reserve_rows;
+}
+
 1;
 
 __END__

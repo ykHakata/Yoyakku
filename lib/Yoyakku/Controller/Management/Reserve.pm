@@ -60,33 +60,42 @@ sub admin_reserv_list {
     my $self  = shift;
     my $model = $self->model->management->reserve;
 
+    # カレンダーナビにstoreidを埋め込む為の切替
+    my $switch_calnavi = 0;
+    my $store_id;
+
     $self->stash(
         class                    => 'admin_reserv_list',
         template                 => 'management/admin_reserv_list',
         format                   => 'html',
         cancel_conf              => '',
         switch_input             => '',
-        switch_input             => '',
-        year_reserve             => '',
-        mon_reserve              => '',
-        admin_now_reserves_ref   => [],
-        next1_year_reserve       => '',
-        next1_mon_reserve        => '',
-        admin_next1_reserves_ref => [],
-        next2_year_reserve       => '',
-        next2_mon_reserve        => '',
-        admin_next2_reserves_ref => [],
-        next3_year_reserve       => '',
-        next3_mon_reserve        => '',
-        admin_next3_reserves_ref => [],
+    );
+
+    # 管理者予約履歴 のための値
+    my $reserve_history
+        = $model->get_reserve_history( $self->stash->{login_row} );
+    $self->stash(
+        admin_now_reserves_ref   => $reserve_history->{now}->{reserve},
+        year_reserve             => $reserve_history->{now}->{year},
+        mon_reserve              => $reserve_history->{now}->{mon},
+        admin_next1_reserves_ref => $reserve_history->{next1}->{reserve},
+        next1_year_reserve       => $reserve_history->{next1}->{year},
+        next1_mon_reserve        => $reserve_history->{next1}->{mon},
+        admin_next2_reserves_ref => $reserve_history->{next2}->{reserve},
+        next2_year_reserve       => $reserve_history->{next2}->{year},
+        next2_mon_reserve        => $reserve_history->{next2}->{mon},
+        admin_next3_reserves_ref => $reserve_history->{next3}->{reserve},
+        next3_year_reserve       => $reserve_history->{next3}->{year},
+        next3_mon_reserve        => $reserve_history->{next3}->{mon},
     );
 
     $self->stash(
         back_mon_val    => '',
         select_date_ym  => '',
         next_mon_val    => '',
-        switch_calnavi  => '',
-        store_id        => '',
+        switch_calnavi  => $switch_calnavi,
+        store_id        => $store_id,
         caps            => [],
         cal             => [],
         select_date_day => '',
@@ -110,129 +119,6 @@ __END__
 #admin_reserv_list.html.ep
 #予約部屋、公開設定確認コントロール-----------------------------
 any '/admin_reserv_list' => sub {
-    my $self = shift;
-
-    # テンプレートbodyのクラス名を定義
-    my $class = "admin_reserv_list";
-    $self->stash( class => $class );
-
-    #ログイン機能==========================================
-    my $login_id;
-    my $login;
-    my $switch_header;
-
-    my $admin_id   = $self->session('session_admin_id');
-    my $general_id = $self->session('session_general_id');
-
-    if ($admin_id) {
-        my $admin_ref   = $teng->single( 'admin',   +{ id       => $admin_id } );
-        my $profile_ref = $teng->single( 'profile', +{ admin_id => $admin_id } );
-        $login    = q{(admin)} . $profile_ref->nick_name;
-        $login_id = $admin_id;
-        my $status = $admin_ref->status;
-        if ($status) {
-            my $storeinfo_ref = $teng->single( 'storeinfo', +{ admin_id => $admin_id } );
-            if ( $storeinfo_ref->status eq 0 ) {
-                $switch_header = 10;
-            }
-            else {
-                $switch_header = 7;
-            }
-        }
-        else {
-            #$switch_header = 8;
-            return $self->redirect_to('profile');
-        }
-
-        #return $self->redirect_to('index');
-    }
-    elsif ($general_id) {
-
-        #my $general_ref  = $teng->single('general', +{id => $general_id});
-        #my $profile_ref  = $teng->single('profile', +{general_id => $general_id});
-        #$login           = $profile_ref->nick_name;
-        #
-        #my $status = $general_ref->status;
-        #if ($status) {
-        #    $switch_header = 6;
-        #}
-        #else {
-        #    #$switch_header = 8;
-        #    return $self->redirect_to('profile');
-        #}
-        return $self->redirect_to('index');
-    }
-    else {
-        #$switch_header = 5;
-        return $self->redirect_to('index');
-    }
-
-    # #ログイン名をヘッダーの右に表示させる
-    $self->stash( login => $login );
-
-    # headerの切替
-    $self->stash( switch_header => $switch_header );
-
-    #====================================================
-    #====================================================
-    # 予約代行のためのリスト抽出
-    #ログインidからstoreinfoのid抽出
-    my $storeinfo_ref = $teng->single( 'storeinfo', { 'admin_id' => $login_id } );
-    my $storeinfo_id  = $storeinfo_ref->id;
-    my @actings       = $teng->search_named(
-        q{
-            select profile.general_id,
-            profile.nick_name,
-            profile.full_name,
-            profile.phonetic_name,
-            profile.tel,
-            profile.mail
-            from profile join acting using(general_id) where acting.storeinfo_id=:storeinfo_id;
-        },
-        { storeinfo_id => $storeinfo_id }
-    );
-
-    # プロフィールデータ抽出
-    # #ログイン名をヘッダーの右に表示させる
-    $self->stash( actings_ref => \@actings );
-
-    #====================================================
-    #====================================================
-    #日付変更線を６時に変更
-    my $now_date = localtime;
-
-    my $chang_date_ref = chang_date_6($now_date);
-
-    my $now_date    = $chang_date_ref->{now_date};
-    my $next1m_date = $chang_date_ref->{next1m_date};
-    my $next2m_date = $chang_date_ref->{next2m_date};
-    my $next3m_date = $chang_date_ref->{next3m_date};
-
-    #====================================================
-
-    ##新しい日付情報取得のスクリプト======================
-    ## 時刻(日付)取得、現在、1,2,3ヶ月後
-    #my $now_date    = localtime;
-    #
-    ##翌月の計算をやり直す
-    #my $first_day   = localtime->strptime($now_date->strftime(   '%Y-%m-01'                             ),'%Y-%m-%d');
-    #my $last_day    = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d');
-    #my $next1m_date = localtime->strptime($now_date->strftime(   '%Y-%m-' . $now_date->month_last_day   ),'%Y-%m-%d') + 86400;
-    #my $next2m_date = localtime->strptime($next1m_date->strftime('%Y-%m-' . $next1m_date->month_last_day),'%Y-%m-%d') + 86400;
-    #my $next3m_date = localtime->strptime($next2m_date->strftime('%Y-%m-' . $next2m_date->month_last_day),'%Y-%m-%d') + 86400;
-    # 時刻(日付)取得、現在、1,2,3ヶ月後(ヘッダー用)
-    $self->stash(
-        now_data    => $now_date,
-        next1m_data => $next1m_date,
-        next2m_data => $next2m_date,
-        next3m_data => $next3m_date
-    );
-
-    # カレンダーナビにstoreidを埋め込む為の切替
-    my $switch_calnavi = 0;
-    $self->stash( switch_calnavi => $switch_calnavi );
-    my $store_id;
-    $self->stash( store_id => $store_id );
 
     #=======================================================
     # 履歴情報を引き出すため基本になる日付情報の計算しなおし

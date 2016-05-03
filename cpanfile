@@ -10,3 +10,5 @@ requires 'Calendar::Simple', '== 1.21';
 requires 'Email::Sender', '== 1.300018';
 requires 'Email::MIME', '== 1.934';
 requires 'Email::Sender::Transport::SMTPS', '== 0.03';
+requires 'inc::Module::Install';
+requires 'Time::Piece::Over24', '== 0.016';
