@@ -1,6 +1,7 @@
 package Yoyakku::Controller::Management::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
-
+use Yoyakku::Util qw{chang_date_6};
+use Mojo::Util qw{dumper};
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -60,206 +61,6 @@ sub admin_reserv_list {
     my $self  = shift;
     my $model = $self->model->management->reserve;
 
-    # カレンダーナビにstoreidを埋め込む為の切替
-    my $switch_calnavi = 0;
-    my $store_id;
-
-    $self->stash(
-        class                    => 'admin_reserv_list',
-        template                 => 'management/admin_reserv_list',
-        format                   => 'html',
-        cancel_conf              => '',
-        switch_input             => '',
-    );
-
-    # 管理者予約履歴 のための値
-    my $reserve_history
-        = $model->get_reserve_history( $self->stash->{login_row} );
-    $self->stash(
-        admin_now_reserves_ref   => $reserve_history->{now}->{reserve},
-        year_reserve             => $reserve_history->{now}->{year},
-        mon_reserve              => $reserve_history->{now}->{mon},
-        admin_next1_reserves_ref => $reserve_history->{next1}->{reserve},
-        next1_year_reserve       => $reserve_history->{next1}->{year},
-        next1_mon_reserve        => $reserve_history->{next1}->{mon},
-        admin_next2_reserves_ref => $reserve_history->{next2}->{reserve},
-        next2_year_reserve       => $reserve_history->{next2}->{year},
-        next2_mon_reserve        => $reserve_history->{next2}->{mon},
-        admin_next3_reserves_ref => $reserve_history->{next3}->{reserve},
-        next3_year_reserve       => $reserve_history->{next3}->{year},
-        next3_mon_reserve        => $reserve_history->{next3}->{mon},
-    );
-
-    $self->stash(
-        back_mon_val    => '',
-        select_date_ym  => '',
-        next_mon_val    => '',
-        switch_calnavi  => $switch_calnavi,
-        store_id        => $store_id,
-        caps            => [],
-        cal             => [],
-        select_date_day => '',
-        select_date_ym  => '',
-        switch_calnavi  => '',
-        store_id        => '',
-        border_date_day => '',
-        select_date_ym  => '',
-        switch_calnavi  => '',
-        store_id        => '',
-    );
-
-    $self->render;
-    return;
-}
-
-1;
-
-__END__
-
-#admin_reserv_list.html.ep
-#予約部屋、公開設定確認コントロール-----------------------------
-any '/admin_reserv_list' => sub {
-
-    #=======================================================
-    # 履歴情報を引き出すため基本になる日付情報の計算しなおし
-    # yoyakkuでいう現在の日付は日付変更線が6:00-になる、
-    # 0:00 - 6:00未満のアクセス時は本来の日付より一日過去になる
-    #翌月の計算をやり直す
-    my $now_date = localtime;
-
-    # 取得時刻が0:00-6:00の場合、変換する
-    my $now_date_hour = $now_date->hour;
-    $now_date_hour += 0;
-    if ( $now_date_hour < 6 ) {
-
-        # 一日前の日付を取得
-        $now_date = $now_date - ONE_DAY * 1;
-    }
-
-    my $next1m_date = localtime->strptime( $now_date->strftime( '%Y-%m-' . $now_date->month_last_day ),       '%Y-%m-%d' ) + 86400;
-    my $next2m_date = localtime->strptime( $next1m_date->strftime( '%Y-%m-' . $next1m_date->month_last_day ), '%Y-%m-%d' ) + 86400;
-    my $next3m_date = localtime->strptime( $next2m_date->strftime( '%Y-%m-' . $next2m_date->month_last_day ), '%Y-%m-%d' ) + 86400;
-    my $next4m_date = localtime->strptime( $next3m_date->strftime( '%Y-%m-' . $next3m_date->month_last_day ), '%Y-%m-%d' ) + 86400;
-
-    #=======================================================
-    # 今アクセスしているログインidと取得している日付情報からsqlより予約データ抽出
-    # 今月の予約履歴を出力
-    my $start_time = $now_date->strftime('%Y-%m') . q{-01} . q{ 06:00:00};
-    my $end_time   = $next4m_date->date . " 06:00:00";
-
-    #表示するための、予約情報データ
-    my @reserves = $teng->search_named(
-        q{
-            select * from reserve
-            where getstarted_on >= :start_time
-            and getstarted_on < :end_time
-            and admin_id = :login_id
-            and status = '0'
-            order by getstarted_on asc;
-        },
-        {
-            start_time => $start_time,
-            end_time   => $end_time,
-            login_id   => $login_id
-        }
-    );
-
-    my @general_now_reserves;
-    my @general_next1_reserves;
-    my @general_next2_reserves;
-    my @general_next3_reserves;
-
-    # 予約データを一件づつすべて引き出す
-    for my $reserve_ref (@reserves) {
-
-        #利用開始日時取り出し
-        my $getstarted_on = $reserve_ref->getstarted_on;
-
-        #日付と時刻に分ける(ただしまだ通常の0-5時の形式)
-        my $getstarted_on_day  = substr( $getstarted_on, 0,  10 );    #日付
-        my $getstarted_on_time = substr( $getstarted_on, 11, 2 );     #時刻
-
-        #念のために時刻を数字の型にして、最初の0があれば表示しない
-        $getstarted_on_time += 0;
-
-        #時刻0-5時の場合は24-29に変換、
-        if ( $getstarted_on_time =~ /^[0-5]$/ ) {
-            $getstarted_on_time += 24;
-
-            #日付を1日もどる
-            $getstarted_on_day = localtime->strptime( $getstarted_on_day, '%Y-%m-%d' );
-            $getstarted_on_day = $getstarted_on_day - ONE_DAY * 1;
-            $getstarted_on_day = $getstarted_on_day->date;
-        }
-        $getstarted_on_time = sprintf( "%02d", $getstarted_on_time );
-
-        my $getstarted_on_ym = substr( $getstarted_on_day, 0, 7 );
-
-        #利用終了日時取り出し
-        my $enduse_on = $reserve_ref->enduse_on;
-
-        #日付と時刻に分ける(ただしまだ通常の0-6時の形式)
-        my $enduse_on_day  = substr( $enduse_on, 0,  10 );    #日付
-        my $enduse_on_time = substr( $enduse_on, 11, 2 );     #時刻
-
-        #念のために時刻を数字の型にして、最初の0があれば表示しない
-        $enduse_on_time += 0;
-
-        #時刻0-6時の場合は24-30に変換、
-        if ( $enduse_on_time =~ /^[0-6]$/ ) {
-            $enduse_on_time += 24;
-
-            #日付を1日もどる
-            $enduse_on_day = localtime->strptime( $enduse_on_day, '%Y-%m-%d' );
-            $enduse_on_day = $enduse_on_day - ONE_DAY * 1;
-            $enduse_on_day = $enduse_on_day->date;
-        }
-        $enduse_on_time = sprintf( "%02d", $enduse_on_time );
-
-        # 修正した日付の文字列をまとめる
-        my $general_reserve_line = $getstarted_on_day . q{ } . $getstarted_on_time . q{:00} . q{-} . $enduse_on_time . q{:00 ->};
-
-        my $general_res = {
-            id      => $reserve_ref->id,
-            date    => $general_reserve_line,
-            date_ym => $getstarted_on_day,
-        };
-
-        # 今月から３ヶ月後までの配列を別々につくる
-        if ( $getstarted_on_ym eq $now_date->strftime('%Y-%m') ) {
-            push( @general_now_reserves, $general_res );
-        }
-
-        if ( $getstarted_on_ym eq $next1m_date->strftime('%Y-%m') ) {
-            push( @general_next1_reserves, $general_res );
-        }
-
-        if ( $getstarted_on_ym eq $next2m_date->strftime('%Y-%m') ) {
-            push( @general_next2_reserves, $general_res );
-        }
-
-        if ( $getstarted_on_ym eq $next3m_date->strftime('%Y-%m') ) {
-            push( @general_next3_reserves, $general_res );
-        }
-    }
-    $self->stash(
-        admin_now_reserves_ref => \@general_now_reserves,
-        year_reserve           => $now_date->year,
-        mon_reserve            => $now_date->mon,
-
-        admin_next1_reserves_ref => \@general_next1_reserves,
-        next1_year_reserve       => $next1m_date->year,
-        next1_mon_reserve        => $next1m_date->mon,
-
-        admin_next2_reserves_ref => \@general_next2_reserves,
-        next2_year_reserve       => $next2m_date->year,
-        next2_mon_reserve        => $next2m_date->mon,
-
-        admin_next3_reserves_ref => \@general_next3_reserves,
-        next3_year_reserve       => $next3m_date->year,
-        next3_mon_reserve        => $next3m_date->mon,
-    );
-
     #=======================================================
 
     #入力フォーム切替
@@ -287,222 +88,203 @@ any '/admin_reserv_list' => sub {
           :                    0;
     }
 
-    $self->stash( cancel_conf  => $cancel_conf );
-    $self->stash( switch_input => $switch_input );
-
     #=======================================================
-    #====================================================
-    #日付変更線を６時に変更
-    my $now_date = localtime;
 
-    my $chang_date_ref = chang_date_6($now_date);
+    # カレンダーナビにstoreidを埋め込む為の切替
+    my $switch_calnavi = 0;
+    my $store_id;
 
-    my $now_date    = $chang_date_ref->{now_date};
-    my $next1m_date = $chang_date_ref->{next1m_date};
-    my $next2m_date = $chang_date_ref->{next2m_date};
-    my $next3m_date = $chang_date_ref->{next3m_date};
-
-    #====================================================
-    ##カレンダーナビスクリプト
-    #my $now_date = localtime;
-    ##翌月の計算をやり直す
-    #my $next1m_date = localtime->strptime(
-    #    $now_date->strftime(
-    #        '%Y-%m-' . $now_date->month_last_day
-    #        ),'%Y-%m-%d'
-    #    ) + 86400;
-    #
-    #my $next2m_date = localtime->strptime(
-    #    $next1m_date->strftime(
-    #        '%Y-%m-' . $next1m_date->month_last_day
-    #    ),'%Y-%m-%d'
-    #) + 86400;
-    #
-    #my $next3m_date = localtime->strptime(
-    #    $next2m_date->strftime(
-    #        '%Y-%m-' . $next2m_date->month_last_day
-    #    ),'%Y-%m-%d'
-    #) + 86400;
-
-    my @cal;
-    my $select_date_ym;
-    my $border_date_day;
-    my $select_date_day;
-
-    my $select_cal = 0;
-
-    # 選択した日付の文字列を受け取る
-    my $select_date = $self->param('select_date');
-
-    # 進むのボタンを押した時の値をつくる
-    my $back_mon = $self->param('back_mon');
-    my $back_mon_val;
-    if ($back_mon) {
-        $back_mon_val = $self->param('back_mon_val');
-
-        $select_cal =
-            ( $back_mon_val == 0 ) ? 0
-          : ( $back_mon_val == 1 ) ? 1
-          : ( $back_mon_val == 2 ) ? 2
-          :                          0;
-
-        if ( $select_cal == 0 ) {
-            $select_date_day = ( $now_date->mday ) + 0;
-        }
-        else {
-            $select_date_day = 1;
-        }
-
-        # select_dateの値を作る（文字列で）
-        $select_date =
-            ( $back_mon_val == 0 ) ? $now_date->date
-          : ( $back_mon_val == 1 ) ? $next1m_date->date
-          : ( $back_mon_val == 2 ) ? $next2m_date->date
-          :                          $now_date->date;
-
-    }
-
-    # 戻るのボタンを押した時の値をつくる
-    my $next_mon = $self->param('next_mon');
-    my $next_mon_val;
-    if ($next_mon) {
-        $next_mon_val = $self->param('next_mon_val');
-
-        $select_cal =
-            ( $next_mon_val == 0 ) ? 0
-          : ( $next_mon_val == 1 ) ? 1
-          : ( $next_mon_val == 2 ) ? 2
-          : ( $next_mon_val == 3 ) ? 3
-          :                          0;
-        if ( $select_cal == 0 ) {
-            $select_date_day = ( $now_date->mday ) + 0;
-        }
-        else {
-            $select_date_day = 1;
-        }
-
-        # select_dateの値を作る（文字列で）
-        $select_date =
-            ( $next_mon_val == 0 ) ? $now_date->date
-          : ( $next_mon_val == 1 ) ? $next1m_date->date
-          : ( $next_mon_val == 2 ) ? $next2m_date->date
-          : ( $next_mon_val == 3 ) ? $next3m_date->date
-          :                          $now_date->date;
-    }
-
-    # 受け取った日付文字列から、出力するカレンダーを選択
-    if ($select_date) {
-        $select_date = localtime->strptime( $select_date, '%Y-%m-%d' );
-
-        $select_cal =
-            ( $select_date->strftime('%Y-%m') eq $now_date->strftime('%Y-%m') )    ? 0
-          : ( $select_date->strftime('%Y-%m') eq $next1m_date->strftime('%Y-%m') ) ? 1
-          : ( $select_date->strftime('%Y-%m') eq $next2m_date->strftime('%Y-%m') ) ? 2
-          : ( $select_date->strftime('%Y-%m') eq $next3m_date->strftime('%Y-%m') ) ? 3
-          :                                                                          0;
-
-        $select_date_day = ( $select_date->mday ) + 0;
-    }
-    else {
-        $select_date = localtime->strptime( $now_date->date, '%Y-%m-%d' );
-        if ( $select_cal == 0 ) {
-            $select_date_day = ( $now_date->mday ) + 0;
-        }
-        else {
-            $select_date_day = 1;
-        }
-    }
-
-    my $select_date_res = $select_date->date;
-    if ( $select_cal == 0 ) {
-
-        #今月のカレンダー情報==================================================
-        #border_dateは今日の日付（日だけ）指定なし
-        @cal             = calendar( $now_date->mon, $now_date->year );
-        $select_date_ym  = $now_date->strftime('%Y-%m');
-        $border_date_day = ( $now_date->mday ) + 0;
-        $back_mon_val    = 0;
-        $next_mon_val    = 1;
-
-        #０−５時までは前の日付に変換する処理をしておく事
-        #=====================================================================
-    }
-    elsif ( $select_cal == 1 ) {
-
-        #１ヶ月後のカレンダー情報==================================================
-        #border_dateは今日の日付（日だけ）指定なし
-        @cal             = calendar( $next1m_date->mon, $next1m_date->year );
-        $select_date_ym  = $next1m_date->strftime('%Y-%m');
-        $border_date_day = 1;
-        $back_mon_val    = 0;
-        $next_mon_val    = 2;
-
-        #$select_date = $next1m_date;
-        #０−５時までは前の日付に変換する処理をしておく事
-        #=====================================================================
-    }
-    elsif ( $select_cal == 2 ) {
-
-        #２ヶ月後のカレンダー情報==================================================
-        #border_dateは今日の日付（日だけ）指定なし
-        @cal             = calendar( $next2m_date->mon, $next2m_date->year );
-        $select_date_ym  = $next2m_date->strftime('%Y-%m');
-        $border_date_day = 1;
-        $back_mon_val    = 1;
-        $next_mon_val    = 3;
-
-        #０−５時までは前の日付に変換する処理をしておく事
-        #=====================================================================
-    }
-    else {
-        #３ヶ月後のカレンダー情報==================================================
-        #border_dateは今日の日付（日だけ）指定なし
-        @cal             = calendar( $next3m_date->mon, $next3m_date->year );
-        $select_date_ym  = $next3m_date->strftime('%Y-%m');
-        $border_date_day = 1;
-        $back_mon_val    = 2;
-        $next_mon_val    = 3;
-
-        #０−５時までは前の日付に変換する処理をしておく事
-        #=====================================================================
-    }
-
-    #送り込む値
     $self->stash(
-        border_date_day => $border_date_day,
-        select_date_ym  => $select_date_ym,
-        select_date_day => $select_date_day,
-        select_cal      => $select_cal,
-        cal             => \@cal,
-        caps            => \@caps,
-        back_mon_val    => $back_mon_val,
-        next_mon_val    => $next_mon_val,
-
-        #select_date     => $select_date,
-        select_date_res => $select_date_res,
+        class        => 'admin_reserv_list',
+        template     => 'management/admin_reserv_list',
+        format       => 'html',
+        cancel_conf  => $cancel_conf,
+        switch_input => $switch_input,
     );
+
+    # 管理者予約履歴 のための値
+    my $reserve_history
+        = $model->get_reserve_history( $self->stash->{login_row} );
+    $self->stash(
+        admin_now_reserves_ref   => $reserve_history->{now}->{reserve},
+        year_reserve             => $reserve_history->{now}->{year},
+        mon_reserve              => $reserve_history->{now}->{mon},
+        admin_next1_reserves_ref => $reserve_history->{next1}->{reserve},
+        next1_year_reserve       => $reserve_history->{next1}->{year},
+        next1_mon_reserve        => $reserve_history->{next1}->{mon},
+        admin_next2_reserves_ref => $reserve_history->{next2}->{reserve},
+        next2_year_reserve       => $reserve_history->{next2}->{year},
+        next2_mon_reserve        => $reserve_history->{next2}->{mon},
+        admin_next3_reserves_ref => $reserve_history->{next3}->{reserve},
+        next3_year_reserve       => $reserve_history->{next3}->{year},
+        next3_mon_reserve        => $reserve_history->{next3}->{mon},
+    );
+
+    $self->stash(
+        switch_calnavi  => $switch_calnavi,
+        store_id        => $store_id,
+    );
+
+    my $params = $self->model->region->get_cal_params( $self->stash->{params} );
+
+    # カレンダー
+    $self->stash(
+        border_date_day => $params->{border_date_day},
+        select_date_ym  => $params->{select_date_ym},
+        select_date_day => $params->{select_date_day},
+        cal             => $params->{cal},
+        caps            => $self->model->region->get_calender_caps(),
+        back_mon_val    => $params->{back_mon_val},
+        next_mon_val    => $params->{next_mon_val},
+    );
+
+    # 表示を切り替えるスイッチ
+    my $switch_res_navi = 1;
+    my $storeinfo_row   = $self->stash->{login_row}->fetch_storeinfo;
+    my $storeinfo_name  = $storeinfo_row->name;
+    my $roominfo_rows
+        = $self->stash->{login_row}->fetch_storeinfo->fetch_roominfos;
+    my $roominfo_ids   = [ map { $_->id } @{$roominfo_rows} ];
+    my $roominfo_names = [ map { $_->name } @{$roominfo_rows} ];
+
+    # 予約テーブル
+    $self->stash(
+        select_date_res => $params->{select_date},
+        switch_res_navi => $switch_res_navi,
+        storeinfo_name  => $storeinfo_name,
+        id_ref          => $roominfo_ids,
+        name_ref        => $roominfo_names,
+    );
+
+    # 暫定的にここにロジックを書く、ここから
+    # roominfoから開始時間と終了時間を引き出して、営業してない時間のハッシュを作る
+    my $select_date = $params->{select_date_obj};
+    my %close_store;
+    my $close_store_val = "close_store";
+
+    my %outside;
+    my $outside_val = "outside";
+
+    my %timeout;
+    my $timeout_val = "timeout";
+
+    for my $roominfo_ref (@{$roominfo_rows}) {
+
+        # 開始時間をしていする変数
+        my $start_time_key = substr( $roominfo_ref->starttime_on, 0, 2 );
+
+        # 時間軸を0:00->24:00にそろえる
+        my $time_adj = 24;
+
+        # 0:00-5:00の場合24:00-29:00にする24をたす、日付を前日にする
+        if ( $start_time_key =~ /^[0][0-5]/ ) {
+            $start_time_key = $start_time_key + $time_adj;
+        }
+
+        # 終了時間を指定する変数をつくる# 時間軸を0:00->24:00にそろえる
+        my $end_time_key = substr( $roominfo_ref->endingtime_on, 0, 2 );
+
+        # 0:00-6:00の場合24:00-30:00にする24をたす
+        if ( $end_time_key =~ /^[0][0-6]/ ) {
+            $end_time_key = $end_time_key + $time_adj;
+        }
+
+        # 終了時間から開始時間を引いて、利用時間をはじき出す
+        # 開始時刻からカレンダーの開始時刻を引いて、営業してない開店前をはじき出す。
+
+        my $before_opening = $start_time_key - 7;
+        my $time_key       = 6;
+
+        # 開始時間から終了時間まで時間枠ごとのハッシュ名をつけた
+        # 配列をつくってみる。
+        # 配列の数だけ配列の中身を繰り返しハッシュに追加する
+        for my $before_open ( 0 .. $before_opening ) {
+            my $room_id_key     = $roominfo_ref->id;
+            my $close_store_key = "close_store" . "_" . $room_id_key . "_" . $time_key;
+            $close_store{$close_store_key} = $close_store_val;
+            ++$time_key;
+        }
+
+        my $after_closing = 30 - $end_time_key;
+        $time_key      = $end_time_key;
+
+        # 開始時間から終了時間まで時間枠ごとのハッシュ名をつけた
+        # 配列をつくってみる。
+        # 配列の数だけ配列の中身を繰り返しハッシュに追加する
+        for my $after_clos ( 0 .. $after_closing ) {
+            my $room_id_key     = $roominfo_ref->id;
+            my $close_store_key = "close_store" . "_" . $room_id_key . "_" . $time_key;
+            $close_store{$close_store_key} = $close_store_val;
+            ++$time_key;
+        }
+
+        # 利用停止になっている部屋はすべての時間をステータスoutside
+        if ( $roominfo_ref->status == 0 ) {
+            for my $outside_time ( 6 .. 29 ) {
+                my $room_id_key = $roominfo_ref->id;
+                my $outside_key = "outside" . "_" . $room_id_key . "_" . $outside_time;
+                $outside{$outside_key} = $outside_val;
+            }
+        }
+
+        # 現在時刻が予約の時間枠をすぎたときのtimeoverタグの付け方
+        # ただし、本日の場合のみ起動する
+        my $time_now = localtime;
+
+        #日付変更線が6時になる
+        # my $chang_date_ref = chang_date_6($time_now);
+        my $chang_date_ref = chang_date_6();
+
+        $time_now = $chang_date_ref->{now_date};
+        warn '$time_now',dumper($time_now);
+        warn '$select_date',dumper($select_date);
+        if ( $select_date->date eq $time_now->date ) {
+            my $time_over = $time_now->hour;
+
+            # 時間時を24-30に変換
+            if ( $time_over =~ m/^[0-5]$/ ) {
+                $time_over += 24;
+            }
+            for my $time_limit ( 6 .. 29 ) {
+                if ( $time_limit <= $time_over ) {
+                    my $room_id_key = $roominfo_ref->id;
+                    my $timeout_key = "timeout" . "_" . $room_id_key . "_" . $time_limit;
+                    $timeout{$timeout_key} = $timeout_val;
+                }
+            }
+        }
+
+    }
+    # 暫定的にここにロジックを書く、ここまで
+
+    #値おくりこみ,ハッシュにするのが大事
+    $self->stash(
+        close_store_ref => \%close_store,
+        outside_ref     => \%outside,
+        timeout_ref     => \%timeout,
+    );    # テンプレートへ送り、
+
+    #値おくりこみ,ハッシュにするのが大事
+    # テンプレートへ送り、
+    $self->stash( select_res_ref => {} );
+
+    # テンプレートへ送り、
+    $self->stash( select_detail_res_ref => {} );
+
+    $self->render;
+    return;
+}
+
+1;
+
+__END__
+
+#admin_reserv_list.html.ep
+#予約部屋、公開設定確認コントロール-----------------------------
+any '/admin_reserv_list' => sub {
 
     #=======================================================
     # 予約テーブルスクリプト
-    # 表示を切り替えるスイッチ
-    my $switch_res_navi = 1;
-    $self->stash( switch_res_navi => $switch_res_navi );
-
-    #ログインidからstoreinfoのテーブルより該当テーブル抽出
-    my @storeinfo = $teng->single( 'storeinfo', { 'admin_id' => $login_id } );
-    my $storeinfo_id;
-    my $storeinfo_name;
-
-    # id検索、sql実行店舗id取得(nameも取得)
-    for my $storeinfo (@storeinfo) {
-        $storeinfo_id   = $storeinfo->id;
-        $storeinfo_name = $storeinfo->name;
-    }
-    $self->stash( storeinfo_name => $storeinfo_name );
-
-    #----------
-    #店舗idから部屋idを１０件取得(管理者承認が終わった時点でデータできてる)
-    my @roominfos = $teng->search( 'roominfo', { 'storeinfo_id' => $storeinfo_id }, { order_by => 'id' } );
 
     # roominfoから開始時間と終了時間を引き出して、営業してない時間のハッシュを作る
     my %close_store;

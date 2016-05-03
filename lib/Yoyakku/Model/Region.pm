@@ -311,6 +311,7 @@ sub get_cal_params {
         $params->{next_mon_val}    = 3;
     }
     $params->{select_date} = $select_date->date;
+    $params->{select_date_obj} = $select_date;
     return $params;
 }
 
