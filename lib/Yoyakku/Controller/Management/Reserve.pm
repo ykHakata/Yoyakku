@@ -2,6 +2,9 @@ package Yoyakku::Controller::Management::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Util qw{chang_date_6};
 use Mojo::Util qw{dumper};
+use Time::Piece;
+use Time::Seconds;
+
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -60,7 +63,7 @@ sub index {
 sub admin_reserv_list {
     my $self  = shift;
     my $model = $self->model->management->reserve;
-
+    warn '$self->stash->{params}',dumper($self->stash->{params});
     #=======================================================
 
     #入力フォーム切替
@@ -142,6 +145,10 @@ sub admin_reserv_list {
     my $switch_res_navi = 1;
     my $storeinfo_row   = $self->stash->{login_row}->fetch_storeinfo;
     my $storeinfo_name  = $storeinfo_row->name;
+
+    # 予約情報取り出しの暫定コードで利用
+    my $storeinfo_id = $storeinfo_row->id;
+
     my $roominfo_rows
         = $self->stash->{login_row}->fetch_storeinfo->fetch_roominfos;
     my $roominfo_ids   = [ map { $_->id } @{$roominfo_rows} ];
@@ -156,23 +163,31 @@ sub admin_reserv_list {
         name_ref        => $roominfo_names,
     );
 
+    my $select_date = $params->{select_date_obj};
+
+    # 利用停止になっている部屋を特定
+    my $outside_room
+        = $model->get_outside_room( $self->stash->{login_row} );
+
+    # 現在時刻が予約の時間枠をすぎた場合予約不可 (本日の場合のみ)
+    my $timeout_room
+        = $model->get_timeout_room( $self->stash->{login_row}, $select_date );
+
+    $self->stash(
+        outside_ref => $outside_room,
+        timeout_ref => $timeout_room,
+    );
+
     # 暫定的にここにロジックを書く、ここから
     # roominfoから開始時間と終了時間を引き出して、営業してない時間のハッシュを作る
-    my $select_date = $params->{select_date_obj};
     my %close_store;
     my $close_store_val = "close_store";
-
-    my %outside;
-    my $outside_val = "outside";
-
-    my %timeout;
-    my $timeout_val = "timeout";
 
     for my $roominfo_ref (@{$roominfo_rows}) {
 
         # 開始時間をしていする変数
         my $start_time_key = substr( $roominfo_ref->starttime_on, 0, 2 );
-
+        warn '$start_time_key',dumper($start_time_key);
         # 時間軸を0:00->24:00にそろえる
         my $time_adj = 24;
 
@@ -217,59 +232,168 @@ sub admin_reserv_list {
             $close_store{$close_store_key} = $close_store_val;
             ++$time_key;
         }
-
-        # 利用停止になっている部屋はすべての時間をステータスoutside
-        if ( $roominfo_ref->status == 0 ) {
-            for my $outside_time ( 6 .. 29 ) {
-                my $room_id_key = $roominfo_ref->id;
-                my $outside_key = "outside" . "_" . $room_id_key . "_" . $outside_time;
-                $outside{$outside_key} = $outside_val;
-            }
-        }
-
-        # 現在時刻が予約の時間枠をすぎたときのtimeoverタグの付け方
-        # ただし、本日の場合のみ起動する
-        my $time_now = localtime;
-
-        #日付変更線が6時になる
-        # my $chang_date_ref = chang_date_6($time_now);
-        my $chang_date_ref = chang_date_6();
-
-        $time_now = $chang_date_ref->{now_date};
-        warn '$time_now',dumper($time_now);
-        warn '$select_date',dumper($select_date);
-        if ( $select_date->date eq $time_now->date ) {
-            my $time_over = $time_now->hour;
-
-            # 時間時を24-30に変換
-            if ( $time_over =~ m/^[0-5]$/ ) {
-                $time_over += 24;
-            }
-            for my $time_limit ( 6 .. 29 ) {
-                if ( $time_limit <= $time_over ) {
-                    my $room_id_key = $roominfo_ref->id;
-                    my $timeout_key = "timeout" . "_" . $room_id_key . "_" . $time_limit;
-                    $timeout{$timeout_key} = $timeout_val;
-                }
-            }
-        }
-
     }
     # 暫定的にここにロジックを書く、ここまで
-
+    warn '\%close_store-----',dumper(\%close_store);
     #値おくりこみ,ハッシュにするのが大事
     $self->stash(
         close_store_ref => \%close_store,
-        outside_ref     => \%outside,
-        timeout_ref     => \%timeout,
     );    # テンプレートへ送り、
 
+    # ================================================
+    # 4/15　予約情報の取り出しのロジックを過去のコードを参考に書き直し
+    # スタジオ予約内容取り出しのsql
+    # sqlを取り出す時点で、(指定の日付6:00-翌朝6:00取り出し)
+    # 絞り込み、今指定している、店舗idから部屋idまで絞り込みforで
+    # 絞り込んだ予約情報の時間軸を変更する00->24表示に
+    # 終了時間から開始時間を引いて利用時間をつくる
+
+    # 取り出し条件の為の変数定義
+    # calnaviで選択した日付をうけとる
+
+    #テストなので日付べたうち
+    my $start_time = $select_date->date . " 06:00:00";
+    my $end_time;
+    $end_time = localtime->strptime( $select_date->date, '%Y-%m-%d' );
+    $end_time = $end_time + ONE_DAY * 1;
+    $end_time = $end_time->date;
+    $end_time = $end_time . " 06:00:00";
+
+    # 暫定的にここで teng
+    my $teng = $self->model->db->base->teng;
+
+    #表示するための、予約情報データ
+    my @display_res_rows = $teng->search_named( q{select * from reserve where getstarted_on >= :start_time and getstarted_on < :end_time ; }, { start_time => $start_time, end_time => $end_time } );
+
+    # データ作る為の、部屋情報roominfo sql
+    # スタジオ部屋設定条件を読み込み
+    my @roominfo_rows = $teng->search_named(q{select * from roominfo order by id asc; });
+
+    # 0:00-6:00までの時間差を修正したスクリプト->24-30に変更する
+    # 指定されている日付の朝6:00-翌朝6:00未満を絞り込んだsqlをさらに絞り込み
+    my %select_res;
+    my $select_res_val = "conf_res";
+
+    # 予約済みの情報の中に、識別の為の値を加える
+    # 管理者が予約したもの
+    # 利用停止 conf_ref_stop_admin
+    # 個人練習利用 conf_ref_individual_admin
+    # バンド利用 conf_ref_individual_admin
+    # 一般ユーザーが予約したもの
+    # 個人練習利用 conf_ref_individual_general
+    # バンド利用 conf_ref_individual_general
+    # 予約内容の情報をおくるスクリプト
+    my %select_detail_res;
+    my $select_detail_res_val;
+
+    for my $display_res_row_ref (@display_res_rows) {
+
+        # ステータス0予約中のみを取り出し
+        if ( $display_res_row_ref->status == 0 ) {
+
+            # 今見ている店舗の部屋情報idをすべて取り出す。
+            for my $roominfo_row_ref (@roominfo_rows) {
+
+                # 今見ている店舗に該当する部屋情報idのみに絞り込み
+                if ( $storeinfo_id == $roominfo_row_ref->storeinfo_id ) {
+
+                    # 絞り込んだ部屋情報idすべてに該当する予約内容を取り出す
+                    if ( $display_res_row_ref->roominfo_id == $roominfo_row_ref->id ) {
+
+                        # 開始時間をしていする変数をつくる
+                        my $start_time_key = substr( $display_res_row_ref->getstarted_on, 11, 2 );
+
+                        # 時間軸を0:00->24:00にそろえる
+
+                        my $time_adj = 24;
+
+                        # 0:00-5:00の場合24:00-29:00にする24をたす、日付を前日にする
+                        if ( $start_time_key =~ /^[0][0-5]/ ) {
+                            $start_time_key = $start_time_key + $time_adj;
+                        }
+
+                        # 終了時間を指定する変数をつくる# 時間軸を0:00->24:00にそろえる
+                        my $end_time_key = substr( $display_res_row_ref->enduse_on, 11, 2 );
+
+                        # 0:00-5:00の場合24:00-29:00にする24をたす
+                        if ( $end_time_key =~ /^[0][0-6]/ ) {
+                            $end_time_key = $end_time_key + $time_adj;
+                        }
+
+                        # 終了時間から開始時間を引いて、利用時間をはじき出す
+                        my $use_t_k  = $end_time_key - $start_time_key;
+                        my $time_key = $start_time_key;
+
+                        # 数字に変換しておく(7/7)
+                        $time_key += 0;
+
+                        # 開始時間から終了時間まで時間枠ごとのハッシュ名をつけた
+                        # 配列をつくってみる。
+                        # 配列の数だけ配列の中身を繰り返しハッシュに追加する
+                        for ( my $i = 0 ; $i < $use_t_k ; ++$i ) {
+
+                            #my %select_detail_res;
+                            #my $select_detail_res_val;
+                            # スタジオ部idを取得して変数定義(スタジオナンバー)
+                            #my $name_key = $roominfo_row_ref->name;
+                            my $name_key = $roominfo_row_ref->id;
+
+                            #key名数字だけはまずいので変更
+                            my $select_res_key = "conf_res" . "_" . $name_key . "_" . $time_key;
+
+                            # detail用のkey作成
+                            my $select_detail_res_key = "detail_res" . "_" . $name_key . "_" . $time_key;
+
+                            #ハッシュの値の作り込み
+                            # 管理者が予約したもの
+                            if ( $display_res_row_ref->admin_id ) {
+
+                                # 予約済みの情報の中に、識別の為の値を加える
+                                $select_res_val =
+                                    ( $display_res_row_ref->useform == 0 ) ? "conf_res_band_admin"
+                                  : ( $display_res_row_ref->useform == 1 ) ? "conf_res_individual_admin"
+                                  : ( $display_res_row_ref->useform == 2 ) ? "conf_res_stop_admin"
+                                  :                                          $select_res_val;
+
+                                #admin_idからログイン名を抽出
+                                #my $admin_ref = $teng->single('admin', +{id => $display_res_row_ref->admin_id});
+                                #$select_detail_res_val = $admin_ref->login;
+                                $select_detail_res_val = $display_res_row_ref->message;
+                            }
+
+                            # 一般ユーザーが予約したもの
+                            if ( $display_res_row_ref->general_id ) {
+
+                                # 予約済みの情報の中に、識別の為の値を加える
+                                $select_res_val =
+                                    ( $display_res_row_ref->useform == 0 ) ? "conf_res_band_general"
+                                  : ( $display_res_row_ref->useform == 1 ) ? "conf_res_individual_general"
+                                  :                                          $select_res_val;
+
+                                #profileからログイン名を抽出
+                                #my $general_ref = $teng->single('general', +{id => $display_res_row_ref->general_id});
+                                my $profile_ref = $teng->single( 'profile', +{ general_id => $display_res_row_ref->general_id } );
+                                $select_detail_res_val = $profile_ref->nick_name;
+
+                            }
+                            $select_res{$select_res_key} = $display_res_row_ref->id . "_" . $select_res_val;
+
+                            $select_detail_res{$select_detail_res_key} = $select_detail_res_val;
+
+                            ++$time_key;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    warn '\%select_res------',dumper(\%select_res);
     #値おくりこみ,ハッシュにするのが大事
     # テンプレートへ送り、
-    $self->stash( select_res_ref => {} );
+    $self->stash( select_res_ref => \%select_res );
 
     # テンプレートへ送り、
-    $self->stash( select_detail_res_ref => {} );
+    $self->stash( select_detail_res_ref => \%select_detail_res);
 
     $self->render;
     return;

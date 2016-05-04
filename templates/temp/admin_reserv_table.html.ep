@@ -18,9 +18,9 @@
 % my @frame_rooms;
     % for my $room_number (0..9) {
         <th class="col1">
-        <%= @$name_ref->[$room_number] %>
+        <%= $name_ref->[$room_number] %>
         <%#= @$id_ref->[$room_number] %>
-        % push (@frame_rooms,@$id_ref->[$room_number]);
+        % push (@frame_rooms,$id_ref->[$room_number]);
         </th>
     % }
     </tr>
@@ -60,7 +60,7 @@
             %}
 
             <td class="t"><%= $row_time %><br /><%= $change_come %></td>
-            % my $number_col_name;
+            % my $number_col_name = 0;
             % for my $frame_room (@frame_rooms) {
 
                 % my $close_store_key = "close_store" . "_" . $frame_room . "_" . $h_time;
@@ -80,7 +80,7 @@
                     %# $conf_res = $1;
                     %# $conf_number = $3;
                 %# }
-                % if ($conf_res =~ m/^(\d+)(_)(conf_.+)/ ) {
+                % if ( $conf_res && $conf_res =~ m/^(\d+)(_)(conf_.+)/ ) {
                     % $conf_res = $3;
                     % $conf_number = $1;
                 % }

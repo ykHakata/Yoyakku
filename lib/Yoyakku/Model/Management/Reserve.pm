@@ -6,7 +6,7 @@ use Yoyakku::Util::Time qw{
     tp_next_month_after
     parse_datetime
 };
-
+use Mojo::Util qw{dumper};
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -24,6 +24,77 @@ use Yoyakku::Util::Time qw{
 =cut
 
 my $YOYAKKU_TIME = '06:00:00';
+
+=head2 get_timeout_room
+
+    現在時刻が予約の時間枠をすぎた場合予約不可 (本日の場合のみ)
+
+    # $timeout_room = +{
+    #     "timeout_10_10" => "timeout",
+    #     "timeout_10_11" => "timeout",
+    #     ...
+    # };
+
+=cut
+
+sub get_timeout_room {
+    my $self        = shift;
+    my $login_row   = shift;
+    my $select_date = shift;
+
+    my $timeout_room = +{};
+
+    # 現在時刻を取得
+    my $tp_now_over24  = tp_now_over24($YOYAKKU_TIME);
+    my $parse_datetime = parse_datetime( $tp_now_over24->over24_datetime );
+
+    # 現在時刻と選択されている予約表の日程が同じ場合のみ
+    return if ( $select_date->date ne $parse_datetime->{date} );
+
+    my $roominfo_ids = $login_row->fetch_storeinfo->get_roominfo_ids();
+    my $time_over    = $tp_now_over24->over24_hour;
+
+    for my $roominfo_id ( @{$roominfo_ids} ) {
+        for my $hour ( 6 .. 29 ) {
+            next if ( $hour >= $time_over );
+            my $key = join '_', 'timeout', $roominfo_id, $hour;
+            $timeout_room->{$key} = 'timeout';
+        }
+    }
+    return $timeout_room;
+}
+
+=head2 get_outside_room
+
+    利用停止になっている部屋を特定
+
+    # $outside_room = +{
+    #     "outside_2_10" => "outside",
+    #     "outside_2_11" => "outside",
+    #     ...
+    # };
+
+=cut
+
+sub get_outside_room {
+    my $self      = shift;
+    my $login_row = shift;
+
+    # 利用停止になっている部屋はすべての時間をステータスoutside
+    my $args = +{ status => 0, };
+
+    my $roominfo_rows = $login_row->fetch_storeinfo->search_roominfos($args);
+    my $outside_room  = +{};
+
+    for my $roominfo_row ( @{$roominfo_rows} ) {
+        for my $hour ( 6 .. 29 ) {
+            my $id = $roominfo_row->id;
+            my $key = join '_', 'outside', $id, $hour;
+            $outside_room->{$key} = 'outside';
+        }
+    }
+    return $outside_room;
+}
 
 =head2 get_reserve_history
 

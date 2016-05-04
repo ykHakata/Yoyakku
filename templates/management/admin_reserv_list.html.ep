@@ -4,7 +4,7 @@
 <div id="wrapper">
 
 
-% if ($cancel_conf == 1) {
+% if ($cancel_conf && $cancel_conf == 1) {
 
 <%= include './temp/up_admin_r_u_c_conf' %>
 

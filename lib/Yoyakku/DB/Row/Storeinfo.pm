@@ -18,6 +18,16 @@ sub get_roominfo_ids {
     return $ids;
 }
 
+sub search_roominfos {
+    my $self = shift;
+    my $args = shift;
+    my @roominfo_rows
+        = $self->handle->search( 'roominfo',
+        +{ storeinfo_id => $self->id, %{$args}, },
+        );
+    return \@roominfo_rows;
+}
+
 1;
 
 __END__
