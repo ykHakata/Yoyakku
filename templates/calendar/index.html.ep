@@ -6,7 +6,7 @@
 <div id="contentsHeader">
 <h2 id="month"><%= $now_date->year %>年<%= $now_date->mon %>月</h2>
 <p id="oneliner_ads">
-<a href="http://www.yoyakku.com/tutorial" target="_blank">yoyakku(ヨヤック)β版のご案内</a>
+<a href="/tutorial" target="_blank">yoyakku(ヨヤック)β版のご案内</a>
 </p>
 <div id="cleafix"></div>
 </div>
