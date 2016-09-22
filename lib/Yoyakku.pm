@@ -130,6 +130,9 @@ sub startup {
     $r->route( '/:reserve', reserve => $management_reserve )
         ->to( controller => 'Management::Reserve', action => 'index' );
 
+    # 紹介ページ
+    $r->route('/tutorial')->to( controller => 'Tutorial', action => 'index' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 

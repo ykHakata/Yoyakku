@@ -1,0 +1,146 @@
+% layout 'default';
+% title 'yoyakku紹介';
+<div id="wrapper">
+
+<div id="tutorial_logo">
+<img src="./images/base/header_logo_01.png" width="180" height="90" ait="studio search yoyakku" />
+</div>
+<div id="tutorial_title">
+<span>yoyakku(ヨヤック)β版のご案内　</span><span id="tutorial_mail">問合せ-->yoyakku@gmail.com</span>
+</div>
+
+
+<div id="tutorial_clear"></div>
+<div id="index_contents">
+    <h1 class="input_ads">yoyakku(ヨヤック)とは？</h1>
+    <div>
+    <div id="imag">
+    <img src="./images/base/1.png"  width="640" alt="サンプル">
+    </div>
+    <div id="bun">
+    <h2 class="tutorial_h2">操作が簡単でわかりやすい</h2>
+    <p class="tutorial_p">使いやすいインターフェイスを追求、これまでネット予約システムが使いにくいと感じていた方でも
+    すぐに簡単に始めることができます。</p>
+    <h2 class="tutorial_h2">Web上で予約情報を一見管理</h2>
+    <p class="tutorial_p">yoyakkuは登録してある店舗を１つのIDで
+    共通のインターフェイスで利用する事により
+    インターネット環境があれば
+    誰でも、いつでも、どこからでも、
+    予約の取得と管理を容易にします。</p>
+    <h2 class="tutorial_h2">イベントの集客などの促進</h2>
+    <p class="tutorial_p">イベント告知カレンダーやメール配信による、
+    登録利用者へむけての情報の展開を容易にします。
+    (有償機能)</p>
+    </div>
+</div>
+
+
+
+
+<h3 class="tutorial_h3">yoyakkuの特長</h3>
+
+<div id="imag">
+    <img src="./images/base/2.png"  width="640" alt="サンプル">
+</div>
+
+
+<div id="bun">
+
+
+<h4 class="tutorial_h4">予約をもっと便利に</h4>
+<p class="tutorial_p">店舗内の掃除をしている時、接客中、営業時間外など、
+なかなか電話に出られない時、
+急用があり、数時間店を離れる場合など
+予約の機会を損失してるかもしれません。
+電話をかけるのがおっくうなお客さんももしかすると
+いるのかもしれませんね。
+予約管理を電話と紙とペンからネット上に徐々に移行したいと
+思っている方には１つの選択肢です。</p>
+
+
+</div>
+
+<h3 class="tutorial_h3">どこの店舗のどのスタジオが空室かがシンプルにわかる</h3>
+<div id="imag">
+    <img src="./images/base/3.png"  width="640" alt="サンプル">
+</div>
+
+<div id="bun">
+
+<h4 class="tutorial_h4">yoyakkuは閉鎖された予約システムではありません。</h4>
+
+<p class="tutorial_p">登録されている店舗であれば、いつ、どの部屋が空室なのかが
+ログインしていなくとも回覧できます。
+利用者として、従来であれば日程の選択肢がなく、
+空き時間を検索するのに各店舗のホームページを回覧したり、直接電話をかける手間が必須でした。
+開示された予約システムの方が利用者にとっては非常に使い勝手が向上するでしょう。</p>
+</div>
+
+
+
+<h3 class="tutorial_h3">店舗ごとの部屋数や公開設定が柔軟にできる。</h3>
+<div id="imag">
+    <img src="./images/base/4.png"  width="640" alt="サンプル">
+</div>
+<div id="bun">
+
+<h4 class="tutorial_h4">もしかすると？</h4>
+
+<p class="tutorial_p">４部屋スタジオを所有しているものの、１部屋は音楽教室専用に占有している。
+今日は19時には閉店したい。
+インターネット上に公開するまえに、店舗内だけでの予約管理として利用したいなど
+様々な要望に柔軟に対応できるよう設計されております。</p>
+</div>
+
+<h3 class="tutorial_h3">念のために予約の履歴をお互いに通知します。</h3>
+<div id="imag">
+    <img src="./images/base/5.png"  width="640" alt="サンプル">
+</div>
+<div id="bun">
+
+<h4 class="tutorial_h4">電話での予約のやり取りにおいての問題点は</h4>
+<p class="tutorial_p">「いい間違い、聞き間違い」
+など、些細な事ですが小さなトラブルを避ける為にも
+予約が完了するとEメールによる予約内容の配信を実装しました。</p>
+
+</div>
+
+<h3 class="tutorial_h3">機能の追加、使い勝手の向上</h3>
+<div id="imag">
+    <img src="./images/base/6.png"  width="640" alt="サンプル">
+</div>
+<div id="bun">
+
+<h4 class="tutorial_h4">yoyakkuは有志のエンジニア達で運営されています。</h4>
+
+<p class="tutorial_p">もし、どうしても追加して欲しい機能があったり、改善して欲しい点があった場合。
+通常の汎用的な予約システムにおいて追加変更を実現するのは難しかったりします。
+なぜならば実現するためにプログラマーやデザイナーなどの業者に作業を依頼する必要があります。
+としてそれらを無償で受け付ける事は困難です。
+有償でビジネスとしてシステムを始めると思惑通り利用者から課金ができなくなると、
+継続する事が不可能になってしまいます。
+とても不思議で矛盾しているような感じですが、有志による運営の方が、
+長期的にみると、利用者にとっては便利なものだったりします。</p>
+</div>
+<h3 class="tutorial_h3">とりあえず使ってみる</h3>
+<div id="imag">
+    <img src="./images/base/7.png"  width="640" alt="サンプル">
+</div>
+<div id="bun">
+
+<h4 class="tutorial_h4">Eメール登録一発</h4>
+
+<p class="tutorial_p">登録の手間をぎりぎりまで省きました。
+メールを登録すると、登録完了のメールと初期パスワードが発行されます。
+クレジットカードの登録などは一切必要ありません。
+そもそも無償ですので、必要ありません。</p>
+</div>
+
+
+
+
+<%= include './temp/footer' %>
+
+<!-- /#wrapper --></div>
+
+
