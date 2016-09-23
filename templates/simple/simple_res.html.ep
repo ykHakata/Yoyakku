@@ -1,0 +1,190 @@
+% layout 'default_new';
+% title 'yoyakku簡易予約状況';
+
+<div id="simple_page">
+    <div id="simple_header">
+        yoyakku
+    </div>
+    <div id="simple_content">
+
+        <div id="simple_studio_name">
+            <h1><%= $storeinfo_name %></h1>
+        </div>
+
+        <div id="simple_studio_date">
+            <p><%= $look_date_ymd %>(<%= $look_date_wday %>)</p>
+        </div>
+        <div id="simple_studio_datetime">
+            <p id="simple_studio_start00">->00スタート</p>
+            <p id="simple_studio_start30">->30スタート</p>
+        </div>
+            <div id="simple_clear_fix"></div>
+
+
+        <div id="simple_table_res">
+
+
+            % my @res_titles = @$roominfo_name;
+            <table>
+            <tr>
+            % my $class_row_th ;
+            % for my $res_title (@res_titles) {
+                % if ($res_title eq 'start') {
+                    % $class_row_th = 'simple_table_res_td_start';
+                    <th class="<%= $class_row_th %>"></th>
+                % }
+                % elsif ($res_title ne 'start' and $res_title ne 'end') {
+                    % $class_row_th = 'simple_table_res_td_room';
+                    <th class="<%= $class_row_th %>"><%= $res_title %></th>
+
+                % }
+                % else {
+                    % $class_row_th = 'simple_table_res_td_end';
+                    <th class="<%= $class_row_th %>"></th>
+                % }
+            % }
+            </tr>
+            % my $class_row_td ;
+            % my @res_timelines = (6 .. 29) ;
+
+            % for my $res_timeline (@res_timelines) {
+                <tr>
+                % for my $res_title (@res_titles) {
+                    % if ($res_title eq 'start') {
+                        % $class_row_td = 'simple_table_res_td_start';
+                        % my $class_row_color = 'simple_table_res_td_color';
+                        % if ($res_timeline % 2 == 0) {
+                            % $class_row_color = undef;
+                        % }
+                        <td class="<%= $class_row_td %> <%= $class_row_color %>">
+                        <%= $res_timeline %>
+                        % if ($res_timeline >= 24) {
+                            % my $time_name = $res_timeline - 24;
+                            (<%= $time_name %>)
+                        % }
+                        </td>
+                    % }
+                    % elsif ($res_title ne 'start' and $res_title ne 'end') {
+                        % my $class_row_td    = 'simple_table_res_td_room';
+                        % my $class_row_color = 'simple_table_res_td_color';
+                        % my $class_row_00 ;
+                        % my $class_row_30 ;
+
+                        % if ($res_hash->{$res_title . $res_timeline} eq '00') {
+                        % $class_row_00    = 'simple_table_res_td_00';
+                        % }
+
+                        % if ($res_hash->{$res_title . $res_timeline} eq '30') {
+                        % $class_row_30    = 'simple_table_res_td_30';
+                        % }
+                        % if ($res_timeline % 2 == 0) {
+                            % $class_row_color = undef;
+                        % }
+                        <td class="<%= $class_row_td %> <%= $class_row_color %> <%= $class_row_00 %> <%= $class_row_30 %>">
+                            <%= $res_hash->{$res_title . $res_timeline} %>
+
+
+
+                        </td>
+                    % }
+                    % elsif ($res_title eq 'end') {
+                        % $class_row_td = 'simple_table_res_td_end';
+                        % my $class_row_color = 'simple_table_res_td_color';
+                        % if ($res_timeline % 2 == 0) {
+                            % $class_row_color = undef;
+                        % }
+                        <td class="<%= $class_row_td %> <%= $class_row_color %>">
+                        <%= $res_timeline %>
+                        % if ($res_timeline >= 24) {
+                            % my $time_name = $res_timeline - 24;
+                            (<%= $time_name %>)
+                        % }
+                        </td>
+                    % }
+                % }
+                </tr>
+            % }
+            </table>
+        </div>
+
+
+
+
+        <div id="simple_calender">
+            <table>
+            <thead>
+                <tr>
+                <form action="" method="post">
+                    <th>
+                    <input type="submit" name="back_submit" value="←" class="simple_calender_button"   />
+                    <input type="hidden" name="back_date"   value="<%= $back_date_ym %>"    />
+                    </th>
+
+                    <th colspan="5"><%= $look_date_ym %><br />
+                    <input type="hidden"   name="look_date_ymd"   value="<%= $look_date_ymd %>" />
+                    </th>
+
+                    <th>
+                    <input type="submit" name="next_submit" value="→" class="simple_calender_button" />
+                    <input type="hidden"   name="next_date"   value="<%= $next_date_ym %>" />
+                    </th>
+                </form>
+                </tr>
+                <tr>
+                % for my $cap (@$caps) {
+                    <th class="simple_calender_cap"><%= $cap %></th>
+                % }
+                </tr>
+            </thead>
+            <tbody>
+                % for my $cal_week_ref (@$cal_now) {
+                <tr>
+                    % for my $cal_day (@$cal_week_ref) {
+                    % $cal_day += 0;
+                    % if ($cal_day == 0) {
+                    <td class=""></td>
+                    % }
+                    % elsif ($cal_day < $past_date_d) {
+                    <td class="past_date_d"><%= $cal_day %></td>
+                    % }
+                    % elsif ($cal_day == $select_date_d) {
+                    <td class="sele">
+
+                    <a href="javascript:void(0)" onclick="document.cal_name_<%= $cal_day %>.submit();return false;">
+                    <%= $cal_day %></a>
+
+                    <form name="cal_name_<%= $cal_day %>" method="post" action="">
+                    <input type="hidden"   name="select_date"   value="<%= $look_date_ym %>-<%= $cal_day %>" />
+                    </form>
+
+                    </td>
+                    % }
+                    % else {
+                    <td class="">
+
+                    <a href="javascript:void(0)" onclick="document.cal_name_<%= $cal_day %>.submit();return false;">
+                    <%= $cal_day %></a>
+
+                    <form name="cal_name_<%= $cal_day %>" method="post" action="">
+                    <input type="hidden"   name="select_date"   value="<%= $look_date_ym %>-<%= $cal_day %>" />
+                    </form>
+
+                    </td>
+
+                    % }
+                    % }
+                </tr>
+                % }
+            </tbody>
+            </table>
+        </div>
+
+
+    </div>
+
+
+
+    <div id="simple_footer">
+        yoyakku
+    </div>
+</div>

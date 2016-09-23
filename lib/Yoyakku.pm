@@ -133,6 +133,9 @@ sub startup {
     # 紹介ページ
     $r->route('/tutorial')->to( controller => 'Tutorial', action => 'index' );
 
+    # スマホに特化した予約確認画面
+    $r->route('/simple_res')->to( controller => 'Simple', action => 'index' );
+
     # セッション情報設定
     $self->sessions->cookie_name('yoyakku');
 
