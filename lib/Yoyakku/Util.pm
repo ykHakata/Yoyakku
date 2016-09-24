@@ -23,6 +23,8 @@ our @EXPORT_OK = qw{
     get_calendar
     get_tp_obj_strptime
     get_tp_obj
+    calendar_move
+    chang_datetime_24for29
 };
 
 =encoding utf8
@@ -289,6 +291,219 @@ sub now_datetime {
     my $now = localtime;
 
     return $now->datetime( T => $SPACE );
+}
+
+=head2 chang_datetime_24for29
+
+    use Yoyakku::Util qw{chang_datetime_24for29};
+
+    my $chang_datetime_ref
+        = chang_datetime_24for29( $reserve_ref->getstarted_on,
+        $reserve_ref->enduse_on );
+
+    24時間を29時間に変更(datetime形式)
+
+=cut
+
+sub chang_datetime_24for29 {
+    my $datetime_start = shift @_;
+    my $datetime_end   = shift @_;
+
+    # 日付情報を分解
+    my $datetime_start_ymd  = substr( $datetime_start, 0,  10 );
+    my $datetime_start_hour = substr( $datetime_start, 11, 2 );
+
+    my $datetime_start_min = substr( $datetime_start, 14, 2 );
+    my $datetime_start_sec = substr( $datetime_start, 17, 2 );
+
+    my $datetime_end_ymd  = substr( $datetime_end, 0,  10 );
+    my $datetime_end_hour = substr( $datetime_end, 11, 2 );
+    my $datetime_end_min  = substr( $datetime_end, 14, 2 );
+    my $datetime_end_sec  = substr( $datetime_end, 17, 2 );
+
+    #時刻0-5時の場合は24-29に変換、(startのみ)
+    $datetime_start_hour += 0;
+
+    if ( $datetime_start_hour =~ /^[0-5]$/ ) {
+        $datetime_start_hour += 24;
+
+        #日付を1日もどる
+        $datetime_start_ymd
+            = localtime->strptime( $datetime_start_ymd, '%Y-%m-%d' );
+        $datetime_start_ymd = $datetime_start_ymd - ONE_DAY * 1;
+        $datetime_start_ymd = $datetime_start_ymd->date;
+    }
+    $datetime_start_hour = sprintf( "%02d", $datetime_start_hour );
+
+    #時刻0-6時の場合は24-30に変換、(endのみ)
+    $datetime_end_hour += 0;
+
+    #念のために時刻を数字の型にして、最初の0があれば表示しない
+    #時刻0-6時の場合は24-30に変換、
+    if ( $datetime_end_hour =~ /^[0-6]$/ ) {
+        $datetime_end_hour += 24;
+
+        #日付を1日もどる
+        $datetime_end_ymd
+            = localtime->strptime( $datetime_end_ymd, '%Y-%m-%d' );
+        $datetime_end_ymd = $datetime_end_ymd - ONE_DAY * 1;
+        $datetime_end_ymd = $datetime_end_ymd->date;
+    }
+    $datetime_end_hour = sprintf( "%02d", $datetime_end_hour );
+
+    # 修正した日付の文字列をまとめる
+    my $datetime_start_chang
+        = $datetime_start_ymd . q{ }
+        . $datetime_start_hour . q{:}
+        . $datetime_start_min . q{:}
+        . $datetime_start_sec;
+
+    my $datetime_end_chang
+        = $datetime_end_ymd . q{ }
+        . $datetime_end_hour . q{:}
+        . $datetime_end_min . q{:}
+        . $datetime_end_sec;
+
+    my $chang_datetime_ref = {
+        datetime_start      => $datetime_start_chang,
+        datetime_start_ymd  => $datetime_start_ymd,
+        datetime_start_hour => $datetime_start_hour,
+        datetime_start_min  => $datetime_start_min,
+        datetime_start_sec  => $datetime_start_sec,
+        datetime_end        => $datetime_end_chang,
+        datetime_end_ymd    => $datetime_end_ymd,
+        datetime_end_hour   => $datetime_end_hour,
+        datetime_end_min    => $datetime_end_min,
+        datetime_end_sec    => $datetime_end_sec,
+    };
+
+    return $chang_datetime_ref;
+}
+
+=head2 calendar_move
+
+    use Yoyakku::Util qw{calendar_move};
+
+    my $calender_move_ref = calendar_move( $date_ref, 'this' );
+
+    カレンダー移動のサブルーチン
+
+=cut
+
+sub calendar_move {
+
+    # 日付の最新情報を取得する(ハッシュリファレンス)
+    my $date_ref = shift @_;
+
+    # 表示したいカレンダー
+    my $select_cal_date = shift @_;
+
+    # 日付が押されたとき
+    my $selected_date = shift @_;
+
+    # 受け取った日付文字を日付データに変換
+    my $select_date = localtime->strptime( $selected_date, '%Y-%m-%d' );
+
+    my $now_date    = $date_ref->{now};
+    my $next1m_date = $date_ref->{next1};
+    my $next2m_date = $date_ref->{next2};
+    my $next3m_date = $date_ref->{next3};
+
+    # 表示したいカレンダー識別
+    my $cal_date
+        = ( $select_cal_date eq 'this' ) ? $now_date
+        : ( $select_cal_date eq 'next_1' ) ? $next1m_date
+        : ( $select_cal_date eq 'next_2' ) ? $next2m_date
+        : ( $select_cal_date eq 'next_3' ) ? $next3m_date
+        : $now_date;
+
+    my $look_date
+        = ( $select_cal_date eq 'this' ) ? $now_date
+        : ( $select_cal_date eq 'next_1' ) ? $next1m_date
+        : ( $select_cal_date eq 'next_2' ) ? $next2m_date
+        : ( $select_cal_date eq 'next_3' ) ? $next3m_date
+        : $now_date;
+
+    my $next_date
+        = ( $select_cal_date eq 'this' ) ? $next1m_date
+        : ( $select_cal_date eq 'next_1' ) ? $next2m_date
+        : ( $select_cal_date eq 'next_2' ) ? $next3m_date
+        : ( $select_cal_date eq 'next_3' ) ? $next3m_date
+        : $next1m_date;
+
+    my $back_date
+        = ( $select_cal_date eq 'this' ) ? $now_date
+        : ( $select_cal_date eq 'next_1' ) ? $now_date
+        : ( $select_cal_date eq 'next_2' ) ? $next1m_date
+        : ( $select_cal_date eq 'next_3' ) ? $next2m_date
+        : $now_date;
+
+    #カレンダー情報をつくる
+    my @caps = ( "日", "月", "火", "水", "木", "金", "土" );
+    my @cal_now = calendar( $cal_date->mon, $cal_date->year );
+
+    my $calender_move_ref = {
+        look_date_ymd => $look_date->date,
+        look_date_ym  => $look_date->strftime('%Y-%m'),
+        look_date_wday =>
+            $look_date->wdayname(qw( 日 月 火 水 木 金 土 )),
+        select_date_d => $look_date->mday,
+        past_date_d   => $look_date->mday,
+        next_date_ym  => $next_date->strftime('%Y-%m'),
+        back_date_ym  => $back_date->strftime('%Y-%m'),
+        cal_now       => \@cal_now,
+        caps          => \@caps,
+        tomorrow      => $look_date + ONE_DAY * 1,
+    };
+
+    # 日付が選択されたときの
+    if ($selected_date) {
+        my $past_date_d;
+        my $next_date_ym;
+        my $back_date_ym;
+
+        if ( $select_date->mon eq $now_date->mon ) {
+            $past_date_d  = $now_date->mday;
+            $next_date_ym = $next1m_date->strftime('%Y-%m');
+            $back_date_ym = $now_date->strftime('%Y-%m');
+        }
+
+        if ( $select_date->mon eq $next1m_date->mon ) {
+            $past_date_d  = 0;
+            $next_date_ym = $next2m_date->strftime('%Y-%m');
+            $back_date_ym = $now_date->strftime('%Y-%m');
+        }
+
+        if ( $select_date->mon eq $next2m_date->mon ) {
+            $past_date_d  = 0;
+            $next_date_ym = $next3m_date->strftime('%Y-%m');
+            $back_date_ym = $next1m_date->strftime('%Y-%m');
+        }
+
+        if ( $select_date->mon eq $next3m_date->mon ) {
+            $past_date_d  = 0;
+            $next_date_ym = $next3m_date->strftime('%Y-%m');
+            $back_date_ym = $next2m_date->strftime('%Y-%m');
+        }
+
+        @cal_now = calendar( $select_date->mon, $select_date->year );
+
+        $calender_move_ref = {
+            look_date_ymd => $select_date->date,
+            look_date_ym  => $select_date->strftime('%Y-%m'),
+            look_date_wday =>
+                $select_date->wdayname(qw( 日 月 火 水 木 金 土 )),
+            select_date_d => $select_date->mday,
+            past_date_d   => $past_date_d,
+            next_date_ym  => $next_date_ym,
+            back_date_ym  => $back_date_ym,
+            cal_now       => \@cal_now,
+            caps          => \@caps,
+            tomorrow      => $select_date + ONE_DAY * 1,
+        };
+    }
+
+    return $calender_move_ref;
 }
 
 =head2 chang_date_6
