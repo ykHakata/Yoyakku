@@ -1,4 +1,4 @@
-% layout 'default_new';
+% layout 'default';
 % title 'yoyakku簡易予約状況';
 
 <div id="simple_page">

@@ -259,6 +259,7 @@ sub index {
 
 
     $self->stash(
+        class    => '',
         template => 'simple/simple_res',
         format   => 'html',
     );
