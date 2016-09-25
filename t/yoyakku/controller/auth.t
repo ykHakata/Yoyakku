@@ -41,7 +41,7 @@ subtest 'method' => sub {
 
 subtest 'index' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # get, post 以外は トップページにリダイレクト
     $t->head_ok('/up_login')->status_is(302)->header_is(@to_index);
@@ -66,7 +66,7 @@ subtest 'index' => sub {
 
 subtest 'up_login' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # ログインなしの場合、ログイン入力選択画面へ
     subtest 'render login select' => sub {
@@ -108,7 +108,7 @@ subtest 'up_login' => sub {
 
 subtest 'up_logout' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # ログイン中の場合 session 終了後ログイン終了画面へ
     subtest 'render logout' => sub {
@@ -138,7 +138,7 @@ subtest 'up_logout' => sub {
 
 subtest 'up_login_admin' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # ログイン入力画面
     subtest 'render login input' => sub {
@@ -271,7 +271,7 @@ subtest 'up_login_admin' => sub {
 
 subtest 'up_login_general' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # ログイン入力画面
     subtest 'render login input' => sub {
@@ -410,7 +410,7 @@ subtest 'up_login_general' => sub {
 
 subtest 'root_login' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # ログイン入力画面
     subtest 'render login input' => sub {

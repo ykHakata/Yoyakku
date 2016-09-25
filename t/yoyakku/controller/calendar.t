@@ -44,7 +44,7 @@ subtest 'index' => sub {
     $t->head_ok('/index_next_m')->status_is(302);
     $t->head_ok('/index_next_two_m')->status_is(302);
     $t->head_ok('/index_next_three_m')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 
     # ログインなしアクセス
     $t->get_ok('/')->status_is(200);

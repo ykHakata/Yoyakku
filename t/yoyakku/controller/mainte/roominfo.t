@@ -40,12 +40,12 @@ subtest 'index' => sub {
 # リクエスト確認 get, post 以外は トップページにリダイレクト
     $t->head_ok('/mainte_roominfo_serch')->status_is(302);
     $t->head_ok('/mainte_roominfo_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 
 # ログインセッション無き場合トップページにリダイレクト
     $t->get_ok('/mainte_roominfo_serch')->status_is(302);
     $t->get_ok('/mainte_roominfo_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 };
 
 =head2 mainte_roominfo_serch
@@ -71,13 +71,12 @@ subtest 'mainte_roominfo_new' => sub {
 
     # ログインなし
     $t->get_ok('/mainte_roominfo_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 
     # ログイン (編集指定 id なし)
     $t->post_ok( '/root_login' => form => $login_params );
     $t->get_ok('/mainte_roominfo_new')->status_is(302);
-    is( $t->tx->res->headers->location,
-        'mainte_roominfo_serch', 'location ok' );
+    $t->header_is( Location => '/mainte_roominfo_serch' );
 
     # 指定のレコード表示
     my $params = +{ id => 1 };

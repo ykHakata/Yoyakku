@@ -40,12 +40,12 @@ subtest 'index' => sub {
     # get, post 以外は トップページにリダイレクト
     $t->head_ok('/mainte_region_serch')->status_is(302);
     $t->head_ok('/mainte_region_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 
     # ログインセッション無き場合トップページ
     $t->get_ok('/mainte_region_serch')->status_is(302);
     $t->get_ok('/mainte_region_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 };
 
 =head2 mainte_region_serch
@@ -71,12 +71,12 @@ subtest 'mainte_region_new' => sub {
 
     # ログインなし
     $t->get_ok('/mainte_region_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 
     # noteログイン (編集指定 id なし 新規作成)
     $t->post_ok( '/root_login' => form => $login_params );
     $t->get_ok('/mainte_region_new')->status_is(302);
-    $t->header_is( Location => 'mainte_list' );
+    $t->header_is( Location => '/mainte_list' );
     note(
         'mainte_region_new は未実装につき、現状は mainte_list へリダイレクト'
     );

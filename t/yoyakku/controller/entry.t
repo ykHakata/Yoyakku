@@ -40,7 +40,7 @@ subtest 'method' => sub {
 
 subtest 'index' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # get, post 以外は トップページにリダイレクト
     $t->head_ok('/entry')->status_is(302)->header_is(@to_index);
@@ -74,7 +74,7 @@ subtest 'index' => sub {
 
 subtest 'entry' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     subtest 'success' => sub {
         $t->get_ok('/entry')->status_is(200)

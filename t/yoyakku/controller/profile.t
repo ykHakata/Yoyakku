@@ -41,7 +41,7 @@ subtest 'method' => sub {
 
 subtest 'index' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # get, post 以外は トップページにリダイレクト
     $t->head_ok('/profile')->status_is(302)->header_is(@to_index);
@@ -60,7 +60,7 @@ subtest 'index' => sub {
 
 subtest 'profile_comp' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     subtest 'success' => sub {
 
@@ -138,7 +138,7 @@ subtest 'profile_comp' => sub {
 
 subtest 'profile' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     subtest 'success' => sub {
 

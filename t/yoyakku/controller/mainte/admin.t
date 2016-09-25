@@ -40,12 +40,12 @@ subtest 'index' => sub {
     # get, post 以外は トップページにリダイレクト
     $t->head_ok('/mainte_registrant_serch')->status_is(302);
     $t->head_ok('/mainte_registrant_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 
     # ログインセッション無き場合トップページ
     $t->get_ok('/mainte_registrant_serch')->status_is(302);
     $t->get_ok('/mainte_registrant_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 };
 
 =head2 mainte_registrant_serch
@@ -72,7 +72,7 @@ subtest 'mainte_registrant_new' => sub {
 
     # ログインなし
     $t->get_ok('/mainte_registrant_new')->status_is(302);
-    $t->header_is( Location => 'index' );
+    $t->header_is( Location => '/index' );
 
     # ログイン (編集指定 id なし 新規作成)
     $t->post_ok( '/root_login' => form => $login_params );

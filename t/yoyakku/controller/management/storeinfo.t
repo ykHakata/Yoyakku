@@ -41,7 +41,7 @@ subtest 'method' => sub {
 
 subtest 'index' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     # get, post 以外は トップページにリダイレクト
     $t->head_ok('/admin_store_edit')->status_is(302)->header_is(@to_index);
@@ -60,7 +60,7 @@ subtest 'index' => sub {
 
 subtest 'admin_store_edit' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     subtest 'success' => sub {
 
@@ -228,7 +228,7 @@ subtest 'admin_store_edit' => sub {
 
 subtest 'admin_store_comp' => sub {
 
-    my @to_index = ( Location => 'index' );
+    my @to_index = ( Location => '/index' );
 
     subtest 'success' => sub {
 
