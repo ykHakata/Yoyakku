@@ -1,21 +1,21 @@
 <table id="calnavi">
 <tr>
-<th colspan="7">
-<form method="get" action="">
-<input type="hidden" name="back_mon_val" size="" value="<%= $back_mon_val %>">
-<input type="submit" name="back_mon" value="＜ー">
-　<%= $select_date_ym %>　
-<input type="hidden" name="next_mon_val" size="" value="<%= $next_mon_val %>">
-<input type="submit" name="next_mon" value="ー＞">
-% if ($switch_calnavi) {
-    <input type="hidden" name="store_id" size="" value="<%= $store_id %>">
-% }
-</form>
-</th>
+  <th colspan="7">
+  <form method="get" action="">
+  <input type="hidden" name="back_mon_val" size="" value="<%= $back_mon_val %>">
+  <input type="submit" name="back_mon" value="＜ー">
+  　<%= $select_date_ym %>　
+  <input type="hidden" name="next_mon_val" size="" value="<%= $next_mon_val %>">
+  <input type="submit" name="next_mon" value="ー＞">
+  % if ($switch_calnavi) {
+  <input type="hidden" name="store_id" size="" value="<%= $store_id %>">
+  % }
+  </form>
+  </th>
 </tr>
 <tr>
 % for my $cap (@$caps) {
-    <td><%= $cap %></td>
+  <td><%= $cap %></td>
 % }
 </tr>
 

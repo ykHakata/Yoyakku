@@ -25,6 +25,41 @@ use Mojo::Util qw{dumper};
 
 my $YOYAKKU_TIME = '06:00:00';
 
+=head2 cond_input_form
+
+    入力フォーム切替の為の値取得
+
+=cut
+
+sub cond_input_form {
+    my $self = shift;
+    my $c    = $self->app->build_controller;
+
+    my $cond_input = +{
+        cancel_conf  => undef,
+        switch_input => undef,
+    };
+
+    # 予約取消が押されたときのスクリプト
+    if ( $c->param('res_cancel') ) {
+        $cond_input->{cancel_conf} = 1;
+        return $cond_input;
+    }
+
+    if ( $c->param('reserve_id') ) {
+        $cond_input->{switch_input} = 1;
+        return $cond_input;
+    }
+
+    if ( $c->param('new_res_room_id') ) {
+        $cond_input->{switch_input} = 2;
+        return $cond_input;
+    }
+
+    $cond_input->{switch_input} = 0;
+    return $cond_input;
+}
+
 =head2 get_timeout_room
 
     現在時刻が予約の時間枠をすぎた場合予約不可 (本日の場合のみ)

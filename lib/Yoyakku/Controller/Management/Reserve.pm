@@ -61,53 +61,24 @@ sub index {
 =cut
 
 sub admin_reserv_list {
-    my $self  = shift;
-    my $model = $self->model->management->reserve;
-    warn '$self->stash->{params}',dumper($self->stash->{params});
-    #=======================================================
+    my $self = shift;
 
-    #入力フォーム切替
-    my $cancel_conf;
-    my $switch_input;
+    my $reserve = $self->model->management->reserve;
 
-    if ( uc $self->req->method eq 'POST' ) {
-
-        # 予約取消が押されたときのスクリプト
-        my $res_cancel = $self->param('res_cancel');
-        if ($res_cancel) {
-            $cancel_conf = 1;
-        }
-    }
-    my $reserve_id      = $self->param('reserve_id');
-    my $new_res_room_id = $self->param('new_res_room_id');
-
-    if ($cancel_conf) {
-        $cancel_conf = 1;
-    }
-    else {
-        $switch_input =
-            $reserve_id      ? 1
-          : $new_res_room_id ? 2
-          :                    0;
-    }
-
-    #=======================================================
-
-    # カレンダーナビにstoreidを埋め込む為の切替
-    my $switch_calnavi = 0;
-    my $store_id;
+    # 入力フォーム切替用値取得
+    my $cond_input_form = $reserve->cond_input_form();
 
     $self->stash(
         class        => 'admin_reserv_list',
         template     => 'management/admin_reserv_list',
         format       => 'html',
-        cancel_conf  => $cancel_conf,
-        switch_input => $switch_input,
+        cancel_conf  => $cond_input_form->{cancel_conf},
+        switch_input => $cond_input_form->{switch_input},
     );
 
     # 管理者予約履歴 のための値
     my $reserve_history
-        = $model->get_reserve_history( $self->stash->{login_row} );
+        = $reserve->get_reserve_history( $self->stash->{login_row} );
     $self->stash(
         admin_now_reserves_ref   => $reserve_history->{now}->{reserve},
         year_reserve             => $reserve_history->{now}->{year},
@@ -123,15 +94,16 @@ sub admin_reserv_list {
         next3_mon_reserve        => $reserve_history->{next3}->{mon},
     );
 
+    # カレンダーナビゲーション用の値
+    my $params = $self->model->region->get_cal_params( $self->stash->{params} );
+
+    # カレンダーナビにstoreidを埋め込む為の切替 (calnavi 0 の場合 store_id 不要)
+    my $switch_calnavi = 0;
+    my $store_id;
+
     $self->stash(
         switch_calnavi  => $switch_calnavi,
         store_id        => $store_id,
-    );
-
-    my $params = $self->model->region->get_cal_params( $self->stash->{params} );
-
-    # カレンダー
-    $self->stash(
         border_date_day => $params->{border_date_day},
         select_date_ym  => $params->{select_date_ym},
         select_date_day => $params->{select_date_day},
@@ -154,28 +126,26 @@ sub admin_reserv_list {
     my $roominfo_ids   = [ map { $_->id } @{$roominfo_rows} ];
     my $roominfo_names = [ map { $_->name } @{$roominfo_rows} ];
 
-    # 予約テーブル
+    my $select_date = $params->{select_date_obj};
+
+    # 利用停止になっている部屋を特定
+    my $outside_room
+        = $reserve->get_outside_room( $self->stash->{login_row} );
+
+    # 現在時刻が予約の時間枠をすぎた場合予約不可 (本日の場合のみ)
+    my $timeout_room
+        = $reserve->get_timeout_room( $self->stash->{login_row},
+        $select_date );
+
+    # 予約テーブル部屋一覧
     $self->stash(
         select_date_res => $params->{select_date},
         switch_res_navi => $switch_res_navi,
         storeinfo_name  => $storeinfo_name,
         id_ref          => $roominfo_ids,
         name_ref        => $roominfo_names,
-    );
-
-    my $select_date = $params->{select_date_obj};
-
-    # 利用停止になっている部屋を特定
-    my $outside_room
-        = $model->get_outside_room( $self->stash->{login_row} );
-
-    # 現在時刻が予約の時間枠をすぎた場合予約不可 (本日の場合のみ)
-    my $timeout_room
-        = $model->get_timeout_room( $self->stash->{login_row}, $select_date );
-
-    $self->stash(
-        outside_ref => $outside_room,
-        timeout_ref => $timeout_room,
+        outside_ref     => $outside_room,
+        timeout_ref     => $timeout_room,
     );
 
     # 暫定的にここにロジックを書く、ここから
@@ -187,7 +157,7 @@ sub admin_reserv_list {
 
         # 開始時間をしていする変数
         my $start_time_key = substr( $roominfo_ref->starttime_on, 0, 2 );
-        warn '$start_time_key',dumper($start_time_key);
+        # warn '$start_time_key',dumper($start_time_key);
         # 時間軸を0:00->24:00にそろえる
         my $time_adj = 24;
 
@@ -234,7 +204,7 @@ sub admin_reserv_list {
         }
     }
     # 暫定的にここにロジックを書く、ここまで
-    warn '\%close_store-----',dumper(\%close_store);
+    # warn '\%close_store-----',dumper(\%close_store);
     #値おくりこみ,ハッシュにするのが大事
     $self->stash(
         close_store_ref => \%close_store,
@@ -387,7 +357,7 @@ sub admin_reserv_list {
             }
         }
     }
-    warn '\%select_res------',dumper(\%select_res);
+    # warn '\%select_res------',dumper(\%select_res);
     #値おくりこみ,ハッシュにするのが大事
     # テンプレートへ送り、
     $self->stash( select_res_ref => \%select_res );

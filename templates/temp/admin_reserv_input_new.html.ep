@@ -1,0 +1,133 @@
+<form method="post" action="">
+
+%# <table id="r_navi_t">
+<table id="admin_input_from">
+
+<div class="vali"><%= validator_error 'id' %></div>
+<div class="vali"><%= validator_error 'getstarted_on_day' %></div>
+<div class="vali"><%= validator_error 'getstarted_on_time' %></div>
+<div class="vali"><%= validator_error 'enduse_on_day' %></div>
+<div class="vali"><%= validator_error 'enduse_on_time' %></div>
+<div class="vali"><%= validator_error 'useform' %></div>
+<div class="vali"><%= validator_error 'message' %></div>
+    %#<tr id="room_n">
+    <tr id="">
+        <th class="col1">部屋</th>
+        <td class="col2">
+        <input type="text" name="room_name" value="" readonly class="admin_input_name">
+        <input type="hidden" name="roominfo_id" value="" readonly class="admin_input_name">
+        <input type="hidden" name="id" value="AUTO_NUMBER" readonly class="admin_input_name"></td>
+        </td>
+        <td class="col3">
+        <input type="submit" name="back" class="admin_input_sub" value="戻る"><input type="submit" name="save" class="admin_input_sub" value="保存"></td>
+    </tr>
+    %#<tr id="start_t">
+    <tr id="">
+        <th class="col1">開始</th>
+        <td class="col2">
+        <input type="text" id="from" name="getstarted_on_day" value="" class="admin_input_name"><br />
+        </td>
+        <td class="col3">
+        <select name="getstarted_on_time" class="admin_input_select">
+        % for (my $i=6;$i < 30;++$i) {
+        % if ($room_time_change) {
+            <option value="<%= $i %>"><%= $i %>:30</option>
+        % }
+        % else {
+            <option value="<%= $i %>"><%= $i %>:00</option>
+        % }
+        % }
+        </select>
+        </td>
+    </tr>
+    %#<tr id="end_t">
+    <tr id="">
+        <th class="col1">終了</th>
+        <td class="col2">
+<input type="text" id="to" name="enduse_on_day" value="" class="admin_input_name"><br />
+        </td>
+        <td class="col3">
+<select name="enduse_on_time" class="admin_input_select">
+% for (my $i=7;$i <= 30;++$i) {
+
+% if ($room_time_change) {
+    <option value="<%= $i %>"><%= $i %>:30</option>
+% }
+% else {
+    <option value="<%= $i %>"><%= $i %>:00</option>
+% }
+
+
+
+
+
+% }
+</select>
+        </td>
+    </tr>
+    %#<tr id="use">
+    <tr id="">
+        <th class="col1">利用</th>
+        <td class="col2">
+<select name="useform" class="admin_input_select">
+<option value="0">バンド</option>
+<option value="1">個人</option>
+<option value="2">利用停止</option>
+</select>
+        </td>
+        <td class="col3"></td>
+    </tr>
+    %#<tr id="name_r">
+    <tr id="">
+        <th class="col1">予約者</th>
+        <td class="col2_3" colspan="2">
+        <input type="text" name="subscriber" value="" readonly class="admin_input_name">
+        </td>
+    </tr>
+    %#<tr id="tel">
+    <tr id="">
+        <th class="col1">電話</th>
+        <td class="col2_3" colspan="2">
+        <input type="text" name="tel" value="" readonly class="admin_input_name">
+        </td>
+    </tr>
+    <tr id="">
+        <th class="col1">伝言板</th>
+        <td class="col2_3" colspan="2">
+        <input type="text" name="message" value="" class="admin_input_name">
+        </td>
+    </tr>
+    <tr id="">
+        <th class="col1">代行予約</th>
+        <td class="col2_3" colspan="2">
+        <select name="general_id" class="admin_input_select">
+        <option value="0">選択しない</option>
+        % for my $acting_ref (@$actings_ref) {
+        <option value="<%= $acting_ref->general_id %>"><%= $acting_ref->nick_name %>(<%= $acting_ref->tel %>)</option>
+        % }
+        </select>
+        </td>
+    </tr>
+</table>
+%#<table id="r_navi_b_t">
+<table id="admin_input_botton">
+    %#<tr id="botton">
+    <tr id="">
+        <td class="col1">
+            <input type="submit" name="h_botton" value="1h" class="h_botton">
+        </td>
+        <td class="col2">
+            <input type="submit" name="h_botton" value="2h" class="h_botton">
+        </td>
+        <td class="col3">
+            <input type="submit" name="h_botton" value="3h" class="h_botton">
+        </td>
+        <td class="col4">
+            <input type="submit" name="h_botton" value="4h" class="h_botton">
+        </td>
+        <td class="col5">
+            <input type="submit" name="h_botton" value="5h" class="h_botton">
+        </td>
+    </tr>
+</table>
+</form>

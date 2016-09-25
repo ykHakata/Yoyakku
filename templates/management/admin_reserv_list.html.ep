@@ -2,113 +2,76 @@
 % title 'yoyakku管理モード';
 
 <div id="wrapper">
-
-
 % if ($cancel_conf && $cancel_conf == 1) {
-
+<!-- キャンセル確認(管理者) -->
 <%= include './temp/up_admin_r_u_c_conf' %>
-
-% }
-% else {
-
-
+% } else {
+<!-- ヘッダーナビゲーション -->
 <%= include './temp/header_navi_new' %>
-
-
-<div id="navigation">
-
+  <div id="navigation">
     <div id="localnavi">
     <h2 id="">管理者予約管理</h2>
     <div class="section_reserv_list">
-
+    <!-- カレンダーナビゲーション -->
     <%= include './temp/navi_calnavi_new' %>
-
     <div id="r_navi_out">
-
     % if ($switch_input == 1) {
-
+    <!-- 予約入力フォーム -->
     <%= include './temp/admin_reserv_input_modify' %>
-
     % }
     % elsif ($switch_input == 2){
-
+    <!-- 予約入力フォーム新規 -->
     <%= include './temp/admin_reserv_input_new' %>
-
     % }
     % else {
         <p>管理者予約履歴</p>
         <p></p><br />
-
-
         <dl id="admin_res">
         <dt><%= $year_reserve %>年&nbsp;<%= $mon_reserve %>月&nbsp;予約</dt>
         % for my $admin_reserve (@$admin_now_reserves_ref) {
             <dd>
             <a href="javascript:void(0)" id="" onclick="document.res_id_<%= $admin_reserve->{id} %>.submit();return false;">
             <%= $admin_reserve->{date} %>
-
             </a>
             <form name="res_id_<%= $admin_reserve->{id} %>" method="get" action="">
             <input type="hidden" name="select_date" size="" value="<%= $admin_reserve->{date_ym} %>">
             </form>
             </dd>
         % }
-
         <dt><%= $next1_year_reserve %>年&nbsp;<%= $next1_mon_reserve %>月&nbsp;予約</dt>
         % for my $admin_reserve (@$admin_next1_reserves_ref) {
             <dd>
             <a href="javascript:void(0)" id="" onclick="document.res_id_<%= $admin_reserve->{id} %>.submit();return false;">
             <%= $admin_reserve->{date} %>
-
             </a>
             <form name="res_id_<%= $admin_reserve->{id} %>" method="get" action="">
             <input type="hidden" name="select_date" size="" value="<%= $admin_reserve->{date_ym} %>">
             </form>
             </dd>
         % }
-
         <dt><%= $next2_year_reserve %>年&nbsp;<%= $next2_mon_reserve %>月&nbsp;予約</dt>
         % for my $admin_reserve (@$admin_next2_reserves_ref) {
             <dd>
             <a href="javascript:void(0)" id="" onclick="document.res_id_<%= $admin_reserve->{id} %>.submit();return false;">
             <%= $admin_reserve->{date} %>
-
             </a>
             <form name="res_id_<%= $admin_reserve->{id} %>" method="get" action="">
             <input type="hidden" name="select_date" size="" value="<%= $admin_reserve->{date_ym} %>">
             </form>
             </dd>
         % }
-
         <dt><%= $next3_year_reserve %>年&nbsp;<%= $next3_mon_reserve %>月&nbsp;予約</dt>
         % for my $admin_reserve (@$admin_next3_reserves_ref) {
             <dd>
             <a href="javascript:void(0)" id="" onclick="document.res_id_<%= $admin_reserve->{id} %>.submit();return false;">
             <%= $admin_reserve->{date} %>
-
             </a>
             <form name="res_id_<%= $admin_reserve->{id} %>" method="get" action="">
             <input type="hidden" name="select_date" size="" value="<%= $admin_reserve->{date_ym} %>">
             </form>
             </dd>
         % }
-
         </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     % }
     </div>
 
@@ -129,13 +92,9 @@
     <li id="tpp5">予約管理</li>
 </ul>
 </div>
-
+<!-- 管理者予約テーブル -->
 <%= include './temp/admin_reserv_table' %>
-
 <!-- /#contents --></div>
-
 <%= include './temp/footer' %>
-
 % }
-
 <!-- /#wrapper --></div>
