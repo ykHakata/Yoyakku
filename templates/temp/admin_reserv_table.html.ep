@@ -15,66 +15,49 @@
     </tr>
     <!-- 部屋 -->
     <tr>
-% my @frame_rooms;
+    % my @frame_rooms;
     % for my $room_number (0..9) {
-        <th class="col1">
-        <%= $name_ref->[$room_number] %>
-        <%#= @$id_ref->[$room_number] %>
+        <th class="col1"> <%= $name_ref->[$room_number] %> </th>
         % push (@frame_rooms,$id_ref->[$room_number]);
-        </th>
     % }
     </tr>
 </thead>
 % my @col_name = qw{ a b c d e f g h i j };
-
     <tbody>
     % my @m_time = qw{ 00 30 };
-
     % my $spece_time;
     % for my $h_time (6..29) {
         % if ( $h_time =~ m/(^\d$)/ ) { $spece_time = "0" ; }
         % if ( $h_time !~ m/(^\d$)/ ) { $spece_time = undef ; }
-
-
         % for my $row_time00_30 (0..1) {
             <tr id="t<%= $spece_time %><%= $h_time %><%= $m_time[$row_time00_30] %>">
-
             % my $row_time ;
             % my $change_h ;
             % my $change_m ;
             % my $change_come;
             % if ($row_time00_30 == 0) {
-
                 % $row_time = $h_time . ":" . $m_time[$row_time00_30] ;
-
                 % if ($h_time >= 24 and $h_time <= 29) {
                     % $change_h    = $h_time -24 ;
                     % $change_m    = ":00";
                     % $change_come = "(" . $change_h . $change_m . ")" ;
                 % }
-
             % }
             % else {
                 % $row_time    = undef;
                 % $change_come = undef;
             %}
-
             <td class="t"><%= $row_time %><br /><%= $change_come %></td>
             % my $number_col_name = 0;
             % for my $frame_room (@frame_rooms) {
-
                 % my $close_store_key = "close_store" . "_" . $frame_room . "_" . $h_time;
                 % my $close           = $close_store_ref->{$close_store_key};
-
                 % my $outside_key = "outside" . "_" . $frame_room . "_" . $h_time;
                 % my $outside     = $outside_ref->{$outside_key};
-
                 % my $timeout_key = "timeout" . "_" . $frame_room . "_" . $h_time;
                 % my $timeout     = $timeout_ref->{$timeout_key};
-
                 % my $select_res_key = "conf_res" . "_" . $frame_room . "_" . $h_time;
                 % my $conf_res       = $select_res_ref->{$select_res_key};
-
                 % my $conf_number;
                 %# if ($conf_res =~ m/^(conf_res)(_)(\d+)/ ) {
                     %# $conf_res = $1;
@@ -84,18 +67,13 @@
                     % $conf_res = $3;
                     % $conf_number = $1;
                 % }
-
                 % my $select_detail_res_key = "detail_res" . "_" . $frame_room . "_" . $h_time;
                 % my $select_detail_res     = $select_detail_res_ref->{$select_detail_res_key};
-
-
-
                 <td class="t<%= $col_name[$number_col_name] %> <%= $outside %> <%= $close %> <%= $timeout %>">
                 <%#= $conf_res %>
                 <%#= $conf_number %>
                 <%#= $timeout %>
                 %# 新規予約の枠
-
                 % if ($switch_res_navi eq 0) {
                     % if (! $close and $row_time00_30 == 1 and ! $outside and ! $conf_res and ! $timeout) {
                     %# if (! $close and $row_time00_30 == 1 and ! $outside ) {
@@ -124,11 +102,6 @@
                     </form></td>
                     % }
                % }
-
-
-
-
-
                 %# 既存予約の枠
                 % if ($switch_res_navi eq 0) {
                     % if ($row_time00_30 == 1 and $conf_res) {
@@ -151,24 +124,14 @@
                     </form></td>
                     % }
                 % }
-
-
-
-
-
-
                 </td>
             % ++$number_col_name;
             % }
-
             </tr>
         % }
     % }
-
 </tbody>
 </table>
 <!-- rooms_flow --></div>
 <!-- rooms_flowout --></div>
-
-
 <!-- /#contensNavi --></div>

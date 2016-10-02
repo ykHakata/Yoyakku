@@ -137,6 +137,10 @@ sub admin_reserv_list {
         = $reserve->get_timeout_room( $self->stash->{login_row},
         $select_date );
 
+    # 営業時間外を特定
+    my $close_store
+        = $reserve->get_close_store( $self->stash->{login_row} );
+
     # 予約テーブル部屋一覧
     $self->stash(
         select_date_res => $params->{select_date},
@@ -146,69 +150,8 @@ sub admin_reserv_list {
         name_ref        => $roominfo_names,
         outside_ref     => $outside_room,
         timeout_ref     => $timeout_room,
+        close_store_ref => $close_store,
     );
-
-    # 暫定的にここにロジックを書く、ここから
-    # roominfoから開始時間と終了時間を引き出して、営業してない時間のハッシュを作る
-    my %close_store;
-    my $close_store_val = "close_store";
-
-    for my $roominfo_ref (@{$roominfo_rows}) {
-
-        # 開始時間をしていする変数
-        my $start_time_key = substr( $roominfo_ref->starttime_on, 0, 2 );
-        # warn '$start_time_key',dumper($start_time_key);
-        # 時間軸を0:00->24:00にそろえる
-        my $time_adj = 24;
-
-        # 0:00-5:00の場合24:00-29:00にする24をたす、日付を前日にする
-        if ( $start_time_key =~ /^[0][0-5]/ ) {
-            $start_time_key = $start_time_key + $time_adj;
-        }
-
-        # 終了時間を指定する変数をつくる# 時間軸を0:00->24:00にそろえる
-        my $end_time_key = substr( $roominfo_ref->endingtime_on, 0, 2 );
-
-        # 0:00-6:00の場合24:00-30:00にする24をたす
-        if ( $end_time_key =~ /^[0][0-6]/ ) {
-            $end_time_key = $end_time_key + $time_adj;
-        }
-
-        # 終了時間から開始時間を引いて、利用時間をはじき出す
-        # 開始時刻からカレンダーの開始時刻を引いて、営業してない開店前をはじき出す。
-
-        my $before_opening = $start_time_key - 7;
-        my $time_key       = 6;
-
-        # 開始時間から終了時間まで時間枠ごとのハッシュ名をつけた
-        # 配列をつくってみる。
-        # 配列の数だけ配列の中身を繰り返しハッシュに追加する
-        for my $before_open ( 0 .. $before_opening ) {
-            my $room_id_key     = $roominfo_ref->id;
-            my $close_store_key = "close_store" . "_" . $room_id_key . "_" . $time_key;
-            $close_store{$close_store_key} = $close_store_val;
-            ++$time_key;
-        }
-
-        my $after_closing = 30 - $end_time_key;
-        $time_key      = $end_time_key;
-
-        # 開始時間から終了時間まで時間枠ごとのハッシュ名をつけた
-        # 配列をつくってみる。
-        # 配列の数だけ配列の中身を繰り返しハッシュに追加する
-        for my $after_clos ( 0 .. $after_closing ) {
-            my $room_id_key     = $roominfo_ref->id;
-            my $close_store_key = "close_store" . "_" . $room_id_key . "_" . $time_key;
-            $close_store{$close_store_key} = $close_store_val;
-            ++$time_key;
-        }
-    }
-    # 暫定的にここにロジックを書く、ここまで
-    # warn '\%close_store-----',dumper(\%close_store);
-    #値おくりこみ,ハッシュにするのが大事
-    $self->stash(
-        close_store_ref => \%close_store,
-    );    # テンプレートへ送り、
 
     # ================================================
     # 4/15　予約情報の取り出しのロジックを過去のコードを参考に書き直し

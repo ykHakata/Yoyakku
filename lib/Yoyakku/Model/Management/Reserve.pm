@@ -6,6 +6,7 @@ use Yoyakku::Util::Time qw{
     tp_next_month_after
     parse_datetime
 };
+use Yoyakku::Util qw{chenge_time_over};
 use Mojo::Util qw{dumper};
 =encoding utf8
 
@@ -58,6 +59,69 @@ sub cond_input_form {
 
     $cond_input->{switch_input} = 0;
     return $cond_input;
+}
+
+=head2 get_close_store
+
+    現在時刻が予約の時間枠をすぎた場合予約不可 (本日の場合のみ)
+
+    # $get_close_store = +{
+    #     "close_store_10_7" => "close_store",
+    #     "close_store_10_8" => "close_store",
+    #     ...
+    # };
+
+=cut
+
+sub get_close_store {
+    my $self      = shift;
+    my $login_row = shift;
+
+    my $roominfo_rows = $login_row->fetch_storeinfo->fetch_roominfos;
+
+    my %close_store;
+    my $close_store_val = "close_store";
+
+    # TODO: 閉店時間をもとめるロジックはわかりにくいので見直し必要
+    for my $roominfo_ref (@{$roominfo_rows}) {
+        my $times = +{
+            start_time => $roominfo_ref->starttime_on,
+            end_time   => $roominfo_ref->endingtime_on,
+        };
+        my $split_t        = chenge_time_over($times);
+        my $start_time_key = $split_t->{start_hour};
+        my $end_time_key   = $split_t->{end_hour};
+
+        # 終了時間から開始時間を引いて、利用時間をはじき出す
+        # 開始時刻からカレンダーの開始時刻を引いて、営業してない開店前をはじき出す。
+        my $before_opening = $start_time_key - 7;
+        my $time_key       = 6;
+
+        # 開始時間から終了時間まで時間枠ごとのハッシュ名をつけた
+        # 配列をつくってみる。
+        # 配列の数だけ配列の中身を繰り返しハッシュに追加する
+        for my $before_open ( 0 .. $before_opening ) {
+            my $room_id_key     = $roominfo_ref->id;
+            my $close_store_key = "close_store" . "_" . $room_id_key . "_" . $time_key;
+            $close_store{$close_store_key} = $close_store_val;
+            ++$time_key;
+        }
+
+        my $after_closing = 30 - $end_time_key;
+        $time_key      = $end_time_key;
+
+        # 開始時間から終了時間まで時間枠ごとのハッシュ名をつけた
+        # 配列をつくってみる。
+        # 配列の数だけ配列の中身を繰り返しハッシュに追加する
+        for my $after_clos ( 0 .. $after_closing ) {
+            my $room_id_key     = $roominfo_ref->id;
+            my $close_store_key = "close_store" . "_" . $room_id_key . "_" . $time_key;
+            $close_store{$close_store_key} = $close_store_val;
+            ++$time_key;
+        }
+    }
+
+    return \%close_store;
 }
 
 =head2 get_timeout_room
