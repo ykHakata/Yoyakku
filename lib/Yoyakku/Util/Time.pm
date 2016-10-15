@@ -13,6 +13,7 @@ our @EXPORT_OK = qw{
     tp_next_month
     tp_next_month_after
     parse_datetime
+    tp_next_day
 };
 
 =encoding utf8
@@ -77,6 +78,20 @@ sub split_time {
 
     datetime 形式を分解
 
+    my $parse = parse_datetime('2016-10-15 12:30:20');
+
+    # $parse = +{
+    #     date     => '2016-10-15',
+    #     time     => '12:30:20',
+    #     year     => '2016',
+    #     mon      => '10',
+    #     mday     => '15',
+    #     hour     => '12',
+    #     min      => '30',
+    #     sec      => '20',
+    #     hour_min => '12:30',
+    # };
+
 =cut
 
 sub parse_datetime {
@@ -91,6 +106,9 @@ sub parse_datetime {
 
     Time Piece で現在時刻を取得
 
+    # 現在時刻の Time::Piece オブジェクト取得
+    my $tp = tp_now();
+
 =cut
 
 sub tp_now {
@@ -101,6 +119,11 @@ sub tp_now {
 =head2 tp_from_date
 
     日付のテキストから Time Piece を取得
+
+    my $tp = tp_from_date('2016-10-15');
+
+    # "2016-10-15T00:00:00"
+    $tp->datetime;
 
 =cut
 
@@ -114,6 +137,11 @@ sub tp_from_date {
 
     日付と時刻のテキストから Time Piece を取得
 
+    my $tp = tp_from_date('2016-10-15 12:30:10');
+
+    # "2016-10-15T12:30:10"
+    $tp->datetime;
+
 =cut
 
 sub tp_from_datetime {
@@ -125,6 +153,25 @@ sub tp_from_datetime {
 =head2 tp_from_datetime_over24
 
     日付と時刻のテキストから日付変更を指定して Time Piece を取得
+
+    my $tp = tp_from_datetime_over24('2016-10-15 02:20:30', '06:00:00');
+
+    # "2016-10-15T02:20:30"
+    $tp->datetime;
+
+    # "2016-10-14 26:20:30"
+    $tp->over24_datetime;
+
+    # 境界線
+    $tp = tp_from_datetime_over24('2016-10-15 06:00:00', '06:00:00');
+
+    # "2016-10-15T06:00:00" "2016-10-15 06:00:00"
+    $tp->datetime; $tp->over24_datetime;
+
+    $tp = tp_from_datetime_over24('2016-10-15 05:59:59', '06:00:00');
+
+    # "2016-10-15T05:59:59" "2016-10-14 29:59:59"
+    $tp->datetime; $tp->over24_datetime;
 
 =cut
 
@@ -204,6 +251,18 @@ sub tp_next_month_after {
         $tp = tp_next_month($tp);
     }
 
+    return $tp;
+}
+
+=head2 tp_next_day
+
+    日付を次の日にすすめる
+
+=cut
+
+sub tp_next_day {
+    my $tp = shift;
+    $tp = $tp + ONE_DAY * 1;
     return $tp;
 }
 

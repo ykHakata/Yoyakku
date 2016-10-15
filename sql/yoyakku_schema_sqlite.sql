@@ -79,8 +79,8 @@ CREATE TABLE roominfo(                                      -- 部屋情報設�
 
 DROP TABLE IF EXISTS reserve;
 CREATE TABLE reserve(                                   -- 予約履歴
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 予約ID
-    roominfo_id     INTEGER,                            -- 部屋情報ID
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 予約ID (例: 10, 自動採番)
+    roominfo_id     INTEGER,                            -- 部屋情報ID (例: 10, 自動採番)
     getstarted_on   TEXT,                               -- 利用開始日時
     enduse_on       TEXT,                               -- 利用終了日時
     useform         INTEGER,                            -- 利用形態名
@@ -88,9 +88,9 @@ CREATE TABLE reserve(                                   -- 予約履歴
     general_id      INTEGER,                            -- 一般ユーザーID
     admin_id        INTEGER,                            -- 管理ユーザーID
     tel             TEXT,                               -- 電話番号
-    status          INTEGER,                            -- ステータス
-    create_on       TEXT,                               -- 登録日
-    modify_on       TEXT                                -- 修正日
+    status          INTEGER,                            -- ステータス (例: 0: 予約中, 1: キャンセル)
+    create_on       TEXT,                               -- 登録日 (例: 2015-06-06 12:24:12, datetime 形式)
+    modify_on       TEXT                                -- 修正日 (例: 2015-06-06 12:24:12, datetime 形式)
 );
 
 DROP TABLE IF EXISTS acting;

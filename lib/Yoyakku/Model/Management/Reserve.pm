@@ -5,9 +5,11 @@ use Yoyakku::Util::Time qw{
     tp_now_over24
     tp_next_month_after
     parse_datetime
+    tp_next_day
 };
 use Yoyakku::Util qw{chenge_time_over};
 use Mojo::Util qw{dumper};
+
 =encoding utf8
 
 =head1 NAME (モジュール名)
@@ -59,6 +61,131 @@ sub cond_input_form {
 
     $cond_input->{switch_input} = 0;
     return $cond_input;
+}
+
+=head2 get_select_res
+
+    指定された予約情報の取得
+
+    $get_select_res = +{
+        # 予約時間枠に表示するメッセージ
+        "select_detail_res" => {
+            # detail_res_部屋ID_予約時間枠 => メッセージ内容
+            "detail_res_1_15" => "ふくしま",
+            "detail_res_1_16" => "ふくしま",
+            "detail_res_2_18" => "test reserve2",
+            "detail_res_2_19" => "test reserve2"
+        },
+        # 予約時間枠に関する情報
+        "select_res" => {
+            # detail_res_部屋ID_予約時間枠 => 時間枠情報
+            # 予約ID_conf_res_利用形態_予約者識別
+            "conf_res_1_15" => "3_conf_res_band_general",
+            "conf_res_1_16" => "3_conf_res_band_general",
+            "conf_res_2_18" => "4_conf_res_band_admin",
+            "conf_res_2_19" => "4_conf_res_band_admin"
+        }
+    };
+
+=cut
+
+sub get_select_res {
+    my $self        = shift;
+    my $select_date = shift;
+    my $login_row   = shift;
+
+    my $start_time = $select_date->date . ' ' . $YOYAKKU_TIME;
+    my $end_time   = tp_next_day($select_date);
+    $end_time = $end_time->date . ' ' . $YOYAKKU_TIME;
+
+    my $fetch_roominfo_rows = $login_row->fetch_storeinfo->fetch_roominfos;
+
+    my $args = +{
+        status => 0,
+        getstarted_on =>
+            [ '-and', +{ '>=' => $start_time }, +{ '<' => $end_time }, ],
+    };
+
+    my $time_unit        = +{};
+    my $time_unit_detail = +{};
+
+    for my $roominfo_row ( @{$fetch_roominfo_rows} ) {
+
+        my $reserve_rows = $roominfo_row->search_reserve($args);
+
+        for my $reserve ( @{$reserve_rows} ) {
+
+            # 予約開始時刻変換
+            my $start_time = tp_from_datetime_over24( $reserve->getstarted_on, '06:00:00' );
+            my $end_time = tp_from_datetime_over24( $reserve->enduse_on, '06:00:01' );
+            my $end_hour = $end_time->over24_hour - 1;
+
+            for my $hour ( $start_time->over24_hour .. $end_hour ) {
+
+                my $unit_keys = $self->_get_unit_keys( $reserve, $hour );
+                my $unit_key        = $unit_keys->{unit_key};
+                my $unit_detail_key = $unit_keys->{unit_detail_key};
+
+                my $unit_vals = $self->_get_unit_vals( $reserve );
+                my $unit_val        = $unit_vals->{unit_val};
+                my $unit_detail_val = $unit_vals->{unit_detail_val};
+
+                $time_unit->{$unit_key}               = $unit_val;
+                $time_unit_detail->{$unit_detail_key} = $unit_detail_val;
+
+            }
+        }
+    }
+
+    my $time_unit_pack = +{
+        select_res        => $time_unit,
+        select_detail_res => $time_unit_detail,
+    };
+
+    return $time_unit_pack;
+}
+
+# 予約情報ユニットの key 取得
+sub _get_unit_keys {
+    my $self    = shift;
+    my $reserve = shift;
+    my $hour    = shift;
+
+    my $id = $reserve->roominfo_id;
+
+    return +{
+        unit_key        => 'conf_res_' . $id . '_' . $hour,
+        unit_detail_key => 'detail_res_' . $id . '_' . $hour,
+    };
+}
+
+# 予約情報ユニットの val 取得
+sub _get_unit_vals {
+    my $self    = shift;
+    my $reserve = shift;
+
+    my $unit_val = 'conf_res';
+    $unit_val
+        = ( $reserve->useform == 0 ) ? 'conf_res_band_admin'
+        : ( $reserve->useform == 1 ) ? 'conf_res_individual_admin'
+        : ( $reserve->useform == 2 ) ? 'conf_res_stop_admin'
+        :                              $unit_val;
+
+    my $unit_detail_val = $reserve->message;
+
+    # 一般ユーザーが予約したもの
+    if ( $reserve->general_id ) {
+        $unit_val
+            = ( $reserve->useform == 0 ) ? 'conf_res_band_general'
+            : ( $reserve->useform == 1 ) ? 'conf_res_individual_general'
+            :                              $unit_val;
+        $unit_detail_val = $reserve->fetch_profile->nick_name;
+    }
+
+    return +{
+        unit_val        => $unit_val,
+        unit_detail_val => $unit_detail_val,
+    };
 }
 
 =head2 get_close_store
