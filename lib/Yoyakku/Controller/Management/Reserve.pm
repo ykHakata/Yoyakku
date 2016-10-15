@@ -2,6 +2,10 @@ package Yoyakku::Controller::Management::Reserve;
 use Mojo::Base 'Mojolicious::Controller';
 use Yoyakku::Util qw{chang_date_6};
 use Mojo::Util qw{dumper};
+use Yoyakku::Util::Time qw{
+    tp_from_datetime_over24
+    parse_datetime
+};
 use Time::Piece;
 use Time::Seconds;
 
@@ -66,7 +70,7 @@ sub admin_reserv_list {
     my $reserve = $self->model->management->reserve;
 
     # 入力フォーム切替用値取得
-    my $cond_input_form = $reserve->cond_input_form();
+    my $cond_input_form = $reserve->cond_input_form( $self->stash->{params} );
 
     $self->stash(
         class        => 'admin_reserv_list',
@@ -162,8 +166,62 @@ sub admin_reserv_list {
         select_detail_res_ref => $get_select_res->{select_detail_res},
     );
 
+    # 予約済みの所をクリックすると詳細がでるスクリプト
+    return $self->_detail_reserve( $self->param('reserve_id') )
+        if $self->param('reserve_id');
+
     $self->render;
     return;
+}
+
+# 予約済みの所をクリックすると詳細がでるスクリプト
+sub _detail_reserve {
+    my $self       = shift;
+    my $reserve_id = shift;
+
+    # 指定された予約情報取得
+    my $teng = $self->model->db->base->teng;
+    my $reserve_row = $teng->single( 'reserve', +{ id => $reserve_id } );
+
+    # 開始時間切替情報
+    $self->stash->{room_time_change}
+        = $reserve_row->fetch_roominfo->time_change;
+
+    # 予約者の情報を取得
+    my $subscriber;
+    if ( $reserve_row->general_id ) {
+        $subscriber = $reserve_row->fetch_profile_general->nick_name;
+    }
+    else {
+        $subscriber = $reserve_row->fetch_profile_admin->nick_name;
+    }
+
+    # 予約日付の整形
+    my $tp
+        = tp_from_datetime_over24( $reserve_row->getstarted_on, '06:00:00' );
+    my $getstarted_parse = parse_datetime( $tp->over24_datetime );
+
+    $tp = tp_from_datetime_over24( $reserve_row->enduse_on, '06:00:01' );
+    my $enduse_parse = parse_datetime( $tp->over24_datetime );
+
+    my $stash_params = +{
+        id                 => $reserve_row->id,
+        roominfo_id        => $reserve_row->roominfo_id,
+        room_name          => $reserve_row->fetch_roominfo->name,
+        getstarted_on_day  => $getstarted_parse->{date},
+        getstarted_on_time => $getstarted_parse->{hour} + 0,
+        enduse_on_day      => $enduse_parse->{date},
+        enduse_on_time     => $enduse_parse->{hour} + 0,
+        useform            => $reserve_row->useform,
+        message            => $reserve_row->message,
+        subscriber         => $subscriber,
+        tel                => $reserve_row->tel,
+    };
+
+    # 修正用フォーム、Fillinつかって表示
+    my $html = $self->render_to_string->to_string;
+    $html = HTML::FillInForm->fill( \$html, $stash_params );
+    return $self->render( text => $html, format => 'html' );
 }
 
 1;

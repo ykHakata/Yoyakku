@@ -35,8 +35,8 @@ my $YOYAKKU_TIME = '06:00:00';
 =cut
 
 sub cond_input_form {
-    my $self = shift;
-    my $c    = $self->app->build_controller;
+    my $self   = shift;
+    my $params = shift;
 
     my $cond_input = +{
         cancel_conf  => undef,
@@ -44,17 +44,17 @@ sub cond_input_form {
     };
 
     # 予約取消が押されたときのスクリプト
-    if ( $c->param('res_cancel') ) {
+    if ( $params->{res_cancel} ) {
         $cond_input->{cancel_conf} = 1;
         return $cond_input;
     }
 
-    if ( $c->param('reserve_id') ) {
+    if ( $params->{reserve_id} ) {
         $cond_input->{switch_input} = 1;
         return $cond_input;
     }
 
-    if ( $c->param('new_res_room_id') ) {
+    if ( $params->{new_res_room_id} ) {
         $cond_input->{switch_input} = 2;
         return $cond_input;
     }
@@ -130,6 +130,8 @@ sub get_select_res {
                 my $unit_val        = $unit_vals->{unit_val};
                 my $unit_detail_val = $unit_vals->{unit_detail_val};
 
+                $unit_val = $reserve->id . '_' . $unit_val;
+
                 $time_unit->{$unit_key}               = $unit_val;
                 $time_unit_detail->{$unit_detail_key} = $unit_detail_val;
 
@@ -179,7 +181,7 @@ sub _get_unit_vals {
             = ( $reserve->useform == 0 ) ? 'conf_res_band_general'
             : ( $reserve->useform == 1 ) ? 'conf_res_individual_general'
             :                              $unit_val;
-        $unit_detail_val = $reserve->fetch_profile->nick_name;
+        $unit_detail_val = $reserve->fetch_profile_general->nick_name;
     }
 
     return +{

@@ -1,11 +1,12 @@
 <form method="post" action="">
-<div class="vali"><%= validator_error 'id' %>
-<%= validator_error 'getstarted_on_day' %>
-<%= validator_error 'getstarted_on_time' %>
-<%= validator_error 'enduse_on_day' %>
-<%= validator_error 'enduse_on_time' %>
-<%= validator_error 'useform' %>
-<%= validator_error 'message' %>
+<div class="vali">
+<%#= validator_error 'id' %>
+<%#= validator_error 'getstarted_on_day' %>
+<%#= validator_error 'getstarted_on_time' %>
+<%#= validator_error 'enduse_on_day' %>
+<%#= validator_error 'enduse_on_time' %>
+<%#= validator_error 'useform' %>
+<%#= validator_error 'message' %>
 </div>
 %#<table id="r_navi_t">
 <table id="admin_input_modify">
