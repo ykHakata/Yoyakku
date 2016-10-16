@@ -127,6 +127,9 @@ sub _routing {
     # 店舗管理(Management) 管理者予約
     $r->route('/admin_reserv_list')->to('Management::Reserve#index');
 
+    # 店舗管理(Management) 予約キャンセル完了画面
+    $r->route('/up_admin_r_u_c_comp')->to('Management::Reserve#up_admin_r_u_c_comp');
+
     # 紹介ページ
     $r->route('/tutorial')->to('Tutorial#index');
 

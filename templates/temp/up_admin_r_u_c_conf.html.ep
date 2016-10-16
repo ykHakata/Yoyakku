@@ -11,7 +11,7 @@
 
 <div id="section">
 
-<form method="post" action="">
+<form method="post" action="/admin_reserv_list">
 
 %# <div id="r_navi_out">
 <div id="admin_reserv_cansel_frem">

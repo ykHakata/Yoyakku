@@ -1,0 +1,16 @@
+% layout 'default';
+% title 'yoyakku管理モード';
+
+<div id="pop_wrapper">
+<div id="pop_section">
+<div id="bottom">
+    <p><a href="admin_reserv_list">×</a></p>
+</div>
+<div id="head">
+    <h2>確認</h2>
+</div>
+<div id="section">
+<p>
+予約取消を完了しました。</p>
+</div>
+</div>

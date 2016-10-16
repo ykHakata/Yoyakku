@@ -58,6 +58,23 @@ sub index {
     return $self->redirect_to('index');
 }
 
+=head2 up_admin_r_u_c_comp
+
+    予約キャンセル完了画面
+
+=cut
+
+sub up_admin_r_u_c_comp {
+    my $self = shift;
+    $self->stash(
+        class    => 'up_admin_r_u_c_comp',
+        template => 'management/up_admin_r_u_c_comp',
+        format   => 'html',
+    );
+    $self->render;
+    return;
+}
+
 =head2 admin_reserv_list
 
     予約部屋情報設定コントロール
@@ -67,13 +84,11 @@ sub index {
 sub admin_reserv_list {
     my $self = shift;
 
-    return $self->_admin_reserv_list_post if $self->req->method eq 'POST';
-
     my $reserve = $self->model->management->reserve;
 
     # 入力フォーム切替用値取得
     my $cond_input_form = $reserve->cond_input_form( $self->stash->{params} );
-
+    warn '$cond_input_form-----',dumper($cond_input_form);
     $self->stash(
         class        => 'admin_reserv_list',
         template     => 'management/admin_reserv_list',
@@ -167,6 +182,16 @@ sub admin_reserv_list {
         select_res_ref        => $get_select_res->{select_res},
         select_detail_res_ref => $get_select_res->{select_detail_res},
     );
+
+    # このへんの post, get での挙動の違いがわかりにく
+    if ($self->req->method eq 'POST') {
+
+        # 戻るボタンを押した時の挙動
+        return $self->_turn_back if $self->stash->{params}->{back};
+
+        # 予約取消ボタンが押されたときの挙動
+        return $self->_cansel_reserv if $self->stash->{params}->{exe_cansel};
+    }
 
     # 予約済みの所をクリックすると詳細がでるスクリプト
     return $self->_detail_reserve( $self->param('reserve_id') )
@@ -282,24 +307,10 @@ sub _turn_back {
     return $self->redirect_to('admin_reserv_list');
 }
 
-# post リスエスト時の挙動
-sub _admin_reserv_list_post {
+# 予約取消ボタンが押されたときの挙動
+sub _cansel_reserv {
     my $self = shift;
 
-    # 戻るボタンを押した時の挙動
-    return $self->_turn_back if $self->stash->{params}->{back};
-
-    # ================================================
-
-    # 予約内容を修正したりする部分はpost,submitボタン判定をする
-    # my $back = $self->param('back');
-    # if ($back) {
-    #     return $self->redirect_to('admin_reserv_list');
-    # }
-
-    # # 予約取消ボタンが押されたときのスクリプト
-    # my $exe_cansel = $self->param('exe_cansel');
-    # if ($exe_cansel) {
     #     my $today     = localtime;
     #     my $modify_on = $today->datetime( date => '-', T => ' ' );
     #     my $create_on = $today->datetime( date => '-', T => ' ' );
@@ -388,6 +399,21 @@ sub _admin_reserv_list_post {
     #     $admin_full_name = $admin_profile_ref->full_name;
     #     $admin_mail      = $admin_profile_ref->mail;
     #     $admin_tel       = $admin_profile_ref->tel;
+
+
+    # 予約キャンセルメール作成の一連の挙動
+
+    # キャンセル完了画面表示
+    return $self->redirect_to('up_admin_r_u_c_comp');
+}
+
+# post リスエスト時の挙動
+sub _admin_reserv_list_post {
+    my $self = shift;
+
+    # ================================================
+
+    # # 予約取消ボタンが押されたときのスクリプト
 
     #     #mailbox用のステータス
     #     my $mailbox_type_mail = 4;

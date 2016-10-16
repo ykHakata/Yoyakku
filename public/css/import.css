@@ -12,10 +12,8 @@
 /* Parts
 ========================================== */
 @import "others.css";
-/*@import "parts/table.css";*/
 @import "table.css";
-/*@import "parts/popup.css";*/
-/*@import "popup.css";*/
+@import "popup.css";
 @import "up_login.css";
 @import "root_login.css";
 @import "up_login_admin.css";
