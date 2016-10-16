@@ -88,7 +88,7 @@ sub admin_reserv_list {
 
     # 入力フォーム切替用値取得
     my $cond_input_form = $reserve->cond_input_form( $self->stash->{params} );
-    warn '$cond_input_form-----',dumper($cond_input_form);
+
     $self->stash(
         class        => 'admin_reserv_list',
         template     => 'management/admin_reserv_list',
@@ -190,7 +190,7 @@ sub admin_reserv_list {
         return $self->_turn_back if $self->stash->{params}->{back};
 
         # 予約取消ボタンが押されたときの挙動
-        return $self->_cansel_reserv if $self->stash->{params}->{exe_cansel};
+        return $self->_cansel_reserve if $self->stash->{params}->{exe_cansel};
     }
 
     # 予約済みの所をクリックすると詳細がでるスクリプト
@@ -308,98 +308,63 @@ sub _turn_back {
 }
 
 # 予約取消ボタンが押されたときの挙動
-sub _cansel_reserv {
+sub _cansel_reserve {
     my $self = shift;
 
-    #     my $today     = localtime;
-    #     my $modify_on = $today->datetime( date => '-', T => ' ' );
-    #     my $create_on = $today->datetime( date => '-', T => ' ' );
+    # キャンセルする予約 id
+    my $reserve_id  = $self->param('id');
+    my $teng        = $self->model->db->base->teng;
+    my $reserve_row = $teng->single( 'reserve', +{ id => $reserve_id } );
 
-    #     # 予約idを受け取る
-    #     my $id = $self->param('id');
+    $reserve_row->soft_delete;
 
-    #     # 該当するsqlの予約idをアップデート
-    #     my $count = $teng->update(
-    #         'reserve' => {
-    #             'admin_id'  => $login_id,
-    #             'status'    => 1,
-    #             'modify_on' => $modify_on,
-    #         },
-    #         { 'id' => $id, }
-    #     );
+    # 削除完了メールの為のパラメーターを作成
+    $reserve_row = $teng->single( 'reserve', +{ id => $reserve_id } );
+    my $roominfo_row      = $reserve_row->fetch_roominfo;
+    my $storeinfo_row     = $roominfo_row->fetch_storeinfo;
+    my $profile_admin_row = $reserve_row->fetch_profile_admin;
 
-    #     # ステータスを1（キャンセル）に書き込み
-    #     #sqlのデータを抽出する
-    #     #reserveデータ
-    #     my $reserve_ref = $teng->single( 'reserve', +{ 'id' => $id } );
+    # useform を変換
+    my $useform
+        = ( $reserve_row->useform eq '0' ) ? 'バンド'
+        : ( $reserve_row->useform eq '1' ) ? '個人'
+        : ( $reserve_row->useform eq '2' ) ? '利用停止'
+        :                                    '該当なし';
 
-    #     my $roominfo_id   = $reserve_ref->roominfo_id;
-    #     my $getstarted_on = $reserve_ref->getstarted_on;
-    #     my $enduse_on     = $reserve_ref->enduse_on;
-    #     my $useform       = $reserve_ref->useform;
-    #     my $message       = $reserve_ref->message;
-    #     my $general_id    = $reserve_ref->general_id;
-    #     my $admin_id      = $reserve_ref->admin_id;
-    #     my $tel           = $reserve_ref->tel;
+    # 一般ユーザーが紐づいていない予約もある
+    my $fetch_profile_ref = +{};
+    if ($reserve_row->general_id) {
+        $fetch_profile_ref = $reserve_row->fetch_profile_general->get_columns;
+    }
 
-    #     # $useformを変換
-    #     $useform =
-    #         ( $useform eq '0' ) ? $USEFORM_0
-    #       : ( $useform eq '1' ) ? $USEFORM_1
-    #       : ( $useform eq '2' ) ? $USEFORM_2
-    #       :                       '該当なし';
+    my $mail_params = +{
+        storeinfo_name          => $storeinfo_row->name,
+        storeinfo_post          => $storeinfo_row->post,
+        storeinfo_state         => $storeinfo_row->state,
+        storeinfo_cities        => $storeinfo_row->cities,
+        storeinfo_addressbelow  => $storeinfo_row->addressbelow,
+        storeinfo_tel           => $storeinfo_row->tel,
+        storeinfo_mail          => $storeinfo_row->mail,
+        storeinfo_url           => $storeinfo_row->url,
+        storeinfo_remarks       => $storeinfo_row->remarks,
+        roominfo_name           => $roominfo_row->name,
+        reserve_getstarted_on   => $reserve_row->getstarted_on,
+        reserve_enduse_on       => $reserve_row->enduse_on,
+        reserve_useform         => $useform,
+        roominfo_pricescomments => $roominfo_row->pricescomments,
+        roominfo_remarks        => $roominfo_row->remarks,
+        reserve_message         => $reserve_row->message,
+        admin_nick_name         => $profile_admin_row->nick_name,
+        admin_full_name         => $profile_admin_row->full_name,
+        admin_tel               => $profile_admin_row->tel,
+        admin_mail              => $profile_admin_row->mail,
+        general_nick_name       => $fetch_profile_ref->{nick_name} || '',
+        general_full_name       => $fetch_profile_ref->{full_name} || '',
+        general_tel             => $fetch_profile_ref->{tel} || '',
+        general_mail            => $fetch_profile_ref->{mail} || '',
+    };
 
-    #     #roominfoデータ
-    #     my $roominfo_ref = $teng->single( 'roominfo', +{ 'id' => $roominfo_id } );
-
-    #     my $storeinfo_id     = $roominfo_ref->storeinfo_id;
-    #     my $name             = $roominfo_ref->name;
-    #     my $pricescomments   = $roominfo_ref->pricescomments;
-    #     my $roominfo_remarks = $roominfo_ref->remarks;
-
-    #     #storeinfoデータ
-    #     my $storeinfo_ref = $teng->single( 'storeinfo', +{ 'id' => $storeinfo_id } );
-
-    #     my $storeinfo_name = $storeinfo_ref->name;
-    #     my $post           = $storeinfo_ref->post;
-    #     my $state          = $storeinfo_ref->state;
-    #     my $cities         = $storeinfo_ref->cities;
-    #     my $addressbelow   = $storeinfo_ref->addressbelow;
-    #     my $storeinfo_tel  = $storeinfo_ref->tel;
-    #     my $storeinfo_mail = $storeinfo_ref->mail;
-    #     my $remarks        = $storeinfo_ref->remarks;
-    #     my $url            = $storeinfo_ref->url;
-
-    #     #profileデータ
-    #     my $general_profile_ref;
-    #     my $admin_profile_ref;
-
-    #     my $general_nick_name;
-    #     my $general_full_name;
-    #     my $general_mail;
-    #     my $general_tel;
-
-    #     my $admin_nick_name;
-    #     my $admin_full_name;
-    #     my $admin_mail;
-    #     my $admin_tel;
-
-    #     if ($general_id) {
-    #         $general_profile_ref = $teng->single( 'profile', +{ 'general_id' => $general_id } );
-
-    #         $general_nick_name = $general_profile_ref->nick_name;
-    #         $general_full_name = $general_profile_ref->full_name;
-    #         $general_mail      = $general_profile_ref->mail;
-    #         $general_tel       = $general_profile_ref->tel;
-
-    #     }
-    #     $admin_profile_ref = $teng->single( 'profile', +{ 'admin_id' => $admin_id } );
-
-    #     $admin_nick_name = $admin_profile_ref->nick_name;
-    #     $admin_full_name = $admin_profile_ref->full_name;
-    #     $admin_mail      = $admin_profile_ref->mail;
-    #     $admin_tel       = $admin_profile_ref->tel;
-
+    # -----
 
     # 予約キャンセルメール作成の一連の挙動
 

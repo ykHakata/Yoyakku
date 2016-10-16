@@ -14,6 +14,7 @@ our @EXPORT_OK = qw{
     tp_next_month_after
     parse_datetime
     tp_next_day
+    now_datetime
 };
 
 =encoding utf8
@@ -115,6 +116,15 @@ sub tp_now {
     my $tp = localtime;
     return $tp;
 }
+
+=head2 now_datetime
+
+    # 今の日時を datatime 形式の文字列で取得
+    now_datetime(); # 2015-06-01 23:55:30
+
+=cut
+
+sub now_datetime { return tp_now()->datetime( T => ' ' ); }
 
 =head2 tp_from_date
 
