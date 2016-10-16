@@ -9,6 +9,25 @@ sub fetch_roominfos {
     return \@roominfo_rows;
 }
 
+sub fetch_roominfo_select_id {
+    my $self = shift;
+    my $id   = shift;
+    my $row = $self->handle->single(
+        'roominfo',
+        +{  storeinfo_id => $self->id,
+            id           => $id,
+        },
+    );
+    return $row;
+}
+
+sub fetch_actings {
+    my $self = shift;
+    my @acting_rows
+        = $self->handle->search( 'acting', +{ storeinfo_id => $self->id }, );
+    return \@acting_rows;
+}
+
 sub get_roominfo_ids {
     my $self = shift;
     my @rows

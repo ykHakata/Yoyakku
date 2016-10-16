@@ -3,13 +3,13 @@
 %# <table id="r_navi_t">
 <table id="admin_input_from">
 
-<div class="vali"><%= validator_error 'id' %></div>
-<div class="vali"><%= validator_error 'getstarted_on_day' %></div>
-<div class="vali"><%= validator_error 'getstarted_on_time' %></div>
-<div class="vali"><%= validator_error 'enduse_on_day' %></div>
-<div class="vali"><%= validator_error 'enduse_on_time' %></div>
-<div class="vali"><%= validator_error 'useform' %></div>
-<div class="vali"><%= validator_error 'message' %></div>
+<div class="vali"><%#= validator_error 'id' %></div>
+<div class="vali"><%#= validator_error 'getstarted_on_day' %></div>
+<div class="vali"><%#= validator_error 'getstarted_on_time' %></div>
+<div class="vali"><%#= validator_error 'enduse_on_day' %></div>
+<div class="vali"><%#= validator_error 'enduse_on_time' %></div>
+<div class="vali"><%#= validator_error 'useform' %></div>
+<div class="vali"><%#= validator_error 'message' %></div>
     %#<tr id="room_n">
     <tr id="">
         <th class="col1">部屋</th>

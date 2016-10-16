@@ -170,6 +170,11 @@ sub admin_reserv_list {
     return $self->_detail_reserve( $self->param('reserve_id') )
         if $self->param('reserve_id');
 
+    # 新規予約をクリックすると必要な情報を表示するスクリプト
+    return $self->_create_reserve( $self->param('new_res_room_id'),
+        $select_date )
+        if $self->param('new_res_room_id');
+
     $self->render;
     return;
 }
@@ -217,11 +222,56 @@ sub _detail_reserve {
         subscriber         => $subscriber,
         tel                => $reserve_row->tel,
     };
+    $self->_render_reserve($stash_params);
+    return;
+}
 
-    # 修正用フォーム、Fillinつかって表示
-    my $html = $self->render_to_string->to_string;
-    $html = HTML::FillInForm->fill( \$html, $stash_params );
-    return $self->render( text => $html, format => 'html' );
+# 新規予約をクリックすると必要な情報を表示するスクリプト (入力フォーム)
+sub _create_reserve {
+    my $self        = shift;
+    my $roominfo_id = shift;
+    my $select_date = shift;
+
+    my $login_row     = $self->stash->{login_row};
+    my $storeinfo_row = $login_row->fetch_storeinfo;
+
+    # 予約代行のためのリスト抽出
+    my $acting_rows = $storeinfo_row->fetch_actings;
+    $self->stash->{actings_ref}
+        = [ map { $_->fetch_profile } @{$acting_rows} ];
+
+    # 開始時間切替情報
+    $self->stash->{room_time_change}
+        = $storeinfo_row->fetch_roominfo_select_id($roominfo_id)->time_change;
+
+    # 予約開始日付を出力するスクリプト
+    my $select_time = $self->param('select_time');
+
+    my $stash_params = +{
+        roominfo_id => $roominfo_id,
+        room_name =>
+            $storeinfo_row->fetch_roominfo_select_id($roominfo_id)->name,
+        getstarted_on_day  => $select_date->date,
+        getstarted_on_time => $select_time,
+        enduse_on_day      => $select_date->date,
+        enduse_on_time     => $select_time + 1,
+        subscriber         => $login_row->fetch_profile->nick_name,
+        tel                => $storeinfo_row->tel,
+    };
+    $self->_render_reserve($stash_params);
+    return;
+}
+
+sub _render_reserve {
+    my $self   = shift;
+    my $params = shift;
+    my $html   = $self->render_to_string->to_string;
+    my $args   = +{
+        html   => \$html,
+        params => $params,
+    };
+    my $output = $self->model->management->reserve->set_fill_in_params($args);
+    return $self->render( text => $output );
 }
 
 1;
