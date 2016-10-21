@@ -191,6 +191,12 @@ sub admin_reserv_list {
 
         # 予約取消ボタンが押されたときの挙動
         return $self->_cansel_reserve if $self->stash->{params}->{exe_cansel};
+
+        # 保存ボタンが押された時のスクリプト
+        return $self->_save_reserve if $self->stash->{params}->{save};
+
+        # 一発予約ボタン (1h, 2h, 3h, 4h, 5h)
+        return $self->_shotr_save_reserve if $self->stash->{params}->{h_botton};
     }
 
     # 予約済みの所をクリックすると詳細がでるスクリプト
@@ -370,6 +376,32 @@ sub _cansel_reserve {
 
     # キャンセル完了画面表示
     return $self->redirect_to('up_admin_r_u_c_comp');
+}
+
+# 保存ボタンが押された時のスクリプト
+sub _save_reserve {
+    my $self = shift;
+    warn '_save_reserve-----1';
+
+    $self->_update_reserve();
+    return;
+}
+
+# 一発予約ボタン (1h, 2h, 3h, 4h, 5h)
+sub _shotr_save_reserve {
+my $self = shift;
+    warn '_shotr_save_reserve-----1';
+    $self->_update_reserve();
+    return;
+}
+
+# 保存アクション
+sub _update_reserve {
+    my $self = shift;
+    warn '_update_reserve-----1';
+    # sqlにデータ入力したのでlist画面にリダイレクト
+    return $self->redirect_to('admin_reserv_list');
+    return;
 }
 
 # post リスエスト時の挙動
