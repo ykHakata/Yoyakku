@@ -5,6 +5,7 @@ use Mojo::Util qw{dumper};
 use Yoyakku::Util::Time qw{
     tp_from_datetime_over24
     parse_datetime
+    tp_now_over24
 };
 use Time::Piece;
 use Time::Seconds;
@@ -383,6 +384,18 @@ sub _save_reserve {
     my $self = shift;
     warn '_save_reserve-----1';
 
+    # 保存、一発保存、どちらでも無い時は終了
+
+    # # 保存ボタンが押された時のスクリプト
+    # return $self->_save_reserve if $self->stash->{params}->{save};
+
+    # # 一発予約ボタン (1h, 2h, 3h, 4h, 5h)
+    # return $self->_shotr_save_reserve if $self->stash->{params}->{h_botton};
+
+    # # 一発保存の時は値を整形
+    # $self->_shotr_save_reserve();
+
+    # 新規、変更ともに
     $self->_update_reserve();
     return;
 }
@@ -391,14 +404,112 @@ sub _save_reserve {
 sub _shotr_save_reserve {
 my $self = shift;
     warn '_shotr_save_reserve-----1';
+    # 一発予約ボタン機能は新規予約のみ
+
+    # ボタン情報からパラメーターの作り込み
+    my $short_time = $self->stash->{params}->{h_botton};
+
+    warn '$short_time-----',dumper($short_time);
+
     $self->_update_reserve();
     return;
+}
+
+sub _tp_create_reserve {
+    my $day       = shift;
+    my $time      = shift;
+    my $over_time = shift;
+
+    my $datetime = $day . ' ' . $time . ':00:00';
+
+    # yoyakku time を指定して tp オブジェクト作成
+    my $tp = tp_now_over24('06:00:00');
+    $tp = $tp->from_over24_datetime($datetime);
+    return $tp;
 }
 
 # 保存アクション
 sub _update_reserve {
     my $self = shift;
     warn '_update_reserve-----1';
+    warn '$self->stash->{params}-----',dumper($self->stash->{params});
+
+    my $login_row = $self->stash->{login_row};
+    my $id        = $self->stash->{params}->{id};
+
+    # AUTO_NUMBER の場合は新規予約
+    if ($id eq 'AUTO_NUMBER') {
+        $id = undef;
+    }
+
+    # getstarted_on 利用開始日時 作り込み
+    # my $day      = $self->stash->{params}->{getstarted_on_day};
+    # my $time     = $self->stash->{params}->{getstarted_on_time};
+    # my $datetime = $day . ' ' . $time . ':00:00';
+
+    # # yoyakku time を指定して tp オブジェクト作成
+    # my $star_tp = tp_now_over24('06:00:00');
+    # $star_tp = $star_tp->from_over24_datetime($datetime);
+    # my $getstarted_on = $star_tp->datetime( 'T' => ' ' );
+
+    my $getstarted_on
+        = _tp_create_reserve( $self->stash->{params}->{getstarted_on_day},
+        $self->stash->{params}->{getstarted_on_time}, '06:00:00', );
+
+    warn dumper $getstarted_on;
+
+    # バリデーション前の値の整形
+    my $create_params = +{
+        id            => $id,
+        roominfo_id   => $self->stash->{params}->{roominfo_id},
+        getstarted_on => $self->stash->{params}->{getstarted_on},
+        enduse_on     => $self->stash->{params}->{enduse_on},
+        useform       => $self->stash->{params}->{useform},
+        message       => $self->stash->{params}->{message},
+        general_id    => $self->stash->{params}->{general_id},
+        admin_id      => $login_row->id,
+        tel           => $self->stash->{params}->{tel},
+        status        => $self->stash->{params}->{status},
+    };
+
+    warn dumper($create_params);
+
+    # 基本的なバリデーション
+
+    # DB に問い合わせをするバリデーテョン
+
+    # 更新する値の整形
+
+    # 必要な値
+
+    # DROP TABLE IF EXISTS reserve;
+    # CREATE TABLE reserve(                                   -- 予約履歴
+    #     id              INTEGER PRIMARY KEY AUTOINCREMENT,  -- 予約ID (例: 10, 自動採番)
+    #     roominfo_id     INTEGER,                            -- 部屋情報ID (例: 10, 自動採番)
+    #     getstarted_on   TEXT,                               -- 利用開始日時
+    #     enduse_on       TEXT,                               -- 利用終了日時
+    #     useform         INTEGER,                            -- 利用形態名
+    #     message         TEXT,                               -- 伝言板
+    #     general_id      INTEGER,                            -- 一般ユーザーID
+    #     admin_id        INTEGER,                            -- 管理ユーザーID
+    #     tel             TEXT,                               -- 電話番号
+    #     status          INTEGER,                            -- ステータス (例: 0: 予約中, 1: キャンセル)
+    #     create_on       TEXT,                               -- 登録日 (例: 2015-06-06 12:24:12, datetime 形式)
+    #     modify_on       TEXT                                -- 修正日 (例: 2015-06-06 12:24:12, datetime 形式)
+    # );
+
+    # 新規 or 更新の判定
+
+    # DB 更新
+
+    # 更新された値からお知らせメール用の値を整形
+
+    # メール送信のアクション
+
+    # 次の画面へ遷移
+
+
+
     # sqlにデータ入力したのでlist画面にリダイレクト
     return $self->redirect_to('admin_reserv_list');
     return;
